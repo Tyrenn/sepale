@@ -1,0 +1,14 @@
+
+body{
+	display: flex;
+	flex-direction: column;
+	gap: 2ch;
+	background-color: white;
+}
+
+div.preview{
+	display: flex;
+	width: 100%;
+	align-items: center;
+	gap: 2ch;
+}

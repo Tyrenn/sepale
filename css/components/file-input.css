@@ -1,0 +1,236 @@
+/* ============================================================
+   DaisyUI — file-input.css (converti en CSS pur, sans Tailwind)
+   ============================================================ */
+
+.file-input {
+	--size: calc(var(--size-field, 0.25rem) * 10);
+	--input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+	--btn-bg: var(--btn-color, var(--color-base-200));
+	--btn-fg: var(--color-base-content);
+	--btn-border: color-mix(in oklab, var(--btn-bg), #000 5%);
+	--btn-shadow:
+		0 3px 2px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000),
+		0 4px 3px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000);
+	--btn-noise: var(--fx-noise);
+
+	cursor: pointer;
+	border: var(--border) solid #0000;
+	background-color: var(--color-base-100);
+	display: inline-flex;
+	appearance: none;
+	align-items: center;
+	vertical-align: middle;
+	user-select: none;
+	width: clamp(3rem, 20rem, 100%);
+	height: var(--size);
+	padding-inline-end: 0.75rem;
+	font-size: 0.875rem;
+	line-height: 2;
+	border-start-start-radius: var(--join-ss, var(--radius-field));
+	border-start-end-radius:   var(--join-se, var(--radius-field));
+	border-end-start-radius:   var(--join-es, var(--radius-field));
+	border-end-end-radius:     var(--join-ee, var(--radius-field));
+	border-color: var(--input-color);
+	box-shadow:
+		0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset,
+		0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
+}
+
+.file-input::file-selector-button {
+	margin-inline-end: 1rem;     /* me-4 */
+	cursor: pointer;
+	padding-inline: 1rem;        /* px-4 */
+	user-select: none;
+	height: calc(100% + var(--border) * 2);
+	margin-block: calc(var(--border) * -1);
+	margin-inline-start: calc(var(--border) * -1);
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--btn-fg);
+	border-width: var(--border);
+	border-style: solid;
+	border-color: var(--btn-border);
+	border-start-start-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
+	border-end-start-radius:   calc(var(--join-es, var(--radius-field)) - var(--border));
+	background-color: var(--btn-bg);
+	background-size: calc(var(--noise) * 100%);
+	background-image: var(--btn-noise);
+	text-shadow: 0 0.5px oklch(1 0 0 / calc(var(--depth) * 0.15));
+	box-shadow:
+		0 0.5px 0 0.5px
+			color-mix(
+				in oklab,
+				color-mix(in oklab, white 30%, var(--btn-bg)) calc(var(--depth) * 20%),
+				#0000
+			)
+			inset,
+		var(--btn-shadow);
+}
+
+.file-input:focus {
+	--input-color: var(--color-base-content);
+	box-shadow: 0 1px color-mix(in oklab, var(--input-color) 10%, #0000);
+	outline: 2px solid var(--input-color);
+	outline-offset: 2px;
+	isolation: isolate;
+}
+
+.file-input:has(> input[disabled]),
+.file-input:is(:disabled, [disabled]) {
+	border-color: var(--color-base-200);
+	background-color: var(--color-base-200);
+	color: color-mix(in oklch, var(--color-base-content) 20%, #0000);
+	cursor: not-allowed;
+	box-shadow: none;
+}
+
+.file-input:has(> input[disabled])::file-selector-button,
+.file-input:is(:disabled, [disabled])::file-selector-button {
+	border-color: var(--color-base-200);
+	background-color: var(--color-base-200);
+	cursor: not-allowed;
+	--btn-border: #0000;
+	--btn-noise: none;
+	--btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
+}
+
+
+/* ============================================================
+   Ghost
+   ============================================================ */
+
+.file-input-ghost {
+	background-color: transparent;
+	transition: background-color 0.2s;
+	box-shadow: none;
+	border-color: #0000;
+}
+
+.file-input-ghost::file-selector-button {
+	margin-inline-start: 0;     /* ms-0 */
+	margin-inline-end: 1rem;    /* me-4 */
+	height: 100%;
+	cursor: pointer;
+	padding-inline: 1rem;       /* px-4 */
+	user-select: none;
+	margin-block: 0;
+	border-start-end-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
+	border-end-end-radius:   calc(var(--join-es, var(--radius-field)) - var(--border));
+}
+
+.file-input-ghost:focus,
+.file-input-ghost:focus-within {
+	color: var(--color-base-content);
+	background-color: var(--color-base-100);
+	border-color: #0000;
+	box-shadow: none;
+}
+
+
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+
+.file-input-neutral { --btn-color: var(--color-neutral); }
+.file-input-neutral::file-selector-button { color: var(--color-neutral-content); }
+.file-input-neutral,
+.file-input-neutral:focus,
+.file-input-neutral:focus-within { --input-color: var(--color-neutral); }
+
+.file-input-primary { --btn-color: var(--color-primary); }
+.file-input-primary::file-selector-button { color: var(--color-primary-content); }
+.file-input-primary,
+.file-input-primary:focus,
+.file-input-primary:focus-within { --input-color: var(--color-primary); }
+
+.file-input-secondary { --btn-color: var(--color-secondary); }
+.file-input-secondary::file-selector-button { color: var(--color-secondary-content); }
+.file-input-secondary,
+.file-input-secondary:focus,
+.file-input-secondary:focus-within { --input-color: var(--color-secondary); }
+
+.file-input-accent { --btn-color: var(--color-accent); }
+.file-input-accent::file-selector-button { color: var(--color-accent-content); }
+.file-input-accent,
+.file-input-accent:focus,
+.file-input-accent:focus-within { --input-color: var(--color-accent); }
+
+.file-input-info { --btn-color: var(--color-info); }
+.file-input-info::file-selector-button { color: var(--color-info-content); }
+.file-input-info,
+.file-input-info:focus,
+.file-input-info:focus-within { --input-color: var(--color-info); }
+
+.file-input-success { --btn-color: var(--color-success); }
+.file-input-success::file-selector-button { color: var(--color-success-content); }
+.file-input-success,
+.file-input-success:focus,
+.file-input-success:focus-within { --input-color: var(--color-success); }
+
+.file-input-warning { --btn-color: var(--color-warning); }
+.file-input-warning::file-selector-button { color: var(--color-warning-content); }
+.file-input-warning,
+.file-input-warning:focus,
+.file-input-warning:focus-within { --input-color: var(--color-warning); }
+
+.file-input-error { --btn-color: var(--color-error); }
+.file-input-error::file-selector-button { color: var(--color-error-content); }
+.file-input-error,
+.file-input-error:focus,
+.file-input-error:focus-within { --input-color: var(--color-error); }
+
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+
+.file-input-xs {
+	--size: calc(var(--size-field, 0.25rem) * 6);
+	font-size: 0.6875rem;
+	line-height: 1rem;
+}
+
+.file-input-xs::file-selector-button {
+	font-size: 0.6875rem;
+}
+
+.file-input-sm {
+	--size: calc(var(--size-field, 0.25rem) * 8);
+	font-size: 0.75rem;
+	line-height: 1.5rem;
+}
+
+.file-input-sm::file-selector-button {
+	font-size: 0.75rem;
+}
+
+.file-input-md {
+	--size: calc(var(--size-field, 0.25rem) * 10);
+	font-size: 0.875rem;
+	line-height: 2;
+}
+
+.file-input-md::file-selector-button {
+	font-size: 0.875rem;
+}
+
+.file-input-lg {
+	--size: calc(var(--size-field, 0.25rem) * 12);
+	font-size: 1.125rem;
+	line-height: 2.5rem;
+}
+
+.file-input-lg::file-selector-button {
+	font-size: 1.125rem;
+}
+
+.file-input-xl {
+	--size: calc(var(--size-field, 0.25rem) * 14);
+	padding-inline-end: 1.5rem; /* pe-6 */
+	font-size: 1.125rem;
+	line-height: 3rem;
+}
+
+.file-input-xl::file-selector-button {
+	font-size: 1.375rem;
+}
