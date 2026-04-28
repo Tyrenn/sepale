@@ -1,0 +1,60 @@
+/* ============================================================
+   DaisyUI — validator.css (converti en CSS pur, sans Tailwind)
+   ============================================================ */
+
+/* Valide */
+.validator:user-valid,
+.validator:has(:user-valid) {
+	--input-color: var(--color-success);
+}
+
+.validator:user-valid:focus,
+.validator:has(:user-valid):focus,
+.validator:user-valid:focus-within,
+.validator:has(:user-valid):focus-within,
+.validator:user-valid:checked,
+.validator:has(:user-valid):checked,
+.validator:user-valid[aria-checked="true"],
+.validator:has(:user-valid)[aria-checked="true"] {
+	--input-color: var(--color-success);
+}
+
+/* Invalide */
+.validator:user-invalid,
+.validator:has(:user-invalid),
+.validator[aria-invalid]:not([aria-invalid="false"]),
+.validator:has([aria-invalid]:not([aria-invalid="false"])) {
+	--input-color: var(--color-error);
+}
+
+.validator:user-invalid:focus,
+.validator:has(:user-invalid):focus,
+.validator[aria-invalid]:not([aria-invalid="false"]):focus,
+.validator:has([aria-invalid]:not([aria-invalid="false"])):focus,
+.validator:user-invalid:focus-within,
+.validator:has(:user-invalid):focus-within,
+.validator[aria-invalid]:not([aria-invalid="false"]):focus-within,
+.validator:has([aria-invalid]:not([aria-invalid="false"])):focus-within {
+	--input-color: var(--color-error);
+}
+
+/* Affiche le hint d'erreur */
+.validator:user-invalid ~ .validator-hint,
+.validator:has(:user-invalid) ~ .validator-hint,
+.validator[aria-invalid]:not([aria-invalid="false"]) ~ .validator-hint,
+.validator:has([aria-invalid]:not([aria-invalid="false"])) ~ .validator-hint {
+	color: var(--color-error);
+	visibility: visible;
+	display: revert-layer;
+}
+
+
+/* ============================================================
+   Hint de validation
+   ============================================================ */
+
+.validator-hint {
+	visibility: hidden;
+	margin-top: 0.5rem; /* mt-2 */
+	font-size: 0.75rem;
+}

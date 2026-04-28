@@ -2,12 +2,13 @@
 body{
 	display: flex;
 	flex-direction: column;
+	justify-content: center;
 	gap: 2ch;
 }
 
 div.preview{
 	display: flex;
-	width: 100%;
+	justify-content: center;
 	align-items: center;
 	gap: 2ch;
 }

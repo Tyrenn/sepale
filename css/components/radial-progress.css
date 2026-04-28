@@ -1,0 +1,51 @@
+/* ============================================================
+   DaisyUI — radial-progress.css (converti en CSS pur, sans Tailwind)
+   ============================================================ */
+
+.radial-progress {
+	--value: 0;
+	--size: 5rem;
+	--thickness: calc(var(--size) / 10);
+	--radialprogress: calc(var(--value) * 1%);
+
+	position: relative;
+	display: inline-grid;
+	height: var(--size);
+	width: var(--size);
+	place-content: center;
+	border-radius: 9999px;
+	background-color: transparent;
+	vertical-align: middle;
+	box-sizing: content-box;
+	transition: --radialprogress 0.3s linear;
+}
+
+.radial-progress::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 9999px;
+	background:
+		radial-gradient(farthest-side, currentColor 98%, #0000) top / var(--thickness) var(--thickness) no-repeat,
+		conic-gradient(currentColor var(--radialprogress), #0000 0);
+	-webkit-mask: radial-gradient(
+		farthest-side,
+		#0000 calc(100% - var(--thickness)),
+		#000 calc(100% + 0.5px - var(--thickness))
+	);
+	mask: radial-gradient(
+		farthest-side,
+		#0000 calc(100% - var(--thickness)),
+		#000 calc(100% + 0.5px - var(--thickness))
+	);
+}
+
+.radial-progress::after {
+	content: "";
+	position: absolute;
+	border-radius: 9999px;
+	background-color: currentColor;
+	inset: calc(50% - var(--thickness) / 2);
+	transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
+	transition: transform 0.3s linear;
+}

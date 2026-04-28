@@ -20,12 +20,18 @@
 	--color-warning-content: oklch(17.63% 0.028 87.722);
 	--color-error: oklch(77.318% 0.128 31.871);
 	--color-error-content: oklch(15.463% 0.025 31.871);
+	
 	--radius-selector: 1rem;
-	--radius-field: 0.5rem;
+	--radius-field: 0.1em;
 	--radius-box: 1rem;
+	
 	--size-selector: 0.25rem;
 	--size-field: 0.25rem;
+	
 	--border: 1px;
+	
 	--depth: 0;
+	--light: 0;
+
 	--noise: 0;
 }
