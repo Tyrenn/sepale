@@ -218,8 +218,8 @@
 .btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
 	--btn-shadow: ;
 	--btn-bg: #0000;
-	--btn-fg: var(--btn-color);
-	--btn-border: var(--btn-color);
+	--btn-fg: var(--btn-color, var(--color-base-200));
+	--btn-border: var(--btn-color, var(--color-base-200));
 	--btn-noise: none;
 }
 
@@ -227,8 +227,8 @@
 	.btn-outline:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
 		--btn-shadow: ;
 		--btn-bg: #0000;
-		--btn-fg: var(--btn-color);
-		--btn-border: var(--btn-color);
+		--btn-fg: var(--btn-color, var(--color-base-200));
+		--btn-border: var(--btn-color, var(--color-base-200));
 		--btn-noise: none;
 	}
 }
@@ -237,8 +237,8 @@
 .btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
 	--btn-shadow: ;
 	--btn-bg: #0000;
-	--btn-fg: var(--btn-color);
-	--btn-border: var(--btn-color);
+	--btn-fg: var(--btn-color, var(--color-base-200));
+	--btn-border: var(--btn-color, var(--color-base-200));
 	--btn-noise: none;
 }
 

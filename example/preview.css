@@ -3,7 +3,6 @@ body{
 	display: flex;
 	flex-direction: column;
 	gap: 2ch;
-	background-color: white;
 }
 
 div.preview{
