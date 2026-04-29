@@ -38,7 +38,7 @@
 	--join-ee: var(--radius-field);
 }
 
-/* Premier enfant direct */
+/* First direct child */
 .join > .join-item:where(:first-child) {
 	--join-ss: var(--radius-field);
 	--join-se: 0;
@@ -53,7 +53,7 @@
 	--join-ee: 0;
 }
 
-/* Dernier enfant direct */
+/* Last direct child */
 .join > .join-item:where(:last-child) {
 	--join-ss: 0;
 	--join-se: var(--radius-field);
@@ -68,7 +68,7 @@
 	--join-ee: var(--radius-field);
 }
 
-/* Enfant unique */
+/* Only child */
 .join > .join-item:where(:only-child) {
 	--join-ss: var(--radius-field);
 	--join-se: var(--radius-field);

@@ -53,7 +53,8 @@
 	border-color: var(--input-color);
 	box-shadow:
 		0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset,
-		0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
+		0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+		var(--shadow-light, );
 }
 
 .input:where(input) {
@@ -92,7 +93,7 @@
 	isolation: isolate;
 }
 
-/* Agrandir la police sur iOS pour éviter le zoom automatique */
+/* Increase font size on iOS to prevent auto-zoom on focus */
 @media (pointer: coarse) {
 	@supports (-webkit-touch-callout: none) {
 		.input:focus,

@@ -22,7 +22,7 @@
 	cursor: pointer;
 }
 
-/* Label inséré dans .input ou .select (icône/texte préfixe ou suffixe) */
+/* Label inside .input or .select (prefix/suffix icon or text) */
 .input > .label,
 .select > .label {
 	display: flex;

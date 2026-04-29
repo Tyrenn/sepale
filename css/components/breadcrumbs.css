@@ -2,11 +2,11 @@
    breadcrumbs.css — Breadcrumb navigation
 
    External variables (defined by theme):
-     none
+		none
 
    Font size system:
-     --fontsize            overrides font size (set by .breadcrumbs-xs … .breadcrumbs-xl)
-     --base / --default-base   fallback font size
+		--fontsize            overrides font size (set by .breadcrumbs-xs … .breadcrumbs-xl)
+		--base / --default-base   fallback font size
    ============================================================ */
 
 .breadcrumbs {
@@ -60,7 +60,7 @@
 	outline-offset: 2px;
 }
 
-/* Séparateur entre items */
+/* Item separator */
 .breadcrumbs > menu > li + *::before,
 .breadcrumbs > ul > li + *::before,
 .breadcrumbs > ol > li + *::before {

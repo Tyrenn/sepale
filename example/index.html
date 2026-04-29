@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>u.u — Component Explorer</title>
+
+	<!-- Apply saved theme synchronously to prevent FOUC -->
+	<script>
+		!function(){var t=localStorage.getItem('uu-theme')||'coffee';document.write('<link rel="stylesheet" href="../theme/'+t+'.css" data-theme>')}();
+	</script>
+
+	<link rel="stylesheet" href="../css/base/properties.css">
+	<link rel="stylesheet" href="../css/base/svg.css">
+	<link rel="stylesheet" href="../css/base/reset.css">
+	<link rel="stylesheet" href="../css/base/rootcolor.css">
+	<link rel="stylesheet" href="../css/base/scrollbar.css">
+	<link rel="stylesheet" href="../css/base/default.css">
+
+	<!-- Components used in the sidebar UI -->
+	<link rel="stylesheet" href="../css/components/select.css">
+	<link rel="stylesheet" href="../css/components/link.css">
+	<link rel="stylesheet" href="../css/components/text.css">
+
+	<link rel="stylesheet" href="./preview-layout.css">
+	<script src="./preview-shell.js" defer></script>
+</head>
+<body>
+
+	<aside id="shell-sidebar">
+		<div id="shell-theme-wrapper">
+			<label class="text-s4-b2">Theme</label>
+			<select id="shell-theme-select" class="select"></select>
+		</div>
+		<nav id="shell-nav">
+			<!-- populated by preview-shell.js -->
+		</nav>
+	</aside>
+
+	<main id="shell-content">
+		<iframe id="shell-frame" src="button.html"></iframe>
+	</main>
+
+</body>
+</html>

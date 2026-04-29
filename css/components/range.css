@@ -32,7 +32,7 @@
 	--range-bg: color-mix(in oklab, currentColor 10%, #0000);
 
 	font-size: var(--fontsize, var(--base, var(--default-base)));
-	/* Variable séparée pour éviter une erreur de build PostCSS+Nuxt avec calc(min(calc(--var))) */
+	/* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
 	--radius-selector-max: calc(
 		var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
 	);
@@ -62,7 +62,7 @@
 	outline-offset: 2px;
 }
 
-/* Piste — WebKit */
+/* Track — WebKit */
 .range::-webkit-slider-runnable-track {
 	width: 100%;
 	background-color: var(--range-bg);
@@ -76,7 +76,7 @@
 	}
 }
 
-/* Curseur — WebKit */
+/* Thumb — WebKit */
 .range::-webkit-slider-thumb {
 	position: relative;
 	box-sizing: border-box;
@@ -96,10 +96,11 @@
 		0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000),
 		0 0 0 2rem var(--range-thumb) inset,
 		calc((var(--range-dir, 1) * -100cqw) - (var(--range-dir, 1) * var(--range-thumb-size) / 2))
-			0 0 calc(100cqw * var(--range-fill));
+			0 0 calc(100cqw * var(--range-fill)),
+		var(--shadow-light, );
 }
 
-/* Piste — Firefox */
+/* Track — Firefox */
 .range::-moz-range-track {
 	width: 100%;
 	background-color: var(--range-bg);
@@ -113,7 +114,7 @@
 	}
 }
 
-/* Curseur — Firefox */
+/* Thumb — Firefox */
 .range::-moz-range-thumb {
 	position: relative;
 	box-sizing: border-box;
@@ -130,7 +131,8 @@
 		0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000),
 		0 0 0 2rem var(--range-thumb) inset,
 		calc((var(--range-dir, 1) * -100cqw) - (var(--range-dir, 1) * var(--range-thumb-size) / 2))
-			0 0 calc(100cqw * var(--range-fill));
+			0 0 calc(100cqw * var(--range-fill)),
+		var(--shadow-light, );
 }
 
 .range:disabled {

@@ -1,5 +1,22 @@
 :root{
 
+	/* ── Light shadow system ─────────────────────────────────────
+	   Alternative to --depth. Set --light-intensity > 0 and --depth: 0
+	   for flat/modern directional shadows instead of retro depth.
+	   --light-intensity   opacity multiplier  (0 = off)
+	   --light-depth       distance/blur scale (1 = sm, 2 = md, 3 = lg)
+	   --light-color       shadow hue, default pure black
+	   ──────────────────────────────────────────────────────────── */
+	--light-intensity: 0;
+	--light-depth: 1;
+	--light-color: oklch(0% 0 0);
+
+	--shadow-light:
+		0 calc(var(--light-depth, 1) * 1px) calc(var(--light-depth, 1) * 3px)
+			color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 15%), #0000),
+		0 calc(var(--light-depth, 1) * 3px) calc(var(--light-depth, 1) * 8px)
+			color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 8%), #0000);
+
 	--default-xxs: 	clamp(0.7023rem, -0.0079vw + 0.7039rem, 0.6944rem);
 	--default-xs: 		clamp(0.7901rem, 0.0432vw + 0.7815rem, 0.8333rem);
 	--default-sm: 		clamp(0.8889rem, 0.1111vw + 0.8667rem, 1rem);

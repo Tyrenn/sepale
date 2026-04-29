@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script>!function(){var t=localStorage.getItem('uu-theme')||'coffee';document.write('<link rel="stylesheet" href="../theme/'+t+'.css" data-theme>')}();</script>
+	<link rel="stylesheet" href="../css/base/properties.css">
+	<link rel="stylesheet" href="../css/base/svg.css">
+	<link rel="stylesheet" href="../css/base/reset.css">
+	<link rel="stylesheet" href="../css/base/rootcolor.css">
+	<link rel="stylesheet" href="../css/base/scrollbar.css">
+	<link rel="stylesheet" href="../css/base/default.css">
+	<link rel="stylesheet" href="../css/components/input.css">
+	<link rel="stylesheet" href="../css/components/label.css">
+	<link rel="stylesheet" href="../css/components/fieldset.css">
+	<link rel="stylesheet" href="./preview.css">
+	<script src="./preview.js" defer></script>
+</head>
+<body>
+
+	<div class="preview">
+		<input type="text" class="input" placeholder="Default input" />
+	</div>
+
+	<div class="preview">
+		<input type="text" class="input input-xs" placeholder="xs" />
+		<input type="text" class="input input-sm" placeholder="sm" />
+		<input type="text" class="input" placeholder="base" />
+		<input type="text" class="input input-md" placeholder="md" />
+		<input type="text" class="input input-lg" placeholder="lg" />
+		<input type="text" class="input input-xl" placeholder="xl" />
+	</div>
+
+	<div class="preview">
+		<input type="text" class="input input-primary"   placeholder="Primary" />
+		<input type="text" class="input input-secondary" placeholder="Secondary" />
+		<input type="text" class="input input-accent"    placeholder="Accent" />
+		<input type="text" class="input input-neutral"   placeholder="Neutral" />
+		<input type="text" class="input input-info"      placeholder="Info" />
+		<input type="text" class="input input-success"   placeholder="Success" />
+		<input type="text" class="input input-warning"   placeholder="Warning" />
+		<input type="text" class="input input-error"     placeholder="Error" />
+	</div>
+
+	<div class="preview">
+		<input type="text" class="input input-ghost" placeholder="Ghost" />
+	</div>
+
+	<div class="preview">
+		<label class="input">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+			<input type="text" placeholder="Search…" />
+		</label>
+	</div>
+
+	<div class="preview">
+		<label class="input">
+			<span class="label">https://</span>
+			<input type="text" placeholder="example.com" />
+		</label>
+		<label class="input">
+			<input type="email" placeholder="mail@site.com" />
+			<span class="label">@</span>
+		</label>
+	</div>
+
+	<div class="preview">
+		<label class="floating-label">
+			<input type="text" class="input" placeholder="Name" />
+			<span>Name</span>
+		</label>
+		<label class="floating-label">
+			<input type="email" class="input input-primary" placeholder="Email" />
+			<span>Email</span>
+		</label>
+	</div>
+
+	<div class="preview">
+		<input type="text" class="input" placeholder="Disabled" disabled />
+	</div>
+
+	<div class="preview">
+		<input type="number" class="input" value="42" />
+		<input type="date" class="input" />
+	</div>
+
+</body>
+</html>

@@ -1,14 +1,17 @@
+/* Component page content layout */
 
-body{
+body {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	gap: 2ch;
+	padding: 2rem;
 }
 
-div.preview{
+div.preview {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	gap: 2ch;
+	flex-wrap: wrap;
 }

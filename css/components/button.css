@@ -45,7 +45,7 @@
 	============================================================ */
 
 .btn {
-	/* Variables internes */
+	/* Internal variables */
 	--size: 1.75em; 
 	/* calc(var(--size-field, 0.25rem) * 10); */
 	--btn-bg: var(--btn-color, var(--color-base-200));
@@ -54,7 +54,8 @@
 	--btn-border: color-mix(in oklab, var(--btn-bg), #000 calc(var(--depth) * 5%));
 	--btn-shadow:
 		0 3px 2px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
-		0 4px 3px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000);
+		0 4px 3px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
+		var(--shadow-light, );
 	--btn-noise: var(--fx-noise);
 
 	/* Layout */
@@ -73,7 +74,7 @@
 	height: var(--size);
 	padding-inline: var(--btn-p);
 
-	/* Typographie */
+	/* Typography */
 	font-size: var(--fontsize, var(--base, var(--default-base)));
 	/*var(--fontsize, 0.875rem);*/
 	font-weight: 600;
@@ -81,17 +82,17 @@
 	--tw-prose-links: var(--btn-fg);
 	text-shadow: 0 0.5px oklch(100% 0 0 / calc(var(--depth) * 0.15));
 
-	/* Fond */
+	/* Background */
 	background-color: var(--btn-bg);
 	background-size: auto, calc(var(--noise) * 100%);
 	background-image: none, var(--btn-noise);
 
-	/* Bordure */
+	/* Border */
 	border-width: var(--border);
 	border-style: solid;
 	border-color: var(--btn-border);
 
-	/* Rayon (compatible avec .join) */
+	/* Corner radius (join-compatible) */
 	border-start-start-radius: var(--join-ss, var(--radius-field));
 	border-start-end-radius:   var(--join-se, var(--radius-field));
 	border-end-start-radius:   var(--join-es, var(--radius-field));
@@ -101,7 +102,7 @@
 	outline-offset: 2px;
 	outline-color: var(--btn-color, var(--color-base-content));
 
-	/* Ombre */
+	/* Shadow */
 	box-shadow:
 		0 0.5px 0 0.5px oklch(100% 0 0 / calc(var(--depth) * 6%)) inset,
 		var(--btn-shadow);
@@ -120,14 +121,14 @@
 	height: 1em;
 }
 
-/* Hover (uniquement sur les appareils qui le supportent) */
+/* Hover (pointer devices only) */
 @media (hover: hover) {
 	.btn:hover {
 		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
 	}
 }
 
-/* Focus clavier */
+/* Keyboard focus */
 .btn:focus-visible,
 .btn:has(:focus-visible) {
 	outline-width: 2px;
@@ -135,7 +136,7 @@
 	isolation: isolate;
 }
 
-/* Clic / appui */
+/* Click / press */
 .btn:active:not(.btn-active) {
 	translate: 0 0.5px;
 	--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 5%);
@@ -143,7 +144,7 @@
 	--btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0);
 }
 
-/* Checkbox / radio stylisés en bouton */
+/* Checkbox / radio styled as button */
 .btn:is(input[type="checkbox"], input[type="radio"]) {
 	appearance: none;
 }
@@ -152,7 +153,7 @@
 	content: attr(aria-label);
 }
 
-/* Checkbox/radio cochée */
+/* Checked checkbox/radio */
 .btn:where(input:checked:not(.filter .btn)) {
 	--btn-color: var(--color-primary);
 	--btn-fg: var(--color-primary-content);
@@ -164,7 +165,7 @@
 	États
 	============================================================ */
 
-/* Désactivé */
+/* Disabled */
 .btn-disabled,
 .btn:disabled,
 .btn[disabled] {
@@ -181,7 +182,7 @@
 	box-shadow: none;
 }
 
-/* Actif (forcé) */
+/* Active (forced) */
 .btn-active {
 	--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
 	--btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0);
@@ -207,7 +208,7 @@
 	Variantes de style
 	============================================================ */
 
-/* Ghost : transparent sauf au hover/focus/actif */
+/* Ghost: transparent until hover/focus/active */
 .btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn)) {
 	--btn-shadow: ;
 	--btn-bg: #0000;
@@ -220,7 +221,7 @@
 	--btn-fg: var(--btn-color, currentColor);
 }
 
-/* Ghost sur écrans tactiles */
+/* Ghost on touch screens */
 @media (hover: none) {
 	.btn-ghost:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
 		outline-color: currentColor;
@@ -270,7 +271,7 @@
 	}
 }
 
-/* Dash (comme outline mais bordure pointillée) */
+/* Dash (like outline but dashed border) */
 .btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
 	--btn-shadow: ;
 	--btn-bg: #0000;

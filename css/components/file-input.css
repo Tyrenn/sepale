@@ -63,7 +63,8 @@
 	border-color: var(--input-color);
 	box-shadow:
 		0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset,
-		0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
+		0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+		var(--shadow-light, );
 }
 
 .file-input::file-selector-button {

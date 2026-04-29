@@ -102,14 +102,14 @@
 	opacity: 0;
 }
 
-/* Affiche le contenu de l'onglet actif */
+/* Show active tab content */
 .tab:checked + .tab-content,
 .tab:is(label:has(:checked)) + .tab-content,
 .tab:is(.tab-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]) + .tab-content {
 	display: block;
 }
 
-/* Onglet inactif */
+/* Inactive tab */
 .tab:not(
 	:checked,
 	label:has(:checked),

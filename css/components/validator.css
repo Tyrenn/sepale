@@ -13,7 +13,7 @@
    the sibling element shown on error.
    ============================================================ */
 
-/* Valide */
+/* Valid */
 .validator:user-valid,
 .validator:has(:user-valid) {
 	--input-color: var(--color-success);
@@ -30,7 +30,7 @@
 	--input-color: var(--color-success);
 }
 
-/* Invalide */
+/* Invalid */
 .validator:user-invalid,
 .validator:has(:user-invalid),
 .validator[aria-invalid]:not([aria-invalid="false"]),
@@ -49,7 +49,7 @@
 	--input-color: var(--color-error);
 }
 
-/* Affiche le hint d'erreur */
+/* Show error hint */
 .validator:user-invalid ~ .validator-hint,
 .validator:has(:user-invalid) ~ .validator-hint,
 .validator[aria-invalid]:not([aria-invalid="false"]) ~ .validator-hint,

@@ -43,6 +43,7 @@
 	background-color: var(--chip-bg);
 	height: var(--size);
 	padding-inline: calc(var(--size) / 2 - var(--border));
+	box-shadow: var(--shadow-light, );
 }
 
 .chip svg{

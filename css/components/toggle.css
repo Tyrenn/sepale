@@ -28,7 +28,7 @@
 	--toggle-p: calc(var(--size) * 0.125);
 
 	font-size: var(--fontsize, var(--base, var(--default-base)));
-	/* Variable séparée pour éviter une erreur de build PostCSS+Nuxt avec calc(min(calc(--var))) */
+	/* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
 	--radius-selector-max: calc(
 		var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
 	);
@@ -49,7 +49,9 @@
 			min(var(--border), var(--radius-selector-max))
 	);
 	padding: var(--toggle-p);
-	box-shadow: 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000) inset;
+	box-shadow:
+		0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000) inset,
+		var(--shadow-light, );
 	width: calc((var(--size) * 2) - (var(--border) + var(--toggle-p)) * 2);
 	height: var(--size);
 	transition:
@@ -57,7 +59,7 @@
 		grid-template-columns 0.2s;
 }
 
-/* Icônes optionnelles à l'intérieur du toggle */
+/* Optional icons inside the toggle */
 .toggle > * {
 	z-index: 1;
 	grid-column: span 1;
@@ -99,7 +101,7 @@
 	rotate: 0deg;
 }
 
-/* Curseur du toggle */
+/* Toggle thumb */
 .toggle::before {
 	--tw-content: "";
 	content: var(--tw-content);

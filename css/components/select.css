@@ -67,7 +67,8 @@
 	border-color: var(--input-color);
 	box-shadow:
 		0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset,
-		0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
+		0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+		var(--shadow-light, );
 }
 
 [dir="rtl"] .select {
@@ -84,7 +85,7 @@
 	background-image: none;
 }
 
-/* Élément <select> natif imbriqué dans le wrapper .select */
+/* Native <select> nested inside the .select wrapper */
 .select select {
 	margin-inline-start: -0.75em;
 	margin-inline-end: -1.75em;
@@ -136,7 +137,7 @@ fieldset:disabled .select {
 	cursor: not-allowed;
 }
 
-/* Support apparence base-select (navigateurs modernes) */
+/* base-select appearance support (modern browsers) */
 .select,
 .select select {
 	@supports (appearance: base-select) {

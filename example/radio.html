@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script>!function(){var t=localStorage.getItem('uu-theme')||'coffee';document.write('<link rel="stylesheet" href="../theme/'+t+'.css" data-theme>')}();</script>
+	<link rel="stylesheet" href="../css/base/properties.css">
+	<link rel="stylesheet" href="../css/base/svg.css">
+	<link rel="stylesheet" href="../css/base/reset.css">
+	<link rel="stylesheet" href="../css/base/rootcolor.css">
+	<link rel="stylesheet" href="../css/base/scrollbar.css">
+	<link rel="stylesheet" href="../css/base/default.css">
+	<link rel="stylesheet" href="../css/components/radio.css">
+	<link rel="stylesheet" href="../css/components/label.css">
+	<link rel="stylesheet" href="../css/components/fieldset.css">
+	<link rel="stylesheet" href="./preview.css">
+	<script src="./preview.js" defer></script>
+</head>
+<body>
+
+	<div class="preview">
+		<input type="radio" name="r1" class="radio" checked />
+		<input type="radio" name="r1" class="radio" />
+	</div>
+
+	<div class="preview">
+		<fieldset class="fieldset">
+			<legend class="fieldset-legend">Choose a size</legend>
+			<label class="label"><input type="radio" name="r2" class="radio" checked /> Small</label>
+			<label class="label"><input type="radio" name="r2" class="radio" /> Medium</label>
+			<label class="label"><input type="radio" name="r2" class="radio" /> Large</label>
+		</fieldset>
+	</div>
+
+	<div class="preview">
+		<input type="radio" name="rc" class="radio radio-primary" checked />
+		<input type="radio" name="rc" class="radio radio-secondary" checked />
+		<input type="radio" name="rc" class="radio radio-accent" checked />
+		<input type="radio" name="rc" class="radio radio-neutral" checked />
+		<input type="radio" name="rc" class="radio radio-info" checked />
+		<input type="radio" name="rc" class="radio radio-success" checked />
+		<input type="radio" name="rc" class="radio radio-warning" checked />
+		<input type="radio" name="rc" class="radio radio-error" checked />
+	</div>
+
+	<div class="preview">
+		<input type="radio" name="rs" class="radio radio-xs" checked />
+		<input type="radio" name="rs" class="radio radio-sm" checked />
+		<input type="radio" name="rs" class="radio" checked />
+		<input type="radio" name="rs" class="radio radio-md" checked />
+		<input type="radio" name="rs" class="radio radio-lg" checked />
+		<input type="radio" name="rs" class="radio radio-xl" checked />
+	</div>
+
+	<div class="preview">
+		<input type="radio" name="rsq" class="radio radio-square" checked />
+		<input type="radio" name="rsq" class="radio radio-square radio-primary" checked />
+		<input type="radio" name="rsq" class="radio radio-square radio-lg" checked />
+	</div>
+
+	<div class="preview">
+		<input type="radio" name="rd" class="radio" disabled />
+		<input type="radio" name="rd" class="radio" disabled checked />
+	</div>
+
+</body>
+</html>

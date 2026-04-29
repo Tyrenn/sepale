@@ -2,21 +2,21 @@
    radio.css — Radio button input
 
    External variables (defined by theme):
-     --color-base-100      background when checked
-     --color-{variant}     accent color (set by .radio-{color})
-     --depth               shadow / inset intensity multiplier
-     --border              border width
-     --noise               noise texture intensity (0–1)
-     --fx-noise            noise SVG data-uri (from base/svg.css)
-     --radius-selector     corner radius (9999px for full circle override)
+		--color-base-100      background when checked
+		--color-{variant}     accent color (set by .radio-{color})
+		--depth               shadow / inset intensity multiplier
+		--border              border width
+		--noise               noise texture intensity (0–1)
+		--fx-noise            noise SVG data-uri (from base/svg.css)
+		--radius-selector     corner radius (9999px for full circle override)
 
-   Font size system:
-     --fontsize            overrides default size (set by .radio-xs … .radio-xl)
-     --base / --default-base   fallback font size
+	Font size system:
+		--fontsize            overrides default size (set by .radio-xs … .radio-xl)
+		--base / --default-base   fallback font size
 
-   Internal variables:
-     --size          circle dimensions (1.5em × 1.5em, scales with font)
-     --input-color   border and fill color; driven by color variants
+	Internal variables:
+		--size          circle dimensions (1.5em × 1.5em, scales with font)
+		--input-color   border and fill color; driven by color variants
    ============================================================ */
 
 .radio {
@@ -125,6 +125,19 @@
 .radio-md { --fontsize: var(--md,  var(--default-md)); }
 .radio-lg { --fontsize: var(--lg,  var(--default-lg)); }
 .radio-xl { --fontsize: var(--xl,  var(--default-xl)); }
+
+
+/* ============================================================
+   Shape variants
+   ============================================================ */
+
+.radio-square {
+	border-radius: 0;
+}
+
+.radio-square::before {
+	border-radius: 0;
+}
 
 .radio-xl:is([type="radio"]) {
 	--size: calc(var(--size-selector, 0.25rem) * 8);

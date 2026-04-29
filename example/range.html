@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script>!function(){var t=localStorage.getItem('uu-theme')||'coffee';document.write('<link rel="stylesheet" href="../theme/'+t+'.css" data-theme>')}();</script>
+	<link rel="stylesheet" href="../css/base/properties.css">
+	<link rel="stylesheet" href="../css/base/svg.css">
+	<link rel="stylesheet" href="../css/base/reset.css">
+	<link rel="stylesheet" href="../css/base/rootcolor.css">
+	<link rel="stylesheet" href="../css/base/scrollbar.css">
+	<link rel="stylesheet" href="../css/base/default.css">
+	<link rel="stylesheet" href="../css/components/range.css">
+	<link rel="stylesheet" href="./preview.css">
+	<script src="./preview.js" defer></script>
+</head>
+<body>
+
+	<div class="preview">
+		<input type="range" class="range" value="40" />
+	</div>
+
+	<div class="preview">
+		<input type="range" class="range range-primary"   value="60" />
+		<input type="range" class="range range-secondary" value="60" />
+		<input type="range" class="range range-accent"    value="60" />
+		<input type="range" class="range range-neutral"   value="60" />
+	</div>
+
+	<div class="preview">
+		<input type="range" class="range range-info"    value="60" />
+		<input type="range" class="range range-success" value="60" />
+		<input type="range" class="range range-warning" value="60" />
+		<input type="range" class="range range-error"   value="60" />
+	</div>
+
+	<div class="preview" style="flex-direction:column; align-items:stretch; max-width: 30rem; margin:0 auto;">
+		<input type="range" class="range range-xs" value="40" />
+		<input type="range" class="range range-sm" value="50" />
+		<input type="range" class="range"          value="60" />
+		<input type="range" class="range range-md" value="70" />
+		<input type="range" class="range range-lg" value="80" />
+		<input type="range" class="range range-xl" value="90" />
+	</div>
+
+	<div class="preview">
+		<input type="range" class="range" disabled value="40" />
+	</div>
+
+</body>
+</html>

@@ -28,7 +28,7 @@
 	font-weight: 600;
 }
 
-/* Déprécié — remplacé par .label, conservé pour éviter les breaking changes */
+/* Deprecated — replaced by .label, kept to avoid breaking changes */
 .fieldset-label {
 	color: color-mix(in oklch, var(--color-base-content) 60%, #0000); /* text-base-content/60 */
 	display: flex;
