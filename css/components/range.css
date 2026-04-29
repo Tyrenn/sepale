@@ -1,14 +1,37 @@
 /* ============================================================
-   DaisyUI — range.css (converti en CSS pur, sans Tailwind)
+   range.css — Range slider input
+
+   External variables (defined by theme):
+     --color-base-100      default thumb background
+     --color-{variant}     track/progress color (set by .range-{color})
+     --color-{variant}-content  thumb fill color for colored variants
+     --depth               shadow / inset intensity multiplier
+     --radius-selector     thumb and track corner radius
+
+   Font size system:
+     --fontsize            overrides default size (set by .range-xs … .range-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --range-thumb         thumb background color
+     --range-thumb-size    thumb diameter (1.5em, scales with font)
+     --range-progress      track fill color (currentColor by default)
+     --range-fill          1 = fill track before thumb, 0 = no fill
+     --range-p             thumb border / padding (0.25em)
+     --range-bg            empty track color
+     --range-dir           RTL direction multiplier (-1 when [dir="rtl"])
+     --radius-selector-max workaround for PostCSS/Nuxt calc(min(calc())) build error
    ============================================================ */
 
 .range {
 	--range-thumb: var(--color-base-100);
-	--range-thumb-size: calc(var(--size-selector, 0.25rem) * 6);
+	--range-thumb-size: 1.5em;
 	--range-progress: currentColor;
 	--range-fill: 1;
-	--range-p: 0.25rem;
+	--range-p: 0.25em;
 	--range-bg: color-mix(in oklab, currentColor 10%, #0000);
+
+	font-size: var(--fontsize, var(--base, var(--default-base)));
 	/* Variable séparée pour éviter une erreur de build PostCSS+Nuxt avec calc(min(calc(--var))) */
 	--radius-selector-max: calc(
 		var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
@@ -134,8 +157,8 @@
    Tailles
    ============================================================ */
 
-.range-xs { --range-thumb-size: calc(var(--size-selector, 0.25rem) * 4); }
-.range-sm { --range-thumb-size: calc(var(--size-selector, 0.25rem) * 5); }
-.range-md { --range-thumb-size: calc(var(--size-selector, 0.25rem) * 6); }
-.range-lg { --range-thumb-size: calc(var(--size-selector, 0.25rem) * 7); }
-.range-xl { --range-thumb-size: calc(var(--size-selector, 0.25rem) * 8); }
+.range-xs { --fontsize: var(--xs,  var(--default-xs)); }
+.range-sm { --fontsize: var(--sm,  var(--default-sm)); }
+.range-md { --fontsize: var(--md,  var(--default-md)); }
+.range-lg { --fontsize: var(--lg,  var(--default-lg)); }
+.range-xl { --fontsize: var(--xl,  var(--default-xl)); }

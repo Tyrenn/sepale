@@ -1,5 +1,14 @@
 /* ============================================================
-   DaisyUI — skeleton.css (converti en CSS pur, sans Tailwind)
+   skeleton.css — Loading skeleton placeholder
+
+   External variables (defined by theme):
+     --color-base-100    shimmer highlight color
+     --color-base-300    skeleton base background
+     --color-base-content  used for .skeleton-text shimmer
+     --radius-box        corner radius
+
+   Internal variables:
+     none — dimensions are set by the element itself (width/height in HTML/CSS)
    ============================================================ */
 
 .skeleton {

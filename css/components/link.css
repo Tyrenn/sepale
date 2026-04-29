@@ -1,5 +1,11 @@
 /* ============================================================
-   DaisyUI — link.css (converti en CSS pur, sans Tailwind)
+   link.css — Styled hyperlink / anchor
+
+   External variables (defined by theme):
+     --color-{variant}   text color (set by .link-{color} classes)
+
+   Internal variables:
+     none — inherits font size and color from context
    ============================================================ */
 
 .link {

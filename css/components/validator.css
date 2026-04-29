@@ -1,5 +1,16 @@
 /* ============================================================
-   DaisyUI — validator.css (converti en CSS pur, sans Tailwind)
+   validator.css — Form field validation state driver
+
+   External variables (defined by theme):
+     --color-success   applied as --input-color on valid fields
+     --color-error     applied as --input-color on invalid fields
+
+   Exported variable (injected into sibling field components):
+     --input-color     overrides the field border/focus color;
+                       consumed by .input, .select, .textarea, .checkbox, etc.
+
+   Usage: add .validator to a field component; .validator-hint is
+   the sibling element shown on error.
    ============================================================ */
 
 /* Valide */
@@ -55,6 +66,6 @@
 
 .validator-hint {
 	visibility: hidden;
-	margin-top: 0.5rem; /* mt-2 */
-	font-size: 0.75rem;
+	margin-top: 0.5em;
+	font-size: var(--xs, var(--default-xs));
 }

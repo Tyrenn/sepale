@@ -1,5 +1,18 @@
 /* ============================================================
-   DaisyUI — join.css (converti en CSS pur, sans Tailwind)
+   join.css — Group adjacent form elements into a single visual unit
+
+   External variables (defined by theme):
+     --border        used for negative margin to merge borders
+     --radius-field  default corner radius applied to first/last items
+
+   Exported variables (injected into child .join-item elements):
+     --join-ss   border-start-start-radius override (0 = flush)
+     --join-se   border-start-end-radius override
+     --join-es   border-end-start-radius override
+     --join-ee   border-end-end-radius override
+
+   These variables are consumed by input, select, button, and other
+   field components that reference var(--join-ss, var(--radius-field)).
    ============================================================ */
 
 .join {

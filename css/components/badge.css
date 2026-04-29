@@ -1,22 +1,36 @@
 /* ============================================================
-   DaisyUI — badge.css (ex-indicator, converti en CSS pur, sans Tailwind)
+   badge.css — badge / badge overlay wrapper (replaces DaisyUI badge)
+
+   External variables (defined by theme):
+     none
+
+   Internal variables (CSS custom properties used for position control):
+     --badge-t    top offset (default: 0)
+     --badge-b    bottom offset (default: auto)
+     --badge-s    inset-inline-start offset (default: auto)
+     --badge-e    inset-inline-end offset (default: 0)
+     --badge-x    horizontal translate (default: 50%)
+     --badge-y    vertical translate (default: -50%)
+
+   Usage: combine .badge wrapper with .badge-{position} modifiers.
+   The inner element with class .badge is the positioned badge itself.
    ============================================================ */
 
-.indicator {
+.badge {
 	position: relative;
 	display: inline-flex;
 	width: max-content;
 }
 
-.indicator :where(.badge) {
+.badge :where(.chip) {
 	z-index: 1;
 	position: absolute;
 	white-space: nowrap;
-	top: var(--indicator-t, 0);
-	bottom: var(--indicator-b, auto);
-	left: var(--indicator-s, auto);
-	right: var(--indicator-e, 0);
-	translate: var(--indicator-x, 50%) var(--indicator-y, -50%);
+	top: var(--badge-t, 0);
+	bottom: var(--badge-b, auto);
+	left: var(--badge-s, auto);
+	right: var(--badge-e, 0);
+	translate: var(--badge-x, 50%) var(--badge-y, -50%);
 }
 
 
@@ -24,38 +38,38 @@
    Position horizontale
    ============================================================ */
 
-.indicator-start {
-	--indicator-s: 0;
-	--indicator-e: auto;
-	--indicator-x: -50%;
+.badge-start {
+	--badge-s: 0;
+	--badge-e: auto;
+	--badge-x: -50%;
 }
 
-[dir="rtl"] .indicator-start {
-	--indicator-s: auto;
-	--indicator-e: 0;
-	--indicator-x: 50%;
+[dir="rtl"] .badge-start {
+	--badge-s: auto;
+	--badge-e: 0;
+	--badge-x: 50%;
 }
 
-.indicator-center {
-	--indicator-s: 50%;
-	--indicator-e: 50%;
-	--indicator-x: -50%;
+.badge-center {
+	--badge-s: 50%;
+	--badge-e: 50%;
+	--badge-x: -50%;
 }
 
-[dir="rtl"] .indicator-center {
-	--indicator-x: 50%;
+[dir="rtl"] .badge-center {
+	--badge-x: 50%;
 }
 
-.indicator-end {
-	--indicator-s: auto;
-	--indicator-e: 0;
-	--indicator-x: 50%;
+.badge-end {
+	--badge-s: auto;
+	--badge-e: 0;
+	--badge-x: 50%;
 }
 
-[dir="rtl"] .indicator-end {
-	--indicator-s: 0;
-	--indicator-e: auto;
-	--indicator-x: -50%;
+[dir="rtl"] .badge-end {
+	--badge-s: 0;
+	--badge-e: auto;
+	--badge-x: -50%;
 }
 
 
@@ -63,20 +77,20 @@
    Position verticale
    ============================================================ */
 
-.indicator-top {
-	--indicator-t: 0;
-	--indicator-b: auto;
-	--indicator-y: -50%;
+.badge-top {
+	--badge-t: 0;
+	--badge-b: auto;
+	--badge-y: -50%;
 }
 
-.indicator-middle {
-	--indicator-t: 50%;
-	--indicator-b: 50%;
-	--indicator-y: -50%;
+.badge-middle {
+	--badge-t: 50%;
+	--badge-b: 50%;
+	--badge-y: -50%;
 }
 
-.indicator-bottom {
-	--indicator-t: auto;
-	--indicator-b: 0;
-	--indicator-y: 50%;
+.badge-bottom {
+	--badge-t: auto;
+	--badge-b: 0;
+	--badge-y: 50%;
 }

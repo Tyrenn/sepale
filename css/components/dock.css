@@ -1,5 +1,13 @@
 /* ============================================================
-   DaisyUI — dock.css (converti en CSS pur, sans Tailwind)
+   dock.css — Fixed bottom navigation bar (mobile app dock)
+
+   External variables (defined by theme):
+     --color-base-100      dock background
+     --color-base-content  used for disabled item text color mix
+     --radius-box          item corner radius
+
+   Internal variables:
+     none — item sizes set via height on .dock-xs … .dock-xl
    ============================================================ */
 
 .dock {

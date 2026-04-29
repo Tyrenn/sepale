@@ -1,17 +1,35 @@
 /* ============================================================
-   DaisyUI — radio.css (converti en CSS pur, sans Tailwind)
+   radio.css — Radio button input
+
+   External variables (defined by theme):
+     --color-base-100      background when checked
+     --color-{variant}     accent color (set by .radio-{color})
+     --depth               shadow / inset intensity multiplier
+     --border              border width
+     --noise               noise texture intensity (0–1)
+     --fx-noise            noise SVG data-uri (from base/svg.css)
+     --radius-selector     corner radius (9999px for full circle override)
+
+   Font size system:
+     --fontsize            overrides default size (set by .radio-xs … .radio-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --size          circle dimensions (1.5em × 1.5em, scales with font)
+     --input-color   border and fill color; driven by color variants
    ============================================================ */
 
 .radio {
-	--size: calc(var(--size-selector, 0.25rem) * 6);
+	--size: 1.5em;
 
+	font-size: var(--fontsize, var(--base, var(--default-base)));
 	position: relative;
 	display: inline-block;
 	flex-shrink: 0;
 	cursor: pointer;
 	appearance: none;
-	border-radius: 9999px; /* rounded-full */
-	padding: 0.25rem; /* p-1 */
+	border-radius: 9999px;
+	padding: 0.15em;
 	vertical-align: middle;
 	border: var(--border) solid var(--input-color, color-mix(in srgb, currentColor 20%, #0000));
 	box-shadow: 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset;
@@ -102,41 +120,11 @@
    Tailles
    ============================================================ */
 
-.radio-xs {
-	padding: 0.125rem;
-}
-
-.radio-xs:is([type="radio"]) {
-	--size: calc(var(--size-selector, 0.25rem) * 4);
-}
-
-.radio-sm {
-	padding: 0.1875rem;
-}
-
-.radio-sm:is([type="radio"]) {
-	--size: calc(var(--size-selector, 0.25rem) * 5);
-}
-
-.radio-md {
-	padding: 0.25rem;
-}
-
-.radio-md:is([type="radio"]) {
-	--size: calc(var(--size-selector, 0.25rem) * 6);
-}
-
-.radio-lg {
-	padding: 0.3125rem;
-}
-
-.radio-lg:is([type="radio"]) {
-	--size: calc(var(--size-selector, 0.25rem) * 7);
-}
-
-.radio-xl {
-	padding: 0.375rem;
-}
+.radio-xs { --fontsize: var(--xs,  var(--default-xs)); }
+.radio-sm { --fontsize: var(--sm,  var(--default-sm)); }
+.radio-md { --fontsize: var(--md,  var(--default-md)); }
+.radio-lg { --fontsize: var(--lg,  var(--default-lg)); }
+.radio-xl { --fontsize: var(--xl,  var(--default-xl)); }
 
 .radio-xl:is([type="radio"]) {
 	--size: calc(var(--size-selector, 0.25rem) * 8);

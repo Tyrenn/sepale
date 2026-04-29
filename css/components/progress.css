@@ -1,5 +1,13 @@
 /* ============================================================
-   DaisyUI — progress.css (converti en CSS pur, sans Tailwind)
+   progress.css — Linear progress bar
+
+   External variables (defined by theme):
+     --color-base-content  default track/fill color
+     --color-{variant}     fill color (set by .progress-{color})
+     --radius-box          bar corner radius
+
+   Internal variables:
+     none — height is fixed at 0.5rem; color driven by currentColor
    ============================================================ */
 
 .progress {

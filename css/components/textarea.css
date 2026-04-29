@@ -1,5 +1,21 @@
 /* ============================================================
-   DaisyUI — textarea.css (converti en CSS pur, sans Tailwind)
+   textarea.css — Multi-line text input
+
+   External variables (defined by theme):
+     --color-base-100      field background
+     --color-base-200      disabled background and border
+     --color-base-content  default text color
+     --color-{variant}     semantic accent color (set by .textarea-{color})
+     --depth               shadow / inset intensity multiplier
+     --border              border width
+     --radius-field        field corner radius
+
+   Font size system:
+     --fontsize            overrides default size (set by .textarea-xs … .textarea-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --input-color   resolved border/shadow color; driven by color variants
    ============================================================ */
 
 .textarea {
@@ -8,15 +24,15 @@
 	border: var(--border) solid #0000;
 	background-color: var(--color-base-100);
 	border-radius: var(--radius-field);
-	min-height: 5rem; /* min-h-20 */
+	min-height: 5em;
 	flex-shrink: 1;
 	appearance: none;
-	padding-block: 0.5rem;
+	padding-block: 0.5em;
 	vertical-align: middle;
-	padding-inline-start: 0.75rem;
-	padding-inline-end: 0.75rem;
+	padding-inline-start: 0.75em;
+	padding-inline-end: 0.75em;
 	width: clamp(3rem, 20rem, 100%);
-	font-size: max(var(--font-size, 0.875rem), 0.875rem);
+	font-size: var(--fontsize, var(--base, var(--default-base)));
 	touch-action: manipulation;
 	border-color: var(--input-color);
 	box-shadow:
@@ -49,7 +65,7 @@
 	@supports (-webkit-touch-callout: none) {
 		.textarea:focus,
 		.textarea:focus-within {
-			--font-size: 1rem;
+			font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
 		}
 	}
 }
@@ -135,8 +151,8 @@
    Tailles
    ============================================================ */
 
-.textarea-xs { font-size: max(var(--font-size, 0.6875rem), 0.6875rem); }
-.textarea-sm { font-size: max(var(--font-size, 0.75rem),   0.75rem); }
-.textarea-md { font-size: max(var(--font-size, 0.875rem),  0.875rem); }
-.textarea-lg { font-size: max(var(--font-size, 1.125rem),  1.125rem); }
-.textarea-xl { font-size: max(var(--font-size, 1.375rem),  1.375rem); }
+.textarea-xs { --fontsize: var(--xs,  var(--default-xs)); }
+.textarea-sm { --fontsize: var(--sm,  var(--default-sm)); }
+.textarea-md { --fontsize: var(--md,  var(--default-md)); }
+.textarea-lg { --fontsize: var(--lg,  var(--default-lg)); }
+.textarea-xl { --fontsize: var(--xl,  var(--default-xl)); }

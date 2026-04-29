@@ -1,13 +1,29 @@
 /* ============================================================
-   DaisyUI — radial-progress.css (converti en CSS pur, sans Tailwind)
+   radial-progress.css — Circular progress ring
+
+   External variables (defined by theme):
+     none — uses currentColor for the ring
+
+   Font size system:
+     --fontsize            overrides ring size (set by .radial-progress-xs … .radial-progress-xl)
+     --base / --default-base   fallback font size
+
+   User-set variables (must be provided in HTML style or CSS):
+     --value       progress value 0–100 (required)
+     --size        ring diameter (default: 5em, scales with font)
+     --thickness   ring stroke width (default: --size / 10)
+
+   Internal variables:
+     --radialprogress   computed from --value (animated CSS property)
    ============================================================ */
 
 .radial-progress {
 	--value: 0;
-	--size: 5rem;
+	--size: 5em;
 	--thickness: calc(var(--size) / 10);
 	--radialprogress: calc(var(--value) * 1%);
 
+	font-size: var(--fontsize, var(--base, var(--default-base)));
 	position: relative;
 	display: inline-grid;
 	height: var(--size);
@@ -19,6 +35,12 @@
 	box-sizing: content-box;
 	transition: --radialprogress 0.3s linear;
 }
+
+.radial-progress-xs { --fontsize: var(--xs,  var(--default-xs)); }
+.radial-progress-sm { --fontsize: var(--sm,  var(--default-sm)); }
+.radial-progress-md { --fontsize: var(--md,  var(--default-md)); }
+.radial-progress-lg { --fontsize: var(--lg,  var(--default-lg)); }
+.radial-progress-xl { --fontsize: var(--xl,  var(--default-xl)); }
 
 .radial-progress::before {
 	content: "";

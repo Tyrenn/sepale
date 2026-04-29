@@ -1,10 +1,29 @@
 /* ============================================================
-   DaisyUI — checkbox.css (converti en CSS pur, sans Tailwind)
+   checkbox.css — Checkbox input
+
+   External variables (defined by theme):
+     --color-base-content       default checkmark color
+     --color-{variant}          fill when checked (set by .checkbox-{color})
+     --color-{variant}-content  checkmark color when checked
+     --depth                    shadow / inset intensity multiplier
+     --border                   border width
+     --noise                    noise texture intensity (0–1)
+     --fx-noise                 noise SVG data-uri (from base/svg.css)
+     --radius-selector          corner radius
+
+   Font size system:
+     --fontsize            overrides default size (set by .checkbox-xs … .checkbox-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --size          box dimensions (1.5em × 1.5em, scales with font)
+     --input-color   border and fill color; driven by color variants
    ============================================================ */
 
 .checkbox {
-	--size: calc(var(--size-selector, 0.25rem) * 6);
+	--size: 1.5em;
 
+	font-size: var(--fontsize, var(--base, var(--default-base)));
 	border: var(--border) solid var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, #0000));
 	color: var(--color-base-content);
 	border-radius: var(--radius-selector);
@@ -13,7 +32,7 @@
 	flex-shrink: 0;
 	cursor: pointer;
 	appearance: none;
-	padding: 0.25rem; /* p-1 */
+	padding: 0.15em;
 	vertical-align: middle;
 	width: var(--size);
 	height: var(--size);
@@ -129,27 +148,8 @@
    Tailles
    ============================================================ */
 
-.checkbox-xs {
-	padding: 0.125rem;
-	--size: calc(var(--size-selector, 0.25rem) * 4);
-}
-
-.checkbox-sm {
-	padding: 0.1875rem;
-	--size: calc(var(--size-selector, 0.25rem) * 5);
-}
-
-.checkbox-md {
-	padding: 0.25rem;
-	--size: calc(var(--size-selector, 0.25rem) * 6);
-}
-
-.checkbox-lg {
-	padding: 0.3125rem;
-	--size: calc(var(--size-selector, 0.25rem) * 7);
-}
-
-.checkbox-xl {
-	padding: 0.375rem;
-	--size: calc(var(--size-selector, 0.25rem) * 8);
-}
+.checkbox-xs { --fontsize: var(--xs,  var(--default-xs)); }
+.checkbox-sm { --fontsize: var(--sm,  var(--default-sm)); }
+.checkbox-md { --fontsize: var(--md,  var(--default-md)); }
+.checkbox-lg { --fontsize: var(--lg,  var(--default-lg)); }
+.checkbox-xl { --fontsize: var(--xl,  var(--default-xl)); }

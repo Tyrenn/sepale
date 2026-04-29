@@ -1,9 +1,39 @@
 /* ============================================================
-   DaisyUI — file-input.css (converti en CSS pur, sans Tailwind)
+   file-input.css — File picker input
+
+   External variables (defined by theme):
+     --color-base-100      field background
+     --color-base-200      disabled background and border
+     --color-base-content  default text color
+     --color-{variant}     button and border color (set by .file-input-{color})
+     --color-{variant}-content  button text for colored variants
+     --depth               shadow / inset intensity multiplier
+     --border              border width
+     --noise               noise texture intensity (0–1)
+     --fx-noise            noise SVG data-uri (from base/svg.css)
+     --radius-field        field corner radius
+
+   Join integration (set by join.css when nested in .join):
+     --join-ss / --join-es   start-side radius overrides (applied to ::file-selector-button)
+
+   Font size system:
+     --fontsize            overrides default size (set by .file-input-xs … .file-input-xl)
+     --base / --default-base   fallback font size
+     Note: ::file-selector-button keeps its own fixed font-size
+
+   Internal variables:
+     --size          field height (2.5em, scales with font)
+     --input-color   border/shadow color; driven by color variants
+     --btn-color     seed color for the file button; set by color variants
+     --btn-bg        resolved button background
+     --btn-fg        resolved button text color
+     --btn-border    resolved button border color
+     --btn-shadow    button drop shadow
+     --btn-noise     button noise texture image
    ============================================================ */
 
 .file-input {
-	--size: calc(var(--size-field, 0.25rem) * 10);
+	--size: 2.5em;
 	--input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
 	--btn-bg: var(--btn-color, var(--color-base-200));
 	--btn-fg: var(--color-base-content);
@@ -23,8 +53,8 @@
 	user-select: none;
 	width: clamp(3rem, 20rem, 100%);
 	height: var(--size);
-	padding-inline-end: 0.75rem;
-	font-size: 0.875rem;
+	padding-inline-end: 0.75em;
+	font-size: var(--fontsize, var(--base, var(--default-base)));
 	line-height: 2;
 	border-start-start-radius: var(--join-ss, var(--radius-field));
 	border-start-end-radius:   var(--join-se, var(--radius-field));
@@ -184,53 +214,11 @@
    Tailles
    ============================================================ */
 
-.file-input-xs {
-	--size: calc(var(--size-field, 0.25rem) * 6);
-	font-size: 0.6875rem;
-	line-height: 1rem;
-}
-
-.file-input-xs::file-selector-button {
-	font-size: 0.6875rem;
-}
-
-.file-input-sm {
-	--size: calc(var(--size-field, 0.25rem) * 8);
-	font-size: 0.75rem;
-	line-height: 1.5rem;
-}
-
-.file-input-sm::file-selector-button {
-	font-size: 0.75rem;
-}
-
-.file-input-md {
-	--size: calc(var(--size-field, 0.25rem) * 10);
-	font-size: 0.875rem;
-	line-height: 2;
-}
-
-.file-input-md::file-selector-button {
-	font-size: 0.875rem;
-}
-
-.file-input-lg {
-	--size: calc(var(--size-field, 0.25rem) * 12);
-	font-size: 1.125rem;
-	line-height: 2.5rem;
-}
-
-.file-input-lg::file-selector-button {
-	font-size: 1.125rem;
-}
-
+.file-input-xs { --fontsize: var(--xs,  var(--default-xs)); }
+.file-input-sm { --fontsize: var(--sm,  var(--default-sm)); }
+.file-input-md { --fontsize: var(--md,  var(--default-md)); }
+.file-input-lg { --fontsize: var(--lg,  var(--default-lg)); }
 .file-input-xl {
-	--size: calc(var(--size-field, 0.25rem) * 14);
-	padding-inline-end: 1.5rem; /* pe-6 */
-	font-size: 1.125rem;
-	line-height: 3rem;
-}
-
-.file-input-xl::file-selector-button {
-	font-size: 1.375rem;
+	--fontsize: var(--xl, var(--default-xl));
+	padding-inline-end: 1.5em;
 }

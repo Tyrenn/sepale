@@ -1,5 +1,11 @@
 /* ============================================================
-   DaisyUI — fieldset.css (converti en CSS pur, sans Tailwind)
+   fieldset.css — Form field group container
+
+   External variables (defined by theme):
+     --color-base-content   legend and label text color
+
+   Internal variables:
+     none
    ============================================================ */
 
 .fieldset {

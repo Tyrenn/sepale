@@ -1,5 +1,27 @@
 /* ============================================================
-   DaisyUI — select.css (converti en CSS pur, sans Tailwind)
+   select.css — Dropdown select field
+
+   External variables (defined by theme):
+     --color-base-100      field background
+     --color-base-200      disabled background and border
+     --color-base-content  default text color
+     --color-neutral / --color-neutral-content   active option highlight
+     --color-{variant}     semantic accent color (set by .select-{color})
+     --depth               shadow / inset intensity multiplier
+     --border              border width
+     --radius-field        field corner radius
+     --radius-box          picker dropdown corner radius
+
+   Join integration (set by join.css when nested in .join):
+     --join-ss / --join-se / --join-es / --join-ee   per-corner radius overrides
+
+   Font size system:
+     --fontsize            overrides default size (set by .select-xs … .select-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --size          field height (2.5em, scales with font)
+     --input-color   resolved border/shadow color; driven by color variants
    ============================================================ */
 
 :where(.select) {
@@ -7,7 +29,7 @@
 }
 
 .select {
-	--size: calc(var(--size-field, 0.25rem) * 10);
+	--size: 2.5em;
 	--input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
 
 	border: var(--border) solid #0000;
@@ -17,13 +39,13 @@
 	flex-shrink: 1;
 	appearance: none;
 	align-items: center;
-	gap: 0.375rem; /* gap-1.5 */
-	padding-inline-start: 0.75rem; /* ps-3 */
-	padding-inline-end: 1.75rem;   /* pe-7 */
+	gap: 0.375em;
+	padding-inline-start: 0.75em;
+	padding-inline-end: 1.75em;
 	vertical-align: middle;
 	width: clamp(3rem, 20rem, 100%);
 	height: var(--size);
-	font-size: 0.875rem;
+	font-size: var(--fontsize, var(--base, var(--default-base)));
 	touch-action: manipulation;
 	border-start-start-radius: var(--join-ss, var(--radius-field));
 	border-start-end-radius:   var(--join-se, var(--radius-field));
@@ -57,19 +79,19 @@
 .select[multiple] {
 	height: auto;
 	overflow: auto;
-	padding-block: 0.75rem;   /* py-3 */
-	padding-inline-end: 0.75rem; /* pe-3 */
+	padding-block: 0.75em;
+	padding-inline-end: 0.75em;
 	background-image: none;
 }
 
 /* Élément <select> natif imbriqué dans le wrapper .select */
 .select select {
-	margin-inline-start: -0.75rem;  /* -ms-3 */
-	margin-inline-end: -1.75rem;    /* -me-7 */
-	width: calc(100% + 2.75rem);
+	margin-inline-start: -0.75em;
+	margin-inline-end: -1.75em;
+	width: calc(100% + 2.5em);
 	appearance: none;
-	padding-inline-start: 0.75rem;
-	padding-inline-end: 1.75rem;
+	padding-inline-start: 0.75em;
+	padding-inline-end: 1.75em;
 	height: calc(100% - calc(var(--border) * 2));
 	align-items: center;
 	background: inherit;
@@ -254,54 +276,11 @@ fieldset:disabled .select {
    Tailles
    ============================================================ */
 
-.select-xs {
-	--size: calc(var(--size-field, 0.25rem) * 6);
-	font-size: 0.6875rem;
-}
-
-.select-xs option,
-.select-xs select option {
-	padding-inline: 0.5rem;  /* px-2 */
-	padding-block: 0.25rem;  /* py-1 */
-}
-
-.select-sm {
-	--size: calc(var(--size-field, 0.25rem) * 8);
-	font-size: 0.75rem;
-}
-
-.select-sm option,
-.select-sm select option {
-	padding-inline: 0.625rem; /* px-2.5 */
-	padding-block: 0.25rem;   /* py-1 */
-}
-
-.select-md {
-	--size: calc(var(--size-field, 0.25rem) * 10);
-	font-size: 0.875rem;
-}
-
-.select-md option,
-.select-md select option {
-	padding-inline: 0.75rem;  /* px-3 */
-	padding-block: 0.375rem;  /* py-1.5 */
-}
-
-.select-lg {
-	--size: calc(var(--size-field, 0.25rem) * 12);
-	font-size: 1.125rem;
-}
-
-.select-lg option,
-.select-lg select option {
-	padding-inline: 1rem;    /* px-4 */
-	padding-block: 0.375rem; /* py-1.5 */
-}
-
-.select-xl {
-	--size: calc(var(--size-field, 0.25rem) * 14);
-	font-size: 1.375rem;
-}
+.select-xs { --fontsize: var(--xs,  var(--default-xs)); }
+.select-sm { --fontsize: var(--sm,  var(--default-sm)); }
+.select-md { --fontsize: var(--md,  var(--default-md)); }
+.select-lg { --fontsize: var(--lg,  var(--default-lg)); }
+.select-xl { --fontsize: var(--xl,  var(--default-xl)); }
 
 .select-xl option,
 .select-xl select option {

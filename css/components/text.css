@@ -1,0 +1,75 @@
+/* ============================================================
+   text.css — Système typographique
+
+   Naming: .{type}-s{size}-b{weight}
+		s = size index, 1 = largest
+		b = weight index, 1 = heaviest (700), 2 = medium (500), 3 = regular (400)
+   Subtitles have a fixed weight — no b index.
+   Title is unique — no index.
+   ============================================================ */
+
+
+/* ============================================================
+   Title
+   ============================================================ */
+
+.title {
+	font-size: var(--xxl, var(--default-xxl));
+	font-weight: 800;
+	line-height: 1.15;
+	letter-spacing: -0.02em;
+}
+
+
+/* ============================================================
+   Subtitle (fixed weight)
+   ============================================================ */
+
+.subtitle-s1 {
+	font-size: var(--xl, var(--default-xl));
+	font-weight: 700;
+	line-height: 1.25;
+	letter-spacing: -0.01em;
+}
+
+.subtitle-s2 {
+	font-size: var(--lg, var(--default-lg));
+	font-weight: 600;
+	line-height: 1.35;
+}
+
+
+/* ============================================================
+   Text — s1 (--md)
+   ============================================================ */
+
+.text-s1-b1 { font-size: var(--md, var(--default-md)); font-weight: 600; line-height: 1.6; }
+.text-s1-b2 { font-size: var(--md, var(--default-md)); font-weight: 500; line-height: 1.6; }
+.text-s1-b3 { font-size: var(--md, var(--default-md)); font-weight: 400; line-height: 1.6; }
+
+
+/* ============================================================
+   Text — s2 (--base)
+   ============================================================ */
+
+.text-s2-b1 { font-size: var(--base, var(--default-base)); font-weight: 600; line-height: 1.6; }
+.text-s2-b2 { font-size: var(--base, var(--default-base)); font-weight: 500; line-height: 1.6; }
+.text-s2-b3 { font-size: var(--base, var(--default-base)); font-weight: 400; line-height: 1.6; }
+
+
+/* ============================================================
+   Text — s3 (--sm)
+   ============================================================ */
+
+.text-s3-b1 { font-size: var(--sm, var(--default-sm)); font-weight: 600; line-height: 1.55; }
+.text-s3-b2 { font-size: var(--sm, var(--default-sm)); font-weight: 500; line-height: 1.55; }
+.text-s3-b3 { font-size: var(--sm, var(--default-sm)); font-weight: 400; line-height: 1.55; }
+
+
+/* ============================================================
+   Text — s4 (--xs)
+   ============================================================ */
+
+.text-s4-b1 { font-size: var(--xs, var(--default-xs)); font-weight: 600; line-height: 1.5; }
+.text-s4-b2 { font-size: var(--xs, var(--default-xs)); font-weight: 500; line-height: 1.5; }
+.text-s4-b3 { font-size: var(--xs, var(--default-xs)); font-weight: 400; line-height: 1.5; }

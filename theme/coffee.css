@@ -34,4 +34,14 @@
 	--light: 0;
 
 	--noise: 0;
+
+	--xxs: clamp(0.7023rem, -0.0079vw + 0.7039rem, 0.6944rem);
+	--xs: clamp(0.7901rem, 0.0432vw + 0.7815rem, 0.8333rem);
+	--sm: clamp(0.8889rem, 0.1111vw + 0.8667rem, 1rem);
+	--base: clamp(1rem, 0.2vw + 0.96rem, 1.2rem);
+	--md: clamp(1.125rem, 0.315vw + 1.062rem, 1.44rem);
+	--lg: clamp(1.2656rem, 0.4624vw + 1.1731rem, 1.728rem);
+	--xl: clamp(1.4238rem, 0.6498vw + 1.2939rem, 2.0736rem);
+	--xxl: clamp(1.6018rem, 0.8865vw + 1.4245rem, 2.4883rem);
+	--xxxl: clamp(1.802rem, 1.184vw + 1.5652rem, 2.986rem);
 }

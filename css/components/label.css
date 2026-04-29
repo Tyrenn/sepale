@@ -1,5 +1,13 @@
 /* ============================================================
-   DaisyUI — label.css (converti en CSS pur, sans Tailwind)
+   label.css — Label and floating label wrapper
+
+   External variables (defined by theme):
+     --color-base-100   floating label background (hides the field border behind it)
+     --border           inline divider width inside .input / .select
+     --size-field       used to calculate floating label vertical center position
+
+   Internal variables:
+     none
    ============================================================ */
 
 .label {
