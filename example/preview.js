@@ -53,6 +53,7 @@
       { id: 'progress',        label: 'Progress'        },
       { id: 'radial-progress', label: 'Radial progress' },
       { id: 'skeleton',        label: 'Skeleton'        },
+      { id: 'list',            label: 'List'            },
       { id: 'text',            label: 'Text'            },
       { id: 'link',            label: 'Link'            },
     ]},

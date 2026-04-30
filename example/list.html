@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script>!function(){var t=localStorage.getItem('uu-theme')||'coffee';document.write('<link rel="stylesheet" href="../theme/'+t+'.css" data-theme>')}();</script>
+	<link rel="stylesheet" href="../css/base/properties.css">
+	<link rel="stylesheet" href="../css/base/svg.css">
+	<link rel="stylesheet" href="../css/base/reset.css">
+	<link rel="stylesheet" href="../css/base/rootcolor.css">
+	<link rel="stylesheet" href="../css/base/scrollbar.css">
+	<link rel="stylesheet" href="../css/base/default.css">
+	<link rel="stylesheet" href="../css/components/list.css">
+	<link rel="stylesheet" href="../css/components/input.css">
+	<link rel="stylesheet" href="../css/components/join.css">
+	<link rel="stylesheet" href="./preview.css">
+	<script src="./preview.js" defer></script>
+</head>
+<body>
+
+	<!-- Data list rows -->
+	<div class="preview">
+		<div class="list" style="width:24rem; border:1px solid var(--color-base-200);">
+			<div class="list-row">
+				<div>
+					<p style="font-weight:600;">Item title</p>
+					<p style="opacity:.6; font-size:.875em;">Secondary info</p>
+				</div>
+				<div class="list-col-grow" style="text-align:right; opacity:.6;">Right</div>
+			</div>
+			<div class="list-row">
+				<div>
+					<p style="font-weight:600;">Another item</p>
+					<p style="opacity:.6; font-size:.875em;">More info here</p>
+				</div>
+				<div class="list-col-grow" style="text-align:right; opacity:.6;">Value</div>
+			</div>
+			<div class="list-row">
+				<div>
+					<p style="font-weight:600;">Third row</p>
+					<p style="opacity:.6; font-size:.875em;">Last entry</p>
+				</div>
+				<div class="list-col-grow" style="text-align:right; opacity:.6;">—</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Input + suggestion dropdown via join -->
+	<div class="preview">
+		<div class="join join-vertical" style="width:20rem;">
+			<input type="text" class="input join-item" placeholder="Search fruits…" />
+			<ul class="list list-suggestions join-item">
+				<li class="suggestion-item suggestion-item-active">Apple</li>
+				<li class="suggestion-item">Apricot</li>
+				<li class="suggestion-item">Avocado</li>
+				<li class="suggestion-item">Banana</li>
+				<li class="suggestion-item">Blueberry</li>
+			</ul>
+		</div>
+	</div>
+
+	<!-- Input sm + suggestion -->
+	<div class="preview">
+		<div class="join join-vertical" style="width:16rem;">
+			<input type="text" class="input input-sm join-item" placeholder="Search…" />
+			<ul class="list list-suggestions list-sm join-item">
+				<li class="suggestion-item">Option A</li>
+				<li class="suggestion-item suggestion-item-active">Option B</li>
+				<li class="suggestion-item">Option C</li>
+			</ul>
+		</div>
+	</div>
+
+	<!-- Suggestion with icons -->
+	<div class="preview">
+		<div class="join join-vertical" style="width:22rem;">
+			<input type="text" class="input join-item" placeholder="Search users…" />
+			<ul class="list list-suggestions join-item">
+				<li class="suggestion-item">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:1em;height:1em;opacity:.5"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd"/></svg>
+					Alice Martin
+				</li>
+				<li class="suggestion-item suggestion-item-active">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:1em;height:1em;opacity:.5"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd"/></svg>
+					Bob Dupont
+				</li>
+				<li class="suggestion-item">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:1em;height:1em;opacity:.5"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd"/></svg>
+					Claire Bernard
+				</li>
+			</ul>
+		</div>
+	</div>
+
+</body>
+</html>

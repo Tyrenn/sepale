@@ -43,3 +43,26 @@ To review
 * Step but from our
 * Toast 
 * Calendar
+
+
+
+
+Toggle  
+	* Version sans bordure ? avec le thumb plus gros
+
+Range
+	* Similaire aux versions de toggle
+
+Checkbox
+	* Rendre le off fluide avec une transition plutôt qu'une animation
+	* Possibilité de mettre une svg en temps que check ?
+
+x Comment faire pour rendre l'ouverture du select plus fluide (animation/transition ?)
+> Pas possible sans un select special
+x Idem pour un input qui aurait une liste de suggestion, ajouter le composant list pour pouvoir les join
+
+Actuellement les classes sont cools mais opiniatre, il y a un modèle par défaut qui oblige, même si on a un thème complet, à renseigner certaines classes à chaque fois.
+Aucun moyen à partir du thème d'appliquer par défaut des variantes. Par exemple le thème ne permet pas de dire "tous les toggles ont un track par défaut"
+Comment faire ? Proposer des solutions avec leur défaut et avantage en plus d'explorer celles-ci:
+- Plusieurs pack de css
+- Conserver ce fonctionnement
