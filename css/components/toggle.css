@@ -2,24 +2,24 @@
    toggle.css — Toggle switch (checkbox-based)
 
    External variables (defined by theme):
-     --color-base-100      track background when checked
-     --color-base-content  thumb color when checked
-     --color-{variant}     thumb/track color when checked (set by .toggle-{color})
-     --depth               shadow / inset intensity multiplier
-     --border              border width
-     --noise               noise texture intensity (0–1)
-     --fx-noise            noise SVG data-uri (from base/svg.css)
-     --radius-selector     thumb and track corner radius
+		--color-base-100      track background when checked
+		--color-base-content  thumb color when checked
+		--color-{variant}     thumb/track color when checked (set by .toggle-{color})
+		--depth               shadow / inset intensity multiplier
+		--border              border width
+		--noise               noise texture intensity (0–1)
+		--fx-noise            noise SVG data-uri (from base/svg.css)
+		--radius-selector     thumb and track corner radius
 
    Font size system:
-     --fontsize            overrides default size (set by .toggle-xs … .toggle-xl)
-     --base / --default-base   fallback font size
+		--fontsize            overrides default size (set by .toggle-xs … .toggle-xl)
+		--base / --default-base   fallback font size
 
    Internal variables:
-     --size               toggle height (1.5em, scales with font); width is derived
-     --toggle-p           inner padding between track border and thumb
-     --input-color        track/thumb color; driven by color variants
-     --radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) build error
+		--size               toggle height (1.5em, scales with font); width is derived
+		--toggle-p           inner padding between track border and thumb
+		--input-color        track/thumb color; driven by color variants
+		--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) build error
    ============================================================ */
 
 .toggle {
@@ -211,6 +211,30 @@
 
 .toggle-error:checked,
 .toggle-error[aria-checked="true"] { --input-color: var(--color-error); }
+
+
+/* ============================================================
+   Track fill variant — colored track, inset via background-clip.
+   The thumb stays currentColor (same as border) for a unified look.
+   The track fills only the content area (inside padding), appearing
+   recessed/thinner than the outer toggle border.
+   Combine with a color variant: .toggle-track.toggle-primary etc.
+   ============================================================ */
+
+.toggle-track:checked,
+.toggle-track[aria-checked="true"],
+.toggle-track:has(> input:checked) {
+	background-color: var(--input-color, var(--color-base-content));
+	background-clip: content-box; /* track stays inside padding = inset/thinner effect */
+}
+
+.toggle-track:checked::before,
+.toggle-track[aria-checked="true"]::before,
+.toggle-track:has(> input:checked)::before {
+	background-color: var(--color-base-content);
+	box-shadow: 0 0 0 0.1em var(--color-base-100);
+	/* border: 0.1em solid var(--color-base-100); */
+}
 
 
 /* ============================================================

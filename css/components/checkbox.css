@@ -156,6 +156,26 @@
 
 
 /* ============================================================
+   Style variants
+   ============================================================ */
+
+/*
+   Outline — colored checkmark, no filled background.
+   Color of the mark is driven by the color variant's --input-color.
+   e.g. .checkbox-outline.checkbox-primary → primary-colored checkmark.
+*/
+.checkbox-outline:checked,
+.checkbox-outline[aria-checked="true"] {
+	background-color: #0000;
+	color: var(--input-color, var(--color-base-content));
+	box-shadow:
+		0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset,
+		0 0 #0000 inset,
+		var(--shadow-light, );
+}
+
+
+/* ============================================================
    Shape variants
    ============================================================ */
 

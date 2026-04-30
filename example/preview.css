@@ -1,12 +1,4 @@
-/* Component page content layout */
-
-body {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	gap: 2ch;
-	padding: 2rem;
-}
+/* Component page — preview rows */
 
 div.preview {
 	display: flex;
@@ -14,4 +6,5 @@ div.preview {
 	align-items: center;
 	gap: 2ch;
 	flex-wrap: wrap;
+	width: 100%;
 }

@@ -96,6 +96,20 @@
 
 
 /* ============================================================
+   join-item height fix
+   Buttons use a compact em-based height (--size) while field elements
+   (input, select) use a taller one. Override height → auto so the button
+   can stretch to match its siblings via align-items: stretch on .join.
+   min-height keeps it from collapsing below its natural size.
+   ============================================================ */
+
+.join > .join-item:where(.btn) {
+	height: unset;
+	min-height: var(--size, 1.75em);
+}
+
+
+/* ============================================================
    join-item : fusion des bordures
    ============================================================ */
 
