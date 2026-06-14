@@ -1,21 +1,24 @@
 <script lang="ts">
 	import './app.css';
-	import { defaultTheme, serializeTheme } from '$lib/theme.js';
+	import { tokensToInlineStyle } from '$lib/theme.js';
 	import { playground } from './playground.svelte.js';
 	import type { Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
 
-	// Default theme on :root so the app chrome renders; the preview area
-	// overrides these per-token via an inline style on its wrapper.
-	const rootTheme = serializeTheme(defaultTheme);
+	// The active theme is applied to :root so the whole app chrome (sidebar,
+	// nav) is styled by it, like the original example pages. Edited tokens
+	// override the family's fallbacks live.
+	let rootStyle = $derived(
+		`:root{color-scheme:${playground.scheme};${tokensToInlineStyle(playground.tokens)}}`
+	);
 </script>
 
 <svelte:head>
-	<!-- Active style family (compiled by `npm run build:css`). Theme loads
-	     after the family so its :root colors/radii win. -->
+	<!-- Active style family (compiled by `npm run build:css`). The theme
+	     <style> below comes after so its :root values always win. -->
 	<link rel="stylesheet" href={`/families/${playground.family}.css`} />
-	{@html `<style>${rootTheme}</style>`}
+	{@html `<style>${rootStyle}</style>`}
 </svelte:head>
 
 {@render children()}

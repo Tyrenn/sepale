@@ -64,3 +64,15 @@ export function serializeTheme(tokens: ThemeToken[]): string {
 export function cloneTheme(tokens: ThemeToken[] = defaultTheme): ThemeToken[] {
 	return tokens.map((t) => ({ ...t }));
 }
+
+/**
+ * Build an editable token array from a `name → value` map (e.g. the parsed
+ * vars of a theme file). Keeps the schema (labels/groups/types) from
+ * `defaultTheme` and only swaps in matching values.
+ */
+export function tokensFromVars(vars: Record<string, string>): ThemeToken[] {
+	return cloneTheme(defaultTheme).map((t) => ({
+		...t,
+		value: vars[t.name] ?? t.value
+	}));
+}

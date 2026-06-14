@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { playground } from './playground.svelte.js';
+	import ColorField from './ColorField.svelte';
 
 	// Group tokens by their `group` field, preserving order.
 	let groups = $derived.by(() => {
@@ -13,18 +14,19 @@
 </script>
 
 {#each groups as [name, tokens] (name)}
-	<fieldset class="pg-group">
+	<fieldset class="ed-group">
 		<legend>{name}</legend>
 		{#each tokens as token (token.name)}
-			<label class="pg-field" title={`--${token.name}`}>
-				<span>{token.label}</span>
-				<span style="display:flex;align-items:center;gap:0.4rem">
-					{#if token.type === 'color'}
-						<span class="pg-swatch" style={`background:${token.value}`}></span>
-					{/if}
-					<input type="text" bind:value={token.value} />
-				</span>
-			</label>
+			{#if token.type === 'color'}
+				<ColorField {token} />
+			{:else}
+				<label class="cf">
+					<span class="cf-label">{token.label}</span>
+					<span class="cf-controls">
+						<input class="cf-text" type="text" bind:value={token.value} spellcheck="false" />
+					</span>
+				</label>
+			{/if}
 		{/each}
 	</fieldset>
 {/each}

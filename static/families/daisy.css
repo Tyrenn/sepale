@@ -33,8 +33,10 @@
    `badge`, …) so the markup is interchangeable.
 
    Characteristics:
-     - Flat aesthetic: crisp 1px borders, low elevation, restrained
-       directional shadows. Retro 3D depth and noise are OFF.
+     - Truly flat aesthetic: crisp 1px borders, NO elevation. Both the
+       retro 3D depth (--depth) and the soft directional shadow
+       (--light-intensity) are OFF — this matches DaisyUI's default
+       light/coffee themes exactly (depth 0, no shadow).
      - Intrinsic em-based sizing: components scale with `font-size`;
        size variants only set `--fontsize`. No breakpoints.
 
@@ -4712,11 +4714,11 @@ label:has(:checked),
   --radius-selector: 1rem;
 }
 
-/* Family-owned look — DaisyUI flat. */
+/* Family-owned look — DaisyUI flat (matches the original css/ output). */
 :root {
   --border: 1px; /* crisp hairline borders */
   --depth: 0; /* no retro 3D inset shadows */
   --noise: 0; /* no noise texture */
-  --light-intensity: 1; /* subtle directional shadow (via --shadow-light) */
+  --light-intensity: 0; /* no directional shadow — fully flat */
   --light-depth: 1;
 }

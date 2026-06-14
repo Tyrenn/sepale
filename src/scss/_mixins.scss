@@ -1,16 +1,6 @@
 @use 'config' as c;
 
-@mixin join-radius($var: --radius-field) {
-	border-start-start-radius: var(--join-ss, var(#{$var}));
-	border-start-end-radius:   var(--join-se, var(#{$var}));
-	border-end-start-radius:   var(--join-es, var(#{$var}));
-	border-end-end-radius:     var(--join-ee, var(#{$var}));
-}
-
-@mixin fluid-font-size {
-	font-size: var(--fontsize, var(--base, var(--default-base)));
-}
-
+// Size variants — each class only sets --fontsize; intrinsic sizing does the rest.
 @mixin size-variants($prefix, $sizes: c.$sizes-field) {
 	@each $size in $sizes {
 		.#{$prefix}-#{$size} {
@@ -30,46 +20,13 @@
 	}
 }
 
-@mixin color-pair-variants($prefix, $color-prop, $fg-prop) {
-	@each $color in c.$color-list {
-		.#{$prefix}-#{$color} {
-			#{$color-prop}: var(--color-#{$color});
-			#{$fg-prop}: var(--color-#{$color}-content);
-		}
-	}
-}
-
+// Field color variants (input/select/textarea): set --input-color on the
+// class and its focus states.
 @mixin field-color-variants($prefix) {
 	@each $color in c.$color-list {
 		.#{$prefix}-#{$color},
 		.#{$prefix}-#{$color}:focus,
 		.#{$prefix}-#{$color}:focus-within {
-			--input-color: var(--color-#{$color});
-		}
-	}
-}
-
-@mixin selector-color-variants($prefix) {
-	@each $color in c.$color-list {
-		.#{$prefix}-#{$color} {
-			color: var(--color-#{$color}-content);
-			--input-color: var(--color-#{$color});
-		}
-	}
-}
-
-@mixin single-prop-variants($prefix, $prop) {
-	@each $color in c.$color-list {
-		.#{$prefix}-#{$color} {
-			#{$prop}: var(--color-#{$color});
-		}
-	}
-}
-
-@mixin toggle-color-variants($prefix) {
-	@each $color in c.$color-list {
-		.#{$prefix}-#{$color}:checked,
-		.#{$prefix}-#{$color}[aria-checked="true"] {
 			--input-color: var(--color-#{$color});
 		}
 	}

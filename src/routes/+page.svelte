@@ -1,10 +1,19 @@
 <script lang="ts">
 	import ThemeEditor from './ThemeEditor.svelte';
-	import Gallery from './Gallery.svelte';
-	import { playground, families, resetTheme } from './playground.svelte.js';
-	import { serializeTheme, tokensToInlineStyle } from '$lib/theme.js';
+	import Showcase from './Showcase.svelte';
+	import {
+		playground,
+		families,
+		COMPONENTS,
+		themesFor,
+		selectFamily,
+		selectTheme,
+		resetTheme
+	} from './playground.svelte.js';
+	import { serializeTheme } from '$lib/theme.js';
 
-	let previewStyle = $derived(tokensToInlineStyle(playground.tokens));
+	let themes = $derived(themesFor(playground.family));
+	let editing = $state(false);
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let exportTitle = $state('');
@@ -21,64 +30,113 @@
 	}
 
 	function exportTheme() {
-		exportTitle = 'theme.css — variables CSS à déposer dans votre projet';
+		exportTitle = `theme — ${playground.theme}.css (CSS variables)`;
 		exportText = serializeTheme(playground.tokens);
 		dialog?.showModal();
 	}
 
 	async function exportFamily() {
-		exportTitle = `${playground.family}.css — classes de la famille (drag & drop)`;
-		exportText = 'Chargement…';
+		exportTitle = `${playground.family}.css — family classes`;
+		exportText = 'Loading…';
 		dialog?.showModal();
 		try {
 			const res = await fetch(`/families/${playground.family}.css`);
 			exportText = await res.text();
 		} catch {
-			exportText = '/* Lancez `npm run build:css` pour générer la famille. */';
+			exportText = '/* Run `npm run build:css` to generate the family. */';
 		}
 	}
 
 	function downloadCurrent() {
-		const name = exportTitle.startsWith('theme') ? 'theme.css' : `${playground.family}.css`;
-		download(name, exportText);
+		const isTheme = exportTitle.startsWith('theme');
+		download(isTheme ? `${playground.theme}.css` : `${playground.family}.css`, exportText);
 	}
 </script>
 
-<div class="pg">
-	<header class="pg-head">
-		<h1>u.u — playground</h1>
-		<label>
-			Famille
-			<select bind:value={playground.family} class="pg-btn">
-				{#each families as f (f)}<option value={f}>{f}</option>{/each}
-			</select>
-		</label>
-		<span class="spacer"></span>
-		<button class="pg-btn" onclick={resetTheme}>Réinitialiser thème</button>
-		<button class="pg-btn" onclick={exportFamily}>Exporter famille</button>
-		<button class="pg-btn" onclick={exportTheme}>Exporter thème</button>
-	</header>
+<div class="shell">
+	<aside class="side">
+		<div class="side-head">
+			<label class="side-select">
+				<span>Family</span>
+				<select
+					class="select select-sm"
+					value={playground.family}
+					onchange={(e) => selectFamily(e.currentTarget.value as typeof playground.family)}
+				>
+					{#each families as f (f)}<option value={f}>{f}</option>{/each}
+				</select>
+			</label>
+			<label class="side-select">
+				<span>Theme</span>
+				<select
+					class="select select-sm"
+					value={playground.theme}
+					onchange={(e) => selectTheme(e.currentTarget.value)}
+				>
+					{#each themes as t (t.name)}<option value={t.name}>{t.label}</option>{/each}
+				</select>
+			</label>
+		</div>
 
-	<aside class="pg-side">
-		<ThemeEditor />
+		<nav class="side-nav">
+			{#each COMPONENTS as group (group.group)}
+				<p class="side-group">{group.group}</p>
+				<ul class="side-list">
+					{#each group.items as item (item.id)}
+						<li>
+							<a
+								href="#{item.id}"
+								class="side-link"
+								data-active={playground.component === item.id}
+								onclick={(e) => {
+									e.preventDefault();
+									playground.component = item.id;
+								}}
+							>
+								{item.label}
+							</a>
+						</li>
+					{/each}
+				</ul>
+			{/each}
+		</nav>
+
+		<div class="side-actions">
+			<button class="btn btn-sm btn-block" onclick={() => (editing = !editing)}>
+				{editing ? 'Close editor' : 'Customize theme'}
+			</button>
+			<div class="side-actions-row">
+				<button class="btn btn-sm" onclick={exportTheme}>Export theme</button>
+				<button class="btn btn-sm" onclick={exportFamily}>Export family</button>
+			</div>
+		</div>
 	</aside>
 
-	<main class="pg-main">
-		<!-- Live preview: edited theme tokens scoped to this subtree. -->
-		<div style={previewStyle}>
-			<Gallery />
-		</div>
+	<main class="content">
+		<Showcase component={playground.component} />
 	</main>
+
+	{#if editing}
+		<aside class="editor">
+			<div class="editor-head">
+				<strong>Theme — {playground.theme}</strong>
+				<button class="btn btn-xs btn-ghost" onclick={resetTheme}>Reset</button>
+			</div>
+			<div class="editor-body">
+				<ThemeEditor />
+			</div>
+		</aside>
+	{/if}
 </div>
 
-<dialog class="pg-export" bind:this={dialog}>
-	<div class="pg-export-inner">
+<dialog class="export" bind:this={dialog}>
+	<div class="export-inner">
 		<h3 style="margin-top:0">{exportTitle}</h3>
-		<textarea readonly value={exportText}></textarea>
-		<div class="pg-row" style="margin-top:0.75rem">
-			<button class="pg-btn" onclick={downloadCurrent}>Télécharger</button>
-			<button class="pg-btn" onclick={() => navigator.clipboard.writeText(exportText)}>Copier</button>
-			<button class="pg-btn" onclick={() => dialog?.close()}>Fermer</button>
+		<textarea class="export-text" readonly value={exportText}></textarea>
+		<div class="export-row">
+			<button class="btn btn-sm btn-primary" onclick={downloadCurrent}>Download</button>
+			<button class="btn btn-sm" onclick={() => navigator.clipboard.writeText(exportText)}>Copy</button>
+			<button class="btn btn-sm btn-ghost" onclick={() => dialog?.close()}>Close</button>
 		</div>
 	</div>
 </dialog>

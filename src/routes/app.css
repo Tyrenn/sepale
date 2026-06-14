@@ -1,4 +1,7 @@
-/* Playground chrome — independent of the family/theme being previewed. */
+/* Playground chrome. Mirrors the original example/ explorer: a sidebar with
+   theme/family selectors + grouped component navigation, a centered preview
+   area, and an optional theme-editor drawer. Styled with the active theme's
+   own variables so the chrome matches the previewed look. */
 
 * { box-sizing: border-box; }
 
@@ -6,119 +9,207 @@ html, body { margin: 0; height: 100%; }
 
 body {
 	font-family: system-ui, sans-serif;
-	background: var(--color-base-200);
+	background: var(--color-base-100);
 	color: var(--color-base-content);
 }
 
-.pg {
-	display: grid;
-	grid-template-columns: 20rem 1fr;
-	grid-template-rows: auto 1fr;
-	grid-template-areas: 'head head' 'side main';
-	height: 100vh;
+.shell {
+	display: flex;
+	flex-direction: row;
+	height: 100dvh;
+	overflow: hidden;
 }
 
-.pg-head {
-	grid-area: head;
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+
+.side {
+	width: 14rem;
+	flex-shrink: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--color-base-200);
+	border-inline-end: 1px solid color-mix(in oklab, var(--color-base-content) 8%, #0000);
+}
+
+.side-head {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.75rem;
+	flex-shrink: 0;
+	border-bottom: 1px solid color-mix(in oklab, var(--color-base-content) 8%, #0000);
+}
+
+.side-select {
 	display: flex;
 	align-items: center;
-	gap: 1rem;
-	padding: 0.75rem 1.25rem;
-	background: var(--color-base-100);
-	border-bottom: 1px solid color-mix(in oklab, var(--color-base-content) 12%, #0000);
+	gap: 0.5rem;
 }
 
-.pg-head h1 { font-size: 1.1rem; margin: 0; font-weight: 800; }
-.pg-head .spacer { flex: 1; }
+.side-select > span {
+	width: 3.5rem;
+	flex-shrink: 0;
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: color-mix(in oklch, var(--color-base-content) 55%, #0000);
+}
 
-.pg-side {
-	grid-area: side;
+.side-select > select { flex: 1; min-width: 0; }
+
+.side-nav {
+	flex: 1;
 	overflow-y: auto;
-	padding: 1rem;
-	background: var(--color-base-100);
-	border-right: 1px solid color-mix(in oklab, var(--color-base-content) 12%, #0000);
+	padding: 0.5rem 0.5rem 2rem;
 }
 
-.pg-main {
-	grid-area: main;
+.side-group {
+	margin: 0.875rem 0 0.2rem;
+	padding-inline: 0.5rem;
+	color: color-mix(in oklch, var(--color-base-content) 45%, #0000);
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	font-size: 0.625rem;
+	font-weight: 600;
+}
+.side-group:first-child { margin-top: 0.25rem; }
+
+.side-list { list-style: none; margin: 0; padding: 0; }
+
+.side-link {
+	display: block;
+	padding: 0.3rem 0.5rem;
+	border-radius: var(--radius-field, 4px);
+	text-decoration: none;
+	font-size: 0.875rem;
+	color: var(--color-base-content);
+	transition: background 0.15s;
+	cursor: pointer;
+}
+.side-link:hover { background-color: color-mix(in oklab, var(--color-base-content) 8%, #0000); }
+.side-link[data-active='true'] {
+	background-color: color-mix(in oklab, var(--color-primary) 16%, #0000);
+	color: var(--color-primary);
+	font-weight: 600;
+}
+
+.side-actions {
+	flex-shrink: 0;
+	padding: 0.75rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	border-top: 1px solid color-mix(in oklab, var(--color-base-content) 8%, #0000);
+}
+.side-actions-row { display: flex; gap: 0.5rem; }
+.side-actions-row > .btn { flex: 1; }
+
+/* ── Content (preview area) ──────────────────────────────────────────────── */
+
+.content {
+	flex: 1;
+	min-width: 0;
+	height: 100%;
 	overflow-y: auto;
-	padding: 2rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 2ch;
+	padding: 2.5rem 2rem;
 }
 
-/* Theme editor */
-.pg-group { margin-bottom: 1.25rem; }
-.pg-group > legend,
-.pg-group > h3 {
+.content :global(div.preview) {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 2ch;
+	flex-wrap: wrap;
+	width: 100%;
+}
+
+/* ── Theme editor drawer ─────────────────────────────────────────────────── */
+
+.editor {
+	width: 20rem;
+	flex-shrink: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	background: var(--color-base-200);
+	border-inline-start: 1px solid color-mix(in oklab, var(--color-base-content) 8%, #0000);
+}
+
+.editor-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.75rem;
+	border-bottom: 1px solid color-mix(in oklab, var(--color-base-content) 8%, #0000);
+}
+
+.editor-body { flex: 1; overflow-y: auto; padding: 0.75rem; }
+
+.ed-group { border: none; margin: 0 0 1.25rem; padding: 0; }
+.ed-group > legend {
 	font-size: 0.7rem;
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
 	opacity: 0.6;
 	margin: 0 0 0.5rem;
+	padding: 0;
 }
-.pg-field {
+
+/* ── Color / token field ─────────────────────────────────────────────────── */
+
+.cf {
 	display: grid;
-	grid-template-columns: 1fr auto;
-	align-items: center;
-	gap: 0.5rem;
-	margin-bottom: 0.4rem;
-	font-size: 0.85rem;
+	grid-template-columns: 1fr;
+	gap: 0.2rem;
+	margin-bottom: 0.5rem;
 }
-.pg-field input[type='text'] {
-	width: 9rem;
+.cf-label { font-size: 0.78rem; }
+.cf-controls { display: flex; align-items: center; gap: 0.4rem; }
+
+.cf-swatch {
+	flex-shrink: 0;
+	width: 1.9rem;
+	height: 1.7rem;
+	padding: 0;
+	border: 1px solid color-mix(in oklab, var(--color-base-content) 25%, #0000);
+	border-radius: 0.35rem;
+	background: none;
+	cursor: pointer;
+}
+.cf-swatch::-webkit-color-swatch-wrapper { padding: 2px; }
+.cf-swatch::-webkit-color-swatch { border: none; border-radius: 0.2rem; }
+
+.cf-text {
+	flex: 1;
+	min-width: 0;
 	font: inherit;
-	font-size: 0.78rem;
-	padding: 0.25rem 0.4rem;
+	font-size: 0.72rem;
+	font-family: ui-monospace, monospace;
+	padding: 0.3rem 0.4rem;
 	border: 1px solid color-mix(in oklab, var(--color-base-content) 20%, #0000);
 	border-radius: 0.35rem;
-	background: var(--color-base-200);
+	background: var(--color-base-100);
 	color: inherit;
 }
-.pg-swatch {
-	width: 1.4rem;
-	height: 1.4rem;
-	border-radius: 0.3rem;
-	border: 1px solid color-mix(in oklab, var(--color-base-content) 20%, #0000);
-}
 
-/* Preview gallery */
-.pg-section { margin-bottom: 2.5rem; }
-.pg-section > h2 {
-	font-size: 0.95rem;
-	font-weight: 700;
-	margin: 0 0 0.75rem;
-	padding-bottom: 0.35rem;
-	border-bottom: 1px solid color-mix(in oklab, var(--color-base-content) 12%, #0000);
-}
-.pg-row {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.75rem;
-	align-items: center;
-	margin-bottom: 0.75rem;
-}
+/* ── Export dialog ───────────────────────────────────────────────────────── */
 
-/* Plain buttons for the chrome itself */
-.pg-btn {
-	font: inherit;
-	cursor: pointer;
-	padding: 0.4rem 0.8rem;
-	border-radius: 0.4rem;
-	border: 1px solid color-mix(in oklab, var(--color-base-content) 20%, #0000);
-	background: var(--color-base-200);
-	color: inherit;
-}
-.pg-btn:hover { background: color-mix(in oklab, var(--color-base-content) 8%, var(--color-base-200)); }
-
-dialog.pg-export {
+dialog.export {
 	border: none;
 	border-radius: 0.6rem;
 	padding: 0;
 	max-width: min(40rem, 90vw);
 	width: 100%;
 }
-dialog.pg-export::backdrop { background: oklch(0% 0 0 / 0.4); }
-.pg-export-inner { padding: 1.25rem; background: var(--color-base-100); color: var(--color-base-content); }
-.pg-export textarea {
+dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
+.export-inner { padding: 1.25rem; background: var(--color-base-100); color: var(--color-base-content); }
+.export-text {
 	width: 100%;
 	height: 16rem;
 	font-family: ui-monospace, monospace;
@@ -129,3 +220,4 @@ dialog.pg-export::backdrop { background: oklch(0% 0 0 / 0.4); }
 	color: inherit;
 	padding: 0.6rem;
 }
+.export-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }

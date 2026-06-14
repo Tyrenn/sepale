@@ -33,6 +33,10 @@ export {
 	cloneTheme,
 	serializeTheme,
 	tokensToInlineStyle,
+	tokensFromVars,
 	type ThemeToken,
 	type TokenType
 } from './theme.js';
+
+// Registry of style families + their themes, auto-generated from src/scss.
+export { families, themesByFamily, type ThemeData } from './generated/registry.js';
