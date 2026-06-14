@@ -1,0 +1,75 @@
+/* ============================================================
+   STYLE FAMILY — « magnolia »  (Neumorphism oriented)
+   ============================================================
+
+   Same family contract as « daisy »: one visual direction, tuned
+   through colors + radii only; the look variables and skin rules
+   below are family-owned.
+
+   The « magnolia » family
+   -----------------------
+   A neumorphism flavour: soft, monochrome surfaces that appear
+   extruded from the page using a dual light/dark soft shadow.
+   Fields blend into the background; pressing or focusing carves
+   the surface inward (inset shadow).
+
+   Characteristics:
+     - Borderless, large radii.
+     - Dual extruded shadow (light top-left, dark bottom-right),
+       derived from the raised surface color, injected through
+       --shadow-light (which every component already consumes).
+     - Inset (pressed) state on :active / :focus.
+
+   Best with a low-contrast theme where base-100 ≈ base-200 so the
+   extrusion reads cleanly.
+
+   Themeable: --color-* and --radius-*.
+   Build: static/families/magnolia.css via `npm run build:css`.
+   ============================================================ */
+
+@use 'lib';
+
+/* Themeable fallbacks — a theme's :root overrides these. */
+:where(:root) {
+	--radius-field: 0.9rem;
+	--radius-box: 1.4rem;
+	--radius-selector: 0.9rem;
+}
+
+/* Family-owned look — soft neumorphic extrusion. */
+:root {
+	--border: 0;
+	--depth: 0;
+	--noise: 0;
+	--light-intensity: 0; /* disable the default dark-only directional shadow */
+
+	--nm-d: 0.3em; /* offset */
+	--nm-blur: 0.6em;
+	--nm-dark: color-mix(in oklab, var(--color-base-200) 78%, #000);
+	--nm-light: color-mix(in oklab, var(--color-base-200) 82%, #fff);
+
+	--shadow-light:
+		var(--nm-d) var(--nm-d) var(--nm-blur) var(--nm-dark),
+		calc(-1 * var(--nm-d)) calc(-1 * var(--nm-d)) var(--nm-blur) var(--nm-light);
+}
+
+/* Monochrome fields blended into the page; buttons keep their tint. */
+:is(.input, .select, .textarea, .file-input) {
+	background-color: var(--color-base-200);
+	border-color: transparent;
+}
+
+.btn {
+	border-color: transparent;
+}
+
+/* Pressed / focused: carve inward. */
+.btn:active,
+.input:focus,
+.input:focus-within,
+.select:focus,
+.textarea:focus {
+	--shadow-light:
+		inset var(--nm-d) var(--nm-d) var(--nm-blur) var(--nm-dark),
+		inset calc(-1 * var(--nm-d)) calc(-1 * var(--nm-d)) var(--nm-blur) var(--nm-light);
+}

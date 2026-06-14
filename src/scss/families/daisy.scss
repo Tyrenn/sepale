@@ -1,0 +1,67 @@
+/* ============================================================
+   STYLE FAMILY — « daisy »
+   ============================================================
+
+   What a family is
+   ----------------
+   A family is the full set of CSS classes (structure + design
+   decisions) the Svelte components emit. A family commits to ONE
+   visual direction and is tuned through its THEME only — a set of
+   CSS custom properties (colors and radii). A family never ships a
+   structural customization mechanism: if you need to fundamentally
+   reshape a component, that is a different family, not an option.
+
+   Style variants that belong to the design language are allowed
+   (e.g. button `outline` / `ghost` / `soft`), because they are part
+   of the look itself, not a customization layer bolted on top.
+
+   Variable ownership
+   ------------------
+   - FAMILY-OWNED look variables are set on `:root` here (borders,
+     elevation system, shadow recipes, noise). They define the
+     family's identity and are not meant to be themed.
+   - THEMEABLE variables (colors, radii) get family fallbacks on
+     `:where(:root)` (specificity 0) so a theme's `:root` rules
+     always win, in any load order.
+
+   The « daisy » family
+   --------------------
+   A faithful port of DaisyUI v5 (https://github.com/saadeghi/daisyui)
+   to plain CSS — no Tailwind, no `@apply`. Reproduces DaisyUI's
+   component looks and class names (`btn`, `btn-primary`, `input`,
+   `badge`, …) so the markup is interchangeable.
+
+   Characteristics:
+     - Flat aesthetic: crisp 1px borders, low elevation, restrained
+       directional shadows. Retro 3D depth and noise are OFF.
+     - Intrinsic em-based sizing: components scale with `font-size`;
+       size variants only set `--fontsize`. No breakpoints.
+
+   Theme variables consumed (see also each component's header)
+   -----------------------------------------------------------
+     --color-base-100/200/300    surfaces (page, raised, sunken)
+     --color-base-content        default foreground color
+     --color-{semantic}[-content] primary/secondary/accent/neutral/
+                                  info/success/warning/error + fg
+     --radius-field/box/selector corner radii (fields / boxes / selectors)
+
+   Build: compiled to static/families/daisy.css by `npm run build:css`.
+   ============================================================ */
+
+@use 'lib';
+
+/* Themeable fallbacks — a theme's :root overrides these. */
+:where(:root) {
+	--radius-field: 0.25rem;
+	--radius-box: 1rem;
+	--radius-selector: 1rem;
+}
+
+/* Family-owned look — DaisyUI flat. */
+:root {
+	--border: 1px;       /* crisp hairline borders */
+	--depth: 0;          /* no retro 3D inset shadows */
+	--noise: 0;          /* no noise texture */
+	--light-intensity: 1; /* subtle directional shadow (via --shadow-light) */
+	--light-depth: 1;
+}

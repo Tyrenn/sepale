@@ -1,0 +1,4722 @@
+@charset "UTF-8";
+/* ============================================================
+   STYLE FAMILY — « daisy »
+   ============================================================
+
+   What a family is
+   ----------------
+   A family is the full set of CSS classes (structure + design
+   decisions) the Svelte components emit. A family commits to ONE
+   visual direction and is tuned through its THEME only — a set of
+   CSS custom properties (colors and radii). A family never ships a
+   structural customization mechanism: if you need to fundamentally
+   reshape a component, that is a different family, not an option.
+
+   Style variants that belong to the design language are allowed
+   (e.g. button `outline` / `ghost` / `soft`), because they are part
+   of the look itself, not a customization layer bolted on top.
+
+   Variable ownership
+   ------------------
+   - FAMILY-OWNED look variables are set on `:root` here (borders,
+     elevation system, shadow recipes, noise). They define the
+     family's identity and are not meant to be themed.
+   - THEMEABLE variables (colors, radii) get family fallbacks on
+     `:where(:root)` (specificity 0) so a theme's `:root` rules
+     always win, in any load order.
+
+   The « daisy » family
+   --------------------
+   A faithful port of DaisyUI v5 (https://github.com/saadeghi/daisyui)
+   to plain CSS — no Tailwind, no `@apply`. Reproduces DaisyUI's
+   component looks and class names (`btn`, `btn-primary`, `input`,
+   `badge`, …) so the markup is interchangeable.
+
+   Characteristics:
+     - Flat aesthetic: crisp 1px borders, low elevation, restrained
+       directional shadows. Retro 3D depth and noise are OFF.
+     - Intrinsic em-based sizing: components scale with `font-size`;
+       size variants only set `--fontsize`. No breakpoints.
+
+   Theme variables consumed (see also each component's header)
+   -----------------------------------------------------------
+     --color-base-100/200/300    surfaces (page, raised, sunken)
+     --color-base-content        default foreground color
+     --color-{semantic}[-content] primary/secondary/accent/neutral/
+                                  info/success/warning/error + fg
+     --radius-field/box/selector corner radii (fields / boxes / selectors)
+
+   Build: compiled to static/families/daisy.css by `npm run build:css`.
+   ============================================================ */
+/* ============================================================
+   _lib.scss — shared aggregation of base + utilities + components.
+
+   Every style family `@use`s this partial to emit the full set of
+   component CSS, then layers its own "look" on top (variable preset
+   + skin rules). Keeping the aggregation here avoids repeating the
+   list in each family entry.
+   ============================================================ */
+/* Base */
+/* properties.css */
+@property --radialprogress {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 0%;
+}
+/* ============================================================
+   svg.css — SVG base rules and noise texture variable
+
+   Defines --fx-noise: SVG data-uri used as a noise texture overlay
+   by button, input, toggle, chip, and other components.
+   Also sets svg { height: 1em } so inline SVG icons scale with font.
+   ============================================================ */
+:root {
+  --fx-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.34' numOctaves='4' stitchTiles='stitch'%3E%3C/feTurbulence%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23a)' opacity='0.2'%3E%3C/rect%3E%3C/svg%3E");
+}
+
+svg {
+  height: 1em;
+}
+
+/* reset.css - based on Tailwind CSS 4 preflight - MIT License - Copyright (c) Tailwind Labs, Inc. */
+*,
+::after,
+::backdrop,
+::before,
+::file-selector-button {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0 solid;
+}
+
+:host,
+html {
+  line-height: 1.5;
+  font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body {
+  line-height: inherit;
+}
+
+hr {
+  height: 0;
+  color: inherit;
+  border-top-width: 1px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+table {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+
+::file-selector-button,
+button,
+input,
+optgroup,
+select,
+textarea {
+  font: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  background: 0 0;
+}
+
+input:where(:not([type=button], [type=reset], [type=submit])),
+select,
+textarea {
+  border-width: 1px;
+}
+
+::file-selector-button,
+button,
+input:where([type=button], [type=reset], [type=submit]) {
+  appearance: button;
+}
+
+:-moz-focusring {
+  outline: auto;
+}
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+menu, ol, ul {
+  list-style: none;
+}
+
+textarea {
+  resize: vertical;
+}
+
+::placeholder {
+  opacity: 1;
+  color: color-mix(in oklch, currentColor 50%, rgba(0, 0, 0, 0));
+}
+
+audio, canvas, embed, iframe, img, object, svg, video {
+  display: block;
+  vertical-align: middle;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ============================================================
+   DaisyUI — rootcolor.css
+   Couleur et fond de base pour :root et les thèmes [data-theme]
+   ============================================================ */
+:root,
+[data-theme] {
+  background: var(--page-scroll-bg, var(--root-bg));
+  color: var(--color-base-content);
+}
+
+:where(:root, [data-theme]) {
+  --root-bg: var(--color-base-100);
+}
+
+/* ============================================================
+   DaisyUI — rootscroll.css
+   Gestion du scroll gutter et du scroll lock (utilisé par modal)
+   ============================================================ */
+/* Scroll gutter — assombrit le fond quand un backdrop est actif */
+:root {
+  background: var(--page-scroll-bg, var(--root-bg));
+  --page-scroll-bg-on: linear-gradient(var(--root-bg, #0000), var(--root-bg, #0000))
+  	color-mix(in srgb, var(--root-bg, #0000), oklch(0% 0 0) calc(var(--page-has-backdrop, 0) * 40%));
+  --page-scroll-transition-on: background-color 0.3s ease-out;
+  transition: var(--page-scroll-transition);
+  /* Fallback sans @supports */
+  scrollbar-gutter: var(--page-scroll-gutter, unset);
+  /* Avec support CSS if() */
+  scrollbar-gutter: if(style(--page-has-scroll: 1): var(--page-scroll-gutter, unset); else: unset);
+}
+
+@keyframes set-page-has-scroll {
+  0%, to {
+    --page-has-scroll: 1;
+  }
+}
+/* Scroll lock — bloque le scroll quand une modale est ouverte */
+:root:not(span) {
+  overflow: var(--page-overflow);
+}
+
+/* ============================================================
+   DaisyUI — scrollbar.css
+   Couleur de scrollbar adaptée au thème
+   ============================================================ */
+:root {
+  scrollbar-color: color-mix(in oklch, currentColor 35%, rgba(0, 0, 0, 0)) rgba(0, 0, 0, 0);
+}
+
+:root {
+  /* ── Light shadow system ─────────────────────────────────────
+     Alternative to --depth. Set --light-intensity > 0 and --depth: 0
+     for flat/modern directional shadows instead of retro depth.
+     --light-intensity   opacity multiplier  (0 = off)
+     --light-depth       distance/blur scale (1 = sm, 2 = md, 3 = lg)
+     --light-color       shadow hue, default pure black
+     ──────────────────────────────────────────────────────────── */
+  --light-intensity: 0;
+  --light-depth: 1;
+  --light-color: oklch(0% 0 0);
+  --shadow-light:
+  	0 calc(var(--light-depth, 1) * 1px) calc(var(--light-depth, 1) * 3px)
+  		color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 15%), #0000),
+  	0 calc(var(--light-depth, 1) * 3px) calc(var(--light-depth, 1) * 8px)
+  		color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 8%), #0000);
+  --default-xxs:	clamp(0.7023rem, -0.0079vw + 0.7039rem, 0.6944rem);
+  --default-xs:	clamp(0.7901rem, 0.0432vw + 0.7815rem, 0.8333rem);
+  --default-sm:	clamp(0.8889rem, 0.1111vw + 0.8667rem, 1rem);
+  --default-base:	clamp(1rem, 0.2vw + 0.96rem, 1.2rem);
+  --default-md:	clamp(1.125rem, 0.315vw + 1.062rem, 1.44rem);
+  --default-lg:	clamp(1.2656rem, 0.4624vw + 1.1731rem, 1.728rem);
+  --default-xl:	clamp(1.4238rem, 0.6498vw + 1.2939rem, 2.0736rem);
+  --default-xxl:	clamp(1.6018rem, 0.8865vw + 1.4245rem, 2.4883rem);
+  --default-xxxl:	clamp(1.802rem, 1.184vw + 1.5652rem, 2.986rem);
+}
+
+/**
+n level
+min_size   = 1.000 × 1.125^n
+max_size   = 1.200 × 1.200^n
+slope      = (max_size - min_size) / 100
+intercept  = min_size - slope × 20
+→ clamp(min_size·rem, intercept·rem + slope·100vw, max_size·rem)
+
+https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=1.125&maxFontSize=19.2&maxWidth=1920&maxRatio=1.2&steps=sm%2Cbase%2Cmd%2Clg%2Cxl%2Cxxl%2Cxxxl&baseStep=base&prefix=fs&useContainerWidth=false&includeFallbacks=false&useRems=true&remValue=16&decimals=4&previewFont=Inter&previewText=Almost+before+we+knew+it%2C+we+had+left+the+ground&previewWidth=320
+**/
+/* Utilities */
+/* ============================================================
+   DaisyUI — radius.css
+   Classes utilitaires pour les rayons DaisyUI
+   ============================================================ */
+.rounded-box {
+  border-radius: var(--radius-box);
+}
+
+.rounded-field {
+  border-radius: var(--radius-field);
+}
+
+.rounded-selector {
+  border-radius: var(--radius-selector);
+}
+
+.rounded-t-box {
+  border-top-left-radius: var(--radius-box);
+  border-top-right-radius: var(--radius-box);
+}
+
+.rounded-b-box {
+  border-bottom-left-radius: var(--radius-box);
+  border-bottom-right-radius: var(--radius-box);
+}
+
+.rounded-l-box {
+  border-top-left-radius: var(--radius-box);
+  border-bottom-left-radius: var(--radius-box);
+}
+
+.rounded-r-box {
+  border-top-right-radius: var(--radius-box);
+  border-bottom-right-radius: var(--radius-box);
+}
+
+.rounded-tl-box {
+  border-top-left-radius: var(--radius-box);
+}
+
+.rounded-tr-box {
+  border-top-right-radius: var(--radius-box);
+}
+
+.rounded-br-box {
+  border-bottom-right-radius: var(--radius-box);
+}
+
+.rounded-bl-box {
+  border-bottom-left-radius: var(--radius-box);
+}
+
+.rounded-t-field {
+  border-top-left-radius: var(--radius-field);
+  border-top-right-radius: var(--radius-field);
+}
+
+.rounded-b-field {
+  border-bottom-left-radius: var(--radius-field);
+  border-bottom-right-radius: var(--radius-field);
+}
+
+.rounded-l-field {
+  border-top-left-radius: var(--radius-field);
+  border-bottom-left-radius: var(--radius-field);
+}
+
+.rounded-r-field {
+  border-top-right-radius: var(--radius-field);
+  border-bottom-right-radius: var(--radius-field);
+}
+
+.rounded-tl-field {
+  border-top-left-radius: var(--radius-field);
+}
+
+.rounded-tr-field {
+  border-top-right-radius: var(--radius-field);
+}
+
+.rounded-br-field {
+  border-bottom-right-radius: var(--radius-field);
+}
+
+.rounded-bl-field {
+  border-bottom-left-radius: var(--radius-field);
+}
+
+.rounded-t-selector {
+  border-top-left-radius: var(--radius-selector);
+  border-top-right-radius: var(--radius-selector);
+}
+
+.rounded-b-selector {
+  border-bottom-left-radius: var(--radius-selector);
+  border-bottom-right-radius: var(--radius-selector);
+}
+
+.rounded-l-selector {
+  border-top-left-radius: var(--radius-selector);
+  border-bottom-left-radius: var(--radius-selector);
+}
+
+.rounded-r-selector {
+  border-top-right-radius: var(--radius-selector);
+  border-bottom-right-radius: var(--radius-selector);
+}
+
+.rounded-tl-selector {
+  border-top-left-radius: var(--radius-selector);
+}
+
+.rounded-tr-selector {
+  border-top-right-radius: var(--radius-selector);
+}
+
+.rounded-br-selector {
+  border-bottom-right-radius: var(--radius-selector);
+}
+
+.rounded-bl-selector {
+  border-bottom-left-radius: var(--radius-selector);
+}
+
+/* ============================================================
+   DaisyUI — glass.css
+   Effet verre dépoli (backdrop-filter)
+   ============================================================ */
+.glass {
+  border: none;
+  backdrop-filter: blur(var(--glass-blur, 40px));
+  background-color: rgba(0, 0, 0, 0);
+  background-image: linear-gradient(135deg, oklch(100% 0 0/var(--glass-opacity, 30%)) 0%, oklch(0% 0 0deg / 0) 100%), linear-gradient(var(--glass-reflect-degree, 100deg), oklch(100% 0 0/var(--glass-reflect-opacity, 5%)) 25%, oklch(0% 0 0deg / 0) 25%);
+  box-shadow: 0 0 0 1px oklch(100% 0 0/var(--glass-border-opacity, 20%)) inset, 0 0 0 2px oklch(0% 0 0deg / 0.05);
+  text-shadow: 0 1px oklch(0% 0 0/var(--glass-text-shadow-opacity, 5%));
+}
+
+/* Components */
+/* ============================================================
+   button.scss — tailles + couleurs générées par mixins (famille flat)
+
+   External variables (defined by the theme):
+	--color-base-200         default button background
+	--color-base-content     default text color
+	--color-{variant}        semantic color (primary, secondary, accent, neutral,
+										info, success, warning, error)
+	--color-{variant}-content  text on semantic color background
+	--depth                  depth effect multiplier (shadows / noise intensity)
+	--border                 border width (px value)
+	--noise                  noise background intensity (0–1)
+	--fx-noise               noise SVG data-uri (from base/svg.css)
+	--radius-field           default field border radius
+	--size-field             base unit for height calculation (default 0.25rem)
+
+   Join integration (set by join.css when inside .join):
+   --join-ss / --join-se / --join-es / --join-ee   per-corner radius overrides
+
+   Internal variables (set and consumed within this file):
+	--btn-color    color seed — set by .btn-{color} variants, drives bg/border/outline
+	--btn-bg       resolved background color
+	--btn-fg       resolved text color
+	--btn-p        inline padding
+	--btn-border   resolved border color
+	--btn-shadow   drop shadow value
+	--btn-noise    noise background-image (--fx-noise or none)
+	--size         button height (computed from --size-field)
+	--fontsize     font size (overridden by size variant classes)
+   ============================================================ */
+/* --- Reset de largeur dans certains contextes (ex: join) --- */
+:where(.btn) {
+  width: unset;
+}
+
+/* --- Liens btn dans prose : pas de soulignement --- */
+.prose :where(a.btn:not(.btn-link)):not(:where([class~=not-prose], [class~=not-prose] *)) {
+  text-decoration: none;
+}
+
+/* ============================================================
+	Base .btn
+	============================================================ */
+.btn {
+  /* Internal variables */
+  --size: 1.75em;
+  /* calc(var(--size-field, 0.25rem) * 10); */
+  --btn-bg: var(--btn-color, var(--color-base-200));
+  --btn-fg: var(--color-base-content);
+  --btn-p: 0.5em;
+  --btn-border: color-mix(in oklab, var(--btn-bg), #000 calc(var(--depth) * 5%));
+  --btn-shadow:
+  	0 3px 2px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
+  	0 4px 3px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
+  	var(--shadow-light, );
+  --btn-noise: var(--fx-noise);
+  /* Layout */
+  display: inline-flex;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem; /* gap-1.5 */
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  touch-action: manipulation;
+  /* Dimensions */
+  height: var(--size);
+  padding-inline: var(--btn-p);
+  /* Typography */
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  /*var(--fontsize, 0.875rem);*/
+  font-weight: 600;
+  color: var(--btn-fg);
+  --tw-prose-links: var(--btn-fg);
+  text-shadow: 0 0.5px oklch(100% 0 0/calc(var(--depth) * 0.15));
+  /* Background */
+  background-color: var(--btn-bg);
+  background-size: auto, calc(var(--noise) * 100%);
+  background-image: none, var(--btn-noise);
+  /* Border */
+  border-width: var(--border);
+  border-style: solid;
+  border-color: var(--btn-border);
+  /* Corner radius (join-compatible) */
+  border-start-start-radius: var(--join-ss, var(--radius-field));
+  border-start-end-radius: var(--join-se, var(--radius-field));
+  border-end-start-radius: var(--join-es, var(--radius-field));
+  border-end-end-radius: var(--join-ee, var(--radius-field));
+  /* Outline */
+  outline-offset: 2px;
+  outline-color: var(--btn-color, var(--color-base-content));
+  /* Shadow */
+  box-shadow: 0 0.5px 0 0.5px oklch(100% 0 0/calc(var(--depth) * 6%)) inset, var(--btn-shadow);
+  /* Transition */
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  transition-duration: 0.2s;
+  /* Other */
+  cursor: pointer;
+}
+
+.btn svg {
+  height: 1em;
+}
+
+/* Hover (pointer devices only) */
+@media (hover: hover) {
+  .btn:hover {
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
+  }
+}
+/* Keyboard focus */
+.btn:focus-visible,
+.btn:has(:focus-visible) {
+  outline-width: 2px;
+  outline-style: solid;
+  isolation: isolate;
+}
+
+/* Click / press */
+.btn:active:not(.btn-active) {
+  translate: 0 0.5px;
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 5%);
+  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
+  --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0);
+}
+
+/* Checkbox / radio styled as button */
+.btn:is(input[type=checkbox], input[type=radio]) {
+  appearance: none;
+}
+
+.btn:is(input[type=checkbox], input[type=radio])[aria-label]::after {
+  content: attr(aria-label);
+}
+
+/* Checked checkbox/radio */
+.btn:where(input:checked:not(.filter .btn)) {
+  --btn-color: var(--color-primary);
+  --btn-fg: var(--color-primary-content);
+  isolation: isolate;
+}
+
+/* ============================================================
+	États
+	============================================================ */
+/* Disabled */
+.btn-disabled,
+.btn:disabled,
+.btn[disabled] {
+  pointer-events: none;
+  --btn-border: #0000;
+  --btn-noise: none;
+  --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
+}
+
+.btn-disabled:not(.btn-link, .btn-ghost),
+.btn:disabled:not(.btn-link, .btn-ghost),
+.btn[disabled]:not(.btn-link, .btn-ghost) {
+  background-color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
+  box-shadow: none;
+}
+
+/* Active (forced) */
+.btn-active {
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
+  --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0);
+  isolation: isolate;
+}
+
+/* ============================================================
+	Variantes de couleur
+	============================================================ */
+.btn-primary {
+  --btn-color: var(--color-primary);
+  --btn-fg: var(--color-primary-content);
+}
+
+.btn-secondary {
+  --btn-color: var(--color-secondary);
+  --btn-fg: var(--color-secondary-content);
+}
+
+.btn-accent {
+  --btn-color: var(--color-accent);
+  --btn-fg: var(--color-accent-content);
+}
+
+.btn-neutral {
+  --btn-color: var(--color-neutral);
+  --btn-fg: var(--color-neutral-content);
+}
+
+.btn-info {
+  --btn-color: var(--color-info);
+  --btn-fg: var(--color-info-content);
+}
+
+.btn-success {
+  --btn-color: var(--color-success);
+  --btn-fg: var(--color-success-content);
+}
+
+.btn-warning {
+  --btn-color: var(--color-warning);
+  --btn-fg: var(--color-warning-content);
+}
+
+.btn-error {
+  --btn-color: var(--color-error);
+  --btn-fg: var(--color-error-content);
+}
+
+/* ============================================================
+	Variantes de style
+	============================================================ */
+/* Ghost: transparent until hover/focus/active */
+.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn)) {
+  --btn-shadow: ;
+  --btn-bg: #0000;
+  --btn-border: #0000;
+  --btn-noise: none;
+}
+
+.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn)):not(:disabled, [disabled], .btn-disabled) {
+  outline-color: currentColor;
+  --btn-fg: var(--btn-color, currentColor);
+}
+
+/* Ghost on touch screens */
+@media (hover: none) {
+  .btn-ghost:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+    outline-color: currentColor;
+    --btn-shadow: ;
+    --btn-bg: #0000;
+    --btn-fg: var(--btn-color, currentColor);
+    --btn-border: #0000;
+    --btn-noise: none;
+  }
+}
+/* Link */
+.btn-link {
+  text-decoration: underline;
+  outline-color: currentColor;
+  --btn-border: #0000;
+  --btn-bg: #0000;
+  --btn-noise: none;
+  --btn-shadow: ;
+}
+
+.btn-link:not(.btn-disabled, .btn:disabled, .btn[disabled]) {
+  --btn-fg: var(--btn-color, var(--color-primary));
+}
+
+.btn-link:is(.btn-active, :hover, :active:focus, :focus-visible) {
+  --btn-border: #0000;
+  --btn-bg: #0000;
+}
+
+/* Outline */
+.btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
+  --btn-shadow: ;
+  --btn-bg: #0000;
+  --btn-fg: var(--btn-color, var(--color-base-content));
+  --btn-border: var(--btn-color, var(--color-base-content));
+  --btn-noise: none;
+}
+
+@media (hover: none) {
+  .btn-outline:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+    --btn-shadow: ;
+    --btn-bg: #0000;
+    --btn-fg: var(--btn-color, var(--color-base-content));
+    --btn-border: var(--btn-color, var(--color-base-content));
+    --btn-noise: none;
+  }
+}
+/* Dash (like outline but dashed border) */
+.btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
+  --btn-shadow: ;
+  --btn-bg: #0000;
+  --btn-fg: var(--btn-color, var(--color-base-content));
+  --btn-border: var(--btn-color, var(--color-base-content));
+  --btn-noise: none;
+}
+
+.btn-dash {
+  border-style: dashed;
+}
+
+@media (hover: none) {
+  .btn-dash:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+    --btn-shadow: ;
+    --btn-bg: #0000;
+    --btn-fg: var(--btn-color, var(--color-base-content));
+    --btn-border: var(--btn-color, var(--color-base-content));
+    --btn-noise: none;
+  }
+}
+/* Soft */
+.btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
+  --btn-shadow: ;
+  --btn-fg: var(--btn-color, var(--color-base-content));
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 8%, var(--color-base-100));
+  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 10%, var(--color-base-100));
+  --btn-noise: none;
+}
+
+@media (hover: none) {
+  .btn-soft:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+    --btn-shadow: ;
+    --btn-fg: var(--btn-color, var(--color-base-content));
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 8%, var(--color-base-100));
+    --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 10%, var(--color-base-100));
+    --btn-noise: none;
+  }
+}
+/* ============================================================
+	Tailles
+	============================================================ */
+.btn-xxs {
+  --fontsize: var(--xxs, var(--default-xxs));
+}
+
+.btn-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.btn-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.btn-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.btn-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.btn-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.btn-xxl {
+  --fontsize: var(--xxl, var(--default-xxl));
+}
+
+.btn-xxxl {
+  --fontsize: var(--xxxl, var(--default-xxxl));
+}
+
+/* ============================================================
+	Formes
+	============================================================ */
+.btn-square {
+  padding-inline: 0;
+  width: var(--size);
+  height: var(--size);
+}
+
+.btn-circle {
+  padding-inline: 0;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 9999px;
+}
+
+/* ============================================================
+	Largeurs
+	============================================================ */
+.btn-wide {
+  width: 100%;
+  max-width: 16rem; /* max-w-64 = 256px */
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ============================================================
+   input.scss — tailles + couleurs générées par mixins (famille flat)
+
+   External variables (defined by theme):
+     --color-base-100      field background
+     --color-base-200      disabled background and border
+     --color-base-content  default text color
+     --color-{variant}     semantic accent color (set by .input-{color})
+     --depth               shadow / inset intensity multiplier
+     --border              border width
+     --radius-field        field corner radius
+
+   Join integration (set by join.css when nested in .join):
+     --join-ss / --join-se / --join-es / --join-ee   per-corner radius overrides
+
+   Font size system:
+     --fontsize            overrides default size (set by .input-xs … .input-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --size          field height (2.5em, scales with font)
+     --input-color   resolved border/shadow color; driven by color variants
+   ============================================================ */
+:where(.input) {
+  width: unset;
+}
+
+.input {
+  --size: 2.5em;
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  cursor: text;
+  display: inline-flex;
+  flex-shrink: 1;
+  appearance: none;
+  align-items: center;
+  gap: 0.5em;
+  padding-inline: 0.75em;
+  vertical-align: middle;
+  white-space: nowrap;
+  position: relative;
+  background-color: var(--color-base-100);
+  width: clamp(3rem, 20rem, 100%);
+  height: var(--size);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  touch-action: manipulation;
+  border: var(--border) solid rgba(0, 0, 0, 0);
+  border-start-start-radius: var(--join-ss, var(--radius-field));
+  border-start-end-radius: var(--join-se, var(--radius-field));
+  border-end-start-radius: var(--join-es, var(--radius-field));
+  border-end-end-radius: var(--join-ee, var(--radius-field));
+  border-color: var(--input-color);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+}
+
+.input:where(input) {
+  display: inline-flex;
+}
+
+.input :where(input) {
+  display: inline-flex;
+  height: 100%;
+  width: 100%;
+  appearance: none;
+  background-color: transparent;
+  border: none;
+}
+
+.input :where(input):focus,
+.input :where(input):focus-within {
+  outline: none;
+}
+
+.input :where(input[type=url]),
+.input :where(input[type=email]) {
+  direction: ltr;
+}
+
+.input :where(input[type=date]) {
+  display: inline-flex;
+}
+
+.input:focus,
+.input:focus-within {
+  --input-color: var(--color-base-content);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+  outline: 2px solid var(--input-color);
+  outline-offset: 2px;
+  isolation: isolate;
+}
+
+/* Increase font size on iOS to prevent auto-zoom on focus */
+@media (pointer: coarse) {
+  @supports (-webkit-touch-callout: none) {
+    .input:focus,
+    .input:focus-within {
+      font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+    }
+  }
+}
+.input:has(> input[disabled]),
+.input:is(:disabled, [disabled]),
+fieldset:disabled .input {
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
+  color: color-mix(in oklch, var(--color-base-content) 40%, rgba(0, 0, 0, 0));
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.input:has(> input[disabled]) input::placeholder,
+.input:is(:disabled, [disabled]) input::placeholder,
+fieldset:disabled .input input::placeholder,
+.input:has(> input[disabled])::placeholder,
+.input:is(:disabled, [disabled])::placeholder,
+fieldset:disabled .input::placeholder {
+  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
+}
+
+.input:has(> input[disabled]) > input[disabled] {
+  cursor: not-allowed;
+}
+
+.input::-webkit-date-and-time-value {
+  text-align: inherit;
+}
+
+.input[type=number]::-webkit-inner-spin-button {
+  margin-block: -0.75em;
+  margin-inline-end: -0.75em;
+}
+
+.input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset-inline-end: 0.75em;
+}
+
+.input:has(> input[type=date]) :where(input[type=date]) {
+  display: inline-flex;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input:has(> input[type=date]) input[type=date]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset-inline-end: 0.75em;
+  width: 1em;
+  height: 1em;
+  cursor: pointer;
+}
+
+/* ============================================================
+   Ghost
+   ============================================================ */
+.input-ghost {
+  background-color: transparent;
+  box-shadow: none;
+  border-color: rgba(0, 0, 0, 0);
+}
+
+.input-ghost:focus,
+.input-ghost:focus-within {
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
+  border-color: rgba(0, 0, 0, 0);
+  box-shadow: none;
+}
+
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+.input-primary,
+.input-primary:focus,
+.input-primary:focus-within {
+  --input-color: var(--color-primary);
+}
+
+.input-secondary,
+.input-secondary:focus,
+.input-secondary:focus-within {
+  --input-color: var(--color-secondary);
+}
+
+.input-accent,
+.input-accent:focus,
+.input-accent:focus-within {
+  --input-color: var(--color-accent);
+}
+
+.input-neutral,
+.input-neutral:focus,
+.input-neutral:focus-within {
+  --input-color: var(--color-neutral);
+}
+
+.input-info,
+.input-info:focus,
+.input-info:focus-within {
+  --input-color: var(--color-info);
+}
+
+.input-success,
+.input-success:focus,
+.input-success:focus-within {
+  --input-color: var(--color-success);
+}
+
+.input-warning,
+.input-warning:focus,
+.input-warning:focus-within {
+  --input-color: var(--color-warning);
+}
+
+.input-error,
+.input-error:focus,
+.input-error:focus-within {
+  --input-color: var(--color-error);
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.input-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.input-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.input-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.input-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.input-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   select.css — Dropdown select field
+
+   External variables (defined by theme):
+     --color-base-100      field background
+     --color-base-200      disabled background and border
+     --color-base-content  default text color
+     --color-neutral / --color-neutral-content   active option highlight
+     --color-{variant}     semantic accent color (set by .select-{color})
+     --depth               shadow / inset intensity multiplier
+     --border              border width
+     --radius-field        field corner radius
+     --radius-box          picker dropdown corner radius
+
+   Join integration (set by join.css when nested in .join):
+     --join-ss / --join-se / --join-es / --join-ee   per-corner radius overrides
+
+   Font size system:
+     --fontsize            overrides default size (set by .select-xs … .select-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --size          field height (2.5em, scales with font)
+     --input-color   resolved border/shadow color; driven by color variants
+   ============================================================ */
+:where(.select) {
+  width: unset;
+}
+
+.select {
+  --size: 2.5em;
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  border: var(--border) solid rgba(0, 0, 0, 0);
+  background-color: var(--color-base-100);
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 1;
+  appearance: none;
+  align-items: center;
+  gap: 0.375em;
+  padding-inline-start: 0.75em;
+  padding-inline-end: 1.75em;
+  vertical-align: middle;
+  width: clamp(3rem, 20rem, 100%);
+  height: var(--size);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  touch-action: manipulation;
+  border-start-start-radius: var(--join-ss, var(--radius-field));
+  border-start-end-radius: var(--join-se, var(--radius-field));
+  border-end-start-radius: var(--join-es, var(--radius-field));
+  border-end-end-radius: var(--join-ee, var(--radius-field));
+  background-image: linear-gradient(45deg, rgba(0, 0, 0, 0) 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, rgba(0, 0, 0, 0) 50%);
+  background-position: calc(100% - 20px) calc(1px + 50%), calc(100% - 16.1px) calc(1px + 50%);
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-color: var(--input-color);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+}
+
+[dir=rtl] .select {
+  background-position: calc(0% + 12px) calc(1px + 50%), calc(0% + 16px) calc(1px + 50%);
+}
+
+.select[multiple] {
+  height: auto;
+  overflow: auto;
+  padding-block: 0.75em;
+  padding-inline-end: 0.75em;
+  background-image: none;
+}
+
+/* Native <select> nested inside the .select wrapper */
+.select select {
+  margin-inline-start: -0.75em;
+  margin-inline-end: -1.75em;
+  width: calc(100% + 2.5em);
+  appearance: none;
+  padding-inline-start: 0.75em;
+  padding-inline-end: 1.75em;
+  height: calc(100% - var(--border) * 2);
+  align-items: center;
+  background: inherit;
+  border-radius: inherit;
+  border-style: none;
+}
+
+.select select:focus,
+.select select:focus-within {
+  outline: none;
+}
+
+.select select:not(:last-child) {
+  margin-inline-end: -1.375rem; /* -me-5.5 */
+  background-image: none;
+}
+
+.select:focus,
+.select:focus-within {
+  --input-color: var(--color-base-content);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+  outline: 2px solid var(--input-color);
+  outline-offset: 2px;
+  isolation: isolate;
+}
+
+.select:has(> select[disabled]),
+.select:is(:disabled, [disabled]),
+fieldset:disabled .select {
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
+  color: color-mix(in oklch, var(--color-base-content) 40%, rgba(0, 0, 0, 0));
+  cursor: not-allowed;
+}
+
+.select:has(> select[disabled]) select::placeholder,
+.select:is(:disabled, [disabled]) select::placeholder {
+  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
+}
+
+.select:has(> select[disabled]) > select[disabled] {
+  cursor: not-allowed;
+}
+
+/* base-select appearance support (modern browsers) */
+@supports (appearance: base-select) {
+  .select,
+  .select select {
+    appearance: base-select;
+  }
+}
+
+.select::picker(select),
+.select select::picker(select) {
+  color: inherit;
+  max-height: min(24rem, 70dvh);
+  margin-inline: 0.5rem;
+  translate: -0.5rem 0;
+  border: var(--border) solid var(--color-base-200);
+  border-radius: var(--radius-box);
+  margin-block: 0.5rem; /* my-2 */
+  padding: 0.5rem; /* p-2 */
+  background-color: inherit;
+  box-shadow: 0 20px 25px -5px rgb(0, 0, 0, calc(var(--depth) * 0.1)), 0 8px 10px -6px rgb(0, 0, 0, calc(var(--depth) * 0.1));
+}
+
+@supports (appearance: base-select) {
+  .select::picker(select),
+  .select select::picker(select) {
+    appearance: base-select;
+  }
+}
+.select::picker-icon,
+.select select::picker-icon {
+  display: none;
+}
+
+[dir=rtl] .select::picker(select),
+[dir=rtl] .select select::picker(select) {
+  translate: 0.5rem 0;
+}
+
+.select optgroup,
+.select select optgroup {
+  padding-top: 0.5em;
+}
+
+.select optgroup option:nth-child(1),
+.select select optgroup option:nth-child(1) {
+  margin-top: 0.5em;
+}
+
+.select option,
+.select select option {
+  border-radius: var(--radius-field);
+  padding-inline: 0.75rem; /* px-3 */
+  padding-block: 0.375rem; /* py-1.5 */
+  transition-property: color, background-color;
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  white-space: normal;
+}
+
+.select option:not(:disabled):hover,
+.select option:not(:disabled):focus-visible,
+.select select option:not(:disabled):hover,
+.select select option:not(:disabled):focus-visible {
+  background-color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
+  cursor: pointer;
+  outline: none;
+}
+
+.select option:not(:disabled):active,
+.select select option:not(:disabled):active {
+  background-color: var(--color-neutral);
+  color: var(--color-neutral-content);
+  box-shadow: 0 2px calc(var(--depth) * 3px) -2px var(--color-neutral);
+}
+
+/* ============================================================
+   Ghost
+   ============================================================ */
+.select-ghost {
+  background-color: transparent;
+  transition: background-color 0.2s;
+  box-shadow: none;
+  border-color: rgba(0, 0, 0, 0);
+}
+
+.select-ghost:focus,
+.select-ghost:focus-within {
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
+  border-color: rgba(0, 0, 0, 0);
+  box-shadow: none;
+}
+
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+.select-neutral,
+.select-neutral:focus,
+.select-neutral:focus-within {
+  --input-color: var(--color-neutral);
+}
+
+.select-primary,
+.select-primary:focus,
+.select-primary:focus-within {
+  --input-color: var(--color-primary);
+}
+
+.select-secondary,
+.select-secondary:focus,
+.select-secondary:focus-within {
+  --input-color: var(--color-secondary);
+}
+
+.select-accent,
+.select-accent:focus,
+.select-accent:focus-within {
+  --input-color: var(--color-accent);
+}
+
+.select-info,
+.select-info:focus,
+.select-info:focus-within {
+  --input-color: var(--color-info);
+}
+
+.select-success,
+.select-success:focus,
+.select-success:focus-within {
+  --input-color: var(--color-success);
+}
+
+.select-warning,
+.select-warning:focus,
+.select-warning:focus-within {
+  --input-color: var(--color-warning);
+}
+
+.select-error,
+.select-error:focus,
+.select-error:focus-within {
+  --input-color: var(--color-error);
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.select-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.select-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.select-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.select-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.select-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.select-xl option,
+.select-xl select option {
+  padding-inline: 1.25rem; /* px-5 */
+  padding-block: 0.375rem; /* py-1.5 */
+}
+
+/* ============================================================
+   textarea.css — Multi-line text input
+
+   External variables (defined by theme):
+     --color-base-100      field background
+     --color-base-200      disabled background and border
+     --color-base-content  default text color
+     --color-{variant}     semantic accent color (set by .textarea-{color})
+     --depth               shadow / inset intensity multiplier
+     --border              border width
+     --radius-field        field corner radius
+
+   Font size system:
+     --fontsize            overrides default size (set by .textarea-xs … .textarea-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --input-color   resolved border/shadow color; driven by color variants
+   ============================================================ */
+.textarea {
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  border: var(--border) solid rgba(0, 0, 0, 0);
+  background-color: var(--color-base-100);
+  border-radius: var(--radius-field);
+  min-height: 5em;
+  flex-shrink: 1;
+  appearance: none;
+  padding-block: 0.5em;
+  vertical-align: middle;
+  padding-inline-start: 0.75em;
+  padding-inline-end: 0.75em;
+  width: clamp(3rem, 20rem, 100%);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  touch-action: manipulation;
+  border-color: var(--input-color);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+}
+
+.textarea textarea {
+  appearance: none;
+  background-color: transparent;
+  border: none;
+}
+
+.textarea textarea:focus,
+.textarea textarea:focus-within {
+  outline: none;
+}
+
+.textarea:focus,
+.textarea:focus-within {
+  --input-color: var(--color-base-content);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+  outline: 2px solid var(--input-color);
+  outline-offset: 2px;
+  isolation: isolate;
+}
+
+/* Increase font size on iOS to prevent auto-zoom on focus */
+@media (pointer: coarse) {
+  @supports (-webkit-touch-callout: none) {
+    .textarea:focus,
+    .textarea:focus-within {
+      font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+    }
+  }
+}
+.textarea:has(> textarea[disabled]),
+.textarea:is(:disabled, [disabled]) {
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
+  color: color-mix(in oklch, var(--color-base-content) 40%, rgba(0, 0, 0, 0));
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.textarea:has(> textarea[disabled]) textarea::placeholder,
+.textarea:is(:disabled, [disabled]) textarea::placeholder,
+.textarea:has(> textarea[disabled])::placeholder,
+.textarea:is(:disabled, [disabled])::placeholder {
+  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
+}
+
+.textarea:has(> textarea[disabled]) > textarea[disabled] {
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   Ghost
+   ============================================================ */
+.textarea-ghost {
+  background-color: transparent;
+  box-shadow: none;
+  border-color: rgba(0, 0, 0, 0);
+}
+
+.textarea-ghost:focus,
+.textarea-ghost:focus-within {
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
+  border-color: rgba(0, 0, 0, 0);
+  box-shadow: none;
+}
+
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+.textarea-neutral,
+.textarea-neutral:focus,
+.textarea-neutral:focus-within {
+  --input-color: var(--color-neutral);
+}
+
+.textarea-primary,
+.textarea-primary:focus,
+.textarea-primary:focus-within {
+  --input-color: var(--color-primary);
+}
+
+.textarea-secondary,
+.textarea-secondary:focus,
+.textarea-secondary:focus-within {
+  --input-color: var(--color-secondary);
+}
+
+.textarea-accent,
+.textarea-accent:focus,
+.textarea-accent:focus-within {
+  --input-color: var(--color-accent);
+}
+
+.textarea-info,
+.textarea-info:focus,
+.textarea-info:focus-within {
+  --input-color: var(--color-info);
+}
+
+.textarea-success,
+.textarea-success:focus,
+.textarea-success:focus-within {
+  --input-color: var(--color-success);
+}
+
+.textarea-warning,
+.textarea-warning:focus,
+.textarea-warning:focus-within {
+  --input-color: var(--color-warning);
+}
+
+.textarea-error,
+.textarea-error:focus,
+.textarea-error:focus-within {
+  --input-color: var(--color-error);
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.textarea-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.textarea-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.textarea-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.textarea-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.textarea-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   checkbox.css — Checkbox input
+
+   External variables (defined by theme):
+     --color-base-content       default checkmark color
+     --color-{variant}          fill when checked (set by .checkbox-{color})
+     --color-{variant}-content  checkmark color when checked
+     --depth                    shadow / inset intensity multiplier
+     --border                   border width
+     --noise                    noise texture intensity (0–1)
+     --fx-noise                 noise SVG data-uri (from base/svg.css)
+     --radius-selector          corner radius
+
+   Font size system:
+     --fontsize            overrides default size (set by .checkbox-xs … .checkbox-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --size          box dimensions (1.5em × 1.5em, scales with font)
+     --input-color   border and fill color; driven by color variants
+   ============================================================ */
+.checkbox {
+  --size: 1.5em;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  border: var(--border) solid var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, rgba(0, 0, 0, 0)));
+  color: var(--color-base-content);
+  border-radius: var(--radius-selector);
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  cursor: pointer;
+  appearance: none;
+  padding: 0.15em;
+  vertical-align: middle;
+  width: var(--size);
+  height: var(--size);
+  background-size: auto, calc(var(--noise) * 100%);
+  background-image: none, var(--fx-noise);
+  box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 0 rgba(0, 0, 0, 0) inset, var(--shadow-light, );
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.checkbox::before {
+  --tw-content: "";
+  content: var(--tw-content);
+  display: block;
+  width: 100%;
+  height: 100%;
+  rotate: 45deg;
+  background-color: currentColor;
+  opacity: 0;
+  transition: clip-path 0.3s, opacity 0.1s, rotate 0.3s, translate 0.3s;
+  transition-delay: 0.1s;
+  clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 70% 80%, 70% 100%);
+  box-shadow: 0px 3px 0 0px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset;
+  font-size: 1rem;
+  line-height: 0.75;
+}
+
+.checkbox:focus-visible {
+  outline: 2px solid var(--input-color, currentColor);
+  outline-offset: 2px;
+}
+
+.checkbox:checked,
+.checkbox[aria-checked=true] {
+  background-color: var(--input-color, rgba(0, 0, 0, 0));
+  box-shadow: 0 0 rgba(0, 0, 0, 0) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1));
+}
+
+.checkbox:checked::before,
+.checkbox[aria-checked=true]::before {
+  clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 0%, 70% 0%, 70% 100%);
+  opacity: 1;
+}
+
+@media (forced-colors: active) {
+  .checkbox:checked::before,
+  .checkbox[aria-checked=true]::before {
+    rotate: 0deg;
+    background-color: transparent;
+    --tw-content: "✔︎";
+    clip-path: none;
+  }
+}
+@media print {
+  .checkbox:checked::before,
+  .checkbox[aria-checked=true]::before {
+    rotate: 0deg;
+    background-color: transparent;
+    --tw-content: "✔︎";
+    clip-path: none;
+  }
+}
+.checkbox:indeterminate {
+  background-color: var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, rgba(0, 0, 0, 0)));
+}
+
+.checkbox:indeterminate::before {
+  rotate: 0deg;
+  opacity: 1;
+  translate: 0 -35%;
+  clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 80% 80%, 80% 100%);
+}
+
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+.checkbox-primary {
+  color: var(--color-primary-content);
+  --input-color: var(--color-primary);
+}
+
+.checkbox-secondary {
+  color: var(--color-secondary-content);
+  --input-color: var(--color-secondary);
+}
+
+.checkbox-accent {
+  color: var(--color-accent-content);
+  --input-color: var(--color-accent);
+}
+
+.checkbox-neutral {
+  color: var(--color-neutral-content);
+  --input-color: var(--color-neutral);
+}
+
+.checkbox-info {
+  color: var(--color-info-content);
+  --input-color: var(--color-info);
+}
+
+.checkbox-success {
+  color: var(--color-success-content);
+  --input-color: var(--color-success);
+}
+
+.checkbox-warning {
+  color: var(--color-warning-content);
+  --input-color: var(--color-warning);
+}
+
+.checkbox-error {
+  color: var(--color-error-content);
+  --input-color: var(--color-error);
+}
+
+/* ============================================================
+   Désactivé
+   ============================================================ */
+.checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.2;
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.checkbox-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.checkbox-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.checkbox-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.checkbox-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.checkbox-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   Style variants
+   ============================================================ */
+/*
+   Outline — colored checkmark, no filled background.
+   Color of the mark is driven by the color variant's --input-color.
+   e.g. .checkbox-outline.checkbox-primary → primary-colored checkmark.
+*/
+.checkbox-outline:checked,
+.checkbox-outline[aria-checked=true] {
+  background-color: rgba(0, 0, 0, 0);
+  color: var(--input-color, var(--color-base-content));
+  box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 0 rgba(0, 0, 0, 0) inset, var(--shadow-light, );
+}
+
+/* ============================================================
+   Shape variants
+   ============================================================ */
+.checkbox-square {
+  border-radius: 0;
+}
+
+/* ============================================================
+   radio.css — Radio button input
+
+   External variables (defined by theme):
+		--color-base-100      background when checked
+		--color-{variant}     accent color (set by .radio-{color})
+		--depth               shadow / inset intensity multiplier
+		--border              border width
+		--noise               noise texture intensity (0–1)
+		--fx-noise            noise SVG data-uri (from base/svg.css)
+		--radius-selector     corner radius (9999px for full circle override)
+
+	Font size system:
+		--fontsize            overrides default size (set by .radio-xs … .radio-xl)
+		--base / --default-base   fallback font size
+
+	Internal variables:
+		--size          circle dimensions (1.5em × 1.5em, scales with font)
+		--input-color   border and fill color; driven by color variants
+   ============================================================ */
+.radio {
+  --size: 1.5em;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  cursor: pointer;
+  appearance: none;
+  border-radius: 9999px;
+  padding: 0.15em;
+  vertical-align: middle;
+  border: var(--border) solid var(--input-color, color-mix(in srgb, currentColor 20%, rgba(0, 0, 0, 0)));
+  box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset;
+  width: var(--size);
+  height: var(--size);
+  color: var(--input-color, currentColor);
+}
+
+.radio::before {
+  --tw-content: "";
+  content: var(--tw-content);
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px; /* rounded-full */
+  background-size: auto, calc(var(--noise) * 100%);
+  background-image: none, var(--fx-noise);
+}
+
+.radio:focus-visible {
+  outline: 2px solid currentColor;
+}
+
+.radio:checked,
+.radio[aria-checked=true] {
+  background-color: var(--color-base-100);
+  border-color: currentColor;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .radio:checked,
+  .radio[aria-checked=true] {
+    animation: radio 0.2s ease-out;
+  }
+}
+.radio:checked::before,
+.radio[aria-checked=true]::before {
+  background-color: currentColor;
+  box-shadow: 0 -1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1));
+}
+
+@media (forced-colors: active) {
+  .radio:checked::before,
+  .radio[aria-checked=true]::before {
+    outline-style: solid;
+    outline-offset: -0.25rem;
+  }
+}
+@media print {
+  .radio:checked::before,
+  .radio[aria-checked=true]::before {
+    outline: 0.25rem solid;
+    outline-offset: -1rem;
+  }
+}
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+.radio-primary {
+  --input-color: var(--color-primary);
+}
+
+.radio-secondary {
+  --input-color: var(--color-secondary);
+}
+
+.radio-accent {
+  --input-color: var(--color-accent);
+}
+
+.radio-neutral {
+  --input-color: var(--color-neutral);
+}
+
+.radio-info {
+  --input-color: var(--color-info);
+}
+
+.radio-success {
+  --input-color: var(--color-success);
+}
+
+.radio-warning {
+  --input-color: var(--color-warning);
+}
+
+.radio-error {
+  --input-color: var(--color-error);
+}
+
+/* ============================================================
+   Désactivé
+   ============================================================ */
+.radio:disabled {
+  cursor: not-allowed;
+  opacity: 0.2;
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.radio-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.radio-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.radio-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.radio-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.radio-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   Shape variants
+   ============================================================ */
+.radio-square {
+  border-radius: 0;
+}
+
+.radio-square::before {
+  border-radius: 0;
+}
+
+.radio-xl:is([type=radio]) {
+  --size: calc(var(--size-selector, 0.25rem) * 8);
+}
+
+/* ============================================================
+   Animation
+   ============================================================ */
+@keyframes radio {
+  0% {
+    padding: 5px;
+  }
+  50% {
+    padding: 3px;
+  }
+}
+/* ============================================================
+   toggle.css — Toggle switch (checkbox-based)
+
+   External variables (defined by theme):
+		--color-base-100      track background when checked
+		--color-base-content  thumb color when checked
+		--color-{variant}     thumb/track color when checked (set by .toggle-{color})
+		--depth               shadow / inset intensity multiplier
+		--border              border width
+		--noise               noise texture intensity (0–1)
+		--fx-noise            noise SVG data-uri (from base/svg.css)
+		--radius-selector     thumb and track corner radius
+
+   Font size system:
+		--fontsize            overrides default size (set by .toggle-xs … .toggle-xl)
+		--base / --default-base   fallback font size
+
+   Internal variables:
+		--size               toggle height (1.5em, scales with font); width is derived
+		--toggle-p           inner padding between track border and thumb
+		--input-color        track/thumb color; driven by color variants
+		--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) build error
+   ============================================================ */
+.toggle {
+  --input-color: color-mix(in oklab, var(--color-base-content) 50%, #0000);
+  --size: 1.5em;
+  --toggle-p: calc(var(--size) * 0.125);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  /* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
+  --radius-selector-max: calc(
+  	var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
+  );
+  border: var(--border) solid currentColor;
+  color: var(--input-color);
+  position: relative;
+  display: inline-grid;
+  flex-shrink: 0;
+  cursor: pointer;
+  appearance: none;
+  place-content: center;
+  vertical-align: middle;
+  user-select: none;
+  grid-template-columns: 0fr 1fr 1fr;
+  border-radius: calc(var(--radius-selector) + min(var(--toggle-p), var(--radius-selector-max)) + min(var(--border), var(--radius-selector-max)));
+  padding: var(--toggle-p);
+  box-shadow: 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, var(--shadow-light, );
+  width: calc(var(--size) * 2 - (var(--border) + var(--toggle-p)) * 2);
+  height: var(--size);
+  transition: color 0.3s, grid-template-columns 0.2s;
+}
+
+/* Optional icons inside the toggle */
+.toggle > * {
+  z-index: 1;
+  grid-column: span 1;
+  grid-column-start: 2;
+  grid-row-start: 1;
+  height: 100%;
+  cursor: pointer;
+  appearance: none;
+  background-color: transparent;
+  padding: 0.125rem; /* p-0.5 */
+  transition: opacity 0.2s, rotate 0.4s;
+  border: none;
+}
+
+.toggle > *:focus {
+  outline: none;
+}
+
+.toggle > *:nth-child(2) {
+  color: var(--color-base-100);
+  rotate: 0deg;
+}
+
+.toggle > *:nth-child(3) {
+  color: var(--color-base-100);
+  opacity: 0;
+  rotate: -15deg;
+}
+
+.toggle:has(:checked) > :nth-child(2) {
+  opacity: 0;
+  rotate: 15deg;
+}
+
+.toggle:has(:checked) > :nth-child(3) {
+  opacity: 1;
+  rotate: 0deg;
+}
+
+/* Toggle thumb */
+.toggle::before {
+  --tw-content: "";
+  content: var(--tw-content);
+  border-radius: var(--radius-selector);
+  position: relative;
+  inset-inline-start: 0;
+  grid-column-start: 2;
+  grid-row-start: 1;
+  aspect-ratio: 1/1;
+  height: 100%;
+  width: 100%;
+  background-color: currentColor;
+  translate: 0;
+  transition: background-color 0.1s, translate 0.2s, inset-inline-start 0.2s;
+  box-shadow: 0 -1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+  background-size: auto, calc(var(--noise) * 100%);
+  background-image: none, var(--fx-noise);
+}
+
+@media (forced-colors: active) {
+  .toggle::before {
+    outline-style: solid;
+    outline-offset: -0.25rem;
+  }
+}
+@media print {
+  .toggle::before {
+    outline: 0.25rem solid;
+    outline-offset: -1rem;
+  }
+}
+.toggle:focus-visible,
+.toggle:has(:focus-visible) {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.toggle:checked,
+.toggle[aria-checked=true],
+.toggle:has(> input:checked) {
+  grid-template-columns: 1fr 1fr 0fr;
+  background-color: var(--color-base-100);
+  --input-color: var(--color-base-content);
+}
+
+.toggle:checked::before,
+.toggle[aria-checked=true]::before,
+.toggle:has(> input:checked)::before {
+  background-color: currentColor;
+}
+
+@starting-style {
+  .toggle:checked::before,
+  .toggle[aria-checked=true]::before,
+  .toggle:has(> input:checked)::before {
+    opacity: 0;
+  }
+}
+.toggle:indeterminate {
+  grid-template-columns: 0.5fr 1fr 0.5fr;
+}
+
+.toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.toggle:disabled::before {
+  background-color: transparent;
+  border: var(--border) solid currentColor;
+}
+
+/* ============================================================
+   Variantes de couleur (actif uniquement)
+   ============================================================ */
+.toggle-primary:checked,
+.toggle-primary[aria-checked=true] {
+  --input-color: var(--color-primary);
+}
+
+.toggle-secondary:checked,
+.toggle-secondary[aria-checked=true] {
+  --input-color: var(--color-secondary);
+}
+
+.toggle-accent:checked,
+.toggle-accent[aria-checked=true] {
+  --input-color: var(--color-accent);
+}
+
+.toggle-neutral:checked,
+.toggle-neutral[aria-checked=true] {
+  --input-color: var(--color-neutral);
+}
+
+.toggle-success:checked,
+.toggle-success[aria-checked=true] {
+  --input-color: var(--color-success);
+}
+
+.toggle-warning:checked,
+.toggle-warning[aria-checked=true] {
+  --input-color: var(--color-warning);
+}
+
+.toggle-info:checked,
+.toggle-info[aria-checked=true] {
+  --input-color: var(--color-info);
+}
+
+.toggle-error:checked,
+.toggle-error[aria-checked=true] {
+  --input-color: var(--color-error);
+}
+
+/* ============================================================
+   Track fill variant — colored track, inset via background-clip.
+   The thumb stays currentColor (same as border) for a unified look.
+   The track fills only the content area (inside padding), appearing
+   recessed/thinner than the outer toggle border.
+   Combine with a color variant: .toggle-track.toggle-primary etc.
+   ============================================================ */
+.toggle-track:checked,
+.toggle-track[aria-checked=true],
+.toggle-track:has(> input:checked) {
+  background-color: var(--input-color, var(--color-base-content));
+  background-clip: content-box; /* track stays inside padding = inset/thinner effect */
+}
+
+.toggle-track:checked::before,
+.toggle-track[aria-checked=true]::before,
+.toggle-track:has(> input:checked)::before {
+  background-color: var(--color-base-content);
+  box-shadow: 0 0 0 0.1em var(--color-base-100);
+  /* border: 0.1em solid var(--color-base-100); */
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.toggle-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.toggle-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.toggle-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.toggle-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.toggle-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   range.css — Range slider input
+
+   External variables (defined by theme):
+     --color-base-100      default thumb background
+     --color-{variant}     track/progress color (set by .range-{color})
+     --color-{variant}-content  thumb fill color for colored variants
+     --depth               shadow / inset intensity multiplier
+     --radius-selector     thumb and track corner radius
+
+   Font size system:
+     --fontsize            overrides default size (set by .range-xs … .range-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --range-thumb         thumb background color
+     --range-thumb-size    thumb diameter (1.5em, scales with font)
+     --range-progress      track fill color (currentColor by default)
+     --range-fill          1 = fill track before thumb, 0 = no fill
+     --range-p             thumb border / padding (0.25em)
+     --range-bg            empty track color
+     --range-dir           RTL direction multiplier (-1 when [dir="rtl"])
+     --radius-selector-max workaround for PostCSS/Nuxt calc(min(calc())) build error
+   ============================================================ */
+.range {
+  --range-thumb: var(--color-base-100);
+  --range-thumb-size: 1.5em;
+  --range-progress: currentColor;
+  --range-fill: 1;
+  --range-p: 0.25em;
+  --range-bg: color-mix(in oklab, currentColor 10%, #0000);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  /* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
+  --radius-selector-max: calc(
+  	var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
+  );
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: transparent;
+  vertical-align: middle;
+  width: clamp(3rem, 20rem, 100%);
+  border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+  border: none;
+  height: var(--range-thumb-size);
+}
+
+[dir=rtl] .range {
+  --range-dir: -1;
+}
+
+.range:focus {
+  outline: none;
+}
+
+.range:focus-visible {
+  outline: 2px solid;
+  outline-offset: 2px;
+}
+
+/* Track — WebKit */
+.range::-webkit-slider-runnable-track {
+  width: 100%;
+  background-color: var(--range-bg);
+  border-radius: var(--radius-selector);
+  height: calc(var(--range-thumb-size) * 0.5);
+}
+
+@media (forced-colors: active) {
+  .range::-webkit-slider-runnable-track {
+    border: 1px solid;
+  }
+}
+/* Thumb — WebKit */
+.range::-webkit-slider-thumb {
+  position: relative;
+  box-sizing: border-box;
+  border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+  background-color: var(--range-thumb);
+  height: var(--range-thumb-size);
+  width: var(--range-thumb-size);
+  border: var(--range-p) solid;
+  appearance: none;
+  -webkit-appearance: none;
+  top: 50%;
+  color: var(--range-progress);
+  transform: translateY(-50%);
+  box-shadow: 0 -1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), rgba(0, 0, 0, 0)), 0 0 0 2rem var(--range-thumb) inset, calc(var(--range-dir, 1) * -100cqw - var(--range-dir, 1) * var(--range-thumb-size) / 2) 0 0 calc(100cqw * var(--range-fill)), var(--shadow-light, );
+}
+
+/* Track — Firefox */
+.range::-moz-range-track {
+  width: 100%;
+  background-color: var(--range-bg);
+  border-radius: var(--radius-selector);
+  height: calc(var(--range-thumb-size) * 0.5);
+}
+
+@media (forced-colors: active) {
+  .range::-moz-range-track {
+    border: 1px solid;
+  }
+}
+/* Thumb — Firefox */
+.range::-moz-range-thumb {
+  position: relative;
+  box-sizing: border-box;
+  border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+  background-color: currentColor;
+  height: var(--range-thumb-size);
+  width: var(--range-thumb-size);
+  border: var(--range-p) solid;
+  top: 50%;
+  color: var(--range-progress);
+  box-shadow: 0 -1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), rgba(0, 0, 0, 0)), 0 0 0 2rem var(--range-thumb) inset, calc(var(--range-dir, 1) * -100cqw - var(--range-dir, 1) * var(--range-thumb-size) / 2) 0 0 calc(100cqw * var(--range-fill)), var(--shadow-light, );
+}
+
+.range:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+.range-primary {
+  color: var(--color-primary);
+  --range-thumb: var(--color-primary-content);
+}
+
+.range-secondary {
+  color: var(--color-secondary);
+  --range-thumb: var(--color-secondary-content);
+}
+
+.range-accent {
+  color: var(--color-accent);
+  --range-thumb: var(--color-accent-content);
+}
+
+.range-neutral {
+  color: var(--color-neutral);
+  --range-thumb: var(--color-neutral-content);
+}
+
+.range-success {
+  color: var(--color-success);
+  --range-thumb: var(--color-success-content);
+}
+
+.range-warning {
+  color: var(--color-warning);
+  --range-thumb: var(--color-warning-content);
+}
+
+.range-info {
+  color: var(--color-info);
+  --range-thumb: var(--color-info-content);
+}
+
+.range-error {
+  color: var(--color-error);
+  --range-thumb: var(--color-error-content);
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.range-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.range-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.range-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.range-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.range-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   file-input.css — File picker input
+
+   External variables (defined by theme):
+     --color-base-100      field background
+     --color-base-200      disabled background and border
+     --color-base-content  default text color
+     --color-{variant}     button and border color (set by .file-input-{color})
+     --color-{variant}-content  button text for colored variants
+     --depth               shadow / inset intensity multiplier
+     --border              border width
+     --noise               noise texture intensity (0–1)
+     --fx-noise            noise SVG data-uri (from base/svg.css)
+     --radius-field        field corner radius
+
+   Join integration (set by join.css when nested in .join):
+     --join-ss / --join-es   start-side radius overrides (applied to ::file-selector-button)
+
+   Font size system:
+     --fontsize            overrides default size (set by .file-input-xs … .file-input-xl)
+     --base / --default-base   fallback font size
+     Note: ::file-selector-button keeps its own fixed font-size
+
+   Internal variables:
+     --size          field height (2.5em, scales with font)
+     --input-color   border/shadow color; driven by color variants
+     --btn-color     seed color for the file button; set by color variants
+     --btn-bg        resolved button background
+     --btn-fg        resolved button text color
+     --btn-border    resolved button border color
+     --btn-shadow    button drop shadow
+     --btn-noise     button noise texture image
+   ============================================================ */
+.file-input {
+  --size: 2.5em;
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  --btn-bg: var(--btn-color, var(--color-base-200));
+  --btn-fg: var(--color-base-content);
+  --btn-border: color-mix(in oklab, var(--btn-bg), #000 5%);
+  --btn-shadow:
+  	0 3px 2px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000),
+  	0 4px 3px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000);
+  --btn-noise: var(--fx-noise);
+  cursor: pointer;
+  border: var(--border) solid rgba(0, 0, 0, 0);
+  background-color: var(--color-base-100);
+  display: inline-flex;
+  appearance: none;
+  align-items: center;
+  vertical-align: middle;
+  user-select: none;
+  width: clamp(3rem, 20rem, 100%);
+  height: var(--size);
+  padding-inline-end: 0.75em;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  line-height: 2;
+  border-start-start-radius: var(--join-ss, var(--radius-field));
+  border-start-end-radius: var(--join-se, var(--radius-field));
+  border-end-start-radius: var(--join-es, var(--radius-field));
+  border-end-end-radius: var(--join-ee, var(--radius-field));
+  border-color: var(--input-color);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+}
+
+.file-input::file-selector-button {
+  margin-inline-end: 1rem; /* me-4 */
+  cursor: pointer;
+  padding-inline: 1rem; /* px-4 */
+  user-select: none;
+  height: calc(100% + var(--border) * 2);
+  margin-block: calc(var(--border) * -1);
+  margin-inline-start: calc(var(--border) * -1);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--btn-fg);
+  border-width: var(--border);
+  border-style: solid;
+  border-color: var(--btn-border);
+  border-start-start-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
+  border-end-start-radius: calc(var(--join-es, var(--radius-field)) - var(--border));
+  background-color: var(--btn-bg);
+  background-size: calc(var(--noise) * 100%);
+  background-image: var(--btn-noise);
+  text-shadow: 0 0.5px oklch(1 0 0/calc(var(--depth) * 0.15));
+  box-shadow: 0 0.5px 0 0.5px color-mix(in oklab, color-mix(in oklab, white 30%, var(--btn-bg)) calc(var(--depth) * 20%), rgba(0, 0, 0, 0)) inset, var(--btn-shadow);
+}
+
+.file-input:focus {
+  --input-color: var(--color-base-content);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) 10%, rgba(0, 0, 0, 0));
+  outline: 2px solid var(--input-color);
+  outline-offset: 2px;
+  isolation: isolate;
+}
+
+.file-input:has(> input[disabled]),
+.file-input:is(:disabled, [disabled]) {
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
+  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.file-input:has(> input[disabled])::file-selector-button,
+.file-input:is(:disabled, [disabled])::file-selector-button {
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
+  cursor: not-allowed;
+  --btn-border: #0000;
+  --btn-noise: none;
+  --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
+}
+
+/* ============================================================
+   Ghost
+   ============================================================ */
+.file-input-ghost {
+  background-color: transparent;
+  transition: background-color 0.2s;
+  box-shadow: none;
+  border-color: rgba(0, 0, 0, 0);
+}
+
+.file-input-ghost::file-selector-button {
+  margin-inline-start: 0; /* ms-0 */
+  margin-inline-end: 1rem; /* me-4 */
+  height: 100%;
+  cursor: pointer;
+  padding-inline: 1rem; /* px-4 */
+  user-select: none;
+  margin-block: 0;
+  border-start-end-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
+  border-end-end-radius: calc(var(--join-es, var(--radius-field)) - var(--border));
+}
+
+.file-input-ghost:focus,
+.file-input-ghost:focus-within {
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
+  border-color: rgba(0, 0, 0, 0);
+  box-shadow: none;
+}
+
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+.file-input-neutral {
+  --btn-color: var(--color-neutral);
+}
+
+.file-input-neutral::file-selector-button {
+  color: var(--color-neutral-content);
+}
+
+.file-input-neutral,
+.file-input-neutral:focus,
+.file-input-neutral:focus-within {
+  --input-color: var(--color-neutral);
+}
+
+.file-input-primary {
+  --btn-color: var(--color-primary);
+}
+
+.file-input-primary::file-selector-button {
+  color: var(--color-primary-content);
+}
+
+.file-input-primary,
+.file-input-primary:focus,
+.file-input-primary:focus-within {
+  --input-color: var(--color-primary);
+}
+
+.file-input-secondary {
+  --btn-color: var(--color-secondary);
+}
+
+.file-input-secondary::file-selector-button {
+  color: var(--color-secondary-content);
+}
+
+.file-input-secondary,
+.file-input-secondary:focus,
+.file-input-secondary:focus-within {
+  --input-color: var(--color-secondary);
+}
+
+.file-input-accent {
+  --btn-color: var(--color-accent);
+}
+
+.file-input-accent::file-selector-button {
+  color: var(--color-accent-content);
+}
+
+.file-input-accent,
+.file-input-accent:focus,
+.file-input-accent:focus-within {
+  --input-color: var(--color-accent);
+}
+
+.file-input-info {
+  --btn-color: var(--color-info);
+}
+
+.file-input-info::file-selector-button {
+  color: var(--color-info-content);
+}
+
+.file-input-info,
+.file-input-info:focus,
+.file-input-info:focus-within {
+  --input-color: var(--color-info);
+}
+
+.file-input-success {
+  --btn-color: var(--color-success);
+}
+
+.file-input-success::file-selector-button {
+  color: var(--color-success-content);
+}
+
+.file-input-success,
+.file-input-success:focus,
+.file-input-success:focus-within {
+  --input-color: var(--color-success);
+}
+
+.file-input-warning {
+  --btn-color: var(--color-warning);
+}
+
+.file-input-warning::file-selector-button {
+  color: var(--color-warning-content);
+}
+
+.file-input-warning,
+.file-input-warning:focus,
+.file-input-warning:focus-within {
+  --input-color: var(--color-warning);
+}
+
+.file-input-error {
+  --btn-color: var(--color-error);
+}
+
+.file-input-error::file-selector-button {
+  color: var(--color-error-content);
+}
+
+.file-input-error,
+.file-input-error:focus,
+.file-input-error:focus-within {
+  --input-color: var(--color-error);
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.file-input-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.file-input-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.file-input-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.file-input-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.file-input-xl {
+  --fontsize: var(--xl, var(--default-xl));
+  padding-inline-end: 1.5em;
+}
+
+/* ============================================================
+   chip.css — Small inline label / badge (replaces DaisyUI badge)
+
+   External variables (defined by theme):
+		--color-base-100      default chip background
+		--color-base-200      ghost/outline border and background
+		--color-base-content  default text color
+		--color-{variant}     seed color (set by .chip-{color})
+		--color-{variant}-content  text color for filled variants
+		--noise               noise texture intensity (0–1)
+		--fx-noise            noise SVG data-uri (from base/svg.css)
+		--border              border width
+		--radius-selector     corner radius
+
+   Font size system:
+		--fontsize            overrides default size (set by .chip-xs … .chip-xl)
+		--base / --default-base   fallback font size
+
+   Internal variables:
+		--size        chip height (1.6em, scales with font); padding derived from it
+		--chip-color  seed color; driven by color variant classes
+		--chip-bg     resolved background color
+		--chip-fg     resolved text color
+   ============================================================ */
+.chip {
+  --chip-bg: var(--chip-color, var(--color-base-100));
+  --chip-fg: var(--color-base-content);
+  --size: 1.6em;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  border-radius: var(--radius-selector);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  vertical-align: middle;
+  color: var(--chip-fg);
+  border: var(--border) solid var(--chip-color, var(--color-base-200));
+  width: fit-content;
+  background-size: auto, calc(var(--noise) * 100%);
+  background-image: none, var(--fx-noise);
+  background-color: var(--chip-bg);
+  height: var(--size);
+  padding-inline: calc(var(--size) / 2 - var(--border));
+  box-shadow: var(--shadow-light, );
+}
+
+.chip svg {
+  height: 1em;
+}
+
+/* ============================================================
+   Variantes de style
+   ============================================================ */
+.chip-outline {
+  color: var(--chip-color);
+  --chip-bg: #0000;
+  background-image: none;
+  border-color: currentColor;
+}
+
+.chip-dash {
+  color: var(--chip-color);
+  --chip-bg: #0000;
+  background-image: none;
+  border-color: currentColor;
+  border-style: dashed;
+}
+
+.chip-soft {
+  color: var(--chip-color, var(--color-base-content));
+  background-color: color-mix(in oklab, var(--chip-color, var(--color-base-content)) 8%, var(--color-base-100));
+  border-color: color-mix(in oklab, var(--chip-color, var(--color-base-content)) 10%, var(--color-base-100));
+  background-image: none;
+}
+
+.chip-ghost {
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
+  color: var(--color-base-content);
+  background-image: none;
+}
+
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+.chip-primary {
+  --chip-color: var(--color-primary);
+  --chip-fg: var(--color-primary-content);
+}
+
+.chip-secondary {
+  --chip-color: var(--color-secondary);
+  --chip-fg: var(--color-secondary-content);
+}
+
+.chip-accent {
+  --chip-color: var(--color-accent);
+  --chip-fg: var(--color-accent-content);
+}
+
+.chip-neutral {
+  --chip-color: var(--color-neutral);
+  --chip-fg: var(--color-neutral-content);
+}
+
+.chip-info {
+  --chip-color: var(--color-info);
+  --chip-fg: var(--color-info-content);
+}
+
+.chip-success {
+  --chip-color: var(--color-success);
+  --chip-fg: var(--color-success-content);
+}
+
+.chip-warning {
+  --chip-color: var(--color-warning);
+  --chip-fg: var(--color-warning-content);
+}
+
+.chip-error {
+  --chip-color: var(--color-error);
+  --chip-fg: var(--color-error-content);
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.chip-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.chip-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.chip-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.chip-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.chip-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   badge.css — badge / badge overlay wrapper (replaces DaisyUI badge)
+
+   External variables (defined by theme):
+     none
+
+   Internal variables (CSS custom properties used for position control):
+     --badge-t    top offset (default: 0)
+     --badge-b    bottom offset (default: auto)
+     --badge-s    inset-inline-start offset (default: auto)
+     --badge-e    inset-inline-end offset (default: 0)
+     --badge-x    horizontal translate (default: 50%)
+     --badge-y    vertical translate (default: -50%)
+
+   Usage: combine .badge wrapper with .badge-{position} modifiers.
+   The inner element with class .badge is the positioned badge itself.
+   ============================================================ */
+.badge {
+  position: relative;
+  display: inline-flex;
+  width: max-content;
+}
+
+.badge :where(.chip) {
+  z-index: 1;
+  position: absolute;
+  white-space: nowrap;
+  top: var(--badge-t, 0);
+  bottom: var(--badge-b, auto);
+  left: var(--badge-s, auto);
+  right: var(--badge-e, 0);
+  translate: var(--badge-x, 50%) var(--badge-y, -50%);
+}
+
+/* ============================================================
+   Position horizontale
+   ============================================================ */
+.badge-start {
+  --badge-s: 0;
+  --badge-e: auto;
+  --badge-x: -50%;
+}
+
+[dir=rtl] .badge-start {
+  --badge-s: auto;
+  --badge-e: 0;
+  --badge-x: 50%;
+}
+
+.badge-center {
+  --badge-s: 50%;
+  --badge-e: 50%;
+  --badge-x: -50%;
+}
+
+[dir=rtl] .badge-center {
+  --badge-x: 50%;
+}
+
+.badge-end {
+  --badge-s: auto;
+  --badge-e: 0;
+  --badge-x: 50%;
+}
+
+[dir=rtl] .badge-end {
+  --badge-s: 0;
+  --badge-e: auto;
+  --badge-x: -50%;
+}
+
+/* ============================================================
+   Position verticale
+   ============================================================ */
+.badge-top {
+  --badge-t: 0;
+  --badge-b: auto;
+  --badge-y: -50%;
+}
+
+.badge-middle {
+  --badge-t: 50%;
+  --badge-b: 50%;
+  --badge-y: -50%;
+}
+
+.badge-bottom {
+  --badge-t: auto;
+  --badge-b: 0;
+  --badge-y: 50%;
+}
+
+/* ============================================================
+   tab.css — Tabs navigation component
+
+   External variables (defined by theme):
+     --color-base-100      active tab background (tabs-box, tabs-lift)
+     --color-base-200      tabs-box track background
+     --color-base-300      default tab border color
+     --color-neutral       tabs-box active shadow color
+     --border              border width
+     --radius-field        tab corner radius
+     --radius-box          tab content panel corner radius
+     --depth               shadow / inset intensity multiplier
+
+   Font size system:
+     --fontsize            overrides tab font size (set by .tabs-xs … .tabs-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables (set on .tabs / .tab, consumed by children):
+     --tabs-height         container height (auto or fixed)
+     --tabs-direction      flex direction (row)
+     --tab-height          individual tab height (2.5em, scales with font)
+     --tab-p               tab inline padding (0.75em, scales with font)
+     --tab-bg              active tab background color
+     --tab-border-color    tab border color
+     --tab-order           tab order in flex container
+     --tab-radius-min      minimum inner radius
+     --tab-radius-limit    clamped radius = min(--radius-field, --tab-radius-min)
+     --tab-radius-grad     radial gradient for lifted corner decoration
+     --tab-radius-ss/se/es/ee   per-corner radius values
+     --tab-border / --tab-border-colors   active tab border sides
+     --tab-paddings        active tab padding adjustment
+     --tab-inset / --radius-start / --radius-end   lifted corner positioning
+     --tabs-box-radius     box variant rounding
+     --tabcontent-order / --tabcontent-margin / --tabcontent-radius-*  content panel layout
+   ============================================================ */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  --tabs-height: auto;
+  --tabs-direction: row;
+  --tab-height: 2.5em;
+  height: var(--tabs-height);
+  flex-direction: var(--tabs-direction);
+}
+
+.tab {
+  --tab-p: 0.75em;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  --tab-bg: var(--color-base-100);
+  --tab-border-color: var(--color-base-300);
+  --tab-radius-ss: 0;
+  --tab-radius-se: 0;
+  --tab-radius-es: 0;
+  --tab-radius-ee: 0;
+  --tab-order: 0;
+  --tab-radius-min: calc(0.75rem - var(--border));
+  --tab-radius-limit: min(var(--radius-field), var(--tab-radius-min));
+  --tab-radius-grad:
+  	#0000 calc(69% - var(--border)),
+  	var(--tab-border-color) calc(69% - var(--border) + 0.25px),
+  	var(--tab-border-color) 69%,
+  	var(--tab-bg) calc(69% + 0.25px);
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+  appearance: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  user-select: none;
+  border-color: rgba(0, 0, 0, 0);
+  order: var(--tab-order);
+  height: var(--tab-height);
+  font-size: 0.875rem;
+  padding-inline: var(--tab-p);
+}
+
+.tab:hover {
+  color: var(--color-base-content);
+}
+
+.tab:is(input[type=radio]) {
+  min-width: fit-content;
+}
+
+.tab:is(input[type=radio])::after {
+  content: attr(aria-label);
+}
+
+.tab:is(label) {
+  position: relative;
+}
+
+.tab:is(label) input {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  appearance: none;
+  opacity: 0;
+}
+
+/* Show active tab content */
+.tab:checked + .tab-content,
+.tab:is(label:has(:checked)) + .tab-content,
+.tab:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]) + .tab-content {
+  display: block;
+}
+
+/* Inactive tab */
+.tab:not(:checked,
+label:has(:checked),
+:hover,
+.tab-active,
+[aria-selected=true],
+[aria-current=true],
+[aria-current=page]) {
+  color: color-mix(in oklch, var(--color-base-content) 50%, rgba(0, 0, 0, 0));
+}
+
+.tab:not(input):empty {
+  flex-grow: 1;
+  cursor: default;
+}
+
+.tab:focus {
+  outline: none;
+}
+
+.tab:focus-visible,
+.tab:is(label:has(:checked:focus-visible)) {
+  outline: 2px solid currentColor;
+  outline-offset: -5px;
+}
+
+.tab[disabled] {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.tab-content {
+  order: 1;
+  display: none;
+  border-color: transparent;
+  --tabcontent-radius-ss: var(--radius-box);
+  --tabcontent-radius-se: var(--radius-box);
+  --tabcontent-radius-es: var(--radius-box);
+  --tabcontent-radius-ee: var(--radius-box);
+  --tabcontent-order: 1;
+  width: 100%;
+  height: calc(100% - var(--tab-height) + var(--border));
+  margin: var(--tabcontent-margin);
+  order: var(--tabcontent-order);
+  border-width: var(--border);
+  border-start-start-radius: var(--tabcontent-radius-ss);
+  border-start-end-radius: var(--tabcontent-radius-se);
+  border-end-start-radius: var(--tabcontent-radius-es);
+  border-end-end-radius: var(--tabcontent-radius-ee);
+}
+
+.tab-disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* ============================================================
+   tabs-border
+   ============================================================ */
+.tabs-border > .tab {
+  --tab-border-color: #0000 #0000 var(--tab-border-color) #0000;
+  position: relative;
+  border-radius: var(--radius-field);
+}
+
+.tabs-border > .tab::before {
+  content: "";
+  background-color: var(--tab-border-color);
+  transition: background-color 0.2s ease;
+  width: 80%;
+  height: 3px;
+  border-radius: var(--radius-field);
+  bottom: 0;
+  left: 10%;
+  position: absolute;
+}
+
+.tabs-border > .tab:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled])::before,
+.tabs-border > .tab:is(input:checked)::before,
+.tabs-border > .tab:is(label:has(:checked))::before {
+  --tab-border-color: currentColor;
+  border-top: 3px solid;
+}
+
+/* ============================================================
+   tabs-lift
+   ============================================================ */
+.tabs-lift {
+  --tabs-height: auto;
+  --tabs-direction: row;
+}
+
+.tabs-lift > .tab {
+  --tab-border: 0 0 var(--border) 0;
+  --tab-radius-ss: var(--tab-radius-limit);
+  --tab-radius-se: var(--tab-radius-limit);
+  --tab-radius-es: 0;
+  --tab-radius-ee: 0;
+  --tab-paddings: var(--border) var(--tab-p) 0 var(--tab-p);
+  --tab-border-colors: #0000 #0000 var(--tab-border-color) #0000;
+  --tab-corner-width: calc(100% + var(--tab-radius-limit) * 2);
+  --tab-corner-height: var(--tab-radius-limit);
+  --tab-corner-position: top left, top right;
+  border-width: var(--tab-border);
+  border-start-start-radius: var(--tab-radius-ss);
+  border-start-end-radius: var(--tab-radius-se);
+  border-end-start-radius: var(--tab-radius-es);
+  border-end-end-radius: var(--tab-radius-ee);
+  padding: var(--tab-paddings);
+  border-color: var(--tab-border-colors);
+}
+
+.tabs-lift > .tab:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]),
+.tabs-lift > .tab:is(input:checked, label:has(:checked)) {
+  --tab-border: var(--border) var(--border) 0 var(--border);
+  --tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+  --tab-paddings: 0 calc(var(--tab-p) - var(--border)) var(--border) calc(var(--tab-p) - var(--border));
+  --tab-inset: auto auto 0 auto;
+  --radius-start: radial-gradient(circle at top left, var(--tab-radius-grad));
+  --radius-end: radial-gradient(circle at top right, var(--tab-radius-grad));
+  background-color: var(--tab-bg);
+}
+
+.tabs-lift > .tab:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled])::before,
+.tabs-lift > .tab:is(input:checked, label:has(:checked))::before {
+  z-index: 1;
+  content: "";
+  display: block;
+  position: absolute;
+  width: var(--tab-corner-width);
+  height: var(--tab-corner-height);
+  background-position: var(--tab-corner-position);
+  background-image: var(--radius-start), var(--radius-end);
+  background-size: var(--tab-radius-limit) var(--tab-radius-limit);
+  background-repeat: no-repeat;
+  inset: var(--tab-inset);
+}
+
+.tabs-lift > .tab:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]):first-child::before,
+.tabs-lift > .tab:is(input:checked, label:has(:checked)):first-child::before {
+  --radius-start: none;
+}
+
+[dir=rtl] .tabs-lift > .tab:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]):first-child::before,
+[dir=rtl] .tabs-lift > .tab:is(input:checked, label:has(:checked)):first-child::before {
+  transform: rotateY(180deg);
+}
+
+.tabs-lift > .tab:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]):last-child::before,
+.tabs-lift > .tab:is(input:checked, label:has(:checked)):last-child::before {
+  --radius-end: none;
+}
+
+[dir=rtl] .tabs-lift > .tab:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]):last-child::before,
+[dir=rtl] .tabs-lift > .tab:is(input:checked, label:has(:checked)):last-child::before {
+  transform: rotateY(180deg);
+}
+
+.tabs-lift:has(> .tab-content) > .tab:first-child:not(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]) {
+  --tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+}
+
+.tabs-lift > .tab-content {
+  --tabcontent-margin: calc(-1 * var(--border)) 0 0 0;
+  --tabcontent-radius-ss: 0;
+  --tabcontent-radius-se: var(--radius-box);
+  --tabcontent-radius-es: var(--radius-box);
+  --tabcontent-radius-ee: var(--radius-box);
+}
+
+.tabs-lift :checked + .tab-content:nth-child(1),
+.tabs-lift :checked + .tab-content:nth-child(n+3),
+.tabs-lift label:has(:checked) + .tab-content:nth-child(1),
+.tabs-lift label:has(:checked) + .tab-content:nth-child(n+3),
+.tabs-lift :is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]) + .tab-content:nth-child(1),
+.tabs-lift :is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]) + .tab-content:nth-child(n+3) {
+  --tabcontent-radius-ss: var(--radius-box);
+}
+
+/* ============================================================
+   tabs-top / tabs-bottom
+   ============================================================ */
+.tabs-top {
+  --tabs-height: auto;
+  --tabs-direction: row;
+}
+
+.tabs-top > .tab {
+  --tab-order: 0;
+  --tab-border: 0 0 var(--border) 0;
+  --tab-radius-ss: var(--tab-radius-limit);
+  --tab-radius-se: var(--tab-radius-limit);
+  --tab-radius-es: 0;
+  --tab-radius-ee: 0;
+  --tab-paddings: var(--border) var(--tab-p) 0 var(--tab-p);
+  --tab-border-colors: #0000 #0000 var(--tab-border-color) #0000;
+  --tab-corner-width: calc(100% + var(--tab-radius-limit) * 2);
+  --tab-corner-height: var(--tab-radius-limit);
+  --tab-corner-position: top left, top right;
+}
+
+.tabs-top > .tab:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]),
+.tabs-top > .tab:is(input:checked),
+.tabs-top > .tab:is(label:has(:checked)) {
+  --tab-border: var(--border) var(--border) 0 var(--border);
+  --tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+  --tab-paddings: 0 calc(var(--tab-p) - var(--border)) var(--border) calc(var(--tab-p) - var(--border));
+  --tab-inset: auto auto 0 auto;
+  --radius-start: radial-gradient(circle at top left, var(--tab-radius-grad));
+  --radius-end: radial-gradient(circle at top right, var(--tab-radius-grad));
+}
+
+.tabs-top:has(> .tab-content) > .tab:first-child:not(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]) {
+  --tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+}
+
+.tabs-top > .tab-content {
+  --tabcontent-order: 1;
+  --tabcontent-margin: calc(-1 * var(--border)) 0 0 0;
+  --tabcontent-radius-ss: 0;
+  --tabcontent-radius-se: var(--radius-box);
+  --tabcontent-radius-es: var(--radius-box);
+  --tabcontent-radius-ee: var(--radius-box);
+}
+
+.tabs-bottom {
+  --tabs-height: auto;
+  --tabs-direction: row;
+}
+
+.tabs-bottom > .tab {
+  --tab-order: 1;
+  --tab-border: var(--border) 0 0 0;
+  --tab-radius-ss: 0;
+  --tab-radius-se: 0;
+  --tab-radius-es: var(--tab-radius-limit);
+  --tab-radius-ee: var(--tab-radius-limit);
+  --tab-border-colors: var(--tab-border-color) #0000 #0000 #0000;
+  --tab-paddings: 0 var(--tab-p) var(--border) var(--tab-p);
+  --tab-corner-width: calc(100% + var(--tab-radius-limit) * 2);
+  --tab-corner-height: var(--tab-radius-limit);
+  --tab-corner-position: top left, top right;
+}
+
+.tabs-bottom > .tab:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]),
+.tabs-bottom > .tab:is(input:checked),
+.tabs-bottom > .tab:is(label:has(:checked)) {
+  --tab-border: 0 var(--border) var(--border) var(--border);
+  --tab-border-colors: #0000 var(--tab-border-color) var(--tab-border-color) var(--tab-border-color);
+  --tab-paddings: var(--border) calc(var(--tab-p) - var(--border)) 0 calc(var(--tab-p) - var(--border));
+  --tab-inset: 0 auto auto auto;
+  --radius-start: radial-gradient(circle at bottom left, var(--tab-radius-grad));
+  --radius-end: radial-gradient(circle at bottom right, var(--tab-radius-grad));
+}
+
+.tabs-bottom:has(> .tab-content) > .tab:first-child:not(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]) {
+  --tab-border-colors: #0000 var(--tab-border-color) var(--tab-border-color) var(--tab-border-color);
+}
+
+.tabs-bottom > .tab-content {
+  --tabcontent-order: 0;
+  --tabcontent-margin: 0 0 calc(-1 * var(--border)) 0;
+  --tabcontent-radius-ss: var(--radius-box);
+  --tabcontent-radius-se: var(--radius-box);
+  --tabcontent-radius-es: 0;
+  --tabcontent-radius-ee: var(--radius-box);
+}
+
+.tabs-bottom > :checked + .tab-content:not(:nth-child(2)),
+.tabs-bottom > :is(label:has(:checked)) + .tab-content:not(:nth-child(2)),
+.tabs-bottom > :is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]) + .tab-content:not(:nth-child(2)) {
+  --tabcontent-radius-es: var(--radius-box);
+}
+
+/* ============================================================
+   tabs-box
+   ============================================================ */
+.tabs-box {
+  --tabs-box-radius: calc(3 * var(--radius-field));
+  background-color: var(--color-base-200);
+  padding: 0.25rem; /* p-1 */
+  border-radius: calc(min(var(--tab-height) / 2, var(--radius-field)) + min(0.25rem, var(--tabs-box-radius)));
+  box-shadow: 0 -0.5px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 0.5px oklch(0% 0 0/calc(var(--depth) * 0.05)) inset;
+}
+
+.tabs-box > .tab {
+  border-radius: var(--radius-field);
+  border-style: none;
+}
+
+.tabs-box > .tab:focus-visible,
+.tabs-box > .tab:is(label:has(:checked:focus-visible)) {
+  outline-offset: 2px;
+}
+
+.tabs-box > .tab:focus-visible {
+  z-index: 1;
+}
+
+.tabs-box > :is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]),
+.tabs-box > :is(input:checked),
+.tabs-box > :is(label:has(:checked)) {
+  background-color: var(--tab-bg, var(--color-base-100));
+  box-shadow: 0 1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px 1px -1px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 50%), rgba(0, 0, 0, 0)), 0 1px 6px -4px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 100%), rgba(0, 0, 0, 0));
+}
+
+@media (forced-colors: active) {
+  .tabs-box > :is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]),
+  .tabs-box > :is(input:checked),
+  .tabs-box > :is(label:has(:checked)) {
+    border: 1px solid;
+  }
+}
+.tabs-box > .tab-content {
+  margin-top: 0.25rem; /* mt-1 */
+  height: calc(100% - var(--tab-height) + var(--border) - 0.5rem);
+  border-radius: calc(min(var(--tab-height) / 2, var(--radius-field)) + min(0.25rem, var(--tabs-box-radius)) - var(--border));
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.tabs-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.tabs-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.tabs-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.tabs-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.tabs-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   loading.css — Animated loading indicator
+
+   External variables (defined by theme):
+     none — uses currentColor for fill
+
+   Font size system:
+     --fontsize            overrides indicator size (set by .loading-xs … .loading-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     width   1.5em (scales with font size via --fontsize)
+   ============================================================ */
+.loading {
+  pointer-events: none;
+  display: inline-block;
+  aspect-ratio: 1/1;
+  background-color: currentColor;
+  vertical-align: middle;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  width: 1.5em;
+  mask-size: 100%;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='black' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform-origin='center'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='2s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dasharray' values='0,150;42,150;42,150' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dashoffset' values='0;-16;-59' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
+}
+
+.loading-spinner {
+  mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='black' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform-origin='center'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='2s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dasharray' values='0,150;42,150;42,150' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dashoffset' values='0;-16;-59' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
+}
+
+.loading-dots {
+  mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='4' cy='12' r='3'%3E%3Canimate attributeName='cy' values='12;6;12;12' keyTimes='0;0.286;0.571;1' dur='1.05s' repeatCount='indefinite' keySplines='.33,0,.66,.33;.33,.66,.66,1'/%3E%3C/circle%3E%3Ccircle cx='12' cy='12' r='3'%3E%3Canimate attributeName='cy' values='12;6;12;12' keyTimes='0;0.286;0.571;1' dur='1.05s' repeatCount='indefinite' keySplines='.33,0,.66,.33;.33,.66,.66,1' begin='0.1s'/%3E%3C/circle%3E%3Ccircle cx='20' cy='12' r='3'%3E%3Canimate attributeName='cy' values='12;6;12;12' keyTimes='0;0.286;0.571;1' dur='1.05s' repeatCount='indefinite' keySplines='.33,0,.66,.33;.33,.66,.66,1' begin='0.2s'/%3E%3C/circle%3E%3C/svg%3E");
+}
+
+.loading-ring {
+  mask-image: url("data:image/svg+xml,%3Csvg width='44' height='44' viewBox='0 0 44 44' xmlns='http://www.w3.org/2000/svg' stroke='white'%3E%3Cg fill='none' fill-rule='evenodd' stroke-width='2'%3E%3Ccircle cx='22' cy='22' r='1'%3E%3Canimate attributeName='r' begin='0s' dur='1.8s' values='1;20' calcMode='spline' keyTimes='0;1' keySplines='0.165,0.84,0.44,1' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-opacity' begin='0s' dur='1.8s' values='1;0' calcMode='spline' keyTimes='0;1' keySplines='0.3,0.61,0.355,1' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='22' cy='22' r='1'%3E%3Canimate attributeName='r' begin='-0.9s' dur='1.8s' values='1;20' calcMode='spline' keyTimes='0;1' keySplines='0.165,0.84,0.44,1' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-opacity' begin='-0.9s' dur='1.8s' values='1;0' calcMode='spline' keyTimes='0;1' keySplines='0.3,0.61,0.355,1' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
+}
+
+.loading-ball {
+  mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='12' cy='5' rx='4' ry='4'%3E%3Canimate attributeName='cy' values='5;20;20.5;20;5' keyTimes='0;0.469;0.5;0.531;1' dur='.8s' repeatCount='indefinite' keySplines='.33,0,.66,.33;.33,.66,.66,1'/%3E%3Canimate attributeName='rx' values='4;4;4.8;4;4' keyTimes='0;0.469;0.5;0.531;1' dur='.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='ry' values='4;4;3;4;4' keyTimes='0;0.469;0.5;0.531;1' dur='.8s' repeatCount='indefinite'/%3E%3C/ellipse%3E%3C/svg%3E");
+}
+
+.loading-bars {
+  mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='1' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3C/rect%3E%3Crect x='9' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3C/rect%3E%3Crect x='17' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3C/rect%3E%3C/svg%3E");
+}
+
+.loading-infinity {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' style='shape-rendering:auto;' width='200px' height='200px' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid'%3E%3Cpath fill='none' stroke='black' stroke-width='10' stroke-dasharray='205.271 51.318' d='M24.3 30C11.4 30 5 43.3 5 50s6.4 20 19.3 20c19.3 0 32.1-40 51.4-40C88.6 30 95 43.3 95 50s-6.4 20-19.3 20C56.4 70 43.6 30 24.3 30z' stroke-linecap='round' style='transform:scale(0.8);transform-origin:50px 50px'%3E%3Canimate attributeName='stroke-dashoffset' repeatCount='indefinite' dur='2s' keyTimes='0;1' values='0;256.589'/%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.loading-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.loading-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.loading-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.loading-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.loading-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   progress.css — Linear progress bar
+
+   External variables (defined by theme):
+     --color-base-content  default track/fill color
+     --color-{variant}     fill color (set by .progress-{color})
+     --radius-box          bar corner radius
+
+   Internal variables:
+     none — height is fixed at 0.5rem; color driven by currentColor
+   ============================================================ */
+.progress {
+  border-radius: var(--radius-box);
+  color: var(--color-base-content);
+  position: relative;
+  height: 0.5rem; /* h-2 */
+  width: 100%;
+  appearance: none;
+  overflow: hidden;
+  background-color: color-mix(in oklch, currentColor 20%, rgba(0, 0, 0, 0)); /* bg-current/20 */
+}
+
+.progress:indeterminate {
+  background-image: repeating-linear-gradient(90deg, currentColor -1%, currentColor 10%, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 0) 90%);
+  background-size: 200%;
+  background-position-x: 15%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .progress:indeterminate {
+    animation: progress 5s ease-in-out infinite;
+  }
+}
+@supports (-moz-appearance: none) {
+  .progress:indeterminate::-moz-progress-bar {
+    background-color: transparent;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .progress:indeterminate::-moz-progress-bar {
+      animation: progress 5s ease-in-out infinite;
+      background-image: repeating-linear-gradient(90deg, currentColor -1%, currentColor 10%, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 0) 90%);
+      background-size: 200%;
+      background-position-x: 15%;
+    }
+  }
+  .progress::-moz-progress-bar {
+    border-radius: var(--radius-box);
+    background-color: currentColor;
+  }
+}
+@supports (-webkit-appearance: none) {
+  .progress::-webkit-progress-bar {
+    border-radius: var(--radius-box);
+    background-color: transparent;
+  }
+  .progress::-webkit-progress-value {
+    border-radius: var(--radius-box);
+    background-color: currentColor;
+  }
+}
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+.progress-primary {
+  color: var(--color-primary);
+}
+
+.progress-secondary {
+  color: var(--color-secondary);
+}
+
+.progress-accent {
+  color: var(--color-accent);
+}
+
+.progress-neutral {
+  color: var(--color-neutral);
+}
+
+.progress-info {
+  color: var(--color-info);
+}
+
+.progress-success {
+  color: var(--color-success);
+}
+
+.progress-warning {
+  color: var(--color-warning);
+}
+
+.progress-error {
+  color: var(--color-error);
+}
+
+/* ============================================================
+   Animation
+   ============================================================ */
+@keyframes progress {
+  50% {
+    background-position-x: -115%;
+  }
+}
+/* ============================================================
+   radial-progress.css — Circular progress ring
+
+   External variables (defined by theme):
+     none — uses currentColor for the ring
+
+   Font size system:
+     --fontsize            overrides ring size (set by .radial-progress-xs … .radial-progress-xl)
+     --base / --default-base   fallback font size
+
+   User-set variables (must be provided in HTML style or CSS):
+     --value       progress value 0–100 (required)
+     --size        ring diameter (default: 5em, scales with font)
+     --thickness   ring stroke width (default: --size / 10)
+
+   Internal variables:
+     --radialprogress   computed from --value (animated CSS property)
+   ============================================================ */
+.radial-progress {
+  --value: 0;
+  --size: 5em;
+  --thickness: calc(var(--size) / 10);
+  --radialprogress: calc(var(--value) * 1%);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  position: relative;
+  display: inline-grid;
+  height: var(--size);
+  width: var(--size);
+  place-content: center;
+  border-radius: 9999px;
+  background-color: transparent;
+  vertical-align: middle;
+  box-sizing: content-box;
+  transition: --radialprogress 0.3s linear;
+}
+
+.radial-progress-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.radial-progress-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.radial-progress-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.radial-progress-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.radial-progress-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.radial-progress::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: radial-gradient(farthest-side, currentColor 98%, rgba(0, 0, 0, 0)) top/var(--thickness) var(--thickness) no-repeat, conic-gradient(currentColor var(--radialprogress), rgba(0, 0, 0, 0) 0);
+  -webkit-mask: radial-gradient(farthest-side, rgba(0, 0, 0, 0) calc(100% - var(--thickness)), #000 calc(100% + 0.5px - var(--thickness)));
+  mask: radial-gradient(farthest-side, rgba(0, 0, 0, 0) calc(100% - var(--thickness)), #000 calc(100% + 0.5px - var(--thickness)));
+}
+
+.radial-progress::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  background-color: currentColor;
+  inset: calc(50% - var(--thickness) / 2);
+  transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
+  transition: transform 0.3s linear;
+}
+
+/* ============================================================
+   skeleton.css — Loading skeleton placeholder
+
+   External variables (defined by theme):
+     --color-base-100    shimmer highlight color
+     --color-base-300    skeleton base background
+     --color-base-content  used for .skeleton-text shimmer
+     --radius-box        corner radius
+
+   Internal variables:
+     none — dimensions are set by the element itself (width/height in HTML/CSS)
+   ============================================================ */
+.skeleton {
+  background-color: var(--color-base-300);
+  border-radius: var(--radius-box);
+  will-change: background-position;
+  background-image: linear-gradient(105deg, rgba(0, 0, 0, 0) 0% 40%, var(--color-base-100) 50%, rgba(0, 0, 0, 0) 60% 100%);
+  background-size: 200% auto;
+  background-position-x: -50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton {
+    animation: skeleton 1.8s ease-in-out infinite;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    transition-duration: 15s;
+  }
+}
+.skeleton-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(105deg, color-mix(in oklab, var(--color-base-content) 20%, transparent) 0% 40%, var(--color-base-content) 50%, color-mix(in oklab, var(--color-base-content) 20%, transparent) 60% 100%);
+}
+
+/* ============================================================
+   Animation
+   ============================================================ */
+@keyframes skeleton {
+  0% {
+    background-position: 150%;
+  }
+  100% {
+    background-position: -50%;
+  }
+}
+/* ============================================================
+   list.css — List display component + suggestion dropdown pattern
+
+   External variables (defined by theme):
+     --color-base-100      list background
+     --color-base-200      separator and border color
+     --color-base-content  text and separator color
+     --color-primary       selected suggestion highlight
+     --depth               shadow intensity
+     --border              border width
+     --radius-box          list container corner radius
+     --radius-field        suggestion item corner radius
+
+   Join integration (set by join.css when nested in .join):
+     --join-ss / --join-se / --join-es / --join-ee   per-corner radius overrides
+
+   Font size system:
+     --fontsize            overrides font size (set by .list-xs … .list-xl)
+     --base / --default-base   fallback font size
+
+   Internal variables:
+     --list-grid-cols   auto-computed grid columns based on .list-col-grow index
+   ============================================================ */
+/* ============================================================
+   Base list container
+   ============================================================ */
+.list {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  background-color: var(--color-base-100);
+  border-start-start-radius: var(--join-ss, var(--radius-box));
+  border-start-end-radius: var(--join-se, var(--radius-box));
+  border-end-start-radius: var(--join-es, var(--radius-box));
+  border-end-end-radius: var(--join-ee, var(--radius-box));
+}
+
+/* ============================================================
+   List rows (data display)
+   ============================================================ */
+.list-row {
+  --list-grid-cols: minmax(0, auto) 1fr;
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: var(--list-grid-cols);
+  gap: 1rem;
+  padding: 1rem;
+  word-break: break-word;
+}
+
+/* Separator line between rows (all except last) */
+.list > .list-row:not(:last-child)::after,
+.list > :not(:last-child) .list-row::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  inset-inline: 1rem;
+  border-bottom: var(--border) solid color-mix(in oklab, var(--color-base-content) 5%, rgba(0, 0, 0, 0));
+}
+
+/* Grid column layout — grows at the Nth .list-col-grow child */
+.list-row:has(.list-col-grow:nth-child(1)) {
+  --list-grid-cols: 1fr;
+}
+
+.list-row:has(.list-col-grow:nth-child(2)) {
+  --list-grid-cols: minmax(0, auto) 1fr;
+}
+
+.list-row:has(.list-col-grow:nth-child(3)) {
+  --list-grid-cols: minmax(0, auto) minmax(0, auto) 1fr;
+}
+
+.list-row:has(.list-col-grow:nth-child(4)) {
+  --list-grid-cols: minmax(0, auto) minmax(0, auto) minmax(0, auto) 1fr;
+}
+
+.list-row:has(.list-col-grow:nth-child(5)) {
+  --list-grid-cols: minmax(0, auto) minmax(0, auto) minmax(0, auto) minmax(0, auto) 1fr;
+}
+
+.list-row > * {
+  grid-row-start: 1;
+}
+
+/* Wrapping column — placed on row 2 (spans full width below the grid) */
+.list-col-wrap {
+  grid-row-start: 2;
+  grid-column: 1/-1;
+}
+
+/* ============================================================
+   Suggestion list variant
+   Used below an input in a .join to provide autocomplete options.
+
+   Usage:
+     <div class="join join-vertical">
+       <input class="input join-item" placeholder="Search…" />
+       <ul class="list list-suggestions join-item">
+         <li class="suggestion-item">Result 1</li>
+         <li class="suggestion-item suggestion-item-active">Result 2</li>
+       </ul>
+     </div>
+   ============================================================ */
+.list-suggestions {
+  padding: 0.25rem;
+  border: var(--border) solid var(--color-base-200);
+  box-shadow: 0 8px 16px -4px color-mix(in oklab, var(--color-base-content) 10%, rgba(0, 0, 0, 0)), var(--shadow-light, );
+  overflow-y: auto;
+  max-height: min(16rem, 60dvh);
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.4em 0.75em;
+  border-radius: var(--radius-field);
+  cursor: pointer;
+  transition: background-color 0.1s;
+  user-select: none;
+}
+
+@media (hover: hover) {
+  .suggestion-item:hover {
+    background-color: color-mix(in oklab, var(--color-base-content) 7%, rgba(0, 0, 0, 0));
+  }
+}
+/* Keyboard-navigated active item */
+.suggestion-item-active,
+.suggestion-item[aria-selected=true] {
+  background-color: color-mix(in oklab, var(--color-primary) 12%, rgba(0, 0, 0, 0));
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.list-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.list-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.list-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.list-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.list-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   text.css — Système typographique
+
+   Naming: .{type}-s{size}-b{weight}
+		s = size index, 1 = largest
+		b = weight index, 1 = heaviest (700), 2 = medium (500), 3 = regular (400)
+   Subtitles have a fixed weight — no b index.
+   Title is unique — no index.
+   ============================================================ */
+/* ============================================================
+   Title
+   ============================================================ */
+.title {
+  font-size: var(--xxl, var(--default-xxl));
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+/* ============================================================
+   Subtitle (fixed weight)
+   ============================================================ */
+.subtitle-s1 {
+  font-size: var(--xl, var(--default-xl));
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.subtitle-s2 {
+  font-size: var(--lg, var(--default-lg));
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* ============================================================
+   Text — s1 (--md)
+   ============================================================ */
+.text-s1-b1 {
+  font-size: var(--md, var(--default-md));
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.text-s1-b2 {
+  font-size: var(--md, var(--default-md));
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.text-s1-b3 {
+  font-size: var(--md, var(--default-md));
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   Text — s2 (--base)
+   ============================================================ */
+.text-s2-b1 {
+  font-size: var(--base, var(--default-base));
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.text-s2-b2 {
+  font-size: var(--base, var(--default-base));
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.text-s2-b3 {
+  font-size: var(--base, var(--default-base));
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   Text — s3 (--sm)
+   ============================================================ */
+.text-s3-b1 {
+  font-size: var(--sm, var(--default-sm));
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.text-s3-b2 {
+  font-size: var(--sm, var(--default-sm));
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.text-s3-b3 {
+  font-size: var(--sm, var(--default-sm));
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+/* ============================================================
+   Text — s4 (--xs)
+   ============================================================ */
+.text-s4-b1 {
+  font-size: var(--xs, var(--default-xs));
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.text-s4-b2 {
+  font-size: var(--xs, var(--default-xs));
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.text-s4-b3 {
+  font-size: var(--xs, var(--default-xs));
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   link.css — Styled hyperlink / anchor
+
+   External variables (defined by theme):
+     --color-{variant}   text color (set by .link-{color} classes)
+
+   Internal variables:
+     none — inherits font size and color from context
+   ============================================================ */
+.link {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.link:focus {
+  outline: none;
+}
+
+.link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.link-hover {
+  text-decoration: none;
+}
+
+.link-hover:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Variantes de couleur
+   ============================================================ */
+.link-primary {
+  color: var(--color-primary);
+}
+
+.link-secondary {
+  color: var(--color-secondary);
+}
+
+.link-accent {
+  color: var(--color-accent);
+}
+
+.link-neutral {
+  color: var(--color-neutral);
+}
+
+.link-success {
+  color: var(--color-success);
+}
+
+.link-info {
+  color: var(--color-info);
+}
+
+.link-warning {
+  color: var(--color-warning);
+}
+
+.link-error {
+  color: var(--color-error);
+}
+
+@media (hover: hover) {
+  .link-primary:hover {
+    color: color-mix(in oklab, var(--color-primary) 80%, #000);
+  }
+  .link-secondary:hover {
+    color: color-mix(in oklab, var(--color-secondary) 80%, #000);
+  }
+  .link-accent:hover {
+    color: color-mix(in oklab, var(--color-accent) 80%, #000);
+  }
+  .link-neutral:hover {
+    color: color-mix(in oklab, var(--color-neutral) 80%, #000);
+  }
+  .link-success:hover {
+    color: color-mix(in oklab, var(--color-success) 80%, #000);
+  }
+  .link-info:hover {
+    color: color-mix(in oklab, var(--color-info) 80%, #000);
+  }
+  .link-warning:hover {
+    color: color-mix(in oklab, var(--color-warning) 80%, #000);
+  }
+  .link-error:hover {
+    color: color-mix(in oklab, var(--color-error) 80%, #000);
+  }
+}
+/* ============================================================
+   breadcrumbs.css — Breadcrumb navigation
+
+   External variables (defined by theme):
+		none
+
+   Font size system:
+		--fontsize            overrides font size (set by .breadcrumbs-xs … .breadcrumbs-xl)
+		--base / --default-base   fallback font size
+   ============================================================ */
+.breadcrumbs {
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  max-width: 100%;
+  overflow-x: auto;
+  padding-block: 0.5em;
+}
+
+.breadcrumbs > menu,
+.breadcrumbs > ul,
+.breadcrumbs > ol {
+  display: flex;
+  min-height: min-content;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.breadcrumbs > menu > li,
+.breadcrumbs > ul > li,
+.breadcrumbs > ol > li {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumbs > menu > li > *,
+.breadcrumbs > ul > li > *,
+.breadcrumbs > ol > li > * {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.breadcrumbs > menu > li > *:hover,
+.breadcrumbs > ul > li > *:hover,
+.breadcrumbs > ol > li > *:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbs > menu > li > *:focus,
+.breadcrumbs > ul > li > *:focus,
+.breadcrumbs > ol > li > *:focus {
+  outline: none;
+}
+
+.breadcrumbs > menu > li > *:focus-visible,
+.breadcrumbs > ul > li > *:focus-visible,
+.breadcrumbs > ol > li > *:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Item separator */
+.breadcrumbs > menu > li + *::before,
+.breadcrumbs > ul > li + *::before,
+.breadcrumbs > ol > li + *::before {
+  content: "";
+  margin-inline-end: 0.75em;
+  margin-inline-start: 0.5em;
+  display: block;
+  height: 0.375em;
+  width: 0.375em;
+  opacity: 0.4;
+  rotate: 45deg;
+  border-top: 1px solid;
+  border-right: 1px solid;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+[dir=rtl] .breadcrumbs > menu > li + *::before,
+[dir=rtl] .breadcrumbs > ul > li + *::before,
+[dir=rtl] .breadcrumbs > ol > li + *::before {
+  rotate: -135deg;
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.breadcrumbs-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.breadcrumbs-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.breadcrumbs-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.breadcrumbs-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.breadcrumbs-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ============================================================
+   dock.css — Fixed bottom navigation bar (mobile app dock)
+
+   External variables (defined by theme):
+     --color-base-100      dock background
+     --color-base-content  used for disabled item text color mix
+     --radius-box          item corner radius
+
+   Internal variables:
+     none — item sizes set via height on .dock-xs … .dock-xl
+   ============================================================ */
+.dock {
+  background-color: var(--color-base-100);
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.5rem;
+  color: currentColor;
+  border-top: 0.5px solid color-mix(in oklab, var(--color-base-content) 5%, rgba(0, 0, 0, 0));
+  height: 4rem;
+  height: calc(4rem + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.dock > * {
+  border-radius: var(--radius-box);
+  position: relative;
+  margin-bottom: 0.5rem; /* mb-2 */
+  display: flex;
+  height: 100%;
+  max-width: 8rem; /* max-w-32 */
+  flex-shrink: 1;
+  flex-basis: 100%;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px; /* gap-px */
+  background-color: transparent;
+  transition: opacity 0.2s ease-out;
+}
+
+@media (hover: hover) {
+  .dock > *:hover {
+    opacity: 0.8;
+  }
+}
+.dock > *[aria-disabled=true],
+.dock > *[disabled] {
+  color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
+  pointer-events: none;
+  opacity: 1;
+}
+
+.dock > *[aria-disabled=true]:hover,
+.dock > *[disabled]:hover {
+  color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
+  pointer-events: none;
+  opacity: 1;
+}
+
+.dock-label {
+  font-size: 0.6875rem;
+}
+
+.dock > *::after {
+  content: "";
+  position: absolute;
+  height: 0.25rem; /* h-1 */
+  width: 1.5rem; /* w-6 */
+  border-radius: 9999px;
+  background-color: transparent;
+  bottom: 0.2rem;
+  border-top: 3px solid transparent;
+  transition: background-color 0.1s ease-out, color 0.1s ease-out, width 0.1s ease-out;
+}
+
+/* Active state */
+.dock-active::after {
+  width: 2.5rem; /* w-10 */
+  background-color: currentColor;
+  color: currentColor;
+}
+
+/* ============================================================
+   Tailles
+   ============================================================ */
+.dock-xs {
+  height: 3rem;
+  height: calc(3rem + env(safe-area-inset-bottom));
+}
+
+.dock-xs .dock-active::after {
+  bottom: -0.1rem;
+}
+
+.dock-xs .dock-label {
+  font-size: 0.625rem;
+}
+
+.dock-sm {
+  height: 3.5rem;
+  height: calc(3.5rem + env(safe-area-inset-bottom));
+}
+
+.dock-sm .dock-active::after {
+  bottom: -0.1rem;
+}
+
+.dock-sm .dock-label {
+  font-size: 0.625rem;
+}
+
+.dock-md {
+  height: 4rem;
+  height: calc(4rem + env(safe-area-inset-bottom));
+}
+
+.dock-md .dock-label {
+  font-size: 0.6875rem;
+}
+
+.dock-lg {
+  height: 4.5rem;
+  height: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+.dock-lg .dock-active::after {
+  bottom: 0.4rem;
+}
+
+.dock-lg .dock-label {
+  font-size: 0.6875rem;
+}
+
+.dock-xl {
+  height: 5rem;
+  height: calc(5rem + env(safe-area-inset-bottom));
+}
+
+.dock-xl .dock-active::after {
+  bottom: 0.4rem;
+}
+
+.dock-xl .dock-label {
+  font-size: 0.75rem;
+}
+
+/* ============================================================
+   join.css — Group adjacent form elements into a single visual unit
+
+   External variables (defined by theme):
+     --border        used for negative margin to merge borders
+     --radius-field  default corner radius applied to first/last items
+
+   Exported variables (injected into child .join-item elements):
+     --join-ss   border-start-start-radius override (0 = flush)
+     --join-se   border-start-end-radius override
+     --join-es   border-end-start-radius override
+     --join-ee   border-end-end-radius override
+
+   These variables are consumed by input, select, button, and other
+   field components that reference var(--join-ss, var(--radius-field)).
+   ============================================================ */
+.join {
+  display: inline-flex;
+  align-items: stretch;
+  --join-ss: 0;
+  --join-se: 0;
+  --join-es: 0;
+  --join-ee: 0;
+}
+
+.join :where(.join-item) {
+  border-start-start-radius: var(--join-ss, 0);
+  border-start-end-radius: var(--join-se, 0);
+  border-end-start-radius: var(--join-es, 0);
+  border-end-end-radius: var(--join-ee, 0);
+}
+
+.join :where(.join-item) * {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+/* First direct child */
+.join > .join-item:where(:first-child) {
+  --join-ss: var(--radius-field);
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: 0;
+}
+
+.join :first-child:not(:last-child) :where(.join-item) {
+  --join-ss: var(--radius-field);
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: 0;
+}
+
+/* Last direct child */
+.join > .join-item:where(:last-child) {
+  --join-ss: 0;
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: var(--radius-field);
+}
+
+.join :last-child:not(:first-child) :where(.join-item) {
+  --join-ss: 0;
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: var(--radius-field);
+}
+
+/* Only child */
+.join > .join-item:where(:only-child) {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join :only-child :where(.join-item) {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+/* Focus */
+.join > :where(:focus, :has(:focus)) {
+  z-index: 1;
+}
+
+@media (hover: hover) {
+  .join > :where(.btn:hover, :has(.btn:hover)) {
+    isolation: isolate;
+  }
+}
+/* ============================================================
+   join-item height fix
+   Buttons use a compact em-based height (--size) while field elements
+   (input, select) use a taller one. Override height → auto so the button
+   can stretch to match its siblings via align-items: stretch on .join.
+   min-height keeps it from collapsing below its natural size.
+   ============================================================ */
+.join > .join-item:where(.btn) {
+  height: unset;
+  min-height: var(--size, 1.75em);
+}
+
+/* ============================================================
+   join-item : fusion des bordures
+   ============================================================ */
+.join-item:where(*:not(:first-child, :disabled, [disabled], .btn-disabled)) {
+  margin-inline-start: calc(var(--border, 1px) * -1);
+  margin-block-start: 0;
+}
+
+.join-item:where(*:is(:disabled, [disabled], .btn-disabled)) {
+  border-width: var(--border, 1px) 0 var(--border, 1px) var(--border, 1px);
+}
+
+/* ============================================================
+   Variante verticale
+   ============================================================ */
+.join-vertical {
+  flex-direction: column;
+}
+
+.join-vertical > .join-item:first-child {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: 0;
+}
+
+.join-vertical :first-child:not(:last-child) .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: 0;
+}
+
+.join-vertical > .join-item:last-child {
+  --join-ss: 0;
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical :last-child:not(:first-child) .join-item {
+  --join-ss: 0;
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical > .join-item:only-child {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical :only-child .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical .join-item:where(*:not(:first-child)) {
+  margin-inline-start: 0;
+  margin-block-start: calc(var(--border, 1px) * -1);
+}
+
+/* ============================================================
+   Variante horizontale (explicite)
+   ============================================================ */
+.join-horizontal {
+  flex-direction: row;
+}
+
+.join-horizontal > .join-item:first-child {
+  --join-ss: var(--radius-field);
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: 0;
+}
+
+.join-horizontal :first-child:not(:last-child) .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: 0;
+}
+
+.join-horizontal > .join-item:last-child {
+  --join-ss: 0;
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal :last-child:not(:first-child) .join-item {
+  --join-ss: 0;
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal > .join-item:only-child {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal :only-child .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal .join-item:where(*:not(:first-child)) {
+  margin-inline-start: calc(var(--border, 1px) * -1);
+  margin-block-start: 0;
+}
+
+/* ============================================================
+   fieldset.css — Form field group container
+
+   External variables (defined by theme):
+     --color-base-content   legend and label text color
+
+   Internal variables:
+     none
+   ============================================================ */
+.fieldset {
+  display: grid;
+  gap: 0.375rem; /* gap-1.5 */
+  padding-block: 0.25rem; /* py-1 */
+  font-size: 0.75rem;
+  grid-template-columns: 1fr;
+  grid-auto-rows: max-content;
+}
+
+.fieldset-legend {
+  color: var(--color-base-content);
+  margin-bottom: -0.25rem; /* -mb-1 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem; /* gap-2 */
+  padding-block: 0.5rem; /* py-2 */
+  font-weight: 600;
+}
+
+/* Deprecated — replaced by .label, kept to avoid breaking changes */
+.fieldset-label {
+  color: color-mix(in oklch, var(--color-base-content) 60%, rgba(0, 0, 0, 0)); /* text-base-content/60 */
+  display: flex;
+  align-items: center;
+  gap: 0.375rem; /* gap-1.5 */
+}
+
+.fieldset-label:has(input) {
+  cursor: pointer;
+}
+
+/* ============================================================
+   label.css — Label and floating label wrapper
+
+   External variables (defined by theme):
+     --color-base-100   floating label background (hides the field border behind it)
+     --border           inline divider width inside .input / .select
+     --size-field       used to calculate floating label vertical center position
+
+   Internal variables:
+     none
+   ============================================================ */
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem; /* gap-1.5 */
+  white-space: nowrap;
+  color: color-mix(in oklch, currentColor 60%, rgba(0, 0, 0, 0)); /* text-current/60 */
+}
+
+.label:has(input) {
+  cursor: pointer;
+}
+
+/* Label inside .input or .select (prefix/suffix icon or text) */
+.input > .label,
+.select > .label {
+  display: flex;
+  height: calc(100% - 0.5rem);
+  align-items: center;
+  padding-inline: 0.75rem; /* px-3 */
+  white-space: nowrap;
+  font-size: inherit;
+}
+
+.input > .label:first-child,
+.select > .label:first-child {
+  margin-inline-start: -0.75rem; /* -ms-3 */
+  margin-inline-end: 0.75rem; /* me-3 */
+  border-inline-end: var(--border) solid color-mix(in oklab, currentColor 10%, rgba(0, 0, 0, 0));
+}
+
+.input > .label:last-child,
+.select > .label:last-child {
+  margin-inline-start: 0.75rem; /* ms-3 */
+  margin-inline-end: -0.75rem; /* -me-3 */
+  border-inline-start: var(--border) solid color-mix(in oklab, currentColor 10%, rgba(0, 0, 0, 0));
+}
+
+/* ============================================================
+   Floating label
+   ============================================================ */
+.floating-label {
+  position: relative;
+  display: block;
+}
+
+.floating-label input {
+  display: block;
+}
+
+.floating-label input::placeholder,
+.floating-label textarea::placeholder {
+  transition: top 0.1s ease-out, translate 0.1s ease-out, scale 0.1s ease-out, opacity 0.1s ease-out;
+}
+
+.floating-label > span {
+  background-color: var(--color-base-100);
+  position: absolute;
+  inset-inline-start: 0.75rem; /* start-3 */
+  z-index: 1;
+  padding-inline: 0.25rem; /* px-1 */
+  opacity: 0;
+  font-size: 0.875rem;
+  top: calc(var(--size-field, 0.25rem) * 10 / 2);
+  line-height: 1;
+  border-radius: 2px;
+  pointer-events: none;
+  translate: 0 -50%;
+  transition: top 0.1s ease-out, translate 0.1s ease-out, scale 0.1s ease-out, opacity 0.1s ease-out;
+}
+
+.floating-label:focus-within ::placeholder,
+.floating-label:not(:has(input:placeholder-shown, textarea:placeholder-shown)) ::placeholder {
+  opacity: 0;
+  top: 0;
+  translate: -12.5% calc(-50% - 0.125em);
+  scale: 0.75;
+  pointer-events: auto;
+}
+
+.floating-label:focus-within > span,
+.floating-label:not(:has(input:placeholder-shown, textarea:placeholder-shown)) > span {
+  opacity: 1;
+  top: 0;
+  translate: -12.5% calc(-50% - 0.125em);
+  scale: 0.75;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.floating-label:has(:disabled, [disabled]) > span {
+  opacity: 0;
+}
+
+/* ============================================================
+   Tailles — ajustement du label flottant selon la taille du champ
+   ============================================================ */
+.floating-label:has(.input-xs, .select-xs, .textarea-xs) span {
+  font-size: 0.6875rem;
+  top: calc(var(--size-field, 0.25rem) * 6 / 2);
+}
+
+.floating-label:has(.input-sm, .select-sm, .textarea-sm) span {
+  font-size: 0.75rem;
+  top: calc(var(--size-field, 0.25rem) * 8 / 2);
+}
+
+.floating-label:has(.input-md, .select-md, .textarea-md) span {
+  font-size: 0.875rem;
+  top: calc(var(--size-field, 0.25rem) * 10 / 2);
+}
+
+.floating-label:has(.input-lg, .select-lg, .textarea-lg) span {
+  font-size: 1.125rem;
+  top: calc(var(--size-field, 0.25rem) * 12 / 2);
+}
+
+.floating-label:has(.input-xl, .select-xl, .textarea-xl) span {
+  font-size: 1.375rem;
+  top: calc(var(--size-field, 0.25rem) * 14 / 2);
+}
+
+/* ============================================================
+   validator.css — Form field validation state driver
+
+   External variables (defined by theme):
+     --color-success   applied as --input-color on valid fields
+     --color-error     applied as --input-color on invalid fields
+
+   Exported variable (injected into sibling field components):
+     --input-color     overrides the field border/focus color;
+                       consumed by .input, .select, .textarea, .checkbox, etc.
+
+   Usage: add .validator to a field component; .validator-hint is
+   the sibling element shown on error.
+   ============================================================ */
+/* Valid */
+.validator:user-valid,
+.validator:has(:user-valid) {
+  --input-color: var(--color-success);
+}
+
+.validator:user-valid:focus,
+.validator:has(:user-valid):focus,
+.validator:user-valid:focus-within,
+.validator:has(:user-valid):focus-within,
+.validator:user-valid:checked,
+.validator:has(:user-valid):checked,
+.validator:user-valid[aria-checked=true],
+.validator:has(:user-valid)[aria-checked=true] {
+  --input-color: var(--color-success);
+}
+
+/* Invalid */
+.validator:user-invalid,
+.validator:has(:user-invalid),
+.validator[aria-invalid]:not([aria-invalid=false]),
+.validator:has([aria-invalid]:not([aria-invalid=false])) {
+  --input-color: var(--color-error);
+}
+
+.validator:user-invalid:focus,
+.validator:has(:user-invalid):focus,
+.validator[aria-invalid]:not([aria-invalid=false]):focus,
+.validator:has([aria-invalid]:not([aria-invalid=false])):focus,
+.validator:user-invalid:focus-within,
+.validator:has(:user-invalid):focus-within,
+.validator[aria-invalid]:not([aria-invalid=false]):focus-within,
+.validator:has([aria-invalid]:not([aria-invalid=false])):focus-within {
+  --input-color: var(--color-error);
+}
+
+/* Show error hint */
+.validator:user-invalid ~ .validator-hint,
+.validator:has(:user-invalid) ~ .validator-hint,
+.validator[aria-invalid]:not([aria-invalid=false]) ~ .validator-hint,
+.validator:has([aria-invalid]:not([aria-invalid=false])) ~ .validator-hint {
+  color: var(--color-error);
+  visibility: visible;
+  display: revert-layer;
+}
+
+/* ============================================================
+   Hint de validation
+   ============================================================ */
+.validator-hint {
+  visibility: hidden;
+  margin-top: 0.5em;
+  font-size: var(--xs, var(--default-xs));
+}
+
+/* Themeable fallbacks — a theme's :root overrides these. */
+:where(:root) {
+  --radius-field: 0.25rem;
+  --radius-box: 1rem;
+  --radius-selector: 1rem;
+}
+
+/* Family-owned look — DaisyUI flat. */
+:root {
+  --border: 1px; /* crisp hairline borders */
+  --depth: 0; /* no retro 3D inset shadows */
+  --noise: 0; /* no noise texture */
+  --light-intensity: 1; /* subtle directional shadow (via --shadow-light) */
+  --light-depth: 1;
+}

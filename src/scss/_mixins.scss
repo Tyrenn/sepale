@@ -1,0 +1,76 @@
+@use 'config' as c;
+
+@mixin join-radius($var: --radius-field) {
+	border-start-start-radius: var(--join-ss, var(#{$var}));
+	border-start-end-radius:   var(--join-se, var(#{$var}));
+	border-end-start-radius:   var(--join-es, var(#{$var}));
+	border-end-end-radius:     var(--join-ee, var(#{$var}));
+}
+
+@mixin fluid-font-size {
+	font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+@mixin size-variants($prefix, $sizes: c.$sizes-field) {
+	@each $size in $sizes {
+		.#{$prefix}-#{$size} {
+			--fontsize: var(--#{$size}, var(--default-#{$size}));
+		}
+	}
+}
+
+// Variants that seed a private color token + foreground (button-style).
+// Used by components whose background derives from a --*-color seed.
+@mixin seed-color-variants($prefix, $seed-prop, $fg-prop) {
+	@each $color in c.$color-list {
+		.#{$prefix}-#{$color} {
+			#{$seed-prop}: var(--color-#{$color});
+			#{$fg-prop}: var(--color-#{$color}-content);
+		}
+	}
+}
+
+@mixin color-pair-variants($prefix, $color-prop, $fg-prop) {
+	@each $color in c.$color-list {
+		.#{$prefix}-#{$color} {
+			#{$color-prop}: var(--color-#{$color});
+			#{$fg-prop}: var(--color-#{$color}-content);
+		}
+	}
+}
+
+@mixin field-color-variants($prefix) {
+	@each $color in c.$color-list {
+		.#{$prefix}-#{$color},
+		.#{$prefix}-#{$color}:focus,
+		.#{$prefix}-#{$color}:focus-within {
+			--input-color: var(--color-#{$color});
+		}
+	}
+}
+
+@mixin selector-color-variants($prefix) {
+	@each $color in c.$color-list {
+		.#{$prefix}-#{$color} {
+			color: var(--color-#{$color}-content);
+			--input-color: var(--color-#{$color});
+		}
+	}
+}
+
+@mixin single-prop-variants($prefix, $prop) {
+	@each $color in c.$color-list {
+		.#{$prefix}-#{$color} {
+			#{$prop}: var(--color-#{$color});
+		}
+	}
+}
+
+@mixin toggle-color-variants($prefix) {
+	@each $color in c.$color-list {
+		.#{$prefix}-#{$color}:checked,
+		.#{$prefix}-#{$color}[aria-checked="true"] {
+			--input-color: var(--color-#{$color});
+		}
+	}
+}

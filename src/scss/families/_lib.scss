@@ -1,0 +1,48 @@
+/* ============================================================
+   _lib.scss — shared aggregation of base + utilities + components.
+
+   Every style family `@use`s this partial to emit the full set of
+   component CSS, then layers its own "look" on top (variable preset
+   + skin rules). Keeping the aggregation here avoids repeating the
+   list in each family entry.
+   ============================================================ */
+
+/* Base */
+@use '../base/properties';
+@use '../base/svg';
+@use '../base/reset';
+@use '../base/rootcolor';
+@use '../base/rootscroll';
+@use '../base/scrollbar';
+@use '../base/default';
+
+/* Utilities */
+@use '../utilities/radius';
+@use '../utilities/glass';
+
+/* Components */
+@use '../components/button';
+@use '../components/input';
+@use '../components/select';
+@use '../components/textarea';
+@use '../components/checkbox';
+@use '../components/radio';
+@use '../components/toggle';
+@use '../components/range';
+@use '../components/file-input';
+@use '../components/chip';
+@use '../components/badge';
+@use '../components/tab';
+@use '../components/loading';
+@use '../components/progress';
+@use '../components/radial-progress';
+@use '../components/skeleton';
+@use '../components/list';
+@use '../components/text';
+@use '../components/link';
+@use '../components/breadcrumbs';
+@use '../components/dock';
+@use '../components/join';
+@use '../components/fieldset';
+@use '../components/label';
+@use '../components/validator';

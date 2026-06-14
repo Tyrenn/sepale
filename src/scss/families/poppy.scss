@@ -1,0 +1,61 @@
+/* ============================================================
+   STYLE FAMILY — « poppy »  (Material-design oriented)
+   ============================================================
+
+   Same family contract as « daisy »: one visual direction, tuned
+   through colors + radii only; the look variables below are
+   family-owned and not meant to be themed.
+
+   The « poppy » family
+   --------------------
+   A Material-design flavour: bold, vivid surfaces with pronounced
+   paper-like elevation. Built on the same components as daisy, but
+   with stronger directional shadows, rounder corners, and buttons
+   that physically rise on hover and sink on press.
+
+   Characteristics:
+     - Elevation-first: strong soft directional shadow (via the
+       --light-* system); depth/noise OFF.
+     - Filled, uppercase buttons with motion: hover raises, active
+       lowers, by animating --light-depth.
+     - Larger corner radii than daisy.
+
+   Themeable: --color-* and --radius-* (see daisy header for the list).
+   Build: static/families/poppy.css via `npm run build:css`.
+   ============================================================ */
+
+@use 'lib';
+
+/* Themeable fallbacks — a theme's :root overrides these. */
+:where(:root) {
+	--radius-field: 0.6rem;
+	--radius-box: 0.9rem;
+	--radius-selector: 0.6rem;
+}
+
+/* Family-owned look — Material elevation. */
+:root {
+	--border: 1px;
+	--depth: 0;
+	--noise: 0;
+	--light-intensity: 1.4; /* pronounced cast shadow */
+	--light-depth: 2;
+	--light-color: oklch(0% 0 0);
+}
+
+/* Material buttons: bold, uppercase, animated elevation. */
+.btn {
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	font-weight: 600;
+}
+
+@media (hover: hover) {
+	.btn:not(:disabled, [disabled], .btn-disabled):hover {
+		--light-depth: 3; /* raise */
+	}
+}
+
+.btn:active {
+	--light-depth: 1; /* press down */
+}
