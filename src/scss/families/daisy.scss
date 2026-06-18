@@ -55,8 +55,8 @@
 /* Themeable fallbacks — a theme's :root overrides these. */
 :where(:root) {
 	--radius-field: 0.25rem;
-	--radius-box: 1rem;
-	--radius-selector: 1rem;
+	--radius-box: 0.5rem;
+	--radius-selector: 0.5rem;
 }
 
 /* Family-owned look — DaisyUI flat (matches the original css/ output). */

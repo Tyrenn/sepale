@@ -1,8 +1,13 @@
-import { families, themesByFamily, tokensFromVars } from '$lib/index.js';
+import { families, themesByFamily, tokensForFamily, familyCategory } from '$lib/index.js';
 import type { ThemeToken } from '$lib/theme.js';
 import type { ThemeData } from '$lib/generated/registry.js';
 
 export { families };
+
+/** Design language label for a family (Flat, Material, …). */
+export function categoryFor(family: string): string {
+	return familyCategory[family] ?? '';
+}
 
 /** Component navigation, mirroring the original example/ explorer. */
 export const COMPONENTS: { group: string; items: { id: string; label: string }[] }[] = [
@@ -71,14 +76,14 @@ export const playground = $state<{
 	theme: initialTheme?.name ?? '',
 	scheme: initialTheme?.scheme ?? 'light',
 	component: 'button',
-	tokens: initialTheme ? tokensFromVars(initialTheme.vars) : []
+	tokens: tokensForFamily(initialFamily, initialTheme?.vars ?? {})
 });
 
 function load(theme: ThemeData | undefined) {
 	if (!theme) return;
 	playground.theme = theme.name;
 	playground.scheme = theme.scheme;
-	playground.tokens = tokensFromVars(theme.vars);
+	playground.tokens = tokensForFamily(playground.family, theme.vars);
 }
 
 /** Switch family: load that family's first theme into the editor. */

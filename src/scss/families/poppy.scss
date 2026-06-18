@@ -28,12 +28,15 @@
 
 /* Themeable fallbacks — a theme's :root overrides these. */
 :where(:root) {
-	--radius-field: 0.6rem;
-	--radius-box: 0.9rem;
-	--radius-selector: 0.6rem;
+	--radius-field: 0.4rem;
+	--radius-box: 0.7rem;
+	--radius-selector: 0.4rem;
 }
 
-/* Family-owned look — Material elevation. */
+/* Family-owned look — Material elevation.
+   --light-intensity / --light-depth are this family's editable knobs
+   (shadow strength / elevation height); set on :root so they win over the
+   flat default in base/default.scss but stay overridable by a theme's :root. */
 :root {
 	--border: 1px;
 	--depth: 0;

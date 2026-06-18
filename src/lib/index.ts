@@ -30,10 +30,13 @@ export { default as ValidatorHint } from './components/ValidatorHint.svelte';
 export type { Color, FieldSize, Size } from './types.js';
 export {
 	defaultTheme,
+	familyCategory,
+	familyExtras,
 	cloneTheme,
 	serializeTheme,
 	tokensToInlineStyle,
 	tokensFromVars,
+	tokensForFamily,
 	type ThemeToken,
 	type TokenType
 } from './theme.js';

@@ -4683,28 +4683,32 @@ label:has(:checked),
 
 /* Themeable fallbacks — a theme's :root overrides these. */
 :where(:root) {
-  --radius-field: 0.75rem;
-  --radius-box: 1.25rem;
-  --radius-selector: 0.75rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.9rem;
+  --radius-selector: 0.5rem;
 }
 
-/* Family-owned look — frosted glass. */
+/* Family-owned look — frosted glass.
+   --glass-blur / --glass-opacity are this family's editable knobs
+   (backdrop blur radius / surface translucency). */
 :root {
   --border: 1px;
   --depth: 0;
   --noise: 0;
   --light-intensity: 0.8;
   --light-depth: 2;
+  --glass-blur: 10px;
+  --glass-opacity: 0.5;
 }
 
 /* Frosted, translucent surfaces. */
 :is(.btn, .input, .select, .textarea, .file-input, .chip, .dock, .tab) {
-  backdrop-filter: blur(10px) saturate(1.4);
-  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
 }
 
 :is(.input, .select, .textarea, .file-input) {
-  background-color: color-mix(in oklab, var(--color-base-100) 50%, transparent);
+  background-color: color-mix(in oklab, var(--color-base-100) calc(var(--glass-opacity) * 100%), transparent);
   border-color: color-mix(in oklab, var(--color-base-content) 14%, transparent);
 }
 

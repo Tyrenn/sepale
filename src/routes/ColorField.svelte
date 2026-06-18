@@ -19,4 +19,5 @@
 		<input class="cf-swatch" type="color" value={hex} oninput={pick} aria-label={token.label} />
 		<input class="cf-text" type="text" bind:value={token.value} spellcheck="false" />
 	</span>
+	{#if token.description}<span class="cf-desc">{token.description}</span>{/if}
 </label>

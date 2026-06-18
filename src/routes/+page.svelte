@@ -6,6 +6,7 @@
 		families,
 		COMPONENTS,
 		themesFor,
+		categoryFor,
 		selectFamily,
 		selectTheme,
 		resetTheme
@@ -63,7 +64,7 @@
 					value={playground.family}
 					onchange={(e) => selectFamily(e.currentTarget.value as typeof playground.family)}
 				>
-					{#each families as f (f)}<option value={f}>{f}</option>{/each}
+					{#each families as f (f)}<option value={f}>{f} ({categoryFor(f)})</option>{/each}
 				</select>
 			</label>
 			<label class="side-select">
@@ -76,6 +77,15 @@
 					{#each themes as t (t.name)}<option value={t.name}>{t.label}</option>{/each}
 				</select>
 			</label>
+			<button class="btn btn-sm btn-block" onclick={() => (editing = !editing)}>
+				{editing ? 'Close editor' : 'Customize theme'}
+			</button>
+
+			<!-- Export actions, right under the customise button. -->
+			<div class="side-export">
+				<button class="btn btn-sm btn-primary" onclick={exportTheme}>Export theme</button>
+				<button class="btn btn-sm" onclick={exportFamily}>Export family</button>
+			</div>
 		</div>
 
 		<nav class="side-nav">
@@ -100,16 +110,6 @@
 				</ul>
 			{/each}
 		</nav>
-
-		<div class="side-actions">
-			<button class="btn btn-sm btn-block" onclick={() => (editing = !editing)}>
-				{editing ? 'Close editor' : 'Customize theme'}
-			</button>
-			<div class="side-actions-row">
-				<button class="btn btn-sm" onclick={exportTheme}>Export theme</button>
-				<button class="btn btn-sm" onclick={exportFamily}>Export family</button>
-			</div>
-		</div>
 	</aside>
 
 	<main class="content">

@@ -29,47 +29,62 @@
 
 @use 'lib';
 
-/* Themeable fallbacks — a theme's :root overrides these. */
+/* Themeable fallbacks — a theme's :root overrides these.
+   --nm-intensity / --nm-blur are this family's editable relief knobs. */
 :where(:root) {
-	--radius-field: 0.9rem;
-	--radius-box: 1.4rem;
-	--radius-selector: 0.9rem;
+	--radius-field: 0.6rem;
+	--radius-box: 1rem;
+	--radius-selector: 0.6rem;
+
+	--nm-intensity: 0.15; /* light/dark contrast (0.03–0.4) */
+	--nm-blur: 2;         /* blur ÷ offset ratio (1–4) */
 }
 
-/* Family-owned look — soft neumorphic extrusion. */
+/* Family-owned look — soft neumorphic extrusion.
+   ----------------------------------------------------------------
+   Shadow recipe after neumorphism.io: a surface that blends into the
+   page (same color) casts two soft shadows — dark toward the bottom-
+   right, light toward the top-left — that read as an extrusion.
+
+   The offset is em-based, so a bigger component (larger font-size)
+   extrudes proportionally harder. Blur = offset × --nm-blur. The two
+   shadow colors are the surface (base-100) shaded toward black / white
+   by --nm-intensity (e.g. 0.15 ⇒ #e0e0e0 → #bebebe / #ffffff). */
 :root {
 	--border: 0;
 	--depth: 0;
 	--noise: 0;
 	--light-intensity: 0; /* disable the default dark-only directional shadow */
 
-	--nm-d: 0.3em; /* offset */
-	--nm-blur: 0.6em;
-	--nm-dark: color-mix(in oklab, var(--color-base-200) 78%, #000);
-	--nm-light: color-mix(in oklab, var(--color-base-200) 82%, #fff);
+	--nm-offset: 0.18em;
+	--nm-b: calc(var(--nm-offset) * var(--nm-blur));
+	--nm-dark: color-mix(in oklab, var(--color-base-100), #000 calc(var(--nm-intensity) * 100%));
+	--nm-light: color-mix(in oklab, var(--color-base-100), #fff calc(var(--nm-intensity) * 100%));
 
 	--shadow-light:
-		var(--nm-d) var(--nm-d) var(--nm-blur) var(--nm-dark),
-		calc(-1 * var(--nm-d)) calc(-1 * var(--nm-d)) var(--nm-blur) var(--nm-light);
+		var(--nm-offset) var(--nm-offset) var(--nm-b) var(--nm-dark),
+		calc(-1 * var(--nm-offset)) calc(-1 * var(--nm-offset)) var(--nm-b) var(--nm-light);
 }
 
-/* Monochrome fields blended into the page; buttons keep their tint. */
+/* Surfaces blend into the page (same color) so the relief reads.
+   Default buttons too; tinted buttons keep their seed color via --btn-color. */
 :is(.input, .select, .textarea, .file-input) {
-	background-color: var(--color-base-200);
+	background-color: var(--color-base-100);
 	border-color: transparent;
 }
 
 .btn {
+	--btn-bg: var(--btn-color, var(--color-base-100));
 	border-color: transparent;
 }
 
-/* Pressed / focused: carve inward. */
+/* Pressed / focused: carve inward (inset relief). */
 .btn:active,
 .input:focus,
 .input:focus-within,
 .select:focus,
 .textarea:focus {
 	--shadow-light:
-		inset var(--nm-d) var(--nm-d) var(--nm-blur) var(--nm-dark),
-		inset calc(-1 * var(--nm-d)) calc(-1 * var(--nm-d)) var(--nm-blur) var(--nm-light);
+		inset var(--nm-offset) var(--nm-offset) var(--nm-b) var(--nm-dark),
+		inset calc(-1 * var(--nm-offset)) calc(-1 * var(--nm-offset)) var(--nm-b) var(--nm-light);
 }
