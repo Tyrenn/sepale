@@ -9,7 +9,7 @@ export function categoryFor(family: string): string {
 	return familyCategory[family] ?? '';
 }
 
-/** Component navigation, mirroring the original example/ explorer. */
+/** Gallery order: every component previewed on the page, grouped. */
 export const COMPONENTS: { group: string; items: { id: string; label: string }[] }[] = [
 	{
 		group: 'Form',
@@ -69,13 +69,11 @@ export const playground = $state<{
 	family: string;
 	theme: string;
 	scheme: string;
-	component: string;
 	tokens: ThemeToken[];
 }>({
 	family: initialFamily,
 	theme: initialTheme?.name ?? '',
 	scheme: initialTheme?.scheme ?? 'light',
-	component: 'button',
 	tokens: tokensForFamily(initialFamily, initialTheme?.vars ?? {})
 });
 

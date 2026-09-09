@@ -1,0 +1,18 @@
+/* Theme « cupcake » — editable variables only (colors + radii). */
+:root {
+	color-scheme: light;
+	--color-surface: oklch(97.788% 0.004 56.375);
+	--color-surface-high: oklch(93.982% 0.007 61.449);
+	--color-surface-peak: oklch(91.586% 0.006 53.44);
+	--color-primary: oklch(85% 0.138 181.071);
+	--color-secondary: oklch(89% 0.061 343.231);
+	--color-accent: oklch(90% 0.076 70.697);
+	--color-neutral: oklch(27% 0.006 286.033);
+	--color-info: oklch(68% 0.169 237.323);
+	--color-success: oklch(69% 0.17 162.48);
+	--color-warning: oklch(79% 0.184 86.047);
+	--color-error: oklch(64% 0.246 16.439);
+	--radius-field: 2rem;
+	--radius-box: 1rem;
+	--radius-selector: 1rem;
+}

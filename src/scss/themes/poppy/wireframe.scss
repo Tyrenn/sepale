@@ -1,0 +1,18 @@
+/* Theme « wireframe » — editable variables only (colors + radii). */
+:root {
+	color-scheme: light;
+	--color-surface: oklch(100% 0 0);
+	--color-surface-high: oklch(97% 0 0);
+	--color-surface-peak: oklch(94% 0 0);
+	--color-primary: oklch(87% 0 0);
+	--color-secondary: oklch(87% 0 0);
+	--color-accent: oklch(87% 0 0);
+	--color-neutral: oklch(87% 0 0);
+	--color-info: oklch(44% 0.11 240.79);
+	--color-success: oklch(43% 0.095 166.913);
+	--color-warning: oklch(47% 0.137 46.201);
+	--color-error: oklch(44% 0.177 26.899);
+	--radius-field: 0.25rem;
+	--radius-box: 0.25rem;
+	--radius-selector: 0rem;
+}

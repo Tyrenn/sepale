@@ -1,248 +1,248 @@
+@use '../mixins' as m;
+@use '../config' as c;
+
 /* ============================================================
-   toggle.css — Toggle switch (checkbox-based)
+   toggle.scss — .toggle mixin library (checkbox-based switch)
 
-   External variables (defined by theme):
-		--color-base-100      track background when checked
-		--color-base-content  thumb color when checked
-		--color-{variant}     thumb/track color when checked (set by .toggle-{color})
-		--depth               shadow / inset intensity multiplier
-		--border              border width
-		--noise               noise texture intensity (0–1)
-		--fx-noise            noise SVG data-uri (from base/svg.css)
-		--radius-selector     thumb and track corner radius
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
 
-   Font size system:
-		--fontsize            overrides default size (set by .toggle-xs … .toggle-xl)
-		--base / --default-base   fallback font size
+   Plumbing contract:
+	--input-color   track/thumb color (color-variants set it on :checked)
+	--size          toggle height (1.5em, scales with font); width derived
+	--toggle-p      inner padding between track border and thumb
+	--fontsize      font size (set by size-variants classes)
+	--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) error
 
-   Internal variables:
-		--size               toggle height (1.5em, scales with font); width is derived
-		--toggle-p           inner padding between track border and thumb
-		--input-color        track/thumb color; driven by color variants
-		--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) build error
+   External variables (theme / family):
+	--color-surface        track background when checked
+	--color-on-surface    thumb color when checked
+	--color-{variant}       checked color (color-variants)
+	--border                border width — MUST carry a unit (0px, not 0):
+	                        it is summed with lengths in the width calc()
+	--radius-selector       thumb and track corner radius
+	--shadow-light          family shadow system
    ============================================================ */
 
-.toggle {
-	--input-color: color-mix(in oklab, var(--color-base-content) 50%, #0000);
-	--size: 1.5em;
-	--toggle-p: calc(var(--size) * 0.125);
 
-	font-size: var(--fontsize, var(--base, var(--default-base)));
-	/* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
-	--radius-selector-max: calc(
-		var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
-	);
+/* ------------------------------------------------------------
+   base — structure: grid track, sliding thumb, optional icons,
+   checked/indeterminate states, focus ring, disabled.
+   ------------------------------------------------------------ */
+@mixin base {
+	.toggle {
+		--input-color: color-mix(in oklab, var(--color-on-surface) 50%, #0000);
+		--size: calc(1.5em * var(--scale));
+		--toggle-p: calc(var(--size) * 0.125);
 
-	border: var(--border) solid currentColor;
-	color: var(--input-color);
-	position: relative;
-	display: inline-grid;
-	flex-shrink: 0;
-	cursor: pointer;
-	appearance: none;
-	place-content: center;
-	vertical-align: middle;
-	user-select: none;
-	grid-template-columns: 0fr 1fr 1fr;
-	border-radius: calc(
-		var(--radius-selector) + min(var(--toggle-p), var(--radius-selector-max)) +
-			min(var(--border), var(--radius-selector-max))
-	);
-	padding: var(--toggle-p);
-	box-shadow:
-		0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000) inset,
-		var(--shadow-light, );
-	width: calc((var(--size) * 2) - (var(--border) + var(--toggle-p)) * 2);
-	height: var(--size);
-	transition:
-		color 0.3s,
-		grid-template-columns 0.2s;
-}
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		/* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
+		--radius-selector-max: calc(
+			var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
+		);
 
-/* Optional icons inside the toggle */
-.toggle > * {
-	z-index: 1;
-	grid-column: span 1;
-	grid-column-start: 2;
-	grid-row-start: 1;
-	height: 100%;
-	cursor: pointer;
-	appearance: none;
-	background-color: transparent;
-	padding: 0.125rem; /* p-0.5 */
-	transition:
-		opacity 0.2s,
-		rotate 0.4s;
-	border: none;
-}
-
-.toggle > *:focus {
-	outline: none;
-}
-
-.toggle > *:nth-child(2) {
-	color: var(--color-base-100);
-	rotate: 0deg;
-}
-
-.toggle > *:nth-child(3) {
-	color: var(--color-base-100);
-	opacity: 0;
-	rotate: -15deg;
-}
-
-.toggle:has(:checked) > :nth-child(2) {
-	opacity: 0;
-	rotate: 15deg;
-}
-
-.toggle:has(:checked) > :nth-child(3) {
-	opacity: 1;
-	rotate: 0deg;
-}
-
-/* Toggle thumb */
-.toggle::before {
-	--tw-content: "";
-	content: var(--tw-content);
-	border-radius: var(--radius-selector);
-	position: relative;
-	inset-inline-start: 0;
-	grid-column-start: 2;
-	grid-row-start: 1;
-	aspect-ratio: 1 / 1;
-	height: 100%;
-	width: 100%;
-	background-color: currentColor;
-	translate: 0;
-	transition:
-		background-color 0.1s,
-		translate 0.2s,
-		inset-inline-start 0.2s;
-	box-shadow:
-		0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset,
-		0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
-		0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000);
-	background-size: auto, calc(var(--noise) * 100%);
-	background-image: none, var(--fx-noise);
-}
-
-@media (forced-colors: active) {
-	.toggle::before {
-		outline-style: solid;
-		outline-offset: -0.25rem;
+		border: var(--border) solid currentColor;
+		color: var(--input-color);
+		position: relative;
+		display: inline-grid;
+		flex-shrink: 0;
+		cursor: pointer;
+		appearance: none;
+		place-content: center;
+		vertical-align: middle;
+		user-select: none;
+		grid-template-columns: 0fr 1fr 1fr;
+		border-radius: calc(
+			var(--radius-selector) + min(var(--toggle-p), var(--radius-selector-max)) +
+				min(var(--border), var(--radius-selector-max))
+		);
+		padding: var(--toggle-p);
+		box-shadow: var(--shadow-light, );
+		width: calc((var(--size) * 2) - (var(--border) + var(--toggle-p)) * 2);
+		height: var(--size);
+		transition:
+			color 0.3s,
+			grid-template-columns 0.2s;
 	}
-}
 
-@media print {
-	.toggle::before {
-		outline: 0.25rem solid;
-		outline-offset: -1rem;
+	/* Optional icons inside the toggle */
+	.toggle > * {
+		z-index: 1;
+		grid-column: span 1;
+		grid-column-start: 2;
+		grid-row-start: 1;
+		height: 100%;
+		cursor: pointer;
+		appearance: none;
+		background-color: transparent;
+		padding: calc(0.125em * var(--scale));
+		transition:
+			opacity 0.2s,
+			rotate 0.4s;
+		border: none;
 	}
-}
 
-.toggle:focus-visible,
-.toggle:has(:focus-visible) {
-	outline: 2px solid currentColor;
-	outline-offset: 2px;
-}
+	.toggle > *:focus {
+		outline: none;
+	}
 
-.toggle:checked,
-.toggle[aria-checked="true"],
-.toggle:has(> input:checked) {
-	grid-template-columns: 1fr 1fr 0fr;
-	background-color: var(--color-base-100);
-	--input-color: var(--color-base-content);
-}
+	.toggle > *:nth-child(2) {
+		color: var(--color-surface);
+		rotate: 0deg;
+	}
 
-.toggle:checked::before,
-.toggle[aria-checked="true"]::before,
-.toggle:has(> input:checked)::before {
-	background-color: currentColor;
-}
+	.toggle > *:nth-child(3) {
+		color: var(--color-surface);
+		opacity: 0;
+		rotate: -15deg;
+	}
 
-@starting-style {
+	.toggle:has(:checked) > :nth-child(2) {
+		opacity: 0;
+		rotate: 15deg;
+	}
+
+	.toggle:has(:checked) > :nth-child(3) {
+		opacity: 1;
+		rotate: 0deg;
+	}
+
+	/* Toggle thumb */
+	.toggle::before {
+		--tw-content: "";
+		content: var(--tw-content);
+		border-radius: var(--radius-selector);
+		position: relative;
+		inset-inline-start: 0;
+		grid-column-start: 2;
+		grid-row-start: 1;
+		aspect-ratio: 1 / 1;
+		height: 100%;
+		width: 100%;
+		background-color: currentColor;
+		translate: 0;
+		transition:
+			background-color 0.1s,
+			translate 0.2s,
+			inset-inline-start 0.2s;
+	}
+
+	@media (forced-colors: active) {
+		.toggle::before {
+			outline-style: solid;
+			outline-offset: -0.25rem;
+		}
+	}
+
+	@media print {
+		.toggle::before {
+			outline: 0.25rem solid;
+			outline-offset: -1rem;
+		}
+	}
+
+	.toggle:focus-visible,
+	.toggle:has(:focus-visible) {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+
+	.toggle:checked,
+	.toggle[aria-checked="true"],
+	.toggle:has(> input:checked) {
+		grid-template-columns: 1fr 1fr 0fr;
+		background-color: var(--color-surface);
+		--input-color: var(--color-on-surface);
+	}
+
 	.toggle:checked::before,
 	.toggle[aria-checked="true"]::before,
 	.toggle:has(> input:checked)::before {
-		opacity: 0;
+		background-color: currentColor;
+	}
+
+	@starting-style {
+		.toggle:checked::before,
+		.toggle[aria-checked="true"]::before,
+		.toggle:has(> input:checked)::before {
+			opacity: 0;
+		}
+	}
+
+	.toggle:indeterminate {
+		grid-template-columns: 0.5fr 1fr 0.5fr;
+	}
+
+	.toggle:disabled {
+		cursor: not-allowed;
+		opacity: 0.3;
+	}
+
+	.toggle:disabled::before {
+		background-color: transparent;
+		border: var(--border) solid currentColor;
 	}
 }
 
-.toggle:indeterminate {
-	grid-template-columns: 0.5fr 1fr 0.5fr;
+
+/* ------------------------------------------------------------
+   ------------------------------------------------------------ */
+@mixin skin-flat {
+	.toggle {
+		box-shadow:
+			0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000) inset,
+			var(--shadow-light, );
+	}
+
+	.toggle::before {
+		box-shadow:
+			0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset,
+			0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+			0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000);
+	}
 }
 
-.toggle:disabled {
-	cursor: not-allowed;
-	opacity: 0.3;
-}
 
-.toggle:disabled::before {
-	background-color: transparent;
-	border: var(--border) solid currentColor;
-}
-
-
-/* ============================================================
-   Variantes de couleur (actif uniquement)
-   ============================================================ */
-
-.toggle-primary:checked,
-.toggle-primary[aria-checked="true"] { --input-color: var(--color-primary); }
-
-.toggle-secondary:checked,
-.toggle-secondary[aria-checked="true"] { --input-color: var(--color-secondary); }
-
-.toggle-accent:checked,
-.toggle-accent[aria-checked="true"] { --input-color: var(--color-accent); }
-
-.toggle-neutral:checked,
-.toggle-neutral[aria-checked="true"] { --input-color: var(--color-neutral); }
-
-.toggle-success:checked,
-.toggle-success[aria-checked="true"] { --input-color: var(--color-success); }
-
-.toggle-warning:checked,
-.toggle-warning[aria-checked="true"] { --input-color: var(--color-warning); }
-
-.toggle-info:checked,
-.toggle-info[aria-checked="true"] { --input-color: var(--color-info); }
-
-.toggle-error:checked,
-.toggle-error[aria-checked="true"] { --input-color: var(--color-error); }
-
-
-/* ============================================================
-   Track fill variant — colored track, inset via background-clip.
-   The thumb stays currentColor (same as border) for a unified look.
+/* ------------------------------------------------------------
+   variant-track — colored track, inset via background-clip. The
+   thumb stays currentColor (same as border) for a unified look.
    The track fills only the content area (inside padding), appearing
    recessed/thinner than the outer toggle border.
    Combine with a color variant: .toggle-track.toggle-primary etc.
-   ============================================================ */
+   ------------------------------------------------------------ */
+@mixin variant-track {
+	.toggle-track:checked,
+	.toggle-track[aria-checked="true"],
+	.toggle-track:has(> input:checked) {
+		background-color: var(--input-color, var(--color-on-surface));
+		background-clip: content-box; /* track stays inside padding = inset/thinner effect */
+	}
 
-.toggle-track:checked,
-.toggle-track[aria-checked="true"],
-.toggle-track:has(> input:checked) {
-	background-color: var(--input-color, var(--color-base-content));
-	background-clip: content-box; /* track stays inside padding = inset/thinner effect */
+	.toggle-track:checked::before,
+	.toggle-track[aria-checked="true"]::before,
+	.toggle-track:has(> input:checked)::before {
+		background-color: var(--color-on-surface);
+		box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-surface);
+	}
 }
 
-.toggle-track:checked::before,
-.toggle-track[aria-checked="true"]::before,
-.toggle-track:has(> input:checked)::before {
-	background-color: var(--color-base-content);
-	box-shadow: 0 0 0 0.1em var(--color-base-100);
-	/* border: 0.1em solid var(--color-base-100); */
+
+/* ------------------------------------------------------------
+   color-variants — .toggle-{primary,…}: set --input-color when
+   checked only.
+   ------------------------------------------------------------ */
+@mixin color-variants {
+	@each $color in c.$color-list {
+		.toggle-#{$color}:checked,
+		.toggle-#{$color}[aria-checked="true"] { --input-color: var(--color-#{$color}); }
+	}
 }
 
 
-/* ============================================================
-   Tailles
-   ============================================================ */
-
-.toggle-xs { --fontsize: var(--xs,  var(--default-xs)); }
-.toggle-sm { --fontsize: var(--sm,  var(--default-sm)); }
-.toggle-md { --fontsize: var(--md,  var(--default-md)); }
-.toggle-lg { --fontsize: var(--lg,  var(--default-lg)); }
-.toggle-xl { --fontsize: var(--xl,  var(--default-xl)); }
+/* ------------------------------------------------------------
+   size-variants — .toggle-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+@mixin size-variants {
+	@include m.size-variants('toggle');
+}

@@ -16,21 +16,27 @@
 
    Characteristics:
      - Elevation-first: strong soft directional shadow (via the
-       --light-* system); depth/noise OFF.
+       --light-* system); depth OFF.
      - Filled, uppercase buttons with motion: hover raises, active
-       lowers, by animating --light-depth.
+       lowers, by animating --light-depth (see the family look below).
      - Larger corner radii than daisy.
 
    Themeable: --color-* and --radius-* (see daisy header for the list).
    Build: static/families/poppy.css via `npm run build:css`.
    ============================================================ */
 /* ============================================================
-   _lib.scss — shared aggregation of base + utilities + components.
+   _lib.scss — shared base/utilities emission + component libraries.
 
-   Every style family `@use`s this partial to emit the full set of
-   component CSS, then layers its own "look" on top (variable preset
-   + skin rules). Keeping the aggregation here avoids repeating the
-   list in each family entry.
+   Emits the base layer (properties, reset, colors, defaults) and
+   the utilities at @use time. Components are mixin-only libraries
+   (see components/button.scss for the pattern): nothing is emitted
+   until a family `@include`s a selection.
+
+   `flat-components` below is the reference daisyUI selection — the
+   full flat look with every variant. Families either include it
+   as-is (daisy) or add their own look on top (poppy).
+
+   Adding a family: see ./README.md for the full guide.
    ============================================================ */
 /* Base */
 /* properties.css */
@@ -40,16 +46,12 @@
   initial-value: 0%;
 }
 /* ============================================================
-   svg.css — SVG base rules and noise texture variable
+   svg.scss — inline SVG sizing.
 
-   Defines --fx-noise: SVG data-uri used as a noise texture overlay
-   by button, input, toggle, chip, and other components.
-   Also sets svg { height: 1em } so inline SVG icons scale with font.
+   Icons inside components scale with the surrounding font size,
+   which is what makes intrinsic (em-based) sizing work for buttons,
+   chips, tabs and the like.
    ============================================================ */
-:root {
-  --fx-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.34' numOctaves='4' stitchTiles='stitch'%3E%3C/feTurbulence%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23a)' opacity='0.2'%3E%3C/rect%3E%3C/svg%3E");
-}
-
 svg {
   height: 1em;
 }
@@ -167,11 +169,11 @@ img, video {
 :root,
 [data-theme] {
   background: var(--page-scroll-bg, var(--root-bg));
-  color: var(--color-base-content);
+  color: var(--color-on-surface);
 }
 
 :where(:root, [data-theme]) {
-  --root-bg: var(--color-base-100);
+  --root-bg: var(--color-surface);
 }
 
 /* ============================================================
@@ -220,32 +222,57 @@ img, video {
   --light-intensity: 0;
   --light-depth: 1;
   --light-color: oklch(0% 0 0);
+  /* ── Type scale ──────────────────────────────────────────────
+     A fixed modular scale (ratio 1.125, base 1rem). Deliberately NOT
+     fluid: component sizes are intrinsic (em), so a viewport-driven
+     base would silently resize every component — two competing size
+     systems. Size is chosen, through --scale below. */
+  --default-xxs: 0.7023rem;
+  --default-xs: 0.7901rem;
+  --default-sm: 0.8889rem;
+  --default-base: 1rem;
+  --default-md: 1.125rem;
+  --default-lg: 1.2656rem;
+  --default-xl: 1.4238rem;
+  --default-xxl: 1.6018rem;
+  --default-xxxl: 1.802rem;
+}
+
+/* ── Element size coefficient ────────────────────────────────────
+   --scale grows or shrinks the FRAME of every component — heights,
+   paddings, gaps, internal offsets — and never the text.
+
+   That is why it is not applied to font-size, and why base.css does not
+   set a root font-size either: a kit that resizes the host page's text
+   when you install it is a kit you uninstall. Each geometric length is
+   written `calc(Nem * var(--scale))` at its own site, so it stays
+   intrinsic (resolved against the element's own font-size, so size
+   variants stay proportioned) while the text is left alone.
+
+   What does NOT scale: text, icons (svg { height: 1em } — they sit on
+   the text baseline), the radii (their own parameters), hairlines in px,
+   and the text-natured components that draw no frame (text, link,
+   breadcrumbs, validator).
+
+   On :where(:root) (specificity 0) so any theme wins, in any load order. */
+:where(:root) {
+  --scale: 1;
+}
+
+/* The recipe is declared on every element (zero specificity via :where) —
+   NOT on :root only. A custom property resolves its var() references where
+   it is declared, so a :root-only --shadow-light would freeze --light-depth
+   forever and per-component overrides (e.g. a button raising its elevation
+   on hover) would do nothing. Declared per element, changing any --light-*
+   on a component recomputes its shadow there. */
+:where(*) {
   --shadow-light:
   	0 calc(var(--light-depth, 1) * 1px) calc(var(--light-depth, 1) * 3px)
   		color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 15%), #0000),
   	0 calc(var(--light-depth, 1) * 3px) calc(var(--light-depth, 1) * 8px)
   		color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 8%), #0000);
-  --default-xxs:	clamp(0.7023rem, -0.0079vw + 0.7039rem, 0.6944rem);
-  --default-xs:	clamp(0.7901rem, 0.0432vw + 0.7815rem, 0.8333rem);
-  --default-sm:	clamp(0.8889rem, 0.1111vw + 0.8667rem, 1rem);
-  --default-base:	clamp(1rem, 0.2vw + 0.96rem, 1.2rem);
-  --default-md:	clamp(1.125rem, 0.315vw + 1.062rem, 1.44rem);
-  --default-lg:	clamp(1.2656rem, 0.4624vw + 1.1731rem, 1.728rem);
-  --default-xl:	clamp(1.4238rem, 0.6498vw + 1.2939rem, 2.0736rem);
-  --default-xxl:	clamp(1.6018rem, 0.8865vw + 1.4245rem, 2.4883rem);
-  --default-xxxl:	clamp(1.802rem, 1.184vw + 1.5652rem, 2.986rem);
 }
 
-/**
-n level
-min_size   = 1.000 × 1.125^n
-max_size   = 1.200 × 1.200^n
-slope      = (max_size - min_size) / 100
-intercept  = min_size - slope × 20
-→ clamp(min_size·rem, intercept·rem + slope·100vw, max_size·rem)
-
-https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=1.125&maxFontSize=19.2&maxWidth=1920&maxRatio=1.2&steps=sm%2Cbase%2Cmd%2Clg%2Cxl%2Cxxl%2Cxxxl&baseStep=base&prefix=fs&useContainerWidth=false&includeFallbacks=false&useRems=true&remValue=16&decimals=4&previewFont=Inter&previewText=Almost+before+we+knew+it%2C+we+had+left+the+ground&previewWidth=320
-**/
 /* Utilities */
 /* ============================================================
    DaisyUI — radius.css
@@ -371,83 +398,872 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
   border-bottom-left-radius: var(--radius-selector);
 }
 
+/* Component libraries (mixin-only — no CSS emitted here) */
 /* ============================================================
-   DaisyUI — glass.css
-   Effet verre dépoli (backdrop-filter)
-   ============================================================ */
-.glass {
-  border: none;
-  backdrop-filter: blur(var(--glass-blur, 40px));
-  background-color: rgba(0, 0, 0, 0);
-  background-image: linear-gradient(135deg, oklch(100% 0 0/var(--glass-opacity, 30%)) 0%, oklch(0% 0 0deg / 0) 100%), linear-gradient(var(--glass-reflect-degree, 100deg), oklch(100% 0 0/var(--glass-reflect-opacity, 5%)) 25%, oklch(0% 0 0deg / 0) 25%);
-  box-shadow: 0 0 0 1px oklch(100% 0 0/var(--glass-border-opacity, 20%)) inset, 0 0 0 2px oklch(0% 0 0deg / 0.05);
-  text-shadow: 0 1px oklch(0% 0 0/var(--glass-text-shadow-opacity, 5%));
-}
+   button.scss — .btn mixin library
 
-/* Components */
-/* ============================================================
-   button.scss — tailles + couleurs générées par mixins (famille flat)
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s the pieces it wants. `base` carries the
+   structure every family shares (layout, intrinsic sizing, state
+   plumbing); every look decision (borders, elevation, hover/press
+   feedback, style variants) is an opt-in mixin. A family is just a
+   selection of these mixins plus its own extra rules.
 
-   External variables (defined by the theme):
-	--color-base-200         default button background
-	--color-base-content     default text color
-	--color-{variant}        semantic color (primary, secondary, accent, neutral,
-										info, success, warning, error)
-	--color-{variant}-content  text on semantic color background
-	--depth                  depth effect multiplier (shadows / noise intensity)
-	--border                 border width (px value)
-	--noise                  noise background intensity (0–1)
-	--fx-noise               noise SVG data-uri (from base/svg.css)
-	--radius-field           default field border radius
-	--size-field             base unit for height calculation (default 0.25rem)
-
-   Join integration (set by join.css when inside .join):
-   --join-ss / --join-se / --join-es / --join-ee   per-corner radius overrides
-
-   Internal variables (set and consumed within this file):
-	--btn-color    color seed — set by .btn-{color} variants, drives bg/border/outline
+   Plumbing contract — custom properties painted by `base`, assigned
+   by skins/variants (and overridable per family):
+	--btn-color    color seed — set by `color-variants`, drives bg/outline
 	--btn-bg       resolved background color
 	--btn-fg       resolved text color
+	--btn-border   resolved border color        (base default: transparent)
+	--btn-shadow   box-shadow value             (base default: var(--shadow-light))
 	--btn-p        inline padding
-	--btn-border   resolved border color
-	--btn-shadow   drop shadow value
-	--btn-noise    noise background-image (--fx-noise or none)
-	--size         button height (computed from --size-field)
-	--fontsize     font size (overridden by size variant classes)
+	--size         button height
+	--fontsize     font size (set by `size-variants` classes)
+
+   External variables (theme / family):
+	--color-surface-high          default button background
+	--color-on-surface      default text color
+	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
+	--radius-field            corner radius
+	--border                  border width (px value)
+	--shadow-light            family shadow system (see base/default.scss)
+
+   Join integration (set by join.scss when inside .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
    ============================================================ */
-/* --- Reset de largeur dans certains contextes (ex: join) --- */
+/* ------------------------------------------------------------
+   base — structure shared by all families.
+   Layout, intrinsic sizing, typography plumbing, paint plumbing
+   (background/border/shadow read the --btn-* variables), keyboard
+   focus, checkbox/radio-as-button behavior, disabled state.
+   No look decision: border/shadow resolve to transparent/family
+   shadow until a skin assigns them.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   skin-flat — the daisyUI surface (used by daisy / poppy).
+   Depth-driven border + inner highlight + drop shadows, hover
+   darken, press feedback (sink 0.5px, zero the
+   depth shadows — --shadow-light stays so elevation families can
+   restyle the pressed state), forced .btn-active look.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .btn-{primary,…}: seed --btn-color / --btn-fg.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-ghost — transparent until hover/focus/active.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-link — looks like a text link.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-outline — transparent bg, colored border/label at rest.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-dash — like outline but dashed border.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-soft — faint tinted fill of the seed color.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .btn-{xxs…xxxl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   shape-variants — square / circle / wide / block.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   ripple — opt-in expanding wave (.btn-ripple) spawned at the
+   pointer position. The wave element (.btn-ripple-wave) is injected
+   by the Svelte <Button ripple> component — or any small script —
+   with --ripple-x / --ripple-y / --ripple-size set inline.
+   ------------------------------------------------------------ */
+/* ============================================================
+   input.scss — .input mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   resolved border/accent color — base defaults it to a
+	                faint on-surface mix, color-variants override it,
+	                focus resets it to on-surface
+	--size          field height (2.5em × --scale, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface        field background
+	--color-surface-high        disabled background and border
+	--color-on-surface    default text color
+	--color-{variant}       semantic accent (set by color-variants)
+	--border                border width
+	--radius-field          field corner radius
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure shared by all families: layout, intrinsic
+   sizing, border/outline plumbing, inner <input> handling, focus
+   ring, disabled state. Box-shadow defaults to the family shadow;
+   skins provide the actual surface recipe.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   skin-flat — depth-driven inset shadows on the well (rest + focus).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-ghost — transparent until focus.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .input-{primary,…}: set --input-color.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .input-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   select.scss — .select mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   resolved border/accent color (same as input.scss)
+	--size          field height (2.5em × --scale, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface        field background
+	--color-surface-high        disabled background and border
+	--color-on-surface    default text color
+	--color-neutral / --color-on-neutral   active option highlight
+	--color-{variant}       semantic accent (set by color-variants)
+	--border                border width
+	--radius-field          field corner radius
+	--radius-box            picker dropdown corner radius
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: layout, chevron, native <select> nesting,
+   picker dropdown (base-select), options, focus ring, disabled.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   skin-flat — depth-driven inset shadows on the well (rest + focus).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-ghost — transparent until focus.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .select-{primary,…}: set --input-color.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .select-{xs…xl}: set --fontsize (+ roomier
+   options at xl).
+   ------------------------------------------------------------ */
+/* ============================================================
+   textarea.scss — .textarea mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   resolved border/accent color (same as input.scss)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface / --color-surface-high / --color-on-surface
+	--color-{variant}       semantic accent (set by color-variants)
+	--border / --radius-field
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: sizing, inner <textarea> handling, focus ring,
+   disabled state.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   skin-flat — depth-driven inset shadows on the well (rest + focus).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-ghost — transparent until focus.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .textarea-{primary,…}: set --input-color.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .textarea-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   checkbox.scss — .checkbox mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   border + checked fill color (set by color-variants)
+	--size          box dimensions (1.5em × 1.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-on-surface       default checkmark color
+	--color-{variant} / --color-on-{variant}  fill / mark colors (color-variants)
+	--border / --radius-selector
+	--shadow-light             family shadow system
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: box, animated clip-path checkmark, focus ring,
+   checked/indeterminate states, forced-colors/print fallbacks,
+   disabled.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   skin-flat — depth-driven inner shadows (rest + checked).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-outline — colored checkmark, no filled background. The
+   mark color is driven by the color variant's --input-color,
+   e.g. .checkbox-outline.checkbox-primary → primary checkmark.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-square — hard corners.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .checkbox-{primary,…}: mark + fill colors.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .checkbox-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   radio.scss — .radio mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Note: .radio does not consume --shadow-light — families that need
+   a shadow skin it directly.
+
+   Plumbing contract:
+	--input-color   border + dot color (set by color-variants)
+	--size          circle dimensions (1.5em × 1.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface        background when checked
+	--color-{variant}       accent color (color-variants)
+	--border
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: circle, inner dot, focus ring, checked state,
+   forced-colors/print fallbacks, disabled, check animation.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-square — hard corners (box + dot).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .radio-{primary,…}: set --input-color.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .radio-{xs…xl}: set --fontsize (+ intrinsic xl
+   size for native radios).
+   ------------------------------------------------------------ */
+/* ============================================================
+   toggle.scss — .toggle mixin library (checkbox-based switch)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   track/thumb color (color-variants set it on :checked)
+	--size          toggle height (1.5em, scales with font); width derived
+	--toggle-p      inner padding between track border and thumb
+	--fontsize      font size (set by size-variants classes)
+	--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) error
+
+   External variables (theme / family):
+	--color-surface        track background when checked
+	--color-on-surface    thumb color when checked
+	--color-{variant}       checked color (color-variants)
+	--border                border width — MUST carry a unit (0px, not 0):
+	                        it is summed with lengths in the width calc()
+	--radius-selector       thumb and track corner radius
+	--shadow-light          family shadow system
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: grid track, sliding thumb, optional icons,
+   checked/indeterminate states, focus ring, disabled.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-track — colored track, inset via background-clip. The
+   thumb stays currentColor (same as border) for a unified look.
+   The track fills only the content area (inside padding), appearing
+   recessed/thinner than the outer toggle border.
+   Combine with a color variant: .toggle-track.toggle-primary etc.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .toggle-{primary,…}: set --input-color when
+   checked only.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .toggle-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   range.scss — .range mixin library (slider input)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Note: the thumb box-shadow recipe stays in `base` — it implements
+   the track-fill trick (a 100cqw shadow cast from the thumb) and
+   cannot be split from the look. Its depth-gated lines are inert
+   when the family sets --depth: 0.
+
+   Plumbing contract:
+	--range-thumb         thumb background color
+	--range-thumb-size    thumb diameter (1.5em, scales with font)
+	--range-progress      track fill color (currentColor by default)
+	--range-fill          1 = fill track before thumb, 0 = no fill
+	--range-p             thumb border / padding (0.25em)
+	--range-bg            empty track color
+	--range-dir           RTL direction multiplier (-1 when [dir="rtl"])
+	--radius-selector-max workaround for PostCSS/Nuxt calc(min(calc())) error
+	--fontsize            font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface        default thumb background
+	--color-{variant} / --color-on-{variant}  track / thumb colors (color-variants)
+	--radius-selector       thumb and track corner radius
+	--depth                 shadow intensity multiplier
+	--shadow-light          family shadow system
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — the whole slider: track, thumb (with the fill-shadow
+   trick), focus, disabled.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .range-{primary,…}: track color + thumb fill.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .range-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   file-input.scss — .file-input mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   field border/accent color (same as input.scss)
+	--btn-color     seed color for the file button (color-variants)
+	--btn-bg        resolved button background   (painted by base)
+	--btn-fg        resolved button text color   (painted by base)
+	--btn-border    resolved button border color (base default: transparent)
+	--btn-shadow    button drop shadow           (skin-flat)
+	--size          field height (2.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface / --color-surface-high / --color-on-surface
+	--color-{variant} / --color-on-{variant}  semantic colors (color-variants)
+	--border / --radius-field
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-es   start-side radius overrides
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: field layout + the ::file-selector-button
+   pseudo-button plumbing (paints from --btn-*), focus ring,
+   disabled state.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   skin-flat — flat look for the field well AND the mini button
+   (border mix, drop shadows, top highlight).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-ghost — transparent field until focus.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .file-input-{primary,…}: seed the file button
+   (--btn-color + its on-color text) and the field accent (--input-color).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .file-input-{xs…xl}: set --fontsize (+ roomier
+   end padding at xl).
+   ------------------------------------------------------------ */
+/* ============================================================
+   chip.scss — .chip mixin library (small inline label)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--chip-color  seed color (set by color-variants)
+	--chip-bg     resolved background color
+	--chip-fg     resolved text color
+	--size        chip height (1.6em, scales with font); padding derived
+	--fontsize    font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface / --color-surface-high / --color-on-surface
+	--color-{variant} / --color-on-{variant}  seed / text colors (color-variants)
+	--border / --radius-selector
+	--shadow-light          family shadow system
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure and paint plumbing (bg/fg/border from --chip-*).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-outline — transparent bg, colored border/label.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-dash — like outline but dashed border.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-soft — faint tinted fill of the seed color.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-ghost — muted surface-high fill.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .chip-{primary,…}: seed --chip-color / --chip-fg.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .chip-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   badge.scss — .badge mixin library (badge overlay wrapper)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   Internal variables (position control):
+	--badge-t    top offset (default: 0)
+	--badge-b    bottom offset (default: auto)
+	--badge-s    inset-inline-start offset (default: auto)
+	--badge-e    inset-inline-end offset (default: 0)
+	--badge-x    horizontal translate (default: 50%)
+	--badge-y    vertical translate (default: -50%)
+
+   Usage: combine the .badge wrapper with .badge-{position}
+   modifiers; the inner .chip is the positioned badge itself.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — wrapper + positioned inner chip.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   position-variants — .badge-{start,center,end,top,middle,bottom}.
+   ------------------------------------------------------------ */
+/* ============================================================
+   tab.scss — .tabs / .tab mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Internal variables (set on .tabs / .tab, consumed by children):
+	--tabs-height         container height (auto or fixed)
+	--tabs-direction      flex direction (row)
+	--tab-height          individual tab height (2.5em, scales with font)
+	--tab-p               tab inline padding (0.75em, scales with font)
+	--tab-bg              active tab background color
+	--tab-border-color    tab border color
+	--tab-order           tab order in flex container
+	--tab-radius-min      minimum inner radius
+	--tab-radius-limit    clamped radius = min(--radius-field, --tab-radius-min)
+	--tab-radius-grad     radial gradient for lifted corner decoration
+	--tab-radius-ss/se/es/ee   per-corner radius values
+	--tab-border / --tab-border-colors   active tab border sides
+	--tab-paddings        active tab padding adjustment
+	--tab-inset / --radius-start / --radius-end   lifted corner positioning
+	--tabs-box-radius     box variant rounding
+	--tabcontent-order / --tabcontent-margin / --tabcontent-radius-*  content panel
+
+   External variables (theme / family):
+	--color-surface/200/300 / --color-neutral / --color-on-surface
+	--border / --radius-field / --radius-box
+	--depth               shadow intensity (variant-box active shadow)
+	--fontsize            tab font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: flex container, tab element (radio/label
+   support), active-content display logic, focus, disabled,
+   .tab-content panel plumbing.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-border — underline indicator (tabs-border).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-lift — active tab lifts out of a bottom border, with
+   rounded corner decorations (tabs-lift).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-top-bottom — tabs above/below their content panel
+   (tabs-top / tabs-bottom).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-box — pill container with a raised active tab
+   (tabs-box). Active shadow is depth-gated (inert at --depth: 0).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .tabs-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   loading.scss — .loading mixin library (animated indicator)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Fill uses currentColor; size scales with --fontsize.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — masked square, defaults to the spinner animation.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   style-variants — .loading-{spinner,dots,ring,ball,bars,infinity}.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .loading-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   progress.scss — .progress mixin library (linear progress bar)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   External variables (theme / family):
+	--color-on-surface  default track/fill color
+	--color-{variant}     fill color (color-variants)
+	--radius-box          bar corner radius
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — track + fill (WebKit/Firefox), indeterminate animation.
+   Color driven by currentColor; height fixed at 0.5rem.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .progress-{primary,…}: set the fill color.
+   ------------------------------------------------------------ */
+/* ============================================================
+   radial-progress.scss — .radial-progress mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Ring uses currentColor.
+
+   User-set variables (provided in HTML style or CSS):
+	--value       progress value 0–100 (required)
+	--size        ring diameter (default: 5em, scales with font)
+	--thickness   ring stroke width (default: --size / 10)
+
+   Internal variables:
+	--radialprogress   computed from --value (animated CSS property)
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — conic ring + rounded cap.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .radial-progress-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   skeleton.scss — .skeleton mixin library (loading placeholder)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   External variables (theme / family):
+	--color-surface      shimmer highlight color
+	--color-surface-high      skeleton base background
+	--color-on-surface  .skeleton-text shimmer
+	--radius-box          corner radius
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — shimmering placeholder block + text variant.
+   ------------------------------------------------------------ */
+/* ============================================================
+   list.scss — .list mixin library (rows + suggestion dropdown)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--list-grid-cols   auto-computed grid columns (.list-col-grow index)
+	--fontsize         font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface / --color-surface-high / --color-on-surface
+	--color-primary         selected suggestion highlight
+	--border / --radius-box / --radius-field
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — list container + data rows with growing columns.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-suggestions — autocomplete dropdown below an input,
+   typically inside a vertical .join:
+
+	<div class="join join-vertical">
+	  <input class="input join-item" placeholder="Search…" />
+	  <ul class="list list-suggestions join-item">
+	    <li class="suggestion-item">Result 1</li>
+	    <li class="suggestion-item suggestion-item-active">Result 2</li>
+	  </ul>
+	</div>
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .list-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   text.scss — typography mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   Naming: .{type}-s{size}-b{weight}
+	s = size index, 1 = largest
+	b = weight index, 1 = heaviest (600), 2 = medium (500), 3 = regular (400)
+   Subtitles have a fixed weight — no b index. Title is unique.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — .title, .subtitle-s{1,2}, .text-s{1-4}-b{1-3}.
+   ------------------------------------------------------------ */
+/* ============================================================
+   link.scss — .link mixin library (styled hyperlink)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Inherits font size and color from context.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — underlined link + .link-hover variant + focus.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   color-variants — .link-{primary,…}: text color + hover darken.
+   ------------------------------------------------------------ */
+/* ============================================================
+   breadcrumbs.scss — .breadcrumbs mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — scrollable list of items with chevron separators.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .breadcrumbs-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+/* ============================================================
+   dock.scss — .dock mixin library (fixed bottom navigation bar)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   External variables (theme / family):
+	--color-surface-peak  dock background (the most raised surface)
+	--color-on-surface  disabled item text color mix
+	--radius-box          item corner radius
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — fixed bar, items, active indicator, disabled.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   size-variants — .dock-{xs…xl}: bar height + label size.
+   ------------------------------------------------------------ */
+/* ============================================================
+   join.scss — .join mixin library (group adjacent form elements)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   Exported variables (injected into child .join-item elements,
+   consumed by input, select, button, … via
+   var(--join-ss, var(--radius-field))):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+
+   External variables (theme / family):
+	--border        used for negative margin to merge borders
+	--radius-field  default corner radius applied to first/last items
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — horizontal grouping: corner radius distribution, border
+   merging, button height stretch.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-vertical — stacked grouping (.join-vertical).
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-horizontal — explicit row grouping (.join-horizontal).
+   ------------------------------------------------------------ */
+/* ============================================================
+   fieldset.scss — .fieldset mixin library (form field group)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   External variables (theme / family):
+	--color-on-surface   legend and label text color
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — grid container + legend (+ deprecated .fieldset-label).
+   ------------------------------------------------------------ */
+/* ============================================================
+   label.scss — .label / .floating-label mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   External variables (theme / family):
+	--color-surface   floating label background (hides the field border)
+	--border           inline divider width inside .input / .select
+	--size-field       floating label vertical center position
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — inline label + prefix/suffix label inside fields.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   variant-floating — floating label that rises above the field on
+   focus / when filled, with per-size position adjustments.
+   ------------------------------------------------------------ */
+/* ============================================================
+   validator.scss — .validator mixin library (validation states)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   Exported variable (injected into sibling field components):
+	--input-color   overrides the field border/focus color;
+	                consumed by .input, .select, .textarea, .checkbox, …
+
+   Usage: add .validator to a field component; .validator-hint is
+   the sibling element shown on error.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — valid/invalid color driving + error hint.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   flat-components — the daisyUI reference selection.
+   ------------------------------------------------------------ */
+/* ============================================================
+   _derived-content.scss — automatic `--color-on-*` colors, plus the
+   default border color.
+
+   A theme sets surfaces and semantic colors; what is written *on*
+   them is derived from the seed with the relative color syntax. The lightness flips around a threshold — a light
+   seed gets near-black text, a dark seed gets near-white — while
+   keeping a whisper of the seed's hue.
+
+     clamp(0.145, (0.66 - l) * 999, 0.97)
+		l > 0.66  →  negative  →  clamps to 0.145 (dark text)
+		l < 0.66  →  huge      →  clamps to 0.97  (light text)
+
+   Declared on :where(:root) (zero specificity) so a theme's :root
+   can still override any of them explicitly if it wants to.
+   ============================================================ */
+:where(:root) {
+  --color-on-surface: oklch(from var(--color-surface) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
+  /* Borders are almost always a wash of the text color over the surface.
+     Derived so a theme has only three surfaces to supply — but a theme
+     (or a family like wireframe) can still set --color-border outright. */
+  --color-border: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+  --color-on-primary: oklch(
+  	from var(--color-primary) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-secondary: oklch(
+  	from var(--color-secondary) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-accent: oklch(
+  	from var(--color-accent) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-neutral: oklch(
+  	from var(--color-neutral) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-info: oklch(
+  	from var(--color-info) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-success: oklch(
+  	from var(--color-success) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-warning: oklch(
+  	from var(--color-warning) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-error: oklch(
+  	from var(--color-error) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+}
+
+/* Themeable fallbacks — a theme's :root overrides these. */
+:where(:root) {
+  --radius-field: 0.4rem;
+  --radius-box: 0.7rem;
+  --radius-selector: 0.4rem;
+}
+
+/* Family-owned look — Material elevation.
+   --light-intensity / --light-depth are this family's editable knobs
+   (shadow strength / elevation height); set on :root so they win over the
+   flat default in base/default.scss but stay overridable by a theme's :root. */
+:root {
+  --border: 1px;
+  --depth: 0;
+  --light-intensity: 1.4; /* pronounced cast shadow */
+  --light-depth: 2;
+  --light-color: oklch(0% 0 0);
+}
+
+/* ── Component mixin selection ──────────────────────────────────────
+   poppy = the flat reference selection, unchanged. */
+/* Width reset in some contexts (e.g. join) */
 :where(.btn) {
   width: unset;
 }
 
-/* --- Liens btn dans prose : pas de soulignement --- */
+/* btn links inside prose: no underline */
 .prose :where(a.btn:not(.btn-link)):not(:where([class~=not-prose], [class~=not-prose] *)) {
   text-decoration: none;
 }
 
-/* ============================================================
-	Base .btn
-	============================================================ */
 .btn {
-  /* Internal variables */
-  --size: 1.75em;
-  /* calc(var(--size-field, 0.25rem) * 10); */
-  --btn-bg: var(--btn-color, var(--color-base-200));
-  --btn-fg: var(--color-base-content);
-  --btn-p: 0.5em;
-  --btn-border: color-mix(in oklab, var(--btn-bg), #000 calc(var(--depth) * 5%));
-  --btn-shadow:
-  	0 3px 2px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
-  	0 4px 3px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
-  	var(--shadow-light, );
-  --btn-noise: var(--fx-noise);
+  /* Internal variables — neutral defaults, skins re-assign */
+  --size: calc(2.5em * var(--scale));
+  --btn-bg: var(--btn-color, var(--color-surface-high));
+  --btn-fg: var(--color-on-surface);
+  --btn-p: calc(1em * var(--scale)); /* daisyUI ships 1rem — half of this was an outlier */
+  --btn-border: transparent;
+  --btn-shadow: var(--shadow-light, );
   /* Layout */
   display: inline-flex;
   flex-shrink: 0;
   flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
-  gap: 0.375rem; /* gap-1.5 */
+  gap: calc(0.375em * var(--scale));
   text-align: center;
   vertical-align: middle;
   user-select: none;
@@ -457,19 +1273,15 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
   padding-inline: var(--btn-p);
   /* Typography */
   font-size: var(--fontsize, var(--base, var(--default-base)));
-  /*var(--fontsize, 0.875rem);*/
   font-weight: 600;
   color: var(--btn-fg);
   --tw-prose-links: var(--btn-fg);
-  text-shadow: 0 0.5px oklch(100% 0 0/calc(var(--depth) * 0.15));
-  /* Background */
+  /* Paint plumbing */
   background-color: var(--btn-bg);
-  background-size: auto, calc(var(--noise) * 100%);
-  background-image: none, var(--btn-noise);
-  /* Border */
   border-width: var(--border);
   border-style: solid;
   border-color: var(--btn-border);
+  box-shadow: var(--btn-shadow);
   /* Corner radius (join-compatible) */
   border-start-start-radius: var(--join-ss, var(--radius-field));
   border-start-end-radius: var(--join-se, var(--radius-field));
@@ -477,9 +1289,7 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
   border-end-end-radius: var(--join-ee, var(--radius-field));
   /* Outline */
   outline-offset: 2px;
-  outline-color: var(--btn-color, var(--color-base-content));
-  /* Shadow */
-  box-shadow: 0 0.5px 0 0.5px oklch(100% 0 0/calc(var(--depth) * 6%)) inset, var(--btn-shadow);
+  outline-color: var(--btn-color, var(--color-on-surface));
   /* Transition */
   transition-property: color, background-color, border-color, box-shadow;
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
@@ -492,26 +1302,12 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
   height: 1em;
 }
 
-/* Hover (pointer devices only) */
-@media (hover: hover) {
-  .btn:hover {
-    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
-  }
-}
 /* Keyboard focus */
 .btn:focus-visible,
 .btn:has(:focus-visible) {
   outline-width: 2px;
   outline-style: solid;
   isolation: isolate;
-}
-
-/* Click / press */
-.btn:active:not(.btn-active) {
-  translate: 0 0.5px;
-  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 5%);
-  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
-  --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0);
 }
 
 /* Checkbox / radio styled as button */
@@ -523,92 +1319,107 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
   content: attr(aria-label);
 }
 
-/* Checked checkbox/radio */
+/* Checked checkbox/radio: seed the primary color */
 .btn:where(input:checked:not(.filter .btn)) {
   --btn-color: var(--color-primary);
-  --btn-fg: var(--color-primary-content);
+  --btn-fg: var(--color-on-primary);
   isolation: isolate;
 }
 
-/* ============================================================
-	États
-	============================================================ */
 /* Disabled */
 .btn-disabled,
 .btn:disabled,
 .btn[disabled] {
   pointer-events: none;
   --btn-border: #0000;
-  --btn-noise: none;
-  --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
+  --btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
 }
 
 .btn-disabled:not(.btn-link, .btn-ghost),
 .btn:disabled:not(.btn-link, .btn-ghost),
 .btn[disabled]:not(.btn-link, .btn-ghost) {
-  background-color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
+  background-color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
   box-shadow: none;
+}
+
+.btn {
+  --btn-border: color-mix(in oklab, var(--btn-bg), #000 calc(var(--depth) * 5%));
+  --btn-shadow:
+  	0 3px 2px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
+  	0 4px 3px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
+  	var(--shadow-light, );
+  text-shadow: 0 0.5px oklch(100% 0 0/calc(var(--depth) * 0.15));
+  /* Inner top highlight + depth shadows */
+  box-shadow: 0 0.5px 0 0.5px oklch(100% 0 0/calc(var(--depth) * 6%)) inset, var(--btn-shadow);
+}
+
+/* Hover darken (pointer devices only) */
+@media (hover: hover) {
+  .btn:hover {
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 7%);
+  }
+}
+/* Click / press. Only the two depth shadows are zeroed; the family
+   shadow (--shadow-light) must stay in the list so families can
+   restyle the pressed state (poppy lowers elevation). */
+.btn:active:not(.btn-active) {
+  translate: 0 0.5px;
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 5%);
+  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 7%);
+  --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0), var(--shadow-light, );
 }
 
 /* Active (forced) */
 .btn-active {
-  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
-  --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0);
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 7%);
+  --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0), var(--shadow-light, );
   isolation: isolate;
 }
 
-/* ============================================================
-	Variantes de couleur
-	============================================================ */
 .btn-primary {
   --btn-color: var(--color-primary);
-  --btn-fg: var(--color-primary-content);
+  --btn-fg: var(--color-on-primary);
 }
 
 .btn-secondary {
   --btn-color: var(--color-secondary);
-  --btn-fg: var(--color-secondary-content);
+  --btn-fg: var(--color-on-secondary);
 }
 
 .btn-accent {
   --btn-color: var(--color-accent);
-  --btn-fg: var(--color-accent-content);
+  --btn-fg: var(--color-on-accent);
 }
 
 .btn-neutral {
   --btn-color: var(--color-neutral);
-  --btn-fg: var(--color-neutral-content);
+  --btn-fg: var(--color-on-neutral);
 }
 
 .btn-info {
   --btn-color: var(--color-info);
-  --btn-fg: var(--color-info-content);
+  --btn-fg: var(--color-on-info);
 }
 
 .btn-success {
   --btn-color: var(--color-success);
-  --btn-fg: var(--color-success-content);
+  --btn-fg: var(--color-on-success);
 }
 
 .btn-warning {
   --btn-color: var(--color-warning);
-  --btn-fg: var(--color-warning-content);
+  --btn-fg: var(--color-on-warning);
 }
 
 .btn-error {
   --btn-color: var(--color-error);
-  --btn-fg: var(--color-error-content);
+  --btn-fg: var(--color-on-error);
 }
 
-/* ============================================================
-	Variantes de style
-	============================================================ */
-/* Ghost: transparent until hover/focus/active */
 .btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn)) {
   --btn-shadow: ;
   --btn-bg: #0000;
   --btn-border: #0000;
-  --btn-noise: none;
 }
 
 .btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn)):not(:disabled, [disabled], .btn-disabled) {
@@ -624,16 +1435,13 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
     --btn-bg: #0000;
     --btn-fg: var(--btn-color, currentColor);
     --btn-border: #0000;
-    --btn-noise: none;
   }
 }
-/* Link */
 .btn-link {
   text-decoration: underline;
   outline-color: currentColor;
   --btn-border: #0000;
   --btn-bg: #0000;
-  --btn-noise: none;
   --btn-shadow: ;
 }
 
@@ -646,31 +1454,26 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
   --btn-bg: #0000;
 }
 
-/* Outline */
 .btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
   --btn-shadow: ;
   --btn-bg: #0000;
-  --btn-fg: var(--btn-color, var(--color-base-content));
-  --btn-border: var(--btn-color, var(--color-base-content));
-  --btn-noise: none;
+  --btn-fg: var(--btn-color, var(--color-on-surface));
+  --btn-border: var(--btn-color, var(--color-on-surface));
 }
 
 @media (hover: none) {
   .btn-outline:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
     --btn-shadow: ;
     --btn-bg: #0000;
-    --btn-fg: var(--btn-color, var(--color-base-content));
-    --btn-border: var(--btn-color, var(--color-base-content));
-    --btn-noise: none;
+    --btn-fg: var(--btn-color, var(--color-on-surface));
+    --btn-border: var(--btn-color, var(--color-on-surface));
   }
 }
-/* Dash (like outline but dashed border) */
 .btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
   --btn-shadow: ;
   --btn-bg: #0000;
-  --btn-fg: var(--btn-color, var(--color-base-content));
-  --btn-border: var(--btn-color, var(--color-base-content));
-  --btn-noise: none;
+  --btn-fg: var(--btn-color, var(--color-on-surface));
+  --btn-border: var(--btn-color, var(--color-on-surface));
 }
 
 .btn-dash {
@@ -681,32 +1484,25 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
   .btn-dash:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
     --btn-shadow: ;
     --btn-bg: #0000;
-    --btn-fg: var(--btn-color, var(--color-base-content));
-    --btn-border: var(--btn-color, var(--color-base-content));
-    --btn-noise: none;
+    --btn-fg: var(--btn-color, var(--color-on-surface));
+    --btn-border: var(--btn-color, var(--color-on-surface));
   }
 }
-/* Soft */
 .btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
   --btn-shadow: ;
-  --btn-fg: var(--btn-color, var(--color-base-content));
-  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 8%, var(--color-base-100));
-  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 10%, var(--color-base-100));
-  --btn-noise: none;
+  --btn-fg: var(--btn-color, var(--color-on-surface));
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface));
+  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface));
 }
 
 @media (hover: none) {
   .btn-soft:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
     --btn-shadow: ;
-    --btn-fg: var(--btn-color, var(--color-base-content));
-    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 8%, var(--color-base-100));
-    --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 10%, var(--color-base-100));
-    --btn-noise: none;
+    --btn-fg: var(--btn-color, var(--color-on-surface));
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface));
+    --btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface));
   }
 }
-/* ============================================================
-	Tailles
-	============================================================ */
 .btn-xxs {
   --fontsize: var(--xxs, var(--default-xxs));
 }
@@ -739,9 +1535,6 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
   --fontsize: var(--xxxl, var(--default-xxxl));
 }
 
-/* ============================================================
-	Formes
-	============================================================ */
 .btn-square {
   padding-inline: 0;
   width: var(--size);
@@ -755,59 +1548,65 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
   border-radius: 9999px;
 }
 
-/* ============================================================
-	Largeurs
-	============================================================ */
 .btn-wide {
   width: 100%;
-  max-width: 16rem; /* max-w-64 = 256px */
+  max-width: 16rem;
 }
 
 .btn-block {
   width: 100%;
 }
 
-/* ============================================================
-   input.scss — tailles + couleurs générées par mixins (famille flat)
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
 
-   External variables (defined by theme):
-     --color-base-100      field background
-     --color-base-200      disabled background and border
-     --color-base-content  default text color
-     --color-{variant}     semantic accent color (set by .input-{color})
-     --depth               shadow / inset intensity multiplier
-     --border              border width
-     --radius-field        field corner radius
+.btn-ripple-wave {
+  position: absolute;
+  left: var(--ripple-x, 50%);
+  top: var(--ripple-y, 50%);
+  width: var(--ripple-size, 100%);
+  height: var(--ripple-size, 100%);
+  margin-left: calc(var(--ripple-size, 100%) / -2);
+  margin-top: calc(var(--ripple-size, 100%) / -2);
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.3;
+  transform: scale(0);
+  pointer-events: none;
+  animation: btn-ripple 0.55s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+}
 
-   Join integration (set by join.css when nested in .join):
-     --join-ss / --join-se / --join-es / --join-ee   per-corner radius overrides
-
-   Font size system:
-     --fontsize            overrides default size (set by .input-xs … .input-xl)
-     --base / --default-base   fallback font size
-
-   Internal variables:
-     --size          field height (2.5em, scales with font)
-     --input-color   resolved border/shadow color; driven by color variants
-   ============================================================ */
+@keyframes btn-ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-ripple-wave {
+    display: none;
+  }
+}
 :where(.input) {
   width: unset;
 }
 
 .input {
-  --size: 2.5em;
-  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  --size: calc(2.5em * var(--scale));
+  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
   cursor: text;
   display: inline-flex;
   flex-shrink: 1;
   appearance: none;
   align-items: center;
-  gap: 0.5em;
-  padding-inline: 0.75em;
+  gap: calc(0.5em * var(--scale));
+  padding-inline: calc(0.75em * var(--scale));
   vertical-align: middle;
   white-space: nowrap;
   position: relative;
-  background-color: var(--color-base-100);
+  background-color: var(--color-surface);
   width: clamp(3rem, 20rem, 100%);
   height: var(--size);
   font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -818,7 +1617,7 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
   border-end-start-radius: var(--join-es, var(--radius-field));
   border-end-end-radius: var(--join-ee, var(--radius-field));
   border-color: var(--input-color);
-  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+  box-shadow: var(--shadow-light, );
 }
 
 .input:where(input) {
@@ -850,8 +1649,7 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
 
 .input:focus,
 .input:focus-within {
-  --input-color: var(--color-base-content);
-  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+  --input-color: var(--color-on-surface);
   outline: 2px solid var(--input-color);
   outline-offset: 2px;
   isolation: isolate;
@@ -869,9 +1667,9 @@ https://www.fluid-type-scale.com/calculate?minFontSize=16&minWidth=320&minRatio=
 .input:has(> input[disabled]),
 .input:is(:disabled, [disabled]),
 fieldset:disabled .input {
-  border-color: var(--color-base-200);
-  background-color: var(--color-base-200);
-  color: color-mix(in oklch, var(--color-base-content) 40%, rgba(0, 0, 0, 0));
+  border-color: var(--color-surface-high);
+  background-color: var(--color-surface-high);
+  color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -882,7 +1680,7 @@ fieldset:disabled .input input::placeholder,
 .input:has(> input[disabled])::placeholder,
 .input:is(:disabled, [disabled])::placeholder,
 fieldset:disabled .input::placeholder {
-  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
 }
 
 .input:has(> input[disabled]) > input[disabled] {
@@ -894,13 +1692,13 @@ fieldset:disabled .input::placeholder {
 }
 
 .input[type=number]::-webkit-inner-spin-button {
-  margin-block: -0.75em;
-  margin-inline-end: -0.75em;
+  margin-block: calc(-0.75em * var(--scale));
+  margin-inline-end: calc(-0.75em * var(--scale));
 }
 
 .input::-webkit-calendar-picker-indicator {
   position: absolute;
-  inset-inline-end: 0.75em;
+  inset-inline-end: calc(0.75em * var(--scale));
 }
 
 .input:has(> input[type=date]) :where(input[type=date]) {
@@ -911,15 +1709,21 @@ fieldset:disabled .input::placeholder {
 
 .input:has(> input[type=date]) input[type=date]::-webkit-calendar-picker-indicator {
   position: absolute;
-  inset-inline-end: 0.75em;
+  inset-inline-end: calc(0.75em * var(--scale));
   width: 1em;
   height: 1em;
   cursor: pointer;
 }
 
-/* ============================================================
-   Ghost
-   ============================================================ */
+.input {
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+}
+
+.input:focus,
+.input:focus-within {
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+}
+
 .input-ghost {
   background-color: transparent;
   box-shadow: none;
@@ -928,15 +1732,12 @@ fieldset:disabled .input::placeholder {
 
 .input-ghost:focus,
 .input-ghost:focus-within {
-  color: var(--color-base-content);
-  background-color: var(--color-base-100);
+  color: var(--color-on-surface);
+  background-color: var(--color-surface);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
 
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
 .input-primary,
 .input-primary:focus,
 .input-primary:focus-within {
@@ -985,9 +1786,6 @@ fieldset:disabled .input::placeholder {
   --input-color: var(--color-error);
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .input-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -1008,48 +1806,23 @@ fieldset:disabled .input::placeholder {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   select.css — Dropdown select field
-
-   External variables (defined by theme):
-     --color-base-100      field background
-     --color-base-200      disabled background and border
-     --color-base-content  default text color
-     --color-neutral / --color-neutral-content   active option highlight
-     --color-{variant}     semantic accent color (set by .select-{color})
-     --depth               shadow / inset intensity multiplier
-     --border              border width
-     --radius-field        field corner radius
-     --radius-box          picker dropdown corner radius
-
-   Join integration (set by join.css when nested in .join):
-     --join-ss / --join-se / --join-es / --join-ee   per-corner radius overrides
-
-   Font size system:
-     --fontsize            overrides default size (set by .select-xs … .select-xl)
-     --base / --default-base   fallback font size
-
-   Internal variables:
-     --size          field height (2.5em, scales with font)
-     --input-color   resolved border/shadow color; driven by color variants
-   ============================================================ */
 :where(.select) {
   width: unset;
 }
 
 .select {
-  --size: 2.5em;
-  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  --size: calc(2.5em * var(--scale));
+  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
   border: var(--border) solid rgba(0, 0, 0, 0);
-  background-color: var(--color-base-100);
+  background-color: var(--color-surface);
   position: relative;
   display: inline-flex;
   flex-shrink: 1;
   appearance: none;
   align-items: center;
-  gap: 0.375em;
-  padding-inline-start: 0.75em;
-  padding-inline-end: 1.75em;
+  gap: calc(0.375em * var(--scale));
+  padding-inline-start: calc(0.75em * var(--scale));
+  padding-inline-end: calc(1.75em * var(--scale));
   vertical-align: middle;
   width: clamp(3rem, 20rem, 100%);
   height: var(--size);
@@ -1067,7 +1840,7 @@ fieldset:disabled .input::placeholder {
   overflow: hidden;
   text-overflow: ellipsis;
   border-color: var(--input-color);
-  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+  box-shadow: var(--shadow-light, );
 }
 
 [dir=rtl] .select {
@@ -1077,19 +1850,19 @@ fieldset:disabled .input::placeholder {
 .select[multiple] {
   height: auto;
   overflow: auto;
-  padding-block: 0.75em;
-  padding-inline-end: 0.75em;
+  padding-block: calc(0.75em * var(--scale));
+  padding-inline-end: calc(0.75em * var(--scale));
   background-image: none;
 }
 
 /* Native <select> nested inside the .select wrapper */
 .select select {
-  margin-inline-start: -0.75em;
-  margin-inline-end: -1.75em;
-  width: calc(100% + 2.5em);
+  margin-inline-start: calc(-0.75em * var(--scale));
+  margin-inline-end: calc(-1.75em * var(--scale));
+  width: calc(100% + 2.5em * var(--scale));
   appearance: none;
-  padding-inline-start: 0.75em;
-  padding-inline-end: 1.75em;
+  padding-inline-start: calc(0.75em * var(--scale));
+  padding-inline-end: calc(1.75em * var(--scale));
   height: calc(100% - var(--border) * 2);
   align-items: center;
   background: inherit;
@@ -1103,14 +1876,13 @@ fieldset:disabled .input::placeholder {
 }
 
 .select select:not(:last-child) {
-  margin-inline-end: -1.375rem; /* -me-5.5 */
+  margin-inline-end: calc(-1.375em * var(--scale));
   background-image: none;
 }
 
 .select:focus,
 .select:focus-within {
-  --input-color: var(--color-base-content);
-  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+  --input-color: var(--color-on-surface);
   outline: 2px solid var(--input-color);
   outline-offset: 2px;
   isolation: isolate;
@@ -1119,15 +1891,15 @@ fieldset:disabled .input::placeholder {
 .select:has(> select[disabled]),
 .select:is(:disabled, [disabled]),
 fieldset:disabled .select {
-  border-color: var(--color-base-200);
-  background-color: var(--color-base-200);
-  color: color-mix(in oklch, var(--color-base-content) 40%, rgba(0, 0, 0, 0));
+  border-color: var(--color-surface-high);
+  background-color: var(--color-surface-high);
+  color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
   cursor: not-allowed;
 }
 
 .select:has(> select[disabled]) select::placeholder,
 .select:is(:disabled, [disabled]) select::placeholder {
-  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
 }
 
 .select:has(> select[disabled]) > select[disabled] {
@@ -1146,12 +1918,12 @@ fieldset:disabled .select {
 .select select::picker(select) {
   color: inherit;
   max-height: min(24rem, 70dvh);
-  margin-inline: 0.5rem;
-  translate: -0.5rem 0;
-  border: var(--border) solid var(--color-base-200);
+  margin-inline: calc(0.5em * var(--scale));
+  translate: calc(-0.5em * var(--scale)) 0;
+  border: var(--border) solid var(--color-surface-high);
   border-radius: var(--radius-box);
-  margin-block: 0.5rem; /* my-2 */
-  padding: 0.5rem; /* p-2 */
+  margin-block: calc(0.5em * var(--scale));
+  padding: calc(0.5em * var(--scale));
   background-color: inherit;
   box-shadow: 0 20px 25px -5px rgb(0, 0, 0, calc(var(--depth) * 0.1)), 0 8px 10px -6px rgb(0, 0, 0, calc(var(--depth) * 0.1));
 }
@@ -1169,24 +1941,24 @@ fieldset:disabled .select {
 
 [dir=rtl] .select::picker(select),
 [dir=rtl] .select select::picker(select) {
-  translate: 0.5rem 0;
+  translate: calc(0.5em * var(--scale)) 0;
 }
 
 .select optgroup,
 .select select optgroup {
-  padding-top: 0.5em;
+  padding-top: calc(0.5em * var(--scale));
 }
 
 .select optgroup option:nth-child(1),
 .select select optgroup option:nth-child(1) {
-  margin-top: 0.5em;
+  margin-top: calc(0.5em * var(--scale));
 }
 
 .select option,
 .select select option {
   border-radius: var(--radius-field);
-  padding-inline: 0.75rem; /* px-3 */
-  padding-block: 0.375rem; /* py-1.5 */
+  padding-inline: calc(0.75em * var(--scale));
+  padding-block: calc(0.375em * var(--scale));
   transition-property: color, background-color;
   transition-duration: 0.2s;
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
@@ -1197,7 +1969,7 @@ fieldset:disabled .select {
 .select option:not(:disabled):focus-visible,
 .select select option:not(:disabled):hover,
 .select select option:not(:disabled):focus-visible {
-  background-color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
+  background-color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
   cursor: pointer;
   outline: none;
 }
@@ -1205,13 +1977,19 @@ fieldset:disabled .select {
 .select option:not(:disabled):active,
 .select select option:not(:disabled):active {
   background-color: var(--color-neutral);
-  color: var(--color-neutral-content);
+  color: var(--color-on-neutral);
   box-shadow: 0 2px calc(var(--depth) * 3px) -2px var(--color-neutral);
 }
 
-/* ============================================================
-   Ghost
-   ============================================================ */
+.select {
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+}
+
+.select:focus,
+.select:focus-within {
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+}
+
 .select-ghost {
   background-color: transparent;
   transition: background-color 0.2s;
@@ -1221,19 +1999,10 @@ fieldset:disabled .select {
 
 .select-ghost:focus,
 .select-ghost:focus-within {
-  color: var(--color-base-content);
-  background-color: var(--color-base-100);
+  color: var(--color-on-surface);
+  background-color: var(--color-surface);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
-}
-
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
-.select-neutral,
-.select-neutral:focus,
-.select-neutral:focus-within {
-  --input-color: var(--color-neutral);
 }
 
 .select-primary,
@@ -1252,6 +2021,12 @@ fieldset:disabled .select {
 .select-accent:focus,
 .select-accent:focus-within {
   --input-color: var(--color-accent);
+}
+
+.select-neutral,
+.select-neutral:focus,
+.select-neutral:focus-within {
+  --input-color: var(--color-neutral);
 }
 
 .select-info,
@@ -1278,9 +2053,6 @@ fieldset:disabled .select {
   --input-color: var(--color-error);
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .select-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -1303,46 +2075,27 @@ fieldset:disabled .select {
 
 .select-xl option,
 .select-xl select option {
-  padding-inline: 1.25rem; /* px-5 */
-  padding-block: 0.375rem; /* py-1.5 */
+  padding-inline: calc(1.25em * var(--scale));
+  padding-block: calc(0.375em * var(--scale));
 }
 
-/* ============================================================
-   textarea.css — Multi-line text input
-
-   External variables (defined by theme):
-     --color-base-100      field background
-     --color-base-200      disabled background and border
-     --color-base-content  default text color
-     --color-{variant}     semantic accent color (set by .textarea-{color})
-     --depth               shadow / inset intensity multiplier
-     --border              border width
-     --radius-field        field corner radius
-
-   Font size system:
-     --fontsize            overrides default size (set by .textarea-xs … .textarea-xl)
-     --base / --default-base   fallback font size
-
-   Internal variables:
-     --input-color   resolved border/shadow color; driven by color variants
-   ============================================================ */
 .textarea {
-  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
   border: var(--border) solid rgba(0, 0, 0, 0);
-  background-color: var(--color-base-100);
+  background-color: var(--color-surface);
   border-radius: var(--radius-field);
-  min-height: 5em;
+  min-height: calc(5em * var(--scale));
   flex-shrink: 1;
   appearance: none;
-  padding-block: 0.5em;
+  padding-block: calc(0.5em * var(--scale));
   vertical-align: middle;
-  padding-inline-start: 0.75em;
-  padding-inline-end: 0.75em;
+  padding-inline-start: calc(0.75em * var(--scale));
+  padding-inline-end: calc(0.75em * var(--scale));
   width: clamp(3rem, 20rem, 100%);
   font-size: var(--fontsize, var(--base, var(--default-base)));
   touch-action: manipulation;
   border-color: var(--input-color);
-  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+  box-shadow: var(--shadow-light, );
 }
 
 .textarea textarea {
@@ -1358,8 +2111,7 @@ fieldset:disabled .select {
 
 .textarea:focus,
 .textarea:focus-within {
-  --input-color: var(--color-base-content);
-  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+  --input-color: var(--color-on-surface);
   outline: 2px solid var(--input-color);
   outline-offset: 2px;
   isolation: isolate;
@@ -1376,9 +2128,9 @@ fieldset:disabled .select {
 }
 .textarea:has(> textarea[disabled]),
 .textarea:is(:disabled, [disabled]) {
-  border-color: var(--color-base-200);
-  background-color: var(--color-base-200);
-  color: color-mix(in oklch, var(--color-base-content) 40%, rgba(0, 0, 0, 0));
+  border-color: var(--color-surface-high);
+  background-color: var(--color-surface-high);
+  color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -1387,16 +2139,22 @@ fieldset:disabled .select {
 .textarea:is(:disabled, [disabled]) textarea::placeholder,
 .textarea:has(> textarea[disabled])::placeholder,
 .textarea:is(:disabled, [disabled])::placeholder {
-  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
 }
 
 .textarea:has(> textarea[disabled]) > textarea[disabled] {
   cursor: not-allowed;
 }
 
-/* ============================================================
-   Ghost
-   ============================================================ */
+.textarea {
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+}
+
+.textarea:focus,
+.textarea:focus-within {
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+}
+
 .textarea-ghost {
   background-color: transparent;
   box-shadow: none;
@@ -1405,19 +2163,10 @@ fieldset:disabled .select {
 
 .textarea-ghost:focus,
 .textarea-ghost:focus-within {
-  color: var(--color-base-content);
-  background-color: var(--color-base-100);
+  color: var(--color-on-surface);
+  background-color: var(--color-surface);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
-}
-
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
-.textarea-neutral,
-.textarea-neutral:focus,
-.textarea-neutral:focus-within {
-  --input-color: var(--color-neutral);
 }
 
 .textarea-primary,
@@ -1436,6 +2185,12 @@ fieldset:disabled .select {
 .textarea-accent:focus,
 .textarea-accent:focus-within {
   --input-color: var(--color-accent);
+}
+
+.textarea-neutral,
+.textarea-neutral:focus,
+.textarea-neutral:focus-within {
+  --input-color: var(--color-neutral);
 }
 
 .textarea-info,
@@ -1462,9 +2217,6 @@ fieldset:disabled .select {
   --input-color: var(--color-error);
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .textarea-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -1485,45 +2237,22 @@ fieldset:disabled .select {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   checkbox.css — Checkbox input
-
-   External variables (defined by theme):
-     --color-base-content       default checkmark color
-     --color-{variant}          fill when checked (set by .checkbox-{color})
-     --color-{variant}-content  checkmark color when checked
-     --depth                    shadow / inset intensity multiplier
-     --border                   border width
-     --noise                    noise texture intensity (0–1)
-     --fx-noise                 noise SVG data-uri (from base/svg.css)
-     --radius-selector          corner radius
-
-   Font size system:
-     --fontsize            overrides default size (set by .checkbox-xs … .checkbox-xl)
-     --base / --default-base   fallback font size
-
-   Internal variables:
-     --size          box dimensions (1.5em × 1.5em, scales with font)
-     --input-color   border and fill color; driven by color variants
-   ============================================================ */
 .checkbox {
-  --size: 1.5em;
+  --size: calc(1.5em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
-  border: var(--border) solid var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, rgba(0, 0, 0, 0)));
-  color: var(--color-base-content);
+  border: var(--border) solid var(--input-color, color-mix(in oklab, var(--color-on-surface) 20%, rgba(0, 0, 0, 0)));
+  color: var(--color-on-surface);
   border-radius: var(--radius-selector);
   position: relative;
   display: inline-block;
   flex-shrink: 0;
   cursor: pointer;
   appearance: none;
-  padding: 0.15em;
+  padding: calc(0.15em * var(--scale));
   vertical-align: middle;
   width: var(--size);
   height: var(--size);
-  background-size: auto, calc(var(--noise) * 100%);
-  background-image: none, var(--fx-noise);
-  box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 0 rgba(0, 0, 0, 0) inset, var(--shadow-light, );
+  box-shadow: var(--shadow-light, );
   transition: background-color 0.2s, box-shadow 0.2s;
 }
 
@@ -1552,7 +2281,6 @@ fieldset:disabled .select {
 .checkbox:checked,
 .checkbox[aria-checked=true] {
   background-color: var(--input-color, rgba(0, 0, 0, 0));
-  box-shadow: 0 0 rgba(0, 0, 0, 0) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1));
 }
 
 .checkbox:checked::before,
@@ -1580,7 +2308,7 @@ fieldset:disabled .select {
   }
 }
 .checkbox:indeterminate {
-  background-color: var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, rgba(0, 0, 0, 0)));
+  background-color: var(--input-color, color-mix(in oklab, var(--color-on-surface) 20%, rgba(0, 0, 0, 0)));
 }
 
 .checkbox:indeterminate::before {
@@ -1590,60 +2318,71 @@ fieldset:disabled .select {
   clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 80% 80%, 80% 100%);
 }
 
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
-.checkbox-primary {
-  color: var(--color-primary-content);
-  --input-color: var(--color-primary);
-}
-
-.checkbox-secondary {
-  color: var(--color-secondary-content);
-  --input-color: var(--color-secondary);
-}
-
-.checkbox-accent {
-  color: var(--color-accent-content);
-  --input-color: var(--color-accent);
-}
-
-.checkbox-neutral {
-  color: var(--color-neutral-content);
-  --input-color: var(--color-neutral);
-}
-
-.checkbox-info {
-  color: var(--color-info-content);
-  --input-color: var(--color-info);
-}
-
-.checkbox-success {
-  color: var(--color-success-content);
-  --input-color: var(--color-success);
-}
-
-.checkbox-warning {
-  color: var(--color-warning-content);
-  --input-color: var(--color-warning);
-}
-
-.checkbox-error {
-  color: var(--color-error-content);
-  --input-color: var(--color-error);
-}
-
-/* ============================================================
-   Désactivé
-   ============================================================ */
 .checkbox:disabled {
   cursor: not-allowed;
   opacity: 0.2;
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
+.checkbox {
+  box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 0 rgba(0, 0, 0, 0) inset, var(--shadow-light, );
+}
+
+.checkbox:checked,
+.checkbox[aria-checked=true] {
+  box-shadow: 0 0 rgba(0, 0, 0, 0) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1));
+}
+
+.checkbox-primary {
+  color: var(--color-on-primary);
+  --input-color: var(--color-primary);
+}
+
+.checkbox-secondary {
+  color: var(--color-on-secondary);
+  --input-color: var(--color-secondary);
+}
+
+.checkbox-accent {
+  color: var(--color-on-accent);
+  --input-color: var(--color-accent);
+}
+
+.checkbox-neutral {
+  color: var(--color-on-neutral);
+  --input-color: var(--color-neutral);
+}
+
+.checkbox-info {
+  color: var(--color-on-info);
+  --input-color: var(--color-info);
+}
+
+.checkbox-success {
+  color: var(--color-on-success);
+  --input-color: var(--color-success);
+}
+
+.checkbox-warning {
+  color: var(--color-on-warning);
+  --input-color: var(--color-warning);
+}
+
+.checkbox-error {
+  color: var(--color-on-error);
+  --input-color: var(--color-error);
+}
+
+.checkbox-outline:checked,
+.checkbox-outline[aria-checked=true] {
+  background-color: rgba(0, 0, 0, 0);
+  color: var(--input-color, var(--color-on-surface));
+  box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 0 rgba(0, 0, 0, 0) inset, var(--shadow-light, );
+}
+
+.checkbox-square {
+  border-radius: 0;
+}
+
 .checkbox-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -1664,50 +2403,8 @@ fieldset:disabled .select {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   Style variants
-   ============================================================ */
-/*
-   Outline — colored checkmark, no filled background.
-   Color of the mark is driven by the color variant's --input-color.
-   e.g. .checkbox-outline.checkbox-primary → primary-colored checkmark.
-*/
-.checkbox-outline:checked,
-.checkbox-outline[aria-checked=true] {
-  background-color: rgba(0, 0, 0, 0);
-  color: var(--input-color, var(--color-base-content));
-  box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 0 rgba(0, 0, 0, 0) inset, var(--shadow-light, );
-}
-
-/* ============================================================
-   Shape variants
-   ============================================================ */
-.checkbox-square {
-  border-radius: 0;
-}
-
-/* ============================================================
-   radio.css — Radio button input
-
-   External variables (defined by theme):
-		--color-base-100      background when checked
-		--color-{variant}     accent color (set by .radio-{color})
-		--depth               shadow / inset intensity multiplier
-		--border              border width
-		--noise               noise texture intensity (0–1)
-		--fx-noise            noise SVG data-uri (from base/svg.css)
-		--radius-selector     corner radius (9999px for full circle override)
-
-	Font size system:
-		--fontsize            overrides default size (set by .radio-xs … .radio-xl)
-		--base / --default-base   fallback font size
-
-	Internal variables:
-		--size          circle dimensions (1.5em × 1.5em, scales with font)
-		--input-color   border and fill color; driven by color variants
-   ============================================================ */
 .radio {
-  --size: 1.5em;
+  --size: calc(1.5em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
   position: relative;
   display: inline-block;
@@ -1715,10 +2412,9 @@ fieldset:disabled .select {
   cursor: pointer;
   appearance: none;
   border-radius: 9999px;
-  padding: 0.15em;
+  padding: calc(0.15em * var(--scale));
   vertical-align: middle;
   border: var(--border) solid var(--input-color, color-mix(in srgb, currentColor 20%, rgba(0, 0, 0, 0)));
-  box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset;
   width: var(--size);
   height: var(--size);
   color: var(--input-color, currentColor);
@@ -1731,8 +2427,6 @@ fieldset:disabled .select {
   width: 100%;
   height: 100%;
   border-radius: 9999px; /* rounded-full */
-  background-size: auto, calc(var(--noise) * 100%);
-  background-image: none, var(--fx-noise);
 }
 
 .radio:focus-visible {
@@ -1741,7 +2435,7 @@ fieldset:disabled .select {
 
 .radio:checked,
 .radio[aria-checked=true] {
-  background-color: var(--color-base-100);
+  background-color: var(--color-surface);
   border-color: currentColor;
 }
 
@@ -1754,7 +2448,6 @@ fieldset:disabled .select {
 .radio:checked::before,
 .radio[aria-checked=true]::before {
   background-color: currentColor;
-  box-shadow: 0 -1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1));
 }
 
 @media (forced-colors: active) {
@@ -1771,9 +2464,28 @@ fieldset:disabled .select {
     outline-offset: -1rem;
   }
 }
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
+.radio:disabled {
+  cursor: not-allowed;
+  opacity: 0.2;
+}
+
+@keyframes radio {
+  0% {
+    padding: 5px;
+  }
+  50% {
+    padding: 3px;
+  }
+}
+.radio {
+  box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset;
+}
+
+.radio:checked::before,
+.radio[aria-checked=true]::before {
+  box-shadow: 0 -1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1));
+}
+
 .radio-primary {
   --input-color: var(--color-primary);
 }
@@ -1806,17 +2518,14 @@ fieldset:disabled .select {
   --input-color: var(--color-error);
 }
 
-/* ============================================================
-   Désactivé
-   ============================================================ */
-.radio:disabled {
-  cursor: not-allowed;
-  opacity: 0.2;
+.radio-square {
+  border-radius: 0;
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
+.radio-square::before {
+  border-radius: 0;
+}
+
 .radio-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -1837,58 +2546,13 @@ fieldset:disabled .select {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   Shape variants
-   ============================================================ */
-.radio-square {
-  border-radius: 0;
-}
-
-.radio-square::before {
-  border-radius: 0;
-}
-
 .radio-xl:is([type=radio]) {
-  --size: calc(var(--size-selector, 0.25rem) * 8);
+  --size: calc(2em * var(--scale));
 }
 
-/* ============================================================
-   Animation
-   ============================================================ */
-@keyframes radio {
-  0% {
-    padding: 5px;
-  }
-  50% {
-    padding: 3px;
-  }
-}
-/* ============================================================
-   toggle.css — Toggle switch (checkbox-based)
-
-   External variables (defined by theme):
-		--color-base-100      track background when checked
-		--color-base-content  thumb color when checked
-		--color-{variant}     thumb/track color when checked (set by .toggle-{color})
-		--depth               shadow / inset intensity multiplier
-		--border              border width
-		--noise               noise texture intensity (0–1)
-		--fx-noise            noise SVG data-uri (from base/svg.css)
-		--radius-selector     thumb and track corner radius
-
-   Font size system:
-		--fontsize            overrides default size (set by .toggle-xs … .toggle-xl)
-		--base / --default-base   fallback font size
-
-   Internal variables:
-		--size               toggle height (1.5em, scales with font); width is derived
-		--toggle-p           inner padding between track border and thumb
-		--input-color        track/thumb color; driven by color variants
-		--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) build error
-   ============================================================ */
 .toggle {
-  --input-color: color-mix(in oklab, var(--color-base-content) 50%, #0000);
-  --size: 1.5em;
+  --input-color: color-mix(in oklab, var(--color-on-surface) 50%, #0000);
+  --size: calc(1.5em * var(--scale));
   --toggle-p: calc(var(--size) * 0.125);
   font-size: var(--fontsize, var(--base, var(--default-base)));
   /* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
@@ -1908,7 +2572,7 @@ fieldset:disabled .select {
   grid-template-columns: 0fr 1fr 1fr;
   border-radius: calc(var(--radius-selector) + min(var(--toggle-p), var(--radius-selector-max)) + min(var(--border), var(--radius-selector-max)));
   padding: var(--toggle-p);
-  box-shadow: 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, var(--shadow-light, );
+  box-shadow: var(--shadow-light, );
   width: calc(var(--size) * 2 - (var(--border) + var(--toggle-p)) * 2);
   height: var(--size);
   transition: color 0.3s, grid-template-columns 0.2s;
@@ -1924,7 +2588,7 @@ fieldset:disabled .select {
   cursor: pointer;
   appearance: none;
   background-color: transparent;
-  padding: 0.125rem; /* p-0.5 */
+  padding: calc(0.125em * var(--scale));
   transition: opacity 0.2s, rotate 0.4s;
   border: none;
 }
@@ -1934,12 +2598,12 @@ fieldset:disabled .select {
 }
 
 .toggle > *:nth-child(2) {
-  color: var(--color-base-100);
+  color: var(--color-surface);
   rotate: 0deg;
 }
 
 .toggle > *:nth-child(3) {
-  color: var(--color-base-100);
+  color: var(--color-surface);
   opacity: 0;
   rotate: -15deg;
 }
@@ -1969,9 +2633,6 @@ fieldset:disabled .select {
   background-color: currentColor;
   translate: 0;
   transition: background-color 0.1s, translate 0.2s, inset-inline-start 0.2s;
-  box-shadow: 0 -1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
-  background-size: auto, calc(var(--noise) * 100%);
-  background-image: none, var(--fx-noise);
 }
 
 @media (forced-colors: active) {
@@ -1996,8 +2657,8 @@ fieldset:disabled .select {
 .toggle[aria-checked=true],
 .toggle:has(> input:checked) {
   grid-template-columns: 1fr 1fr 0fr;
-  background-color: var(--color-base-100);
-  --input-color: var(--color-base-content);
+  background-color: var(--color-surface);
+  --input-color: var(--color-on-surface);
 }
 
 .toggle:checked::before,
@@ -2027,9 +2688,14 @@ fieldset:disabled .select {
   border: var(--border) solid currentColor;
 }
 
-/* ============================================================
-   Variantes de couleur (actif uniquement)
-   ============================================================ */
+.toggle {
+  box-shadow: 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, var(--shadow-light, );
+}
+
+.toggle::before {
+  box-shadow: 0 -1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), rgba(0, 0, 0, 0));
+}
+
 .toggle-primary:checked,
 .toggle-primary[aria-checked=true] {
   --input-color: var(--color-primary);
@@ -2050,6 +2716,11 @@ fieldset:disabled .select {
   --input-color: var(--color-neutral);
 }
 
+.toggle-info:checked,
+.toggle-info[aria-checked=true] {
+  --input-color: var(--color-info);
+}
+
 .toggle-success:checked,
 .toggle-success[aria-checked=true] {
   --input-color: var(--color-success);
@@ -2060,41 +2731,25 @@ fieldset:disabled .select {
   --input-color: var(--color-warning);
 }
 
-.toggle-info:checked,
-.toggle-info[aria-checked=true] {
-  --input-color: var(--color-info);
-}
-
 .toggle-error:checked,
 .toggle-error[aria-checked=true] {
   --input-color: var(--color-error);
 }
 
-/* ============================================================
-   Track fill variant — colored track, inset via background-clip.
-   The thumb stays currentColor (same as border) for a unified look.
-   The track fills only the content area (inside padding), appearing
-   recessed/thinner than the outer toggle border.
-   Combine with a color variant: .toggle-track.toggle-primary etc.
-   ============================================================ */
 .toggle-track:checked,
 .toggle-track[aria-checked=true],
 .toggle-track:has(> input:checked) {
-  background-color: var(--input-color, var(--color-base-content));
+  background-color: var(--input-color, var(--color-on-surface));
   background-clip: content-box; /* track stays inside padding = inset/thinner effect */
 }
 
 .toggle-track:checked::before,
 .toggle-track[aria-checked=true]::before,
 .toggle-track:has(> input:checked)::before {
-  background-color: var(--color-base-content);
-  box-shadow: 0 0 0 0.1em var(--color-base-100);
-  /* border: 0.1em solid var(--color-base-100); */
+  background-color: var(--color-on-surface);
+  box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-surface);
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .toggle-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -2115,36 +2770,12 @@ fieldset:disabled .select {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   range.css — Range slider input
-
-   External variables (defined by theme):
-     --color-base-100      default thumb background
-     --color-{variant}     track/progress color (set by .range-{color})
-     --color-{variant}-content  thumb fill color for colored variants
-     --depth               shadow / inset intensity multiplier
-     --radius-selector     thumb and track corner radius
-
-   Font size system:
-     --fontsize            overrides default size (set by .range-xs … .range-xl)
-     --base / --default-base   fallback font size
-
-   Internal variables:
-     --range-thumb         thumb background color
-     --range-thumb-size    thumb diameter (1.5em, scales with font)
-     --range-progress      track fill color (currentColor by default)
-     --range-fill          1 = fill track before thumb, 0 = no fill
-     --range-p             thumb border / padding (0.25em)
-     --range-bg            empty track color
-     --range-dir           RTL direction multiplier (-1 when [dir="rtl"])
-     --radius-selector-max workaround for PostCSS/Nuxt calc(min(calc())) build error
-   ============================================================ */
 .range {
-  --range-thumb: var(--color-base-100);
-  --range-thumb-size: 1.5em;
+  --range-thumb: var(--color-surface);
+  --range-thumb-size: calc(1.5em * var(--scale));
   --range-progress: currentColor;
   --range-fill: 1;
-  --range-p: 0.25em;
+  --range-p: calc(0.25em * var(--scale));
   --range-bg: color-mix(in oklab, currentColor 10%, #0000);
   font-size: var(--fontsize, var(--base, var(--default-base)));
   /* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
@@ -2238,52 +2869,46 @@ fieldset:disabled .select {
   opacity: 0.3;
 }
 
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
 .range-primary {
   color: var(--color-primary);
-  --range-thumb: var(--color-primary-content);
+  --range-thumb: var(--color-on-primary);
 }
 
 .range-secondary {
   color: var(--color-secondary);
-  --range-thumb: var(--color-secondary-content);
+  --range-thumb: var(--color-on-secondary);
 }
 
 .range-accent {
   color: var(--color-accent);
-  --range-thumb: var(--color-accent-content);
+  --range-thumb: var(--color-on-accent);
 }
 
 .range-neutral {
   color: var(--color-neutral);
-  --range-thumb: var(--color-neutral-content);
-}
-
-.range-success {
-  color: var(--color-success);
-  --range-thumb: var(--color-success-content);
-}
-
-.range-warning {
-  color: var(--color-warning);
-  --range-thumb: var(--color-warning-content);
+  --range-thumb: var(--color-on-neutral);
 }
 
 .range-info {
   color: var(--color-info);
-  --range-thumb: var(--color-info-content);
+  --range-thumb: var(--color-on-info);
+}
+
+.range-success {
+  color: var(--color-success);
+  --range-thumb: var(--color-on-success);
+}
+
+.range-warning {
+  color: var(--color-warning);
+  --range-thumb: var(--color-on-warning);
 }
 
 .range-error {
   color: var(--color-error);
-  --range-thumb: var(--color-error-content);
+  --range-thumb: var(--color-on-error);
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .range-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -2304,52 +2929,15 @@ fieldset:disabled .select {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   file-input.css — File picker input
-
-   External variables (defined by theme):
-     --color-base-100      field background
-     --color-base-200      disabled background and border
-     --color-base-content  default text color
-     --color-{variant}     button and border color (set by .file-input-{color})
-     --color-{variant}-content  button text for colored variants
-     --depth               shadow / inset intensity multiplier
-     --border              border width
-     --noise               noise texture intensity (0–1)
-     --fx-noise            noise SVG data-uri (from base/svg.css)
-     --radius-field        field corner radius
-
-   Join integration (set by join.css when nested in .join):
-     --join-ss / --join-es   start-side radius overrides (applied to ::file-selector-button)
-
-   Font size system:
-     --fontsize            overrides default size (set by .file-input-xs … .file-input-xl)
-     --base / --default-base   fallback font size
-     Note: ::file-selector-button keeps its own fixed font-size
-
-   Internal variables:
-     --size          field height (2.5em, scales with font)
-     --input-color   border/shadow color; driven by color variants
-     --btn-color     seed color for the file button; set by color variants
-     --btn-bg        resolved button background
-     --btn-fg        resolved button text color
-     --btn-border    resolved button border color
-     --btn-shadow    button drop shadow
-     --btn-noise     button noise texture image
-   ============================================================ */
 .file-input {
-  --size: 2.5em;
-  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
-  --btn-bg: var(--btn-color, var(--color-base-200));
-  --btn-fg: var(--color-base-content);
-  --btn-border: color-mix(in oklab, var(--btn-bg), #000 5%);
-  --btn-shadow:
-  	0 3px 2px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000),
-  	0 4px 3px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000);
-  --btn-noise: var(--fx-noise);
+  --size: calc(2.5em * var(--scale));
+  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+  --btn-bg: var(--btn-color, var(--color-surface-high));
+  --btn-fg: var(--color-on-surface);
+  --btn-border: transparent;
   cursor: pointer;
   border: var(--border) solid rgba(0, 0, 0, 0);
-  background-color: var(--color-base-100);
+  background-color: var(--color-surface);
   display: inline-flex;
   appearance: none;
   align-items: center;
@@ -2357,7 +2945,7 @@ fieldset:disabled .select {
   user-select: none;
   width: clamp(3rem, 20rem, 100%);
   height: var(--size);
-  padding-inline-end: 0.75em;
+  padding-inline-end: calc(0.75em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
   line-height: 2;
   border-start-start-radius: var(--join-ss, var(--radius-field));
@@ -2365,13 +2953,13 @@ fieldset:disabled .select {
   border-end-start-radius: var(--join-es, var(--radius-field));
   border-end-end-radius: var(--join-ee, var(--radius-field));
   border-color: var(--input-color);
-  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+  box-shadow: var(--shadow-light, );
 }
 
 .file-input::file-selector-button {
-  margin-inline-end: 1rem; /* me-4 */
+  margin-inline-end: calc(1em * var(--scale));
   cursor: pointer;
-  padding-inline: 1rem; /* px-4 */
+  padding-inline: calc(1em * var(--scale));
   user-select: none;
   height: calc(100% + var(--border) * 2);
   margin-block: calc(var(--border) * -1);
@@ -2385,15 +2973,10 @@ fieldset:disabled .select {
   border-start-start-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
   border-end-start-radius: calc(var(--join-es, var(--radius-field)) - var(--border));
   background-color: var(--btn-bg);
-  background-size: calc(var(--noise) * 100%);
-  background-image: var(--btn-noise);
-  text-shadow: 0 0.5px oklch(1 0 0/calc(var(--depth) * 0.15));
-  box-shadow: 0 0.5px 0 0.5px color-mix(in oklab, color-mix(in oklab, white 30%, var(--btn-bg)) calc(var(--depth) * 20%), rgba(0, 0, 0, 0)) inset, var(--btn-shadow);
 }
 
 .file-input:focus {
-  --input-color: var(--color-base-content);
-  box-shadow: 0 1px color-mix(in oklab, var(--input-color) 10%, rgba(0, 0, 0, 0));
+  --input-color: var(--color-on-surface);
   outline: 2px solid var(--input-color);
   outline-offset: 2px;
   isolation: isolate;
@@ -2401,26 +2984,39 @@ fieldset:disabled .select {
 
 .file-input:has(> input[disabled]),
 .file-input:is(:disabled, [disabled]) {
-  border-color: var(--color-base-200);
-  background-color: var(--color-base-200);
-  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
+  border-color: var(--color-surface-high);
+  background-color: var(--color-surface-high);
+  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
   cursor: not-allowed;
   box-shadow: none;
 }
 
 .file-input:has(> input[disabled])::file-selector-button,
 .file-input:is(:disabled, [disabled])::file-selector-button {
-  border-color: var(--color-base-200);
-  background-color: var(--color-base-200);
+  border-color: var(--color-surface-high);
+  background-color: var(--color-surface-high);
   cursor: not-allowed;
   --btn-border: #0000;
-  --btn-noise: none;
-  --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
+  --btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
 }
 
-/* ============================================================
-   Ghost
-   ============================================================ */
+.file-input {
+  --btn-border: color-mix(in oklab, var(--btn-bg), #000 5%);
+  --btn-shadow:
+  	0 3px 2px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000),
+  	0 4px 3px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000);
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), rgba(0, 0, 0, 0)) inset, 0 -1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, var(--shadow-light, );
+}
+
+.file-input::file-selector-button {
+  text-shadow: 0 0.5px oklch(1 0 0/calc(var(--depth) * 0.15));
+  box-shadow: 0 0.5px 0 0.5px color-mix(in oklab, color-mix(in oklab, white 30%, var(--btn-bg)) calc(var(--depth) * 20%), rgba(0, 0, 0, 0)) inset, var(--btn-shadow);
+}
+
+.file-input:focus {
+  box-shadow: 0 1px color-mix(in oklab, var(--input-color) 10%, rgba(0, 0, 0, 0));
+}
+
 .file-input-ghost {
   background-color: transparent;
   transition: background-color 0.2s;
@@ -2430,10 +3026,10 @@ fieldset:disabled .select {
 
 .file-input-ghost::file-selector-button {
   margin-inline-start: 0; /* ms-0 */
-  margin-inline-end: 1rem; /* me-4 */
+  margin-inline-end: calc(1em * var(--scale));
   height: 100%;
   cursor: pointer;
-  padding-inline: 1rem; /* px-4 */
+  padding-inline: calc(1em * var(--scale));
   user-select: none;
   margin-block: 0;
   border-start-end-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
@@ -2442,27 +3038,10 @@ fieldset:disabled .select {
 
 .file-input-ghost:focus,
 .file-input-ghost:focus-within {
-  color: var(--color-base-content);
-  background-color: var(--color-base-100);
+  color: var(--color-on-surface);
+  background-color: var(--color-surface);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
-}
-
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
-.file-input-neutral {
-  --btn-color: var(--color-neutral);
-}
-
-.file-input-neutral::file-selector-button {
-  color: var(--color-neutral-content);
-}
-
-.file-input-neutral,
-.file-input-neutral:focus,
-.file-input-neutral:focus-within {
-  --input-color: var(--color-neutral);
 }
 
 .file-input-primary {
@@ -2470,7 +3049,7 @@ fieldset:disabled .select {
 }
 
 .file-input-primary::file-selector-button {
-  color: var(--color-primary-content);
+  color: var(--color-on-primary);
 }
 
 .file-input-primary,
@@ -2484,7 +3063,7 @@ fieldset:disabled .select {
 }
 
 .file-input-secondary::file-selector-button {
-  color: var(--color-secondary-content);
+  color: var(--color-on-secondary);
 }
 
 .file-input-secondary,
@@ -2498,7 +3077,7 @@ fieldset:disabled .select {
 }
 
 .file-input-accent::file-selector-button {
-  color: var(--color-accent-content);
+  color: var(--color-on-accent);
 }
 
 .file-input-accent,
@@ -2507,12 +3086,26 @@ fieldset:disabled .select {
   --input-color: var(--color-accent);
 }
 
+.file-input-neutral {
+  --btn-color: var(--color-neutral);
+}
+
+.file-input-neutral::file-selector-button {
+  color: var(--color-on-neutral);
+}
+
+.file-input-neutral,
+.file-input-neutral:focus,
+.file-input-neutral:focus-within {
+  --input-color: var(--color-neutral);
+}
+
 .file-input-info {
   --btn-color: var(--color-info);
 }
 
 .file-input-info::file-selector-button {
-  color: var(--color-info-content);
+  color: var(--color-on-info);
 }
 
 .file-input-info,
@@ -2526,7 +3119,7 @@ fieldset:disabled .select {
 }
 
 .file-input-success::file-selector-button {
-  color: var(--color-success-content);
+  color: var(--color-on-success);
 }
 
 .file-input-success,
@@ -2540,7 +3133,7 @@ fieldset:disabled .select {
 }
 
 .file-input-warning::file-selector-button {
-  color: var(--color-warning-content);
+  color: var(--color-on-warning);
 }
 
 .file-input-warning,
@@ -2554,7 +3147,7 @@ fieldset:disabled .select {
 }
 
 .file-input-error::file-selector-button {
-  color: var(--color-error-content);
+  color: var(--color-on-error);
 }
 
 .file-input-error,
@@ -2563,9 +3156,6 @@ fieldset:disabled .select {
   --input-color: var(--color-error);
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .file-input-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -2584,49 +3174,26 @@ fieldset:disabled .select {
 
 .file-input-xl {
   --fontsize: var(--xl, var(--default-xl));
-  padding-inline-end: 1.5em;
 }
 
-/* ============================================================
-   chip.css — Small inline label / badge (replaces DaisyUI badge)
+.file-input-xl {
+  padding-inline-end: calc(1.5em * var(--scale));
+}
 
-   External variables (defined by theme):
-		--color-base-100      default chip background
-		--color-base-200      ghost/outline border and background
-		--color-base-content  default text color
-		--color-{variant}     seed color (set by .chip-{color})
-		--color-{variant}-content  text color for filled variants
-		--noise               noise texture intensity (0–1)
-		--fx-noise            noise SVG data-uri (from base/svg.css)
-		--border              border width
-		--radius-selector     corner radius
-
-   Font size system:
-		--fontsize            overrides default size (set by .chip-xs … .chip-xl)
-		--base / --default-base   fallback font size
-
-   Internal variables:
-		--size        chip height (1.6em, scales with font); padding derived from it
-		--chip-color  seed color; driven by color variant classes
-		--chip-bg     resolved background color
-		--chip-fg     resolved text color
-   ============================================================ */
 .chip {
-  --chip-bg: var(--chip-color, var(--color-base-100));
-  --chip-fg: var(--color-base-content);
-  --size: 1.6em;
+  --chip-bg: var(--chip-color, var(--color-surface));
+  --chip-fg: var(--color-on-surface);
+  --size: calc(1.6em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
   border-radius: var(--radius-selector);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5em;
+  gap: calc(0.5em * var(--scale));
   vertical-align: middle;
   color: var(--chip-fg);
-  border: var(--border) solid var(--chip-color, var(--color-base-200));
+  border: var(--border) solid var(--chip-color, var(--color-surface-high));
   width: fit-content;
-  background-size: auto, calc(var(--noise) * 100%);
-  background-image: none, var(--fx-noise);
   background-color: var(--chip-bg);
   height: var(--size);
   padding-inline: calc(var(--size) / 2 - var(--border));
@@ -2637,9 +3204,6 @@ fieldset:disabled .select {
   height: 1em;
 }
 
-/* ============================================================
-   Variantes de style
-   ============================================================ */
 .chip-outline {
   color: var(--chip-color);
   --chip-bg: #0000;
@@ -2656,65 +3220,59 @@ fieldset:disabled .select {
 }
 
 .chip-soft {
-  color: var(--chip-color, var(--color-base-content));
-  background-color: color-mix(in oklab, var(--chip-color, var(--color-base-content)) 8%, var(--color-base-100));
-  border-color: color-mix(in oklab, var(--chip-color, var(--color-base-content)) 10%, var(--color-base-100));
+  color: var(--chip-color, var(--color-on-surface));
+  background-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 8%, var(--color-surface));
+  border-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 10%, var(--color-surface));
   background-image: none;
 }
 
 .chip-ghost {
-  border-color: var(--color-base-200);
-  background-color: var(--color-base-200);
-  color: var(--color-base-content);
+  border-color: var(--color-surface-high);
+  background-color: var(--color-surface-high);
+  color: var(--color-on-surface);
   background-image: none;
 }
 
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
 .chip-primary {
   --chip-color: var(--color-primary);
-  --chip-fg: var(--color-primary-content);
+  --chip-fg: var(--color-on-primary);
 }
 
 .chip-secondary {
   --chip-color: var(--color-secondary);
-  --chip-fg: var(--color-secondary-content);
+  --chip-fg: var(--color-on-secondary);
 }
 
 .chip-accent {
   --chip-color: var(--color-accent);
-  --chip-fg: var(--color-accent-content);
+  --chip-fg: var(--color-on-accent);
 }
 
 .chip-neutral {
   --chip-color: var(--color-neutral);
-  --chip-fg: var(--color-neutral-content);
+  --chip-fg: var(--color-on-neutral);
 }
 
 .chip-info {
   --chip-color: var(--color-info);
-  --chip-fg: var(--color-info-content);
+  --chip-fg: var(--color-on-info);
 }
 
 .chip-success {
   --chip-color: var(--color-success);
-  --chip-fg: var(--color-success-content);
+  --chip-fg: var(--color-on-success);
 }
 
 .chip-warning {
   --chip-color: var(--color-warning);
-  --chip-fg: var(--color-warning-content);
+  --chip-fg: var(--color-on-warning);
 }
 
 .chip-error {
   --chip-color: var(--color-error);
-  --chip-fg: var(--color-error-content);
+  --chip-fg: var(--color-on-error);
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .chip-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -2735,23 +3293,6 @@ fieldset:disabled .select {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   badge.css — badge / badge overlay wrapper (replaces DaisyUI badge)
-
-   External variables (defined by theme):
-     none
-
-   Internal variables (CSS custom properties used for position control):
-     --badge-t    top offset (default: 0)
-     --badge-b    bottom offset (default: auto)
-     --badge-s    inset-inline-start offset (default: auto)
-     --badge-e    inset-inline-end offset (default: 0)
-     --badge-x    horizontal translate (default: 50%)
-     --badge-y    vertical translate (default: -50%)
-
-   Usage: combine .badge wrapper with .badge-{position} modifiers.
-   The inner element with class .badge is the positioned badge itself.
-   ============================================================ */
 .badge {
   position: relative;
   display: inline-flex;
@@ -2769,9 +3310,6 @@ fieldset:disabled .select {
   translate: var(--badge-x, 50%) var(--badge-y, -50%);
 }
 
-/* ============================================================
-   Position horizontale
-   ============================================================ */
 .badge-start {
   --badge-s: 0;
   --badge-e: auto;
@@ -2806,9 +3344,6 @@ fieldset:disabled .select {
   --badge-x: -50%;
 }
 
-/* ============================================================
-   Position verticale
-   ============================================================ */
 .badge-top {
   --badge-t: 0;
   --badge-b: auto;
@@ -2827,56 +3362,21 @@ fieldset:disabled .select {
   --badge-y: 50%;
 }
 
-/* ============================================================
-   tab.css — Tabs navigation component
-
-   External variables (defined by theme):
-     --color-base-100      active tab background (tabs-box, tabs-lift)
-     --color-base-200      tabs-box track background
-     --color-base-300      default tab border color
-     --color-neutral       tabs-box active shadow color
-     --border              border width
-     --radius-field        tab corner radius
-     --radius-box          tab content panel corner radius
-     --depth               shadow / inset intensity multiplier
-
-   Font size system:
-     --fontsize            overrides tab font size (set by .tabs-xs … .tabs-xl)
-     --base / --default-base   fallback font size
-
-   Internal variables (set on .tabs / .tab, consumed by children):
-     --tabs-height         container height (auto or fixed)
-     --tabs-direction      flex direction (row)
-     --tab-height          individual tab height (2.5em, scales with font)
-     --tab-p               tab inline padding (0.75em, scales with font)
-     --tab-bg              active tab background color
-     --tab-border-color    tab border color
-     --tab-order           tab order in flex container
-     --tab-radius-min      minimum inner radius
-     --tab-radius-limit    clamped radius = min(--radius-field, --tab-radius-min)
-     --tab-radius-grad     radial gradient for lifted corner decoration
-     --tab-radius-ss/se/es/ee   per-corner radius values
-     --tab-border / --tab-border-colors   active tab border sides
-     --tab-paddings        active tab padding adjustment
-     --tab-inset / --radius-start / --radius-end   lifted corner positioning
-     --tabs-box-radius     box variant rounding
-     --tabcontent-order / --tabcontent-margin / --tabcontent-radius-*  content panel layout
-   ============================================================ */
 .tabs {
   display: flex;
   flex-wrap: wrap;
   --tabs-height: auto;
   --tabs-direction: row;
-  --tab-height: 2.5em;
+  --tab-height: calc(2.5em * var(--scale));
   height: var(--tabs-height);
   flex-direction: var(--tabs-direction);
 }
 
 .tab {
-  --tab-p: 0.75em;
+  --tab-p: calc(0.75em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
-  --tab-bg: var(--color-base-100);
-  --tab-border-color: var(--color-base-300);
+  --tab-bg: var(--color-surface);
+  --tab-border-color: var(--color-border);
   --tab-radius-ss: 0;
   --tab-radius-se: 0;
   --tab-radius-es: 0;
@@ -2906,7 +3406,7 @@ fieldset:disabled .select {
 }
 
 .tab:hover {
-  color: var(--color-base-content);
+  color: var(--color-on-surface);
 }
 
 .tab:is(input[type=radio]) {
@@ -2944,7 +3444,7 @@ label:has(:checked),
 [aria-selected=true],
 [aria-current=true],
 [aria-current=page]) {
-  color: color-mix(in oklch, var(--color-base-content) 50%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-on-surface) 50%, rgba(0, 0, 0, 0));
 }
 
 .tab:not(input):empty {
@@ -2992,9 +3492,6 @@ label:has(:checked),
   opacity: 0.4;
 }
 
-/* ============================================================
-   tabs-border
-   ============================================================ */
 .tabs-border > .tab {
   --tab-border-color: #0000 #0000 var(--tab-border-color) #0000;
   position: relative;
@@ -3020,9 +3517,6 @@ label:has(:checked),
   border-top: 3px solid;
 }
 
-/* ============================================================
-   tabs-lift
-   ============================================================ */
 .tabs-lift {
   --tabs-height: auto;
   --tabs-direction: row;
@@ -3115,9 +3609,6 @@ label:has(:checked),
   --tabcontent-radius-ss: var(--radius-box);
 }
 
-/* ============================================================
-   tabs-top / tabs-bottom
-   ============================================================ */
 .tabs-top {
   --tabs-height: auto;
   --tabs-direction: row;
@@ -3210,13 +3701,10 @@ label:has(:checked),
   --tabcontent-radius-es: var(--radius-box);
 }
 
-/* ============================================================
-   tabs-box
-   ============================================================ */
 .tabs-box {
   --tabs-box-radius: calc(3 * var(--radius-field));
-  background-color: var(--color-base-200);
-  padding: 0.25rem; /* p-1 */
+  background-color: var(--color-surface-high);
+  padding: calc(0.25em * var(--scale));
   border-radius: calc(min(var(--tab-height) / 2, var(--radius-field)) + min(0.25rem, var(--tabs-box-radius)));
   box-shadow: 0 -0.5px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 0.5px oklch(0% 0 0/calc(var(--depth) * 0.05)) inset;
 }
@@ -3238,7 +3726,7 @@ label:has(:checked),
 .tabs-box > :is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]),
 .tabs-box > :is(input:checked),
 .tabs-box > :is(label:has(:checked)) {
-  background-color: var(--tab-bg, var(--color-base-100));
+  background-color: var(--tab-bg, var(--color-surface));
   box-shadow: 0 1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px 1px -1px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 50%), rgba(0, 0, 0, 0)), 0 1px 6px -4px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 100%), rgba(0, 0, 0, 0));
 }
 
@@ -3250,14 +3738,11 @@ label:has(:checked),
   }
 }
 .tabs-box > .tab-content {
-  margin-top: 0.25rem; /* mt-1 */
-  height: calc(100% - var(--tab-height) + var(--border) - 0.5rem);
+  margin-top: calc(0.25em * var(--scale));
+  height: calc(100% - var(--tab-height) + var(--border) - 0.5em * var(--scale));
   border-radius: calc(min(var(--tab-height) / 2, var(--radius-field)) + min(0.25rem, var(--tabs-box-radius)) - var(--border));
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .tabs-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -3278,19 +3763,6 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   loading.css — Animated loading indicator
-
-   External variables (defined by theme):
-     none — uses currentColor for fill
-
-   Font size system:
-     --fontsize            overrides indicator size (set by .loading-xs … .loading-xl)
-     --base / --default-base   fallback font size
-
-   Internal variables:
-     width   1.5em (scales with font size via --fontsize)
-   ============================================================ */
 .loading {
   pointer-events: none;
   display: inline-block;
@@ -3298,7 +3770,7 @@ label:has(:checked),
   background-color: currentColor;
   vertical-align: middle;
   font-size: var(--fontsize, var(--base, var(--default-base)));
-  width: 1.5em;
+  width: calc(1.5em * var(--scale));
   mask-size: 100%;
   mask-repeat: no-repeat;
   mask-position: center;
@@ -3329,9 +3801,6 @@ label:has(:checked),
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' style='shape-rendering:auto;' width='200px' height='200px' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid'%3E%3Cpath fill='none' stroke='black' stroke-width='10' stroke-dasharray='205.271 51.318' d='M24.3 30C11.4 30 5 43.3 5 50s6.4 20 19.3 20c19.3 0 32.1-40 51.4-40C88.6 30 95 43.3 95 50s-6.4 20-19.3 20C56.4 70 43.6 30 24.3 30z' stroke-linecap='round' style='transform:scale(0.8);transform-origin:50px 50px'%3E%3Canimate attributeName='stroke-dashoffset' repeatCount='indefinite' dur='2s' keyTimes='0;1' values='0;256.589'/%3E%3C/path%3E%3C/svg%3E");
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .loading-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -3352,22 +3821,11 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   progress.css — Linear progress bar
-
-   External variables (defined by theme):
-     --color-base-content  default track/fill color
-     --color-{variant}     fill color (set by .progress-{color})
-     --radius-box          bar corner radius
-
-   Internal variables:
-     none — height is fixed at 0.5rem; color driven by currentColor
-   ============================================================ */
 .progress {
   border-radius: var(--radius-box);
-  color: var(--color-base-content);
+  color: var(--color-on-surface);
   position: relative;
-  height: 0.5rem; /* h-2 */
+  height: calc(0.5em * var(--scale));
   width: 100%;
   appearance: none;
   overflow: hidden;
@@ -3412,9 +3870,11 @@ label:has(:checked),
     background-color: currentColor;
   }
 }
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
+@keyframes progress {
+  50% {
+    background-position-x: -115%;
+  }
+}
 .progress-primary {
   color: var(--color-primary);
 }
@@ -3447,35 +3907,9 @@ label:has(:checked),
   color: var(--color-error);
 }
 
-/* ============================================================
-   Animation
-   ============================================================ */
-@keyframes progress {
-  50% {
-    background-position-x: -115%;
-  }
-}
-/* ============================================================
-   radial-progress.css — Circular progress ring
-
-   External variables (defined by theme):
-     none — uses currentColor for the ring
-
-   Font size system:
-     --fontsize            overrides ring size (set by .radial-progress-xs … .radial-progress-xl)
-     --base / --default-base   fallback font size
-
-   User-set variables (must be provided in HTML style or CSS):
-     --value       progress value 0–100 (required)
-     --size        ring diameter (default: 5em, scales with font)
-     --thickness   ring stroke width (default: --size / 10)
-
-   Internal variables:
-     --radialprogress   computed from --value (animated CSS property)
-   ============================================================ */
 .radial-progress {
   --value: 0;
-  --size: 5em;
+  --size: calc(5em * var(--scale));
   --thickness: calc(var(--size) / 10);
   --radialprogress: calc(var(--value) * 1%);
   font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -3489,26 +3923,6 @@ label:has(:checked),
   vertical-align: middle;
   box-sizing: content-box;
   transition: --radialprogress 0.3s linear;
-}
-
-.radial-progress-xs {
-  --fontsize: var(--xs, var(--default-xs));
-}
-
-.radial-progress-sm {
-  --fontsize: var(--sm, var(--default-sm));
-}
-
-.radial-progress-md {
-  --fontsize: var(--md, var(--default-md));
-}
-
-.radial-progress-lg {
-  --fontsize: var(--lg, var(--default-lg));
-}
-
-.radial-progress-xl {
-  --fontsize: var(--xl, var(--default-xl));
 }
 
 .radial-progress::before {
@@ -3531,23 +3945,31 @@ label:has(:checked),
   transition: transform 0.3s linear;
 }
 
-/* ============================================================
-   skeleton.css — Loading skeleton placeholder
+.radial-progress-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
 
-   External variables (defined by theme):
-     --color-base-100    shimmer highlight color
-     --color-base-300    skeleton base background
-     --color-base-content  used for .skeleton-text shimmer
-     --radius-box        corner radius
+.radial-progress-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
 
-   Internal variables:
-     none — dimensions are set by the element itself (width/height in HTML/CSS)
-   ============================================================ */
+.radial-progress-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.radial-progress-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.radial-progress-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
 .skeleton {
-  background-color: var(--color-base-300);
+  background-color: var(--color-surface-high);
   border-radius: var(--radius-box);
   will-change: background-position;
-  background-image: linear-gradient(105deg, rgba(0, 0, 0, 0) 0% 40%, var(--color-base-100) 50%, rgba(0, 0, 0, 0) 60% 100%);
+  background-image: linear-gradient(105deg, rgba(0, 0, 0, 0) 0% 40%, var(--color-surface) 50%, rgba(0, 0, 0, 0) 60% 100%);
   background-size: 200% auto;
   background-position-x: -50%;
 }
@@ -3566,12 +3988,9 @@ label:has(:checked),
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  background-image: linear-gradient(105deg, color-mix(in oklab, var(--color-base-content) 20%, transparent) 0% 40%, var(--color-base-content) 50%, color-mix(in oklab, var(--color-base-content) 20%, transparent) 60% 100%);
+  background-image: linear-gradient(105deg, color-mix(in oklab, var(--color-on-surface) 20%, transparent) 0% 40%, var(--color-on-surface) 50%, color-mix(in oklab, var(--color-on-surface) 20%, transparent) 60% 100%);
 }
 
-/* ============================================================
-   Animation
-   ============================================================ */
 @keyframes skeleton {
   0% {
     background-position: 150%;
@@ -3580,54 +3999,25 @@ label:has(:checked),
     background-position: -50%;
   }
 }
-/* ============================================================
-   list.css — List display component + suggestion dropdown pattern
-
-   External variables (defined by theme):
-     --color-base-100      list background
-     --color-base-200      separator and border color
-     --color-base-content  text and separator color
-     --color-primary       selected suggestion highlight
-     --depth               shadow intensity
-     --border              border width
-     --radius-box          list container corner radius
-     --radius-field        suggestion item corner radius
-
-   Join integration (set by join.css when nested in .join):
-     --join-ss / --join-se / --join-es / --join-ee   per-corner radius overrides
-
-   Font size system:
-     --fontsize            overrides font size (set by .list-xs … .list-xl)
-     --base / --default-base   fallback font size
-
-   Internal variables:
-     --list-grid-cols   auto-computed grid columns based on .list-col-grow index
-   ============================================================ */
-/* ============================================================
-   Base list container
-   ============================================================ */
 .list {
   display: flex;
   flex-direction: column;
   font-size: var(--fontsize, var(--base, var(--default-base)));
-  background-color: var(--color-base-100);
+  background-color: var(--color-surface);
   border-start-start-radius: var(--join-ss, var(--radius-box));
   border-start-end-radius: var(--join-se, var(--radius-box));
   border-end-start-radius: var(--join-es, var(--radius-box));
   border-end-end-radius: var(--join-ee, var(--radius-box));
 }
 
-/* ============================================================
-   List rows (data display)
-   ============================================================ */
 .list-row {
   --list-grid-cols: minmax(0, auto) 1fr;
   position: relative;
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: var(--list-grid-cols);
-  gap: 1rem;
-  padding: 1rem;
+  gap: calc(1em * var(--scale));
+  padding: calc(1em * var(--scale));
   word-break: break-word;
 }
 
@@ -3637,8 +4027,8 @@ label:has(:checked),
   content: "";
   position: absolute;
   bottom: 0;
-  inset-inline: 1rem;
-  border-bottom: var(--border) solid color-mix(in oklab, var(--color-base-content) 5%, rgba(0, 0, 0, 0));
+  inset-inline: calc(1em * var(--scale));
+  border-bottom: var(--border) solid color-mix(in oklab, var(--color-on-surface) 5%, rgba(0, 0, 0, 0));
 }
 
 /* Grid column layout — grows at the Nth .list-col-grow child */
@@ -3672,23 +4062,10 @@ label:has(:checked),
   grid-column: 1/-1;
 }
 
-/* ============================================================
-   Suggestion list variant
-   Used below an input in a .join to provide autocomplete options.
-
-   Usage:
-     <div class="join join-vertical">
-       <input class="input join-item" placeholder="Search…" />
-       <ul class="list list-suggestions join-item">
-         <li class="suggestion-item">Result 1</li>
-         <li class="suggestion-item suggestion-item-active">Result 2</li>
-       </ul>
-     </div>
-   ============================================================ */
 .list-suggestions {
-  padding: 0.25rem;
-  border: var(--border) solid var(--color-base-200);
-  box-shadow: 0 8px 16px -4px color-mix(in oklab, var(--color-base-content) 10%, rgba(0, 0, 0, 0)), var(--shadow-light, );
+  padding: calc(0.25em * var(--scale));
+  border: var(--border) solid var(--color-surface-high);
+  box-shadow: 0 8px 16px -4px color-mix(in oklab, var(--color-on-surface) 10%, rgba(0, 0, 0, 0)), var(--shadow-light, );
   overflow-y: auto;
   max-height: min(16rem, 60dvh);
 }
@@ -3696,8 +4073,8 @@ label:has(:checked),
 .suggestion-item {
   display: flex;
   align-items: center;
-  gap: 0.5em;
-  padding: 0.4em 0.75em;
+  gap: calc(0.5em * var(--scale));
+  padding: calc(0.4em * var(--scale)) calc(0.75em * var(--scale));
   border-radius: var(--radius-field);
   cursor: pointer;
   transition: background-color 0.1s;
@@ -3706,7 +4083,7 @@ label:has(:checked),
 
 @media (hover: hover) {
   .suggestion-item:hover {
-    background-color: color-mix(in oklab, var(--color-base-content) 7%, rgba(0, 0, 0, 0));
+    background-color: color-mix(in oklab, var(--color-on-surface) 7%, rgba(0, 0, 0, 0));
   }
 }
 /* Keyboard-navigated active item */
@@ -3717,9 +4094,6 @@ label:has(:checked),
   font-weight: 500;
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .list-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -3740,18 +4114,6 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   text.css — Système typographique
-
-   Naming: .{type}-s{size}-b{weight}
-		s = size index, 1 = largest
-		b = weight index, 1 = heaviest (700), 2 = medium (500), 3 = regular (400)
-   Subtitles have a fixed weight — no b index.
-   Title is unique — no index.
-   ============================================================ */
-/* ============================================================
-   Title
-   ============================================================ */
 .title {
   font-size: var(--xxl, var(--default-xxl));
   font-weight: 800;
@@ -3759,9 +4121,6 @@ label:has(:checked),
   letter-spacing: -0.02em;
 }
 
-/* ============================================================
-   Subtitle (fixed weight)
-   ============================================================ */
 .subtitle-s1 {
   font-size: var(--xl, var(--default-xl));
   font-weight: 700;
@@ -3775,9 +4134,7 @@ label:has(:checked),
   line-height: 1.35;
 }
 
-/* ============================================================
-   Text — s1 (--md)
-   ============================================================ */
+/* Text — s1 (--md) */
 .text-s1-b1 {
   font-size: var(--md, var(--default-md));
   font-weight: 600;
@@ -3796,9 +4153,7 @@ label:has(:checked),
   line-height: 1.6;
 }
 
-/* ============================================================
-   Text — s2 (--base)
-   ============================================================ */
+/* Text — s2 (--base) */
 .text-s2-b1 {
   font-size: var(--base, var(--default-base));
   font-weight: 600;
@@ -3817,9 +4172,7 @@ label:has(:checked),
   line-height: 1.6;
 }
 
-/* ============================================================
-   Text — s3 (--sm)
-   ============================================================ */
+/* Text — s3 (--sm) */
 .text-s3-b1 {
   font-size: var(--sm, var(--default-sm));
   font-weight: 600;
@@ -3838,9 +4191,7 @@ label:has(:checked),
   line-height: 1.55;
 }
 
-/* ============================================================
-   Text — s4 (--xs)
-   ============================================================ */
+/* Text — s4 (--xs) */
 .text-s4-b1 {
   font-size: var(--xs, var(--default-xs));
   font-weight: 600;
@@ -3859,15 +4210,6 @@ label:has(:checked),
   line-height: 1.5;
 }
 
-/* ============================================================
-   link.css — Styled hyperlink / anchor
-
-   External variables (defined by theme):
-     --color-{variant}   text color (set by .link-{color} classes)
-
-   Internal variables:
-     none — inherits font size and color from context
-   ============================================================ */
 .link {
   cursor: pointer;
   text-decoration: underline;
@@ -3890,9 +4232,6 @@ label:has(:checked),
   text-decoration: underline;
 }
 
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
 .link-primary {
   color: var(--color-primary);
 }
@@ -3909,12 +4248,12 @@ label:has(:checked),
   color: var(--color-neutral);
 }
 
-.link-success {
-  color: var(--color-success);
-}
-
 .link-info {
   color: var(--color-info);
+}
+
+.link-success {
+  color: var(--color-success);
 }
 
 .link-warning {
@@ -3938,11 +4277,11 @@ label:has(:checked),
   .link-neutral:hover {
     color: color-mix(in oklab, var(--color-neutral) 80%, #000);
   }
-  .link-success:hover {
-    color: color-mix(in oklab, var(--color-success) 80%, #000);
-  }
   .link-info:hover {
     color: color-mix(in oklab, var(--color-info) 80%, #000);
+  }
+  .link-success:hover {
+    color: color-mix(in oklab, var(--color-success) 80%, #000);
   }
   .link-warning:hover {
     color: color-mix(in oklab, var(--color-warning) 80%, #000);
@@ -3951,16 +4290,6 @@ label:has(:checked),
     color: color-mix(in oklab, var(--color-error) 80%, #000);
   }
 }
-/* ============================================================
-   breadcrumbs.css — Breadcrumb navigation
-
-   External variables (defined by theme):
-		none
-
-   Font size system:
-		--fontsize            overrides font size (set by .breadcrumbs-xs … .breadcrumbs-xl)
-		--base / --default-base   fallback font size
-   ============================================================ */
 .breadcrumbs {
   font-size: var(--fontsize, var(--base, var(--default-base)));
   max-width: 100%;
@@ -4035,9 +4364,6 @@ label:has(:checked),
   rotate: -135deg;
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .breadcrumbs-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
@@ -4058,19 +4384,8 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* ============================================================
-   dock.css — Fixed bottom navigation bar (mobile app dock)
-
-   External variables (defined by theme):
-     --color-base-100      dock background
-     --color-base-content  used for disabled item text color mix
-     --radius-box          item corner radius
-
-   Internal variables:
-     none — item sizes set via height on .dock-xs … .dock-xl
-   ============================================================ */
 .dock {
-  background-color: var(--color-base-100);
+  background-color: var(--color-surface-peak);
   position: fixed;
   right: 0;
   bottom: 0;
@@ -4083,7 +4398,7 @@ label:has(:checked),
   justify-content: space-around;
   padding: 0.5rem;
   color: currentColor;
-  border-top: 0.5px solid color-mix(in oklab, var(--color-base-content) 5%, rgba(0, 0, 0, 0));
+  border-top: 0.5px solid color-mix(in oklab, var(--color-on-surface) 5%, rgba(0, 0, 0, 0));
   height: 4rem;
   height: calc(4rem + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
@@ -4114,14 +4429,14 @@ label:has(:checked),
 }
 .dock > *[aria-disabled=true],
 .dock > *[disabled] {
-  color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
   pointer-events: none;
   opacity: 1;
 }
 
 .dock > *[aria-disabled=true]:hover,
 .dock > *[disabled]:hover {
-  color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
   pointer-events: none;
   opacity: 1;
 }
@@ -4149,9 +4464,6 @@ label:has(:checked),
   color: currentColor;
 }
 
-/* ============================================================
-   Tailles
-   ============================================================ */
 .dock-xs {
   height: 3rem;
   height: calc(3rem + env(safe-area-inset-bottom));
@@ -4213,22 +4525,6 @@ label:has(:checked),
   font-size: 0.75rem;
 }
 
-/* ============================================================
-   join.css — Group adjacent form elements into a single visual unit
-
-   External variables (defined by theme):
-     --border        used for negative margin to merge borders
-     --radius-field  default corner radius applied to first/last items
-
-   Exported variables (injected into child .join-item elements):
-     --join-ss   border-start-start-radius override (0 = flush)
-     --join-se   border-start-end-radius override
-     --join-es   border-end-start-radius override
-     --join-ee   border-end-end-radius override
-
-   These variables are consumed by input, select, button, and other
-   field components that reference var(--join-ss, var(--radius-field)).
-   ============================================================ */
 .join {
   display: inline-flex;
   align-items: stretch;
@@ -4307,21 +4603,17 @@ label:has(:checked),
     isolation: isolate;
   }
 }
-/* ============================================================
-   join-item height fix
+/* join-item height fix.
    Buttons use a compact em-based height (--size) while field elements
    (input, select) use a taller one. Override height → auto so the button
    can stretch to match its siblings via align-items: stretch on .join.
-   min-height keeps it from collapsing below its natural size.
-   ============================================================ */
+   min-height keeps it from collapsing below its natural size. */
 .join > .join-item:where(.btn) {
   height: unset;
-  min-height: var(--size, 1.75em);
+  min-height: var(--size, calc(2.5em * var(--scale)));
 }
 
-/* ============================================================
-   join-item : fusion des bordures
-   ============================================================ */
+/* Border merging */
 .join-item:where(*:not(:first-child, :disabled, [disabled], .btn-disabled)) {
   margin-inline-start: calc(var(--border, 1px) * -1);
   margin-block-start: 0;
@@ -4331,9 +4623,6 @@ label:has(:checked),
   border-width: var(--border, 1px) 0 var(--border, 1px) var(--border, 1px);
 }
 
-/* ============================================================
-   Variante verticale
-   ============================================================ */
 .join-vertical {
   flex-direction: column;
 }
@@ -4385,9 +4674,6 @@ label:has(:checked),
   margin-block-start: calc(var(--border, 1px) * -1);
 }
 
-/* ============================================================
-   Variante horizontale (explicite)
-   ============================================================ */
 .join-horizontal {
   flex-direction: row;
 }
@@ -4439,62 +4725,42 @@ label:has(:checked),
   margin-block-start: 0;
 }
 
-/* ============================================================
-   fieldset.css — Form field group container
-
-   External variables (defined by theme):
-     --color-base-content   legend and label text color
-
-   Internal variables:
-     none
-   ============================================================ */
 .fieldset {
   display: grid;
-  gap: 0.375rem; /* gap-1.5 */
-  padding-block: 0.25rem; /* py-1 */
+  gap: calc(0.375em * var(--scale));
+  padding-block: calc(0.25em * var(--scale));
   font-size: 0.75rem;
   grid-template-columns: 1fr;
   grid-auto-rows: max-content;
 }
 
 .fieldset-legend {
-  color: var(--color-base-content);
-  margin-bottom: -0.25rem; /* -mb-1 */
+  color: var(--color-on-surface);
+  margin-bottom: calc(-0.25em * var(--scale));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem; /* gap-2 */
-  padding-block: 0.5rem; /* py-2 */
+  gap: calc(0.5em * var(--scale));
+  padding-block: calc(0.5em * var(--scale));
   font-weight: 600;
 }
 
 /* Deprecated — replaced by .label, kept to avoid breaking changes */
 .fieldset-label {
-  color: color-mix(in oklch, var(--color-base-content) 60%, rgba(0, 0, 0, 0)); /* text-base-content/60 */
+  color: color-mix(in oklch, var(--color-on-surface) 60%, rgba(0, 0, 0, 0));
   display: flex;
   align-items: center;
-  gap: 0.375rem; /* gap-1.5 */
+  gap: calc(0.375em * var(--scale));
 }
 
 .fieldset-label:has(input) {
   cursor: pointer;
 }
 
-/* ============================================================
-   label.css — Label and floating label wrapper
-
-   External variables (defined by theme):
-     --color-base-100   floating label background (hides the field border behind it)
-     --border           inline divider width inside .input / .select
-     --size-field       used to calculate floating label vertical center position
-
-   Internal variables:
-     none
-   ============================================================ */
 .label {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem; /* gap-1.5 */
+  gap: calc(0.375em * var(--scale));
   white-space: nowrap;
   color: color-mix(in oklch, currentColor 60%, rgba(0, 0, 0, 0)); /* text-current/60 */
 }
@@ -4507,30 +4773,27 @@ label:has(:checked),
 .input > .label,
 .select > .label {
   display: flex;
-  height: calc(100% - 0.5rem);
+  height: calc(100% - 0.5em * var(--scale));
   align-items: center;
-  padding-inline: 0.75rem; /* px-3 */
+  padding-inline: calc(0.75em * var(--scale));
   white-space: nowrap;
   font-size: inherit;
 }
 
 .input > .label:first-child,
 .select > .label:first-child {
-  margin-inline-start: -0.75rem; /* -ms-3 */
-  margin-inline-end: 0.75rem; /* me-3 */
+  margin-inline-start: calc(-0.75em * var(--scale));
+  margin-inline-end: calc(0.75em * var(--scale));
   border-inline-end: var(--border) solid color-mix(in oklab, currentColor 10%, rgba(0, 0, 0, 0));
 }
 
 .input > .label:last-child,
 .select > .label:last-child {
-  margin-inline-start: 0.75rem; /* ms-3 */
-  margin-inline-end: -0.75rem; /* -me-3 */
+  margin-inline-start: calc(0.75em * var(--scale));
+  margin-inline-end: calc(-0.75em * var(--scale));
   border-inline-start: var(--border) solid color-mix(in oklab, currentColor 10%, rgba(0, 0, 0, 0));
 }
 
-/* ============================================================
-   Floating label
-   ============================================================ */
 .floating-label {
   position: relative;
   display: block;
@@ -4546,14 +4809,14 @@ label:has(:checked),
 }
 
 .floating-label > span {
-  background-color: var(--color-base-100);
+  background-color: var(--color-surface);
   position: absolute;
-  inset-inline-start: 0.75rem; /* start-3 */
+  inset-inline-start: calc(0.75em * var(--scale));
   z-index: 1;
-  padding-inline: 0.25rem; /* px-1 */
+  padding-inline: calc(0.25em * var(--scale));
   opacity: 0;
   font-size: 0.875rem;
-  top: calc(var(--size-field, 0.25rem) * 10 / 2);
+  top: calc(1.25em * var(--scale));
   line-height: 1;
   border-radius: 2px;
   pointer-events: none;
@@ -4584,12 +4847,10 @@ label:has(:checked),
   opacity: 0;
 }
 
-/* ============================================================
-   Tailles — ajustement du label flottant selon la taille du champ
-   ============================================================ */
+/* Per-field-size adjustments */
 .floating-label:has(.input-xs, .select-xs, .textarea-xs) span {
   font-size: 0.6875rem;
-  top: calc(var(--size-field, 0.25rem) * 6 / 2);
+  top: calc(0.75em * var(--scale));
 }
 
 .floating-label:has(.input-sm, .select-sm, .textarea-sm) span {
@@ -4612,20 +4873,6 @@ label:has(:checked),
   top: calc(var(--size-field, 0.25rem) * 14 / 2);
 }
 
-/* ============================================================
-   validator.css — Form field validation state driver
-
-   External variables (defined by theme):
-     --color-success   applied as --input-color on valid fields
-     --color-error     applied as --input-color on invalid fields
-
-   Exported variable (injected into sibling field components):
-     --input-color     overrides the field border/focus color;
-                       consumed by .input, .select, .textarea, .checkbox, etc.
-
-   Usage: add .validator to a field component; .validator-hint is
-   the sibling element shown on error.
-   ============================================================ */
 /* Valid */
 .validator:user-valid,
 .validator:has(:user-valid) {
@@ -4672,36 +4919,17 @@ label:has(:checked),
   display: revert-layer;
 }
 
-/* ============================================================
-   Hint de validation
-   ============================================================ */
 .validator-hint {
   visibility: hidden;
   margin-top: 0.5em;
   font-size: var(--xs, var(--default-xs));
 }
 
-/* Themeable fallbacks — a theme's :root overrides these. */
-:where(:root) {
-  --radius-field: 0.4rem;
-  --radius-box: 0.7rem;
-  --radius-selector: 0.4rem;
-}
-
-/* Family-owned look — Material elevation.
-   --light-intensity / --light-depth are this family's editable knobs
-   (shadow strength / elevation height); set on :root so they win over the
-   flat default in base/default.scss but stay overridable by a theme's :root. */
-:root {
-  --border: 1px;
-  --depth: 0;
-  --noise: 0;
-  --light-intensity: 1.4; /* pronounced cast shadow */
-  --light-depth: 2;
-  --light-color: oklch(0% 0 0);
-}
-
-/* Material buttons: bold, uppercase, animated elevation. */
+/* ── Family look ────────────────────────────────────────────────────
+   Material motion & typography. Only poppy uses it, so it lives here
+   rather than in components/button.scss (ADR 0003). Layered on top of
+   skin-flat: bold uppercase labels, and elevation animated through the
+   --light-* shadow system — hover raises, press lowers. */
 .btn {
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -4713,6 +4941,9 @@ label:has(:checked),
     --light-depth: 3; /* raise */
   }
 }
-.btn:active {
+/* The :hover:active form matches the hover rule's specificity so the
+   press still lowers the button while the pointer is over it. */
+.btn:active,
+.btn:hover:active {
   --light-depth: 1; /* press down */
 }

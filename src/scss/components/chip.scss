@@ -1,110 +1,123 @@
-/* ============================================================
-   chip.css — Small inline label / badge (replaces DaisyUI badge)
-
-   External variables (defined by theme):
-		--color-base-100      default chip background
-		--color-base-200      ghost/outline border and background
-		--color-base-content  default text color
-		--color-{variant}     seed color (set by .chip-{color})
-		--color-{variant}-content  text color for filled variants
-		--noise               noise texture intensity (0–1)
-		--fx-noise            noise SVG data-uri (from base/svg.css)
-		--border              border width
-		--radius-selector     corner radius
-
-   Font size system:
-		--fontsize            overrides default size (set by .chip-xs … .chip-xl)
-		--base / --default-base   fallback font size
-
-   Internal variables:
-		--size        chip height (1.6em, scales with font); padding derived from it
-		--chip-color  seed color; driven by color variant classes
-		--chip-bg     resolved background color
-		--chip-fg     resolved text color
-   ============================================================ */
-
-.chip {
-	--chip-bg: var(--chip-color, var(--color-base-100));
-	--chip-fg: var(--color-base-content);
-	--size: 1.6em;
-
-	font-size: var(--fontsize, var(--base, var(--default-base)));
-	border-radius: var(--radius-selector);
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5em;
-	vertical-align: middle;
-	color: var(--chip-fg);
-	border: var(--border) solid var(--chip-color, var(--color-base-200));
-	width: fit-content;
-	background-size: auto, calc(var(--noise) * 100%);
-	background-image: none, var(--fx-noise);
-	background-color: var(--chip-bg);
-	height: var(--size);
-	padding-inline: calc(var(--size) / 2 - var(--border));
-	box-shadow: var(--shadow-light, );
-}
-
-.chip svg{
-	height: 1em;
-}
-
+@use '../mixins' as m;
+@use '../config' as c;
 
 /* ============================================================
-   Variantes de style
+   chip.scss — .chip mixin library (small inline label)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--chip-color  seed color (set by color-variants)
+	--chip-bg     resolved background color
+	--chip-fg     resolved text color
+	--size        chip height (1.6em, scales with font); padding derived
+	--fontsize    font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface / --color-surface-high / --color-on-surface
+	--color-{variant} / --color-on-{variant}  seed / text colors (color-variants)
+	--border / --radius-selector
+	--shadow-light          family shadow system
    ============================================================ */
 
-.chip-outline {
-	color: var(--chip-color);
-	--chip-bg: #0000;
-	background-image: none;
-	border-color: currentColor;
+
+/* ------------------------------------------------------------
+   base — structure and paint plumbing (bg/fg/border from --chip-*).
+   ------------------------------------------------------------ */
+@mixin base {
+	.chip {
+		--chip-bg: var(--chip-color, var(--color-surface));
+		--chip-fg: var(--color-on-surface);
+		--size: calc(1.6em * var(--scale));
+
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		border-radius: var(--radius-selector);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: calc(0.5em * var(--scale));
+		vertical-align: middle;
+		color: var(--chip-fg);
+		border: var(--border) solid var(--chip-color, var(--color-surface-high));
+		width: fit-content;
+		background-color: var(--chip-bg);
+		height: var(--size);
+		padding-inline: calc(var(--size) / 2 - var(--border));
+		box-shadow: var(--shadow-light, );
+	}
+
+	.chip svg {
+		height: 1em;
+	}
 }
 
-.chip-dash {
-	color: var(--chip-color);
-	--chip-bg: #0000;
-	background-image: none;
-	border-color: currentColor;
-	border-style: dashed;
-}
 
-.chip-soft {
-	color: var(--chip-color, var(--color-base-content));
-	background-color: color-mix(in oklab, var(--chip-color, var(--color-base-content)) 8%, var(--color-base-100));
-	border-color: color-mix(in oklab, var(--chip-color, var(--color-base-content)) 10%, var(--color-base-100));
-	background-image: none;
-}
-
-.chip-ghost {
-	border-color: var(--color-base-200);
-	background-color: var(--color-base-200);
-	color: var(--color-base-content);
-	background-image: none;
+/* ------------------------------------------------------------
+   variant-outline — transparent bg, colored border/label.
+   ------------------------------------------------------------ */
+@mixin variant-outline {
+	.chip-outline {
+		color: var(--chip-color);
+		--chip-bg: #0000;
+		background-image: none;
+		border-color: currentColor;
+	}
 }
 
 
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
+/* ------------------------------------------------------------
+   variant-dash — like outline but dashed border.
+   ------------------------------------------------------------ */
+@mixin variant-dash {
+	.chip-dash {
+		color: var(--chip-color);
+		--chip-bg: #0000;
+		background-image: none;
+		border-color: currentColor;
+		border-style: dashed;
+	}
+}
 
-.chip-primary   { --chip-color: var(--color-primary);   --chip-fg: var(--color-primary-content); }
-.chip-secondary { --chip-color: var(--color-secondary); --chip-fg: var(--color-secondary-content); }
-.chip-accent    { --chip-color: var(--color-accent);    --chip-fg: var(--color-accent-content); }
-.chip-neutral   { --chip-color: var(--color-neutral);   --chip-fg: var(--color-neutral-content); }
-.chip-info      { --chip-color: var(--color-info);      --chip-fg: var(--color-info-content); }
-.chip-success   { --chip-color: var(--color-success);   --chip-fg: var(--color-success-content); }
-.chip-warning   { --chip-color: var(--color-warning);   --chip-fg: var(--color-warning-content); }
-.chip-error     { --chip-color: var(--color-error);     --chip-fg: var(--color-error-content); }
+
+/* ------------------------------------------------------------
+   variant-soft — faint tinted fill of the seed color.
+   ------------------------------------------------------------ */
+@mixin variant-soft {
+	.chip-soft {
+		color: var(--chip-color, var(--color-on-surface));
+		background-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 8%, var(--color-surface));
+		border-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 10%, var(--color-surface));
+		background-image: none;
+	}
+}
 
 
-/* ============================================================
-   Tailles
-   ============================================================ */
+/* ------------------------------------------------------------
+   variant-ghost — muted surface-high fill.
+   ------------------------------------------------------------ */
+@mixin variant-ghost {
+	.chip-ghost {
+		border-color: var(--color-surface-high);
+		background-color: var(--color-surface-high);
+		color: var(--color-on-surface);
+		background-image: none;
+	}
+}
 
-.chip-xs { --fontsize: var(--xs,  var(--default-xs)); }
-.chip-sm { --fontsize: var(--sm,  var(--default-sm)); }
-.chip-md { --fontsize: var(--md,  var(--default-md)); }
-.chip-lg { --fontsize: var(--lg,  var(--default-lg)); }
-.chip-xl { --fontsize: var(--xl,  var(--default-xl)); }
+
+/* ------------------------------------------------------------
+   color-variants — .chip-{primary,…}: seed --chip-color / --chip-fg.
+   ------------------------------------------------------------ */
+@mixin color-variants {
+	@include m.seed-color-variants('chip', --chip-color, --chip-fg);
+}
+
+
+/* ------------------------------------------------------------
+   size-variants — .chip-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+@mixin size-variants {
+	@include m.size-variants('chip');
+}

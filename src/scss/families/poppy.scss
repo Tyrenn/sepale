@@ -15,9 +15,9 @@
 
    Characteristics:
      - Elevation-first: strong soft directional shadow (via the
-       --light-* system); depth/noise OFF.
+       --light-* system); depth OFF.
      - Filled, uppercase buttons with motion: hover raises, active
-       lowers, by animating --light-depth.
+       lowers, by animating --light-depth (see the family look below).
      - Larger corner radii than daisy.
 
    Themeable: --color-* and --radius-* (see daisy header for the list).
@@ -25,6 +25,7 @@
    ============================================================ */
 
 @use 'lib';
+@use 'derived-content';
 
 /* Themeable fallbacks — a theme's :root overrides these. */
 :where(:root) {
@@ -40,13 +41,21 @@
 :root {
 	--border: 1px;
 	--depth: 0;
-	--noise: 0;
 	--light-intensity: 1.4; /* pronounced cast shadow */
 	--light-depth: 2;
 	--light-color: oklch(0% 0 0);
 }
 
-/* Material buttons: bold, uppercase, animated elevation. */
+/* ── Component mixin selection ──────────────────────────────────────
+   poppy = the flat reference selection, unchanged. */
+@include lib.flat-components;
+
+
+/* ── Family look ────────────────────────────────────────────────────
+   Material motion & typography. Only poppy uses it, so it lives here
+   rather than in components/button.scss (ADR 0003). Layered on top of
+   skin-flat: bold uppercase labels, and elevation animated through the
+   --light-* shadow system — hover raises, press lowers. */
 .btn {
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
@@ -59,6 +68,9 @@
 	}
 }
 
-.btn:active {
+/* The :hover:active form matches the hover rule's specificity so the
+   press still lowers the button while the pointer is over it. */
+.btn:active,
+.btn:hover:active {
 	--light-depth: 1; /* press down */
 }

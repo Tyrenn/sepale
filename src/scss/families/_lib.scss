@@ -1,10 +1,16 @@
 /* ============================================================
-   _lib.scss — shared aggregation of base + utilities + components.
+   _lib.scss — shared base/utilities emission + component libraries.
 
-   Every style family `@use`s this partial to emit the full set of
-   component CSS, then layers its own "look" on top (variable preset
-   + skin rules). Keeping the aggregation here avoids repeating the
-   list in each family entry.
+   Emits the base layer (properties, reset, colors, defaults) and
+   the utilities at @use time. Components are mixin-only libraries
+   (see components/button.scss for the pattern): nothing is emitted
+   until a family `@include`s a selection.
+
+   `flat-components` below is the reference daisyUI selection — the
+   full flat look with every variant. Families either include it
+   as-is (daisy) or add their own look on top (poppy).
+
+   Adding a family: see ./README.md for the full guide.
    ============================================================ */
 
 /* Base */
@@ -18,9 +24,8 @@
 
 /* Utilities */
 @use '../utilities/radius';
-@use '../utilities/glass';
 
-/* Components */
+/* Component libraries (mixin-only — no CSS emitted here) */
 @use '../components/button';
 @use '../components/input';
 @use '../components/select';
@@ -46,3 +51,123 @@
 @use '../components/fieldset';
 @use '../components/label';
 @use '../components/validator';
+
+/* ------------------------------------------------------------
+   flat-components — the daisyUI reference selection.
+   ------------------------------------------------------------ */
+@mixin flat-components {
+	@include button.base;
+	@include button.skin-flat;
+	@include button.color-variants;
+	@include button.variant-ghost;
+	@include button.variant-link;
+	@include button.variant-outline;
+	@include button.variant-dash;
+	@include button.variant-soft;
+	@include button.size-variants;
+	@include button.shape-variants;
+	@include button.ripple;
+
+	@include input.base;
+	@include input.skin-flat;
+	@include input.variant-ghost;
+	@include input.color-variants;
+	@include input.size-variants;
+
+	@include select.base;
+	@include select.skin-flat;
+	@include select.variant-ghost;
+	@include select.color-variants;
+	@include select.size-variants;
+
+	@include textarea.base;
+	@include textarea.skin-flat;
+	@include textarea.variant-ghost;
+	@include textarea.color-variants;
+	@include textarea.size-variants;
+
+	@include checkbox.base;
+	@include checkbox.skin-flat;
+	@include checkbox.color-variants;
+	@include checkbox.variant-outline;
+	@include checkbox.variant-square;
+	@include checkbox.size-variants;
+
+	@include radio.base;
+	@include radio.skin-flat;
+	@include radio.color-variants;
+	@include radio.variant-square;
+	@include radio.size-variants;
+
+	@include toggle.base;
+	@include toggle.skin-flat;
+	@include toggle.color-variants;
+	@include toggle.variant-track;
+	@include toggle.size-variants;
+
+	@include range.base;
+	@include range.color-variants;
+	@include range.size-variants;
+
+	@include file-input.base;
+	@include file-input.skin-flat;
+	@include file-input.variant-ghost;
+	@include file-input.color-variants;
+	@include file-input.size-variants;
+
+	@include chip.base;
+	@include chip.variant-outline;
+	@include chip.variant-dash;
+	@include chip.variant-soft;
+	@include chip.variant-ghost;
+	@include chip.color-variants;
+	@include chip.size-variants;
+
+	@include badge.base;
+	@include badge.position-variants;
+
+	@include tab.base;
+	@include tab.variant-border;
+	@include tab.variant-lift;
+	@include tab.variant-top-bottom;
+	@include tab.variant-box;
+	@include tab.size-variants;
+
+	@include loading.base;
+	@include loading.style-variants;
+	@include loading.size-variants;
+
+	@include progress.base;
+	@include progress.color-variants;
+
+	@include radial-progress.base;
+	@include radial-progress.size-variants;
+
+	@include skeleton.base;
+
+	@include list.base;
+	@include list.variant-suggestions;
+	@include list.size-variants;
+
+	@include text.base;
+
+	@include link.base;
+	@include link.color-variants;
+
+	@include breadcrumbs.base;
+	@include breadcrumbs.size-variants;
+
+	@include dock.base;
+	@include dock.size-variants;
+
+	@include join.base;
+	@include join.variant-vertical;
+	@include join.variant-horizontal;
+
+	@include fieldset.base;
+
+	@include label.base;
+	@include label.variant-floating;
+
+	@include validator.base;
+}

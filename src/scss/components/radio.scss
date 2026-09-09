@@ -1,154 +1,162 @@
+@use '../mixins' as m;
+@use '../config' as c;
+
 /* ============================================================
-   radio.css — Radio button input
+   radio.scss — .radio mixin library
 
-   External variables (defined by theme):
-		--color-base-100      background when checked
-		--color-{variant}     accent color (set by .radio-{color})
-		--depth               shadow / inset intensity multiplier
-		--border              border width
-		--noise               noise texture intensity (0–1)
-		--fx-noise            noise SVG data-uri (from base/svg.css)
-		--radius-selector     corner radius (9999px for full circle override)
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
 
-	Font size system:
-		--fontsize            overrides default size (set by .radio-xs … .radio-xl)
-		--base / --default-base   fallback font size
+   Note: .radio does not consume --shadow-light — families that need
+   a shadow skin it directly.
 
-	Internal variables:
-		--size          circle dimensions (1.5em × 1.5em, scales with font)
-		--input-color   border and fill color; driven by color variants
+   Plumbing contract:
+	--input-color   border + dot color (set by color-variants)
+	--size          circle dimensions (1.5em × 1.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface        background when checked
+	--color-{variant}       accent color (color-variants)
+	--border
    ============================================================ */
 
-.radio {
-	--size: 1.5em;
 
-	font-size: var(--fontsize, var(--base, var(--default-base)));
-	position: relative;
-	display: inline-block;
-	flex-shrink: 0;
-	cursor: pointer;
-	appearance: none;
-	border-radius: 9999px;
-	padding: 0.15em;
-	vertical-align: middle;
-	border: var(--border) solid var(--input-color, color-mix(in srgb, currentColor 20%, #0000));
-	box-shadow: 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset;
-	width: var(--size);
-	height: var(--size);
-	color: var(--input-color, currentColor);
-}
+/* ------------------------------------------------------------
+   base — structure: circle, inner dot, focus ring, checked state,
+   forced-colors/print fallbacks, disabled, check animation.
+   ------------------------------------------------------------ */
+@mixin base {
+	.radio {
+		--size: calc(1.5em * var(--scale));
 
-.radio::before {
-	--tw-content: "";
-	content: var(--tw-content);
-	display: block;
-	width: 100%;
-	height: 100%;
-	border-radius: 9999px; /* rounded-full */
-	background-size: auto, calc(var(--noise) * 100%);
-	background-image: none, var(--fx-noise);
-}
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		position: relative;
+		display: inline-block;
+		flex-shrink: 0;
+		cursor: pointer;
+		appearance: none;
+		border-radius: 9999px;
+		padding: calc(0.15em * var(--scale));
+		vertical-align: middle;
+		border: var(--border) solid var(--input-color, color-mix(in srgb, currentColor 20%, #0000));
+		width: var(--size);
+		height: var(--size);
+		color: var(--input-color, currentColor);
+	}
 
-.radio:focus-visible {
-	outline: 2px solid currentColor;
-}
+	.radio::before {
+		--tw-content: "";
+		content: var(--tw-content);
+		display: block;
+		width: 100%;
+		height: 100%;
+		border-radius: 9999px; /* rounded-full */
+	}
 
-.radio:checked,
-.radio[aria-checked="true"] {
-	background-color: var(--color-base-100);
-	border-color: currentColor;
-}
+	.radio:focus-visible {
+		outline: 2px solid currentColor;
+	}
 
-@media (prefers-reduced-motion: no-preference) {
 	.radio:checked,
 	.radio[aria-checked="true"] {
-		animation: radio 0.2s ease-out;
+		background-color: var(--color-surface);
+		border-color: currentColor;
 	}
-}
 
-.radio:checked::before,
-.radio[aria-checked="true"]::before {
-	background-color: currentColor;
-	box-shadow:
-		0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset,
-		0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
-		0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1));
-}
+	@media (prefers-reduced-motion: no-preference) {
+		.radio:checked,
+		.radio[aria-checked="true"] {
+			animation: radio 0.2s ease-out;
+		}
+	}
 
-@media (forced-colors: active) {
 	.radio:checked::before,
 	.radio[aria-checked="true"]::before {
-		outline-style: solid;
-		outline-offset: -0.25rem;
+		background-color: currentColor;
+	}
+
+	@media (forced-colors: active) {
+		.radio:checked::before,
+		.radio[aria-checked="true"]::before {
+			outline-style: solid;
+			outline-offset: -0.25rem;
+		}
+	}
+
+	@media print {
+		.radio:checked::before,
+		.radio[aria-checked="true"]::before {
+			outline: 0.25rem solid;
+			outline-offset: -1rem;
+		}
+	}
+
+	.radio:disabled {
+		cursor: not-allowed;
+		opacity: 0.2;
+	}
+
+	@keyframes radio {
+		0%  { padding: 5px; }
+		50% { padding: 3px; }
 	}
 }
 
-@media print {
+
+/* ------------------------------------------------------------
+   ------------------------------------------------------------ */
+@mixin skin-flat {
+	.radio {
+		box-shadow: 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset;
+	}
+
+	.radio::before {
+	}
+
 	.radio:checked::before,
 	.radio[aria-checked="true"]::before {
-		outline: 0.25rem solid;
-		outline-offset: -1rem;
+		box-shadow:
+			0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset,
+			0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+			0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1));
 	}
 }
 
 
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
+/* ------------------------------------------------------------
+   variant-square — hard corners (box + dot).
+   ------------------------------------------------------------ */
+@mixin variant-square {
+	.radio-square {
+		border-radius: 0;
+	}
 
-.radio-primary   { --input-color: var(--color-primary); }
-.radio-secondary { --input-color: var(--color-secondary); }
-.radio-accent    { --input-color: var(--color-accent); }
-.radio-neutral   { --input-color: var(--color-neutral); }
-.radio-info      { --input-color: var(--color-info); }
-.radio-success   { --input-color: var(--color-success); }
-.radio-warning   { --input-color: var(--color-warning); }
-.radio-error     { --input-color: var(--color-error); }
-
-
-/* ============================================================
-   Désactivé
-   ============================================================ */
-
-.radio:disabled {
-	cursor: not-allowed;
-	opacity: 0.2;
+	.radio-square::before {
+		border-radius: 0;
+	}
 }
 
 
-/* ============================================================
-   Tailles
-   ============================================================ */
-
-.radio-xs { --fontsize: var(--xs,  var(--default-xs)); }
-.radio-sm { --fontsize: var(--sm,  var(--default-sm)); }
-.radio-md { --fontsize: var(--md,  var(--default-md)); }
-.radio-lg { --fontsize: var(--lg,  var(--default-lg)); }
-.radio-xl { --fontsize: var(--xl,  var(--default-xl)); }
-
-
-/* ============================================================
-   Shape variants
-   ============================================================ */
-
-.radio-square {
-	border-radius: 0;
-}
-
-.radio-square::before {
-	border-radius: 0;
-}
-
-.radio-xl:is([type="radio"]) {
-	--size: calc(var(--size-selector, 0.25rem) * 8);
+/* ------------------------------------------------------------
+   color-variants — .radio-{primary,…}: set --input-color.
+   ------------------------------------------------------------ */
+@mixin color-variants {
+	@each $color in c.$color-list {
+		.radio-#{$color} { --input-color: var(--color-#{$color}); }
+	}
 }
 
 
-/* ============================================================
-   Animation
-   ============================================================ */
+/* ------------------------------------------------------------
+   size-variants — .radio-{xs…xl}: set --fontsize (+ intrinsic xl
+   size for native radios).
+   ------------------------------------------------------------ */
+@mixin size-variants {
+	@include m.size-variants('radio');
 
-@keyframes radio {
-	0%  { padding: 5px; }
-	50% { padding: 3px; }
+	.radio-xl:is([type="radio"]) {
+		--size: calc(2em * var(--scale));
+	}
 }

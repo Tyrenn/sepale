@@ -1,0 +1,29 @@
+/* Theme « corporate » — editable variables only (colors + radii). */
+:root {
+	color-scheme: light;
+	--color-surface: oklch(100% 0 0);
+	--color-surface-high: oklch(93% 0 0);
+	--color-surface-peak: oklch(86% 0 0);
+	--color-on-surface: oklch(22.389% 0.031 278.072);
+	--color-primary: oklch(58% 0.158 241.966);
+	--color-on-primary: oklch(100% 0 0);
+	--color-secondary: oklch(55% 0.046 257.417);
+	--color-on-secondary: oklch(100% 0 0);
+	--color-accent: oklch(60% 0.118 184.704);
+	--color-on-accent: oklch(100% 0 0);
+	--color-neutral: oklch(0% 0 0);
+	--color-on-neutral: oklch(100% 0 0);
+	--color-info: oklch(60% 0.126 221.723);
+	--color-on-info: oklch(100% 0 0);
+	--color-success: oklch(62% 0.194 149.214);
+	--color-on-success: oklch(100% 0 0);
+	--color-warning: oklch(85% 0.199 91.936);
+	--color-on-warning: oklch(0% 0 0);
+	--color-error: oklch(70% 0.191 22.216);
+	--color-on-error: oklch(0% 0 0);
+	--radius-field: 0.25rem;
+	--radius-box: 0.25rem;
+	--radius-selector: 0.25rem;
+	--border: 1px;
+	--depth: 0;
+}

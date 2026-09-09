@@ -1,159 +1,150 @@
+@use '../mixins' as m;
+
 /* ============================================================
-   textarea.css — Multi-line text input
+   textarea.scss — .textarea mixin library
 
-   External variables (defined by theme):
-     --color-base-100      field background
-     --color-base-200      disabled background and border
-     --color-base-content  default text color
-     --color-{variant}     semantic accent color (set by .textarea-{color})
-     --depth               shadow / inset intensity multiplier
-     --border              border width
-     --radius-field        field corner radius
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
 
-   Font size system:
-     --fontsize            overrides default size (set by .textarea-xs … .textarea-xl)
-     --base / --default-base   fallback font size
+   Plumbing contract:
+	--input-color   resolved border/accent color (same as input.scss)
+	--fontsize      font size (set by size-variants classes)
 
-   Internal variables:
-     --input-color   resolved border/shadow color; driven by color variants
+   External variables (theme / family):
+	--color-surface / --color-surface-high / --color-on-surface
+	--color-{variant}       semantic accent (set by color-variants)
+	--border / --radius-field
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
    ============================================================ */
 
-.textarea {
-	--input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
 
-	border: var(--border) solid #0000;
-	background-color: var(--color-base-100);
-	border-radius: var(--radius-field);
-	min-height: 5em;
-	flex-shrink: 1;
-	appearance: none;
-	padding-block: 0.5em;
-	vertical-align: middle;
-	padding-inline-start: 0.75em;
-	padding-inline-end: 0.75em;
-	width: clamp(3rem, 20rem, 100%);
-	font-size: var(--fontsize, var(--base, var(--default-base)));
-	touch-action: manipulation;
-	border-color: var(--input-color);
-	box-shadow:
-		0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset,
-		0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
-		var(--shadow-light, );
-}
+/* ------------------------------------------------------------
+   base — structure: sizing, inner <textarea> handling, focus ring,
+   disabled state.
+   ------------------------------------------------------------ */
+@mixin base {
+	.textarea {
+		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
 
-.textarea textarea {
-	appearance: none;
-	background-color: transparent;
-	border: none;
-}
+		border: var(--border) solid #0000;
+		background-color: var(--color-surface);
+		border-radius: var(--radius-field);
+		min-height: calc(5em * var(--scale));
+		flex-shrink: 1;
+		appearance: none;
+		padding-block: calc(0.5em * var(--scale));
+		vertical-align: middle;
+		padding-inline-start: calc(0.75em * var(--scale));
+		padding-inline-end: calc(0.75em * var(--scale));
+		width: clamp(3rem, 20rem, 100%);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		touch-action: manipulation;
+		border-color: var(--input-color);
+		box-shadow: var(--shadow-light, );
+	}
 
-.textarea textarea:focus,
-.textarea textarea:focus-within {
-	outline: none;
-}
+	.textarea textarea {
+		appearance: none;
+		background-color: transparent;
+		border: none;
+	}
 
-.textarea:focus,
-.textarea:focus-within {
-	--input-color: var(--color-base-content);
-	box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000);
-	outline: 2px solid var(--input-color);
-	outline-offset: 2px;
-	isolation: isolate;
-}
+	.textarea textarea:focus,
+	.textarea textarea:focus-within {
+		outline: none;
+	}
 
-/* Increase font size on iOS to prevent auto-zoom on focus */
-@media (pointer: coarse) {
-	@supports (-webkit-touch-callout: none) {
-		.textarea:focus,
-		.textarea:focus-within {
-			font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+	.textarea:focus,
+	.textarea:focus-within {
+		--input-color: var(--color-on-surface);
+		outline: 2px solid var(--input-color);
+		outline-offset: 2px;
+		isolation: isolate;
+	}
+
+	/* Increase font size on iOS to prevent auto-zoom on focus */
+	@media (pointer: coarse) {
+		@supports (-webkit-touch-callout: none) {
+			.textarea:focus,
+			.textarea:focus-within {
+				font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+			}
 		}
+	}
+
+	.textarea:has(> textarea[disabled]),
+	.textarea:is(:disabled, [disabled]) {
+		border-color: var(--color-surface-high);
+		background-color: var(--color-surface-high);
+		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
+		cursor: not-allowed;
+		box-shadow: none;
+	}
+
+	.textarea:has(> textarea[disabled]) textarea::placeholder,
+	.textarea:is(:disabled, [disabled]) textarea::placeholder,
+	.textarea:has(> textarea[disabled])::placeholder,
+	.textarea:is(:disabled, [disabled])::placeholder {
+		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+	}
+
+	.textarea:has(> textarea[disabled]) > textarea[disabled] {
+		cursor: not-allowed;
 	}
 }
 
-.textarea:has(> textarea[disabled]),
-.textarea:is(:disabled, [disabled]) {
-	border-color: var(--color-base-200);
-	background-color: var(--color-base-200);
-	color: color-mix(in oklch, var(--color-base-content) 40%, #0000);
-	cursor: not-allowed;
-	box-shadow: none;
-}
 
-.textarea:has(> textarea[disabled]) textarea::placeholder,
-.textarea:is(:disabled, [disabled]) textarea::placeholder,
-.textarea:has(> textarea[disabled])::placeholder,
-.textarea:is(:disabled, [disabled])::placeholder {
-	color: color-mix(in oklch, var(--color-base-content) 20%, #0000);
-}
+/* ------------------------------------------------------------
+   skin-flat — depth-driven inset shadows on the well (rest + focus).
+   ------------------------------------------------------------ */
+@mixin skin-flat {
+	.textarea {
+		box-shadow:
+			0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset,
+			0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+			var(--shadow-light, );
+	}
 
-.textarea:has(> textarea[disabled]) > textarea[disabled] {
-	cursor: not-allowed;
-}
-
-
-/* ============================================================
-   Ghost
-   ============================================================ */
-
-.textarea-ghost {
-	background-color: transparent;
-	box-shadow: none;
-	border-color: #0000;
-}
-
-.textarea-ghost:focus,
-.textarea-ghost:focus-within {
-	color: var(--color-base-content);
-	background-color: var(--color-base-100);
-	border-color: #0000;
-	box-shadow: none;
+	.textarea:focus,
+	.textarea:focus-within {
+		box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000);
+	}
 }
 
 
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
+/* ------------------------------------------------------------
+   variant-ghost — transparent until focus.
+   ------------------------------------------------------------ */
+@mixin variant-ghost {
+	.textarea-ghost {
+		background-color: transparent;
+		box-shadow: none;
+		border-color: #0000;
+	}
 
-.textarea-neutral,
-.textarea-neutral:focus,
-.textarea-neutral:focus-within { --input-color: var(--color-neutral); }
-
-.textarea-primary,
-.textarea-primary:focus,
-.textarea-primary:focus-within { --input-color: var(--color-primary); }
-
-.textarea-secondary,
-.textarea-secondary:focus,
-.textarea-secondary:focus-within { --input-color: var(--color-secondary); }
-
-.textarea-accent,
-.textarea-accent:focus,
-.textarea-accent:focus-within { --input-color: var(--color-accent); }
-
-.textarea-info,
-.textarea-info:focus,
-.textarea-info:focus-within { --input-color: var(--color-info); }
-
-.textarea-success,
-.textarea-success:focus,
-.textarea-success:focus-within { --input-color: var(--color-success); }
-
-.textarea-warning,
-.textarea-warning:focus,
-.textarea-warning:focus-within { --input-color: var(--color-warning); }
-
-.textarea-error,
-.textarea-error:focus,
-.textarea-error:focus-within { --input-color: var(--color-error); }
+	.textarea-ghost:focus,
+	.textarea-ghost:focus-within {
+		color: var(--color-on-surface);
+		background-color: var(--color-surface);
+		border-color: #0000;
+		box-shadow: none;
+	}
+}
 
 
-/* ============================================================
-   Tailles
-   ============================================================ */
+/* ------------------------------------------------------------
+   color-variants — .textarea-{primary,…}: set --input-color.
+   ------------------------------------------------------------ */
+@mixin color-variants {
+	@include m.field-color-variants('textarea');
+}
 
-.textarea-xs { --fontsize: var(--xs,  var(--default-xs)); }
-.textarea-sm { --fontsize: var(--sm,  var(--default-sm)); }
-.textarea-md { --fontsize: var(--md,  var(--default-md)); }
-.textarea-lg { --fontsize: var(--lg,  var(--default-lg)); }
-.textarea-xl { --fontsize: var(--xl,  var(--default-xl)); }
+
+/* ------------------------------------------------------------
+   size-variants — .textarea-{xs…xl}: set --fontsize only.
+   ------------------------------------------------------------ */
+@mixin size-variants {
+	@include m.size-variants('textarea');
+}

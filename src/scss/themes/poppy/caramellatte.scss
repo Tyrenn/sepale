@@ -1,0 +1,18 @@
+/* Theme « caramellatte » — editable variables only (colors + radii). */
+:root {
+	color-scheme: light;
+	--color-surface: oklch(98% 0.016 73.684);
+	--color-surface-high: oklch(95% 0.038 75.164);
+	--color-surface-peak: oklch(90% 0.076 70.697);
+	--color-primary: oklch(0% 0 0);
+	--color-secondary: oklch(22.45% 0.075 37.85);
+	--color-accent: oklch(46.44% 0.111 37.85);
+	--color-neutral: oklch(55% 0.195 38.402);
+	--color-info: oklch(42% 0.199 265.638);
+	--color-success: oklch(43% 0.095 166.913);
+	--color-warning: oklch(82% 0.189 84.429);
+	--color-error: oklch(70% 0.191 22.216);
+	--radius-field: 0.5rem;
+	--radius-box: 1rem;
+	--radius-selector: 2rem;
+}

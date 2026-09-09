@@ -1,7 +1,7 @@
-/* Playground chrome. Mirrors the original example/ explorer: a sidebar with
-   theme/family selectors + grouped component navigation, a centered preview
-   area, and an optional theme-editor drawer. Styled with the active theme's
-   own variables so the chrome matches the previewed look. */
+/* Playground chrome. Two screens share one sidebar: the theme page (sidebar +
+   parameter panel + live preview) and the component gallery (sidebar + one
+   component). Styled with the active theme's own variables, so the chrome is
+   itself a preview of the family being configured. */
 
 * { box-sizing: border-box; }
 
@@ -9,8 +9,10 @@ html, body { margin: 0; height: 100%; }
 
 body {
 	font-family: system-ui, sans-serif;
-	background: var(--color-base-100);
-	color: var(--color-base-content);
+	/* --root-bg lets a family repaint the page; defaults to the theme's
+	   base surface. */
+	background: var(--root-bg, var(--color-surface));
+	color: var(--color-on-surface);
 }
 
 .shell {
@@ -20,7 +22,7 @@ body {
 	overflow: hidden;
 }
 
-/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+/* ── Sidebar (in the layout: identical on every screen) ──────────────────── */
 
 .side {
 	width: 14rem;
@@ -28,8 +30,8 @@ body {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	background-color: var(--color-base-200);
-	border-inline-end: 1px solid color-mix(in oklab, var(--color-base-content) 8%, #0000);
+	background-color: var(--color-surface-high);
+	border-inline-end: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
 }
 
 .side-head {
@@ -38,7 +40,7 @@ body {
 	gap: 0.5rem;
 	padding: 0.75rem;
 	flex-shrink: 0;
-	border-bottom: 1px solid color-mix(in oklab, var(--color-base-content) 8%, #0000);
+	border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
 }
 
 .side-select {
@@ -53,20 +55,10 @@ body {
 	font-size: 0.7rem;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
-	color: color-mix(in oklch, var(--color-base-content) 55%, #0000);
+	color: color-mix(in oklch, var(--color-on-surface) 55%, #0000);
 }
 
 .side-select > select { flex: 1; min-width: 0; }
-
-.side-head > .btn { margin-top: 0.25rem; }
-
-/* Export actions, stacked under the customise button. */
-.side-export {
-	display: flex;
-	flex-direction: column;
-	gap: 0.4rem;
-	margin-top: 0.25rem;
-}
 
 .side-nav {
 	flex: 1;
@@ -77,13 +69,12 @@ body {
 .side-group {
 	margin: 0.875rem 0 0.2rem;
 	padding-inline: 0.5rem;
-	color: color-mix(in oklch, var(--color-base-content) 45%, #0000);
+	color: color-mix(in oklch, var(--color-on-surface) 45%, #0000);
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
 	font-size: 0.625rem;
 	font-weight: 600;
 }
-.side-group:first-child { margin-top: 0.25rem; }
 
 .side-list { list-style: none; margin: 0; padding: 0; }
 
@@ -93,51 +84,44 @@ body {
 	border-radius: var(--radius-field, 4px);
 	text-decoration: none;
 	font-size: 0.875rem;
-	color: var(--color-base-content);
+	color: var(--color-on-surface);
 	transition: background 0.15s;
 	cursor: pointer;
 }
-.side-link:hover { background-color: color-mix(in oklab, var(--color-base-content) 8%, #0000); }
+.side-link:hover { background-color: color-mix(in oklab, var(--color-on-surface) 8%, #0000); }
 .side-link[data-active='true'] {
 	background-color: color-mix(in oklab, var(--color-primary) 16%, #0000);
 	color: var(--color-primary);
 	font-weight: 600;
 }
 
-/* ── Content (preview area) ──────────────────────────────────────────────── */
-
-.content {
-	flex: 1;
-	min-width: 0;
-	height: 100%;
-	overflow-y: auto;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	gap: 2.5rem;
-	padding: 2.5rem 2rem;
-}
-
-/* ── Theme editor drawer ─────────────────────────────────────────────────── */
+/* ── Theme editor: second column, against the sidebar ────────────────────── */
 
 .editor {
-	width: 20rem;
+	width: 21rem;
 	flex-shrink: 0;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	background: var(--color-base-200);
-	border-inline-start: 1px solid color-mix(in oklab, var(--color-base-content) 8%, #0000);
+	background: var(--color-surface-high);
+	border-inline-end: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
 }
 
 .editor-head {
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	flex-direction: column;
+	gap: 0.5rem;
 	padding: 0.75rem;
-	border-bottom: 1px solid color-mix(in oklab, var(--color-base-content) 8%, #0000);
+	flex-shrink: 0;
+	border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
 }
+
+.editor-name {
+	font-size: 0.8rem;
+	letter-spacing: 0.02em;
+}
+
+.editor-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 
 .editor-body { flex: 1; overflow-y: auto; padding: 0.75rem; }
 
@@ -151,7 +135,62 @@ body {
 	padding: 0;
 }
 
-/* ── Color / token field ─────────────────────────────────────────────────── */
+/* ── Palette ─────────────────────────────────────────────────────────────
+   Tiles, not rows: four columns, base spanning the full width, then the
+   semantics two per line. Each tile is itself the picker. */
+.pal {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.9rem 0.75rem;
+}
+
+.pal-item { display: flex; flex-direction: column; gap: 0.3rem; }
+.pal-item-wide { grid-column: 1 / -1; }
+
+.pal-tiles { display: flex; gap: 0.4rem; }
+
+.pal-label {
+	font-size: 0.72rem;
+	opacity: 0.6;
+}
+
+/* A colour tile: the whole square is the <input type="color">. */
+.ct {
+	position: relative;
+	flex: 1;
+	aspect-ratio: 1;
+	min-width: 0;
+	display: grid;
+	place-items: center;
+	border-radius: 0.5rem;
+	border: 1px solid color-mix(in oklab, var(--color-on-surface) 12%, #0000);
+	cursor: pointer;
+	overflow: hidden;
+}
+
+/* The derived-content tiles are samples, not controls. */
+.ct-derived { cursor: default; }
+
+.ct-glyph {
+	font-size: 0.85rem;
+	font-weight: 700;
+	line-height: 1;
+	pointer-events: none;
+}
+
+/* The native picker fills the tile and stays invisible. */
+.ct-input {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+}
+
+/* ── Parameter fields ────────────────────────────────────────────────────── */
 
 .cf {
 	display: grid;
@@ -162,19 +201,6 @@ body {
 .cf-label { font-size: 0.78rem; }
 .cf-controls { display: flex; align-items: center; gap: 0.4rem; }
 
-.cf-swatch {
-	flex-shrink: 0;
-	width: 1.9rem;
-	height: 1.7rem;
-	padding: 0;
-	border: 1px solid color-mix(in oklab, var(--color-base-content) 25%, #0000);
-	border-radius: 0.35rem;
-	background: none;
-	cursor: pointer;
-}
-.cf-swatch::-webkit-color-swatch-wrapper { padding: 2px; }
-.cf-swatch::-webkit-color-swatch { border: none; border-radius: 0.2rem; }
-
 .cf-text {
 	flex: 1;
 	min-width: 0;
@@ -182,9 +208,9 @@ body {
 	font-size: 0.72rem;
 	font-family: ui-monospace, monospace;
 	padding: 0.3rem 0.4rem;
-	border: 1px solid color-mix(in oklab, var(--color-base-content) 20%, #0000);
+	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
 	border-radius: 0.35rem;
-	background: var(--color-base-100);
+	background: var(--color-surface);
 	color: inherit;
 }
 
@@ -195,27 +221,134 @@ body {
 	opacity: 0.6;
 }
 
-/* Number token: slider + compact number input. */
+/* Number token: slider + compact number input (+ unit picker when the token
+   offers several units). */
 .cf-range { flex: 1; min-width: 0; accent-color: var(--color-primary); }
-.cf-num {
-	width: 3.5rem;
+.cf-num,
+.cf-unit {
 	flex-shrink: 0;
 	font: inherit;
 	font-size: 0.72rem;
 	font-family: ui-monospace, monospace;
 	padding: 0.3rem 0.4rem;
-	border: 1px solid color-mix(in oklab, var(--color-base-content) 20%, #0000);
+	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
 	border-radius: 0.35rem;
-	background: var(--color-base-100);
+	background: var(--color-surface);
 	color: inherit;
 }
+.cf-num { width: 3.5rem; }
+.cf-unit { width: 3.6rem; cursor: pointer; }
 
-/* Intro blurb at the top of the editor. */
-.ed-intro {
-	margin: 0 0 1rem;
-	font-size: 0.72rem;
-	line-height: 1.45;
-	opacity: 0.7;
+/* ── Content ─────────────────────────────────────────────────────────────── */
+
+.content {
+	flex: 1;
+	min-width: 0;
+	height: 100%;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 2.5rem;
+	padding: 2rem;
+}
+
+/* Theme preview: composite blocks, so a parameter change is visible across
+   several components at once — including where they meet. */
+.content-preview { padding: 1rem; }
+
+.tp-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
+	gap: 0.75rem;
+	align-items: start;
+}
+
+.tp-block {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 1rem;
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-box, 0.75rem);
+}
+
+/* The colour sweep needs the full width to stay on a few lines. */
+.tp-wide { grid-column: 1 / -1; }
+
+.tp-title {
+	margin: 0;
+	font-size: 0.65rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	opacity: 0.45;
+}
+
+/* Three surface levels side by side: the only way to judge whether a theme
+   separates them enough. */
+.tp-surfaces {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 0.5rem;
+}
+
+.tp-surf {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.5rem;
+	padding: 0.75rem;
+	border-radius: var(--radius-box, 0.5rem);
+	border: 1px solid var(--color-border);
+}
+
+.tp-surf > span {
+	font-family: ui-monospace, monospace;
+	font-size: 0.62rem;
+	opacity: 0.6;
+}
+
+.tp-note {
+	margin: 0;
+	font-size: 0.7rem;
+	line-height: 1.4;
+	opacity: 0.55;
+}
+
+/* The dock is page chrome — it needs a box to sit at the bottom of. */
+.tp-dock {
+	position: relative;
+	height: 5rem;
+	border-radius: var(--radius-box, 0.5rem);
+	background: color-mix(in oklab, var(--color-on-surface) 4%, #0000);
+	overflow: hidden;
+}
+
+.tp-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+/* Component gallery page: one component, its examples stacked. */
+.gallery {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+	max-width: 60rem;
+	width: 100%;
+	margin-inline: auto;
+}
+
+.gallery-title {
+	margin: 0;
+	font-size: 1.35rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	padding-bottom: 0.4rem;
+	border-bottom: 2px solid color-mix(in oklab, var(--color-primary) 40%, #0000);
 }
 
 /* ── Export dialog ───────────────────────────────────────────────────────── */
@@ -228,15 +361,15 @@ dialog.export {
 	width: 100%;
 }
 dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
-.export-inner { padding: 1.25rem; background: var(--color-base-100); color: var(--color-base-content); }
+.export-inner { padding: 1.25rem; background: var(--color-surface); color: var(--color-on-surface); }
 .export-text {
 	width: 100%;
 	height: 16rem;
 	font-family: ui-monospace, monospace;
 	font-size: 0.78rem;
 	border-radius: 0.4rem;
-	border: 1px solid color-mix(in oklab, var(--color-base-content) 20%, #0000);
-	background: var(--color-base-200);
+	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	background: var(--color-surface-high);
 	color: inherit;
 	padding: 0.6rem;
 }

@@ -106,6 +106,23 @@
 	</Section>
 
 	<Section
+		title="Ripple"
+		subtitle="Opt-in Material-style ripple — an expanding wave from the press point."
+		svelte={`<Button ripple>Ripple</Button>
+<Button ripple color="primary">Primary</Button>
+<Button ripple color="accent" size="lg">Large</Button>
+<Button ripple variant="soft" color="secondary">Soft</Button>`}
+		html={`<!-- .btn-ripple clips the wave; the <Button ripple> component injects
+     a .btn-ripple-wave <span> at the press point (see button.css). -->
+<button class="btn btn-ripple">Ripple</button>`}
+	>
+		<Button ripple>Ripple</Button>
+		<Button ripple color="primary">Primary</Button>
+		<Button ripple color="accent" size="lg">Large</Button>
+		<Button ripple variant="soft" color="secondary">Soft</Button>
+	</Section>
+
+	<Section
 		title="States & widths"
 		svelte={`<Button active color="primary">Active</Button>
 <Button width="wide">Wide</Button>
@@ -693,7 +710,7 @@
 {:else if component === 'list'}
 	<Section
 		title="Rows"
-		svelte={`<List style="width:24rem; border:1px solid var(--color-base-200);">
+		svelte={`<List style="width:24rem; border:1px solid var(--color-surface-high);">
 	<li class="list-row">
 		<div>
 			<p style="font-weight:600;">Item title</p>
@@ -702,7 +719,7 @@
 		<div class="list-col-grow" style="text-align:right; opacity:.6;">Right</div>
 	</li>
 </List>`}
-		html={`<ul class="list" style="width:24rem; border:1px solid var(--color-base-200);">
+		html={`<ul class="list" style="width:24rem; border:1px solid var(--color-surface-high);">
 	<li class="list-row">
 		<div>
 			<p style="font-weight:600;">Item title</p>
@@ -712,7 +729,7 @@
 	</li>
 </ul>`}
 	>
-		<List style="width:24rem; border:1px solid var(--color-base-200);">
+		<List style="width:24rem; border:1px solid var(--color-surface-high);">
 			<li class="list-row">
 				<div>
 					<p style="font-weight:600;">Item title</p>

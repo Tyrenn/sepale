@@ -1,56 +1,53 @@
-/* ============================================================
-   link.css — Styled hyperlink / anchor
-
-   External variables (defined by theme):
-     --color-{variant}   text color (set by .link-{color} classes)
-
-   Internal variables:
-     none — inherits font size and color from context
-   ============================================================ */
-
-.link {
-	cursor: pointer;
-	text-decoration: underline;
-}
-
-.link:focus {
-	outline: none;
-}
-
-.link:focus-visible {
-	outline: 2px solid currentColor;
-	outline-offset: 2px;
-}
-
-.link-hover {
-	text-decoration: none;
-}
-
-.link-hover:hover {
-	text-decoration: underline;
-}
-
+@use '../config' as c;
 
 /* ============================================================
-   Variantes de couleur
+   link.scss — .link mixin library (styled hyperlink)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Inherits font size and color from context.
    ============================================================ */
 
-.link-primary { color: var(--color-primary); }
-.link-secondary { color: var(--color-secondary); }
-.link-accent { color: var(--color-accent); }
-.link-neutral { color: var(--color-neutral); }
-.link-success { color: var(--color-success); }
-.link-info { color: var(--color-info); }
-.link-warning { color: var(--color-warning); }
-.link-error { color: var(--color-error); }
 
-@media (hover: hover) {
-	.link-primary:hover  { color: color-mix(in oklab, var(--color-primary)   80%, #000); }
-	.link-secondary:hover { color: color-mix(in oklab, var(--color-secondary) 80%, #000); }
-	.link-accent:hover   { color: color-mix(in oklab, var(--color-accent)     80%, #000); }
-	.link-neutral:hover  { color: color-mix(in oklab, var(--color-neutral)    80%, #000); }
-	.link-success:hover  { color: color-mix(in oklab, var(--color-success)    80%, #000); }
-	.link-info:hover     { color: color-mix(in oklab, var(--color-info)       80%, #000); }
-	.link-warning:hover  { color: color-mix(in oklab, var(--color-warning)    80%, #000); }
-	.link-error:hover    { color: color-mix(in oklab, var(--color-error)      80%, #000); }
+/* ------------------------------------------------------------
+   base — underlined link + .link-hover variant + focus.
+   ------------------------------------------------------------ */
+@mixin base {
+	.link {
+		cursor: pointer;
+		text-decoration: underline;
+	}
+
+	.link:focus {
+		outline: none;
+	}
+
+	.link:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+
+	.link-hover {
+		text-decoration: none;
+	}
+
+	.link-hover:hover {
+		text-decoration: underline;
+	}
+}
+
+
+/* ------------------------------------------------------------
+   color-variants — .link-{primary,…}: text color + hover darken.
+   ------------------------------------------------------------ */
+@mixin color-variants {
+	@each $color in c.$color-list {
+		.link-#{$color} { color: var(--color-#{$color}); }
+	}
+
+	@media (hover: hover) {
+		@each $color in c.$color-list {
+			.link-#{$color}:hover { color: color-mix(in oklab, var(--color-#{$color}) 80%, #000); }
+		}
+	}
 }

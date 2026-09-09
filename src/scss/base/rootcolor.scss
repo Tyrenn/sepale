@@ -6,9 +6,9 @@
 :root,
 [data-theme] {
 	background: var(--page-scroll-bg, var(--root-bg));
-	color: var(--color-base-content);
+	color: var(--color-on-surface);
 }
 
 :where(:root, [data-theme]) {
-	--root-bg: var(--color-base-100);
+	--root-bg: var(--color-surface);
 }

@@ -1,0 +1,18 @@
+/* Theme « winter » — editable variables only (colors + radii). */
+:root {
+	color-scheme: light;
+	--color-surface: oklch(100% 0 0);
+	--color-surface-high: oklch(97.466% 0.011 259.822);
+	--color-surface-peak: oklch(93.268% 0.016 262.751);
+	--color-primary: oklch(56.86% 0.255 257.57);
+	--color-secondary: oklch(42.551% 0.161 282.339);
+	--color-accent: oklch(59.939% 0.191 335.171);
+	--color-neutral: oklch(19.616% 0.063 257.651);
+	--color-info: oklch(88.127% 0.085 214.515);
+	--color-success: oklch(80.494% 0.077 197.823);
+	--color-warning: oklch(89.172% 0.045 71.47);
+	--color-error: oklch(73.092% 0.11 20.076);
+	--radius-field: 0.5rem;
+	--radius-box: 1rem;
+	--radius-selector: 1rem;
+}

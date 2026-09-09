@@ -15,7 +15,7 @@
 	@each $color in c.$color-list {
 		.#{$prefix}-#{$color} {
 			#{$seed-prop}: var(--color-#{$color});
-			#{$fg-prop}: var(--color-#{$color}-content);
+			#{$fg-prop}: var(--color-on-#{$color});
 		}
 	}
 }

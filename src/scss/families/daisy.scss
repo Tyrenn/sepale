@@ -4,12 +4,12 @@
 
    What a family is
    ----------------
-   A family is the full set of CSS classes (structure + design
-   decisions) the Svelte components emit. A family commits to ONE
-   visual direction and is tuned through its THEME only — a set of
-   CSS custom properties (colors and radii). A family never ships a
-   structural customization mechanism: if you need to fundamentally
-   reshape a component, that is a different family, not an option.
+   A family is a SELECTION of component mixins (structure `base` +
+   opt-in look mixins) plus its own root variables. A family commits
+   to ONE visual direction and is tuned through its THEME only — a
+   set of CSS custom properties (colors and radii). A family never
+   ships a structural customization mechanism: if you need to
+   fundamentally reshape a component, that is a different family.
 
    Style variants that belong to the design language are allowed
    (e.g. button `outline` / `ghost` / `soft`), because they are part
@@ -18,7 +18,6 @@
    Variable ownership
    ------------------
    - FAMILY-OWNED look variables are set on `:root` here (borders,
-     elevation system, shadow recipes, noise). They define the
      family's identity and are not meant to be themed.
    - THEMEABLE variables (colors, radii) get family fallbacks on
      `:where(:root)` (specificity 0) so a theme's `:root` rules
@@ -26,10 +25,12 @@
 
    The « daisy » family
    --------------------
-   A faithful port of DaisyUI v5 (https://github.com/saadeghi/daisyui)
-   to plain CSS — no Tailwind, no `@apply`. Reproduces DaisyUI's
-   component looks and class names (`btn`, `btn-primary`, `input`,
-   `badge`, …) so the markup is interchangeable.
+   Heavily inspired by DaisyUI v5 (https://github.com/saadeghi/daisyui),
+   in plain CSS — no Tailwind, no `@apply`. Same class names (`btn`,
+   `btn-primary`, `input`, `badge`, …) and same look, so the markup is
+   interchangeable — but NOT the theme: our variables carry our own
+   names (--color-surface / --color-on-surface / --color-border, see
+   CONTEXT.md), so a DaisyUI theme pasted as-is will not apply.
 
    Characteristics:
      - Truly flat aesthetic: crisp 1px borders, NO elevation. Both the
@@ -41,9 +42,9 @@
 
    Theme variables consumed (see also each component's header)
    -----------------------------------------------------------
-     --color-base-100/200/300    surfaces (page, raised, sunken)
-     --color-base-content        default foreground color
-     --color-{semantic}[-content] primary/secondary/accent/neutral/
+     --color-surface/200/300    surfaces (page, raised, sunken)
+     --color-on-surface        default foreground color
+     --color-{semantic} / --color-on-{semantic} primary/secondary/accent/neutral/
                                   info/success/warning/error + fg
      --radius-field/box/selector corner radii (fields / boxes / selectors)
 
@@ -51,19 +52,26 @@
    ============================================================ */
 
 @use 'lib';
+@use 'derived-content';
 
-/* Themeable fallbacks — a theme's :root overrides these. */
+/* Themeable fallbacks — a theme's :root overrides these. Unlike the other
+   families, daisy also exposes daisyUI's effect variables (--border and
+   --depth) to the theme, mirroring the upstream theme API. */
 :where(:root) {
 	--radius-field: 0.25rem;
 	--radius-box: 0.5rem;
 	--radius-selector: 0.5rem;
+
+	--border: 1px; /* crisp hairline borders */
+	--depth: 1;    /* daisyUI's subtle 3D depth (its default themes ship 1) */
 }
 
-/* Family-owned look — DaisyUI flat (matches the original css/ output). */
+/* Family-owned look. */
 :root {
-	--border: 1px;        /* crisp hairline borders */
-	--depth: 0;           /* no retro 3D inset shadows */
-	--noise: 0;           /* no noise texture */
-	--light-intensity: 0; /* no directional shadow — fully flat */
+	--light-intensity: 0; /* no directional shadow */
 	--light-depth: 1;
 }
+
+/* ── Component mixin selection ──────────────────────────────────────
+   daisy = the reference daisyUI selection, nothing more. */
+@include lib.flat-components;

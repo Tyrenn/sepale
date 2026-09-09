@@ -49,5 +49,17 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"description": "* `Source Tailwind` -> Équivalent CSS * `@apply inline-flex shrink-0 …` -> Propriétés CSS explicites * `@apply no-underline` -> text-decoration: none * `@apply appearance-none` -> appearance: none * `@apply rounded-full px-0` -> border-radius: 9999px + padding-inline: 0 * `@apply w-full max-w-64` -> width: 100% + max-width: 16rem * `@apply bg-base-content/10` -> color-mix(in oklch, var(--color-base-content) 10%, #0000)",
+	"main": "svelte.config.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Tyrenn/u.u.git"
+	},
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Tyrenn/u.u/issues"
+	},
+	"homepage": "https://github.com/Tyrenn/u.u#readme"
 }

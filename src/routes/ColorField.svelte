@@ -2,22 +2,21 @@
 	import type { ThemeToken } from '$lib/theme.js';
 	import { colorToHex } from './color.js';
 
-	// `token` is a reactive $state proxy; mutating token.value propagates.
+	// One clickable colour tile: the whole square is the picker. `token` is a
+	// reactive $state proxy, so mutating token.value propagates. The tile shows
+	// nothing but the colour — its identity is the label under the group, and
+	// the exact variable name is in the tooltip.
 	let { token }: { token: ThemeToken } = $props();
 
-	// Hex shown in the native picker, recomputed from the (possibly oklch) value.
 	let hex = $derived(colorToHex(token.value));
-
-	function pick(e: Event) {
-		token.value = (e.target as HTMLInputElement).value;
-	}
 </script>
 
-<label class="cf">
-	<span class="cf-label">{token.label}</span>
-	<span class="cf-controls">
-		<input class="cf-swatch" type="color" value={hex} oninput={pick} aria-label={token.label} />
-		<input class="cf-text" type="text" bind:value={token.value} spellcheck="false" />
-	</span>
-	{#if token.description}<span class="cf-desc">{token.description}</span>{/if}
+<label class="ct" style="background:{token.value};" title="--{token.name} — {token.value}">
+	<input
+		class="ct-input"
+		type="color"
+		value={hex}
+		oninput={(e) => (token.value = e.currentTarget.value)}
+		aria-label={token.label}
+	/>
 </label>

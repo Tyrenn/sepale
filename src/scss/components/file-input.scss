@@ -1,225 +1,206 @@
-/* ============================================================
-   file-input.css — File picker input
-
-   External variables (defined by theme):
-     --color-base-100      field background
-     --color-base-200      disabled background and border
-     --color-base-content  default text color
-     --color-{variant}     button and border color (set by .file-input-{color})
-     --color-{variant}-content  button text for colored variants
-     --depth               shadow / inset intensity multiplier
-     --border              border width
-     --noise               noise texture intensity (0–1)
-     --fx-noise            noise SVG data-uri (from base/svg.css)
-     --radius-field        field corner radius
-
-   Join integration (set by join.css when nested in .join):
-     --join-ss / --join-es   start-side radius overrides (applied to ::file-selector-button)
-
-   Font size system:
-     --fontsize            overrides default size (set by .file-input-xs … .file-input-xl)
-     --base / --default-base   fallback font size
-     Note: ::file-selector-button keeps its own fixed font-size
-
-   Internal variables:
-     --size          field height (2.5em, scales with font)
-     --input-color   border/shadow color; driven by color variants
-     --btn-color     seed color for the file button; set by color variants
-     --btn-bg        resolved button background
-     --btn-fg        resolved button text color
-     --btn-border    resolved button border color
-     --btn-shadow    button drop shadow
-     --btn-noise     button noise texture image
-   ============================================================ */
-
-.file-input {
-	--size: 2.5em;
-	--input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
-	--btn-bg: var(--btn-color, var(--color-base-200));
-	--btn-fg: var(--color-base-content);
-	--btn-border: color-mix(in oklab, var(--btn-bg), #000 5%);
-	--btn-shadow:
-		0 3px 2px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000),
-		0 4px 3px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000);
-	--btn-noise: var(--fx-noise);
-
-	cursor: pointer;
-	border: var(--border) solid #0000;
-	background-color: var(--color-base-100);
-	display: inline-flex;
-	appearance: none;
-	align-items: center;
-	vertical-align: middle;
-	user-select: none;
-	width: clamp(3rem, 20rem, 100%);
-	height: var(--size);
-	padding-inline-end: 0.75em;
-	font-size: var(--fontsize, var(--base, var(--default-base)));
-	line-height: 2;
-	border-start-start-radius: var(--join-ss, var(--radius-field));
-	border-start-end-radius:   var(--join-se, var(--radius-field));
-	border-end-start-radius:   var(--join-es, var(--radius-field));
-	border-end-end-radius:     var(--join-ee, var(--radius-field));
-	border-color: var(--input-color);
-	box-shadow:
-		0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset,
-		0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
-		var(--shadow-light, );
-}
-
-.file-input::file-selector-button {
-	margin-inline-end: 1rem;     /* me-4 */
-	cursor: pointer;
-	padding-inline: 1rem;        /* px-4 */
-	user-select: none;
-	height: calc(100% + var(--border) * 2);
-	margin-block: calc(var(--border) * -1);
-	margin-inline-start: calc(var(--border) * -1);
-	font-size: 0.875rem;
-	font-weight: 600;
-	color: var(--btn-fg);
-	border-width: var(--border);
-	border-style: solid;
-	border-color: var(--btn-border);
-	border-start-start-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
-	border-end-start-radius:   calc(var(--join-es, var(--radius-field)) - var(--border));
-	background-color: var(--btn-bg);
-	background-size: calc(var(--noise) * 100%);
-	background-image: var(--btn-noise);
-	text-shadow: 0 0.5px oklch(1 0 0 / calc(var(--depth) * 0.15));
-	box-shadow:
-		0 0.5px 0 0.5px
-			color-mix(
-				in oklab,
-				color-mix(in oklab, white 30%, var(--btn-bg)) calc(var(--depth) * 20%),
-				#0000
-			)
-			inset,
-		var(--btn-shadow);
-}
-
-.file-input:focus {
-	--input-color: var(--color-base-content);
-	box-shadow: 0 1px color-mix(in oklab, var(--input-color) 10%, #0000);
-	outline: 2px solid var(--input-color);
-	outline-offset: 2px;
-	isolation: isolate;
-}
-
-.file-input:has(> input[disabled]),
-.file-input:is(:disabled, [disabled]) {
-	border-color: var(--color-base-200);
-	background-color: var(--color-base-200);
-	color: color-mix(in oklch, var(--color-base-content) 20%, #0000);
-	cursor: not-allowed;
-	box-shadow: none;
-}
-
-.file-input:has(> input[disabled])::file-selector-button,
-.file-input:is(:disabled, [disabled])::file-selector-button {
-	border-color: var(--color-base-200);
-	background-color: var(--color-base-200);
-	cursor: not-allowed;
-	--btn-border: #0000;
-	--btn-noise: none;
-	--btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
-}
-
+@use '../mixins' as m;
+@use '../config' as c;
 
 /* ============================================================
-   Ghost
+   file-input.scss — .file-input mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   field border/accent color (same as input.scss)
+	--btn-color     seed color for the file button (color-variants)
+	--btn-bg        resolved button background   (painted by base)
+	--btn-fg        resolved button text color   (painted by base)
+	--btn-border    resolved button border color (base default: transparent)
+	--btn-shadow    button drop shadow           (skin-flat)
+	--size          field height (2.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface / --color-surface-high / --color-on-surface
+	--color-{variant} / --color-on-{variant}  semantic colors (color-variants)
+	--border / --radius-field
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-es   start-side radius overrides
    ============================================================ */
 
-.file-input-ghost {
-	background-color: transparent;
-	transition: background-color 0.2s;
-	box-shadow: none;
-	border-color: #0000;
+
+/* ------------------------------------------------------------
+   base — structure: field layout + the ::file-selector-button
+   pseudo-button plumbing (paints from --btn-*), focus ring,
+   disabled state.
+   ------------------------------------------------------------ */
+@mixin base {
+	.file-input {
+		--size: calc(2.5em * var(--scale));
+		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+		--btn-bg: var(--btn-color, var(--color-surface-high));
+		--btn-fg: var(--color-on-surface);
+		--btn-border: transparent;
+
+		cursor: pointer;
+		border: var(--border) solid #0000;
+		background-color: var(--color-surface);
+		display: inline-flex;
+		appearance: none;
+		align-items: center;
+		vertical-align: middle;
+		user-select: none;
+		width: clamp(3rem, 20rem, 100%);
+		height: var(--size);
+		padding-inline-end: calc(0.75em * var(--scale));
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		line-height: 2;
+		border-start-start-radius: var(--join-ss, var(--radius-field));
+		border-start-end-radius:   var(--join-se, var(--radius-field));
+		border-end-start-radius:   var(--join-es, var(--radius-field));
+		border-end-end-radius:     var(--join-ee, var(--radius-field));
+		border-color: var(--input-color);
+		box-shadow: var(--shadow-light, );
+	}
+
+	.file-input::file-selector-button {
+		margin-inline-end: calc(1em * var(--scale));
+		cursor: pointer;
+		padding-inline: calc(1em * var(--scale));
+		user-select: none;
+		height: calc(100% + var(--border) * 2);
+		margin-block: calc(var(--border) * -1);
+		margin-inline-start: calc(var(--border) * -1);
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--btn-fg);
+		border-width: var(--border);
+		border-style: solid;
+		border-color: var(--btn-border);
+		border-start-start-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
+		border-end-start-radius:   calc(var(--join-es, var(--radius-field)) - var(--border));
+		background-color: var(--btn-bg);
+	}
+
+	.file-input:focus {
+		--input-color: var(--color-on-surface);
+		outline: 2px solid var(--input-color);
+		outline-offset: 2px;
+		isolation: isolate;
+	}
+
+	.file-input:has(> input[disabled]),
+	.file-input:is(:disabled, [disabled]) {
+		border-color: var(--color-surface-high);
+		background-color: var(--color-surface-high);
+		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+		cursor: not-allowed;
+		box-shadow: none;
+	}
+
+	.file-input:has(> input[disabled])::file-selector-button,
+	.file-input:is(:disabled, [disabled])::file-selector-button {
+		border-color: var(--color-surface-high);
+		background-color: var(--color-surface-high);
+		cursor: not-allowed;
+		--btn-border: #0000;
+		--btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+	}
 }
 
-.file-input-ghost::file-selector-button {
-	margin-inline-start: 0;     /* ms-0 */
-	margin-inline-end: 1rem;    /* me-4 */
-	height: 100%;
-	cursor: pointer;
-	padding-inline: 1rem;       /* px-4 */
-	user-select: none;
-	margin-block: 0;
-	border-start-end-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
-	border-end-end-radius:   calc(var(--join-es, var(--radius-field)) - var(--border));
+
+/* ------------------------------------------------------------
+   skin-flat — flat look for the field well AND the mini button
+   (border mix, drop shadows, top highlight).
+   ------------------------------------------------------------ */
+@mixin skin-flat {
+	.file-input {
+		--btn-border: color-mix(in oklab, var(--btn-bg), #000 5%);
+		--btn-shadow:
+			0 3px 2px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000),
+			0 4px 3px -2px color-mix(in oklab, var(--btn-bg) 30%, #0000);
+
+		box-shadow:
+			0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset,
+			0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+			var(--shadow-light, );
+	}
+
+	.file-input::file-selector-button {
+		text-shadow: 0 0.5px oklch(1 0 0 / calc(var(--depth) * 0.15));
+		box-shadow:
+			0 0.5px 0 0.5px
+				color-mix(
+					in oklab,
+					color-mix(in oklab, white 30%, var(--btn-bg)) calc(var(--depth) * 20%),
+					#0000
+				)
+				inset,
+			var(--btn-shadow);
+	}
+
+	.file-input:focus {
+		box-shadow: 0 1px color-mix(in oklab, var(--input-color) 10%, #0000);
+	}
 }
 
-.file-input-ghost:focus,
-.file-input-ghost:focus-within {
-	color: var(--color-base-content);
-	background-color: var(--color-base-100);
-	border-color: #0000;
-	box-shadow: none;
+
+/* ------------------------------------------------------------
+   variant-ghost — transparent field until focus.
+   ------------------------------------------------------------ */
+@mixin variant-ghost {
+	.file-input-ghost {
+		background-color: transparent;
+		transition: background-color 0.2s;
+		box-shadow: none;
+		border-color: #0000;
+	}
+
+	.file-input-ghost::file-selector-button {
+		margin-inline-start: 0;     /* ms-0 */
+		margin-inline-end: calc(1em * var(--scale));
+		height: 100%;
+		cursor: pointer;
+		padding-inline: calc(1em * var(--scale));
+		user-select: none;
+		margin-block: 0;
+		border-start-end-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
+		border-end-end-radius:   calc(var(--join-es, var(--radius-field)) - var(--border));
+	}
+
+	.file-input-ghost:focus,
+	.file-input-ghost:focus-within {
+		color: var(--color-on-surface);
+		background-color: var(--color-surface);
+		border-color: #0000;
+		box-shadow: none;
+	}
 }
 
 
-/* ============================================================
-   Variantes de couleur
-   ============================================================ */
-
-.file-input-neutral { --btn-color: var(--color-neutral); }
-.file-input-neutral::file-selector-button { color: var(--color-neutral-content); }
-.file-input-neutral,
-.file-input-neutral:focus,
-.file-input-neutral:focus-within { --input-color: var(--color-neutral); }
-
-.file-input-primary { --btn-color: var(--color-primary); }
-.file-input-primary::file-selector-button { color: var(--color-primary-content); }
-.file-input-primary,
-.file-input-primary:focus,
-.file-input-primary:focus-within { --input-color: var(--color-primary); }
-
-.file-input-secondary { --btn-color: var(--color-secondary); }
-.file-input-secondary::file-selector-button { color: var(--color-secondary-content); }
-.file-input-secondary,
-.file-input-secondary:focus,
-.file-input-secondary:focus-within { --input-color: var(--color-secondary); }
-
-.file-input-accent { --btn-color: var(--color-accent); }
-.file-input-accent::file-selector-button { color: var(--color-accent-content); }
-.file-input-accent,
-.file-input-accent:focus,
-.file-input-accent:focus-within { --input-color: var(--color-accent); }
-
-.file-input-info { --btn-color: var(--color-info); }
-.file-input-info::file-selector-button { color: var(--color-info-content); }
-.file-input-info,
-.file-input-info:focus,
-.file-input-info:focus-within { --input-color: var(--color-info); }
-
-.file-input-success { --btn-color: var(--color-success); }
-.file-input-success::file-selector-button { color: var(--color-success-content); }
-.file-input-success,
-.file-input-success:focus,
-.file-input-success:focus-within { --input-color: var(--color-success); }
-
-.file-input-warning { --btn-color: var(--color-warning); }
-.file-input-warning::file-selector-button { color: var(--color-warning-content); }
-.file-input-warning,
-.file-input-warning:focus,
-.file-input-warning:focus-within { --input-color: var(--color-warning); }
-
-.file-input-error { --btn-color: var(--color-error); }
-.file-input-error::file-selector-button { color: var(--color-error-content); }
-.file-input-error,
-.file-input-error:focus,
-.file-input-error:focus-within { --input-color: var(--color-error); }
+/* ------------------------------------------------------------
+   color-variants — .file-input-{primary,…}: seed the file button
+   (--btn-color + its on-color text) and the field accent (--input-color).
+   ------------------------------------------------------------ */
+@mixin color-variants {
+	@each $color in c.$color-list {
+		.file-input-#{$color} { --btn-color: var(--color-#{$color}); }
+		.file-input-#{$color}::file-selector-button { color: var(--color-on-#{$color}); }
+		.file-input-#{$color},
+		.file-input-#{$color}:focus,
+		.file-input-#{$color}:focus-within { --input-color: var(--color-#{$color}); }
+	}
+}
 
 
-/* ============================================================
-   Tailles
-   ============================================================ */
+/* ------------------------------------------------------------
+   size-variants — .file-input-{xs…xl}: set --fontsize (+ roomier
+   end padding at xl).
+   ------------------------------------------------------------ */
+@mixin size-variants {
+	@include m.size-variants('file-input');
 
-.file-input-xs { --fontsize: var(--xs,  var(--default-xs)); }
-.file-input-sm { --fontsize: var(--sm,  var(--default-sm)); }
-.file-input-md { --fontsize: var(--md,  var(--default-md)); }
-.file-input-lg { --fontsize: var(--lg,  var(--default-lg)); }
-.file-input-xl {
-	--fontsize: var(--xl, var(--default-xl));
-	padding-inline-end: 1.5em;
+	.file-input-xl {
+		padding-inline-end: calc(1.5em * var(--scale));
+	}
 }

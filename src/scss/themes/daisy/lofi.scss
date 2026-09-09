@@ -1,0 +1,29 @@
+/* Theme « lofi » — editable variables only (colors + radii). */
+:root {
+	color-scheme: light;
+	--color-surface: oklch(100% 0 0);
+	--color-surface-high: oklch(97% 0 0);
+	--color-surface-peak: oklch(94% 0 0);
+	--color-on-surface: oklch(0% 0 0);
+	--color-primary: oklch(15.906% 0 0);
+	--color-on-primary: oklch(100% 0 0);
+	--color-secondary: oklch(21.455% 0.001 17.278);
+	--color-on-secondary: oklch(100% 0 0);
+	--color-accent: oklch(26.861% 0 0);
+	--color-on-accent: oklch(100% 0 0);
+	--color-neutral: oklch(0% 0 0);
+	--color-on-neutral: oklch(100% 0 0);
+	--color-info: oklch(79.54% 0.103 205.9);
+	--color-on-info: oklch(15.908% 0.02 205.9);
+	--color-success: oklch(90.13% 0.153 164.14);
+	--color-on-success: oklch(18.026% 0.03 164.14);
+	--color-warning: oklch(88.37% 0.135 79.94);
+	--color-on-warning: oklch(17.674% 0.027 79.94);
+	--color-error: oklch(78.66% 0.15 28.47);
+	--color-on-error: oklch(15.732% 0.03 28.47);
+	--radius-field: 0.25rem;
+	--radius-box: 0.5rem;
+	--radius-selector: 2rem;
+	--border: 1px;
+	--depth: 0;
+}

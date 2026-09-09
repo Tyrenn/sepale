@@ -1,161 +1,169 @@
 /* ============================================================
-   dock.css — Fixed bottom navigation bar (mobile app dock)
+   dock.scss — .dock mixin library (fixed bottom navigation bar)
 
-   External variables (defined by theme):
-     --color-base-100      dock background
-     --color-base-content  used for disabled item text color mix
-     --radius-box          item corner radius
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
 
-   Internal variables:
-     none — item sizes set via height on .dock-xs … .dock-xl
+   External variables (theme / family):
+	--color-surface-peak  dock background (the most raised surface)
+	--color-on-surface  disabled item text color mix
+	--radius-box          item corner radius
    ============================================================ */
 
-.dock {
-	background-color: var(--color-base-100);
-	position: fixed;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	z-index: 1;
-	display: flex;
-	width: 100%;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-around;
-	padding: 0.5rem;
-	color: currentColor;
-	border-top: 0.5px solid color-mix(in oklab, var(--color-base-content) 5%, #0000);
-	height: 4rem;
-	height: calc(4rem + env(safe-area-inset-bottom));
-	padding-bottom: env(safe-area-inset-bottom);
-}
 
-.dock > * {
-	border-radius: var(--radius-box);
-	position: relative;
-	margin-bottom: 0.5rem;   /* mb-2 */
-	display: flex;
-	height: 100%;
-	max-width: 8rem;          /* max-w-32 */
-	flex-shrink: 1;
-	flex-basis: 100%;
-	cursor: pointer;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 1px;                 /* gap-px */
-	background-color: transparent;
-	transition: opacity 0.2s ease-out;
-}
+/* ------------------------------------------------------------
+   base — fixed bar, items, active indicator, disabled.
+   ------------------------------------------------------------ */
+@mixin base {
+	.dock {
+		background-color: var(--color-surface-peak);
+		position: fixed;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		z-index: 1;
+		display: flex;
+		width: 100%;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-around;
+		padding: 0.5rem;
+		color: currentColor;
+		border-top: 0.5px solid color-mix(in oklab, var(--color-on-surface) 5%, #0000);
+		height: 4rem;
+		height: calc(4rem + env(safe-area-inset-bottom));
+		padding-bottom: env(safe-area-inset-bottom);
+	}
 
-@media (hover: hover) {
-	.dock > *:hover {
-		opacity: 0.8;
+	.dock > * {
+		border-radius: var(--radius-box);
+		position: relative;
+		margin-bottom: 0.5rem;   /* mb-2 */
+		display: flex;
+		height: 100%;
+		max-width: 8rem;          /* max-w-32 */
+		flex-shrink: 1;
+		flex-basis: 100%;
+		cursor: pointer;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1px;                 /* gap-px */
+		background-color: transparent;
+		transition: opacity 0.2s ease-out;
+	}
+
+	@media (hover: hover) {
+		.dock > *:hover {
+			opacity: 0.8;
+		}
+	}
+
+	.dock > *[aria-disabled="true"],
+	.dock > *[disabled] {
+		color: color-mix(in oklch, var(--color-on-surface) 10%, #0000);
+		pointer-events: none;
+		opacity: 1;
+	}
+
+	.dock > *[aria-disabled="true"]:hover,
+	.dock > *[disabled]:hover {
+		color: color-mix(in oklch, var(--color-on-surface) 10%, #0000);
+		pointer-events: none;
+		opacity: 1;
+	}
+
+	.dock-label {
+		font-size: 0.6875rem;
+	}
+
+	.dock > *::after {
+		content: "";
+		position: absolute;
+		height: 0.25rem;          /* h-1 */
+		width: 1.5rem;            /* w-6 */
+		border-radius: 9999px;
+		background-color: transparent;
+		bottom: 0.2rem;
+		border-top: 3px solid transparent;
+		transition:
+			background-color 0.1s ease-out,
+			color 0.1s ease-out,
+			width 0.1s ease-out;
+	}
+
+	/* Active state */
+	.dock-active::after {
+		width: 2.5rem;            /* w-10 */
+		background-color: currentColor;
+		color: currentColor;
 	}
 }
 
-.dock > *[aria-disabled="true"],
-.dock > *[disabled] {
-	color: color-mix(in oklch, var(--color-base-content) 10%, #0000);
-	pointer-events: none;
-	opacity: 1;
-}
 
-.dock > *[aria-disabled="true"]:hover,
-.dock > *[disabled]:hover {
-	color: color-mix(in oklch, var(--color-base-content) 10%, #0000);
-	pointer-events: none;
-	opacity: 1;
-}
+/* ------------------------------------------------------------
+   size-variants — .dock-{xs…xl}: bar height + label size.
+   ------------------------------------------------------------ */
+@mixin size-variants {
+	.dock-xs {
+		height: 3rem;
+		height: calc(3rem + env(safe-area-inset-bottom));
+	}
 
-.dock-label {
-	font-size: 0.6875rem;
-}
+	.dock-xs .dock-active::after {
+		bottom: -0.1rem;
+	}
 
-.dock > *::after {
-	content: "";
-	position: absolute;
-	height: 0.25rem;          /* h-1 */
-	width: 1.5rem;            /* w-6 */
-	border-radius: 9999px;
-	background-color: transparent;
-	bottom: 0.2rem;
-	border-top: 3px solid transparent;
-	transition:
-		background-color 0.1s ease-out,
-		color 0.1s ease-out,
-		width 0.1s ease-out;
-}
+	.dock-xs .dock-label {
+		font-size: 0.625rem;
+	}
 
-/* Active state */
-.dock-active::after {
-	width: 2.5rem;            /* w-10 */
-	background-color: currentColor;
-	color: currentColor;
-}
+	.dock-sm {
+		height: 3.5rem;
+		height: calc(3.5rem + env(safe-area-inset-bottom));
+	}
 
+	.dock-sm .dock-active::after {
+		bottom: -0.1rem;
+	}
 
-/* ============================================================
-   Tailles
-   ============================================================ */
+	.dock-sm .dock-label {
+		font-size: 0.625rem;
+	}
 
-.dock-xs {
-	height: 3rem;
-	height: calc(3rem + env(safe-area-inset-bottom));
-}
+	.dock-md {
+		height: 4rem;
+		height: calc(4rem + env(safe-area-inset-bottom));
+	}
 
-.dock-xs .dock-active::after {
-	bottom: -0.1rem;
-}
+	.dock-md .dock-label {
+		font-size: 0.6875rem;
+	}
 
-.dock-xs .dock-label {
-	font-size: 0.625rem;
-}
+	.dock-lg {
+		height: 4.5rem;
+		height: calc(4.5rem + env(safe-area-inset-bottom));
+	}
 
-.dock-sm {
-	height: 3.5rem;
-	height: calc(3.5rem + env(safe-area-inset-bottom));
-}
+	.dock-lg .dock-active::after {
+		bottom: 0.4rem;
+	}
 
-.dock-sm .dock-active::after {
-	bottom: -0.1rem;
-}
+	.dock-lg .dock-label {
+		font-size: 0.6875rem;
+	}
 
-.dock-sm .dock-label {
-	font-size: 0.625rem;
-}
+	.dock-xl {
+		height: 5rem;
+		height: calc(5rem + env(safe-area-inset-bottom));
+	}
 
-.dock-md {
-	height: 4rem;
-	height: calc(4rem + env(safe-area-inset-bottom));
-}
+	.dock-xl .dock-active::after {
+		bottom: 0.4rem;
+	}
 
-.dock-md .dock-label {
-	font-size: 0.6875rem;
-}
-
-.dock-lg {
-	height: 4.5rem;
-	height: calc(4.5rem + env(safe-area-inset-bottom));
-}
-
-.dock-lg .dock-active::after {
-	bottom: 0.4rem;
-}
-
-.dock-lg .dock-label {
-	font-size: 0.6875rem;
-}
-
-.dock-xl {
-	height: 5rem;
-	height: calc(5rem + env(safe-area-inset-bottom));
-}
-
-.dock-xl .dock-active::after {
-	bottom: 0.4rem;
-}
-
-.dock-xl .dock-label {
-	font-size: 0.75rem;
+	.dock-xl .dock-label {
+		font-size: 0.75rem;
+	}
 }

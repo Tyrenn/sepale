@@ -1,0 +1,18 @@
+/* Theme « emerald » — editable variables only (colors + radii). */
+:root {
+	color-scheme: light;
+	--color-surface: oklch(100% 0 0);
+	--color-surface-high: oklch(93% 0 0);
+	--color-surface-peak: oklch(86% 0 0);
+	--color-primary: oklch(76.662% 0.135 153.45);
+	--color-secondary: oklch(61.302% 0.202 261.294);
+	--color-accent: oklch(72.772% 0.149 33.2);
+	--color-neutral: oklch(35.519% 0.032 262.988);
+	--color-info: oklch(72.06% 0.191 231.6);
+	--color-success: oklch(64.8% 0.15 160);
+	--color-warning: oklch(84.71% 0.199 83.87);
+	--color-error: oklch(71.76% 0.221 22.18);
+	--radius-field: 0.5rem;
+	--radius-box: 1rem;
+	--radius-selector: 1rem;
+}
