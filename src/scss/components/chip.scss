@@ -16,7 +16,7 @@
 	--fontsize    font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface / --color-surface-high / --color-on-surface
+	--color-surface-1 / --color-surface-2 / --color-on-surface
 	--color-{variant} / --color-on-{variant}  seed / text colors (color-variants)
 	--border / --radius-selector
 	--shadow-light          family shadow system
@@ -28,7 +28,7 @@
    ------------------------------------------------------------ */
 @mixin base {
 	.chip {
-		--chip-bg: var(--chip-color, var(--color-surface));
+		--chip-bg: var(--chip-color, var(--color-surface-1));
 		--chip-fg: var(--color-on-surface);
 		--size: calc(1.6em * var(--scale));
 
@@ -40,7 +40,7 @@
 		gap: calc(0.5em * var(--scale));
 		vertical-align: middle;
 		color: var(--chip-fg);
-		border: var(--border) solid var(--chip-color, var(--color-surface-high));
+		border: var(--border) solid var(--chip-color, var(--color-surface-2));
 		width: fit-content;
 		background-color: var(--chip-bg);
 		height: var(--size);
@@ -87,20 +87,20 @@
 @mixin variant-soft {
 	.chip-soft {
 		color: var(--chip-color, var(--color-on-surface));
-		background-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 8%, var(--color-surface));
-		border-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 10%, var(--color-surface));
+		background-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+		border-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 10%, var(--color-surface-1));
 		background-image: none;
 	}
 }
 
 
 /* ------------------------------------------------------------
-   variant-ghost — muted surface-high fill.
+   variant-ghost — muted surface-2 fill.
    ------------------------------------------------------------ */
 @mixin variant-ghost {
 	.chip-ghost {
-		border-color: var(--color-surface-high);
-		background-color: var(--color-surface-high);
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
 		color: var(--color-on-surface);
 		background-image: none;
 	}

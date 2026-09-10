@@ -17,7 +17,7 @@
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface        background when checked
+	--color-surface-1        background when checked
 	--color-{variant}       accent color (color-variants)
 	--border
    ============================================================ */
@@ -61,7 +61,7 @@
 
 	.radio:checked,
 	.radio[aria-checked="true"] {
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		border-color: currentColor;
 	}
 

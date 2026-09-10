@@ -30,3 +30,6 @@ vite.config.ts.timestamp-*
 
 .claude
 CLAUDE.md
+
+# Screenshots from scripts/shoot.mjs
+.shots/

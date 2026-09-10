@@ -710,7 +710,7 @@
 {:else if component === 'list'}
 	<Section
 		title="Rows"
-		svelte={`<List style="width:24rem; border:1px solid var(--color-surface-high);">
+		svelte={`<List style="width:24rem; border:1px solid var(--color-surface-2);">
 	<li class="list-row">
 		<div>
 			<p style="font-weight:600;">Item title</p>
@@ -719,7 +719,7 @@
 		<div class="list-col-grow" style="text-align:right; opacity:.6;">Right</div>
 	</li>
 </List>`}
-		html={`<ul class="list" style="width:24rem; border:1px solid var(--color-surface-high);">
+		html={`<ul class="list" style="width:24rem; border:1px solid var(--color-surface-2);">
 	<li class="list-row">
 		<div>
 			<p style="font-weight:600;">Item title</p>
@@ -729,7 +729,7 @@
 	</li>
 </ul>`}
 	>
-		<List style="width:24rem; border:1px solid var(--color-surface-high);">
+		<List style="width:24rem; border:1px solid var(--color-surface-2);">
 			<li class="list-row">
 				<div>
 					<p style="font-weight:600;">Item title</p>

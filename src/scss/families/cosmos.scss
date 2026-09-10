@@ -1,0 +1,310 @@
+/* ============================================================
+   STYLE FAMILY — « cosmos »  (after PaperCSS, hand-drawn)
+
+   Cosmos flowers look like they were cut from tissue paper —
+   thin, papery petals that never sit symmetrically. Which is
+   what this family does to every corner it draws.
+
+   The look: nothing is a rectangle. Every frame uses six
+   different elliptical radii so no two corners match, the border
+   is a thick marker line, and elements sit at a fraction of a
+   degree off true. It should look drawn, not rendered.
+
+   Changes made to fit our contract:
+     - PaperCSS imports Patrick Hand from Google Fonts. We do not
+       ship or fetch fonts, so cosmos names a handwriting stack
+       and degrades to the system face. Point
+       --default-font-family at a real hand face and it snaps into
+       character.
+     - The asymmetric radius is a fixed six-value recipe, not a
+       single number, so `--radius-field` cannot express it. cosmos
+       exposes a `wobble` knob instead, which mixes between a plain
+       radius and the full hand-drawn recipe. At 0 it is an
+       ordinary rounded family; at 1 it is PaperCSS.
+     - PaperCSS has no dark theme. Ours adds one — a chalk-on-slate
+       reading of the same idea, which is an invention, not a port.
+
+   Build: static/families/cosmos.css via `npm run build:css`.
+   ============================================================ */
+
+@use 'sass:map';
+@use '../params';
+@use 'lib';
+@use 'derived-content';
+
+$params: map.merge(
+	params.colors((
+		'color-surface-1': #fdfdf6,
+		'color-surface-2': #f5f3e8,
+		'color-surface-3': #eae7d6,
+		'color-border': #41403e,
+		'color-on-surface': #41403e,
+		'color-primary': #41403e,
+		'color-secondary': #7f8c8d,
+		'color-accent': #f6c667,
+		'color-neutral': #41403e,
+		'color-info': #6ca9d6,
+		'color-success': #86b98a,
+		'color-warning': #f6c667,
+		'color-error': #d97b6c
+	)),
+	(
+		'default-font-family': (
+			label: 'Typeface', group: 'Typography', type: text,
+			default: ('Patrick Hand', 'Comic Sans MS', 'Segoe Print', cursive),
+			help: 'cosmos is drawn by hand. Without a hand face it reads as a wonky sans — install or link one and it comes alive.'
+		),
+		'radius-field': (
+			label: 'Field radius', group: 'Shape', type: length,
+			default: 0.75rem, min: 0, max: 2, step: 0.05, unit: rem, units: (px rem em),
+			help: 'The rounded base the wobble is mixed on top of.'
+		),
+		'radius-box': (
+			label: 'Box radius', group: 'Shape', type: length,
+			default: 1rem, min: 0, max: 3, step: 0.05, unit: rem, units: (px rem em),
+			help: 'Corner radius of larger boxes.'
+		),
+		'radius-selector': (
+			label: 'Selector radius', group: 'Shape', type: length,
+			default: 0.5rem, min: 0, max: 2, step: 0.05, unit: rem, units: (px rem em),
+			help: 'Corner radius of checkboxes, toggles and tabs.'
+		),
+		'border': (
+			label: 'Pen width', group: 'Shape', type: length,
+			default: 2px, min: 1, max: 5, step: 0.5, unit: px, units: (px em),
+			help: 'Thickness of the marker line. This is a drawing, so the line matters more than the fill.'
+		),
+		'scale': (
+			label: 'Element size', group: 'Size', type: number,
+			default: 1, min: 0.75, max: 2, step: 0.05,
+			help: 'Grows every frame — paddings, heights, spacing. Text is unaffected.'
+		),
+		'cosmos-wobble': (
+			label: 'Wobble', group: 'Effects', type: number,
+			default: 1, min: 0, max: 1, step: 0.05,
+			help: 'How far the corners drift from a true radius. 0 is an ordinary rounded family; 1 is fully hand-drawn.'
+		),
+		'cosmos-tilt': (
+			label: 'Tilt', group: 'Effects', type: number,
+			default: 0.4, min: 0, max: 3, step: 0.1,
+			help: 'Degrees a control sits off true. Small numbers read as drawn; large ones read as broken.'
+		)
+	)
+);
+
+@include params.emit($params);
+
+/* Family-owned: ink on paper. No cast light. */
+:root {
+	--depth: 0;
+	--light-intensity: 0;
+	--root-bg: var(--color-surface-1);
+}
+
+@include lib.structure;
+
+/* ── Family look ───────────────────────────────────────────────
+   The hand-drawn corner recipe, declared per element so it
+   resolves against that element's own radius. */
+
+:where(*) {
+	--cw: var(--cosmos-wobble, 1);
+	/* Six elliptical radii; each is the plain radius plus a drift
+	   scaled by the wobble, so wobble 0 collapses to a circle. */
+	--cosmos-corners:
+		calc(var(--radius-field) + var(--cw) * 14rem) calc(var(--radius-field) + var(--cw) * 0.15rem)
+		calc(var(--radius-field) + var(--cw) * 12rem) calc(var(--radius-field) + var(--cw) * 0.15rem) /
+		calc(var(--radius-field) + var(--cw) * 0.15rem) calc(var(--radius-field) + var(--cw) * 12rem)
+		calc(var(--radius-field) + var(--cw) * 0.15rem) calc(var(--radius-field) + var(--cw) * 14rem);
+}
+
+.btn,
+.input,
+.select,
+.textarea,
+.file-input,
+.chip {
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--cosmos-corners);
+	rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+.btn {
+	--btn-bg: var(--btn-color, var(--color-surface-1));
+	--btn-fg: var(--color-on-surface);
+	--btn-border: var(--color-border);
+	--btn-shadow: none;
+	transition: rotate 0.1s ease-out, background-color 0.1s;
+}
+
+.btn:is(.btn-primary, .btn-secondary, .btn-accent, .btn-neutral, .btn-info, .btn-success, .btn-warning, .btn-error) {
+	--btn-fg: var(--color-on-primary);
+}
+
+/* Hover straightens the drawing; press tips it the other way. */
+@media (hover: hover) {
+	.btn:not(:disabled, [disabled], .btn-disabled):hover {
+		rotate: 0deg;
+	}
+}
+
+.btn:active:not(.btn-active) {
+	rotate: calc(var(--cosmos-tilt, 0.4) * 1deg);
+}
+
+/* Fields: same pen, and the focus is a second stroke rather than
+   a glow — as if it had been gone over twice. */
+.input,
+.select,
+.textarea,
+.file-input {
+	--input-color: var(--color-border);
+	background-color: var(--color-surface-1);
+}
+
+.input:focus,
+.input:focus-within,
+.select:focus,
+.select:focus-within,
+.textarea:focus,
+.textarea:focus-within,
+.file-input:focus-within {
+	outline: none;
+	box-shadow: 0 0 0 var(--border) var(--color-border);
+}
+
+.checkbox,
+.radio,
+.toggle {
+	--input-color: var(--color-border);
+	border-width: var(--border);
+}
+
+.checkbox:checked,
+.checkbox[aria-checked='true'],
+.radio:checked,
+.radio[aria-checked='true'] {
+	--input-color: var(--color-accent);
+}
+
+.tab {
+	--tab-border-color: var(--color-border);
+}
+
+/* ── Progress ──────────────────────────────────────────────────
+   PaperCSS draws its progress as a DRAWN CONTAINER with a block
+   sketched inside — not a rail with a fill. So the bar keeps the
+   pen line and the wobbly corners, and the value is a flat block
+   that stops short of the frame. */
+.progress {
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--cosmos-corners);
+	height: calc(1.1em * var(--scale));
+	background-color: var(--color-surface-1);
+	color: var(--color-accent);
+	overflow: hidden;
+	rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+.progress::-webkit-progress-bar {
+	background-color: var(--color-surface-1);
+}
+
+.progress::-webkit-progress-value {
+	background-color: var(--color-accent);
+	border-radius: 0;
+}
+
+.progress::-moz-progress-bar {
+	background-color: var(--color-accent);
+	border-radius: 0;
+}
+
+/* ── Range ─────────────────────────────────────────────────────
+   Drawn like everything else: a pen-line channel with a
+   hand-drawn knob riding it.
+
+   Our base paints the filled portion with a shadow cast by the
+   thumb, clipped to the control box — so the fill is always as
+   tall as the CONTROL, never as tall as the rail. A thin rail
+   with a big handle and a filled portion cannot all three hold
+   here, so the fill is off and the rail reads as one line. */
+.range {
+	--rail: calc(0.55em * var(--scale));
+	--range-thumb-size: calc(1.1em * var(--scale));
+	--range-fill: 0;
+	--range-p: 0px;
+	--range-thumb: var(--color-surface-1);
+	--range-bg: var(--color-surface-2);
+	--range-progress: var(--color-accent);
+	color: var(--color-accent);
+}
+
+.range::-webkit-slider-runnable-track {
+	height: var(--rail);
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--cosmos-corners);
+}
+
+.range::-moz-range-track {
+	height: var(--rail);
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--cosmos-corners);
+}
+
+.range::-webkit-slider-thumb {
+	border: var(--border) solid var(--color-border);
+	border-radius: 999px;
+}
+
+.range::-moz-range-thumb {
+	border: var(--border) solid var(--color-border);
+	border-radius: 999px;
+}
+/* ── Tabs ──────────────────────────────────────────────────────
+   Tabs are drawn boxes, and the active one is the one that has
+   been coloured in. */
+.tab {
+	--tab-border-color: var(--color-border);
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--cosmos-corners);
+	rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+	transition: rotate 0.1s ease-out, background-color 0.1s;
+}
+
+.tab-active {
+	background-color: var(--color-accent);
+	color: var(--color-on-accent);
+	rotate: 0deg;
+}
+
+@media (hover: hover) {
+	.tab:not(.tab-active, :disabled):hover {
+		rotate: 0deg;
+	}
+}
+
+/* ── Chips, lists, chrome ─────────────────────────────────────── */
+.chip {
+	background-color: var(--chip-color, var(--color-surface-1));
+	border-radius: var(--cosmos-corners);
+}
+
+.list,
+.dock,
+.navbar {
+	background-color: var(--color-surface-1);
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--cosmos-corners);
+}
+
+.skeleton {
+	background-color: var(--color-surface-2);
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--cosmos-corners);
+}
+
+.link {
+	text-decoration-thickness: var(--border);
+	text-underline-offset: 0.2em;
+}

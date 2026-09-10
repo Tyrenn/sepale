@@ -1,5 +1,5 @@
 /* ============================================================
-   STYLE FAMILY — « daisy »
+   STYLE FAMILY — « daisy »  (after DaisyUI 5)
    ============================================================
 
    What a family is
@@ -29,7 +29,7 @@
    in plain CSS — no Tailwind, no `@apply`. Same class names (`btn`,
    `btn-primary`, `input`, `badge`, …) and same look, so the markup is
    interchangeable — but NOT the theme: our variables carry our own
-   names (--color-surface / --color-on-surface / --color-border, see
+   names (--color-surface-1 / --color-on-surface / --color-border, see
    CONTEXT.md), so a DaisyUI theme pasted as-is will not apply.
 
    Characteristics:
@@ -42,7 +42,7 @@
 
    Theme variables consumed (see also each component's header)
    -----------------------------------------------------------
-     --color-surface/200/300    surfaces (page, raised, sunken)
+     --color-surface-1/200/300    surfaces (page, raised, sunken)
      --color-on-surface        default foreground color
      --color-{semantic} / --color-on-{semantic} primary/secondary/accent/neutral/
                                   info/success/warning/error + fg
@@ -51,20 +51,63 @@
    Build: compiled to static/families/daisy.css by `npm run build:css`.
    ============================================================ */
 
+@use 'sass:map';
+@use '../params';
 @use 'lib';
 @use 'derived-content';
 
-/* Themeable fallbacks — a theme's :root overrides these. Unlike the other
-   families, daisy also exposes daisyUI's effect variables (--border and
-   --depth) to the theme, mirroring the upstream theme API. */
-:where(:root) {
-	--radius-field: 0.25rem;
-	--radius-box: 0.5rem;
-	--radius-selector: 0.5rem;
+/* The variables daisy exposes. Emitted on :where(:root) so any theme
+   wins, and declared once here so the configurator and the Families
+   page read the same source. */
+$params: map.merge(
+	params.colors((
+		'color-surface-1': oklch(100% 0 0),
+		'color-surface-2': oklch(96% 0 0),
+		'color-surface-3': oklch(92% 0 0),
+		'color-primary': oklch(55% 0.21 264),
+		'color-secondary': oklch(60% 0.2 330),
+		'color-accent': oklch(65% 0.18 165),
+		'color-neutral': oklch(28% 0.01 285),
+		'color-info': oklch(70% 0.13 230),
+		'color-success': oklch(72% 0.16 145),
+		'color-warning': oklch(80% 0.15 85),
+		'color-error': oklch(63% 0.22 25)
+	)),
+	(
+		'radius-field': (
+			label: 'Field radius', group: 'Shape', type: length,
+			default: 0.25rem, min: 0, max: 2, step: 0.05, unit: rem, units: (px rem em ch),
+			help: 'Corner radius of fields: buttons, inputs, selects.'
+		),
+		'radius-box': (
+			label: 'Box radius', group: 'Shape', type: length,
+			default: 0.5rem, min: 0, max: 3, step: 0.05, unit: rem, units: (px rem em ch),
+			help: 'Corner radius of larger boxes: lists, dropdowns.'
+		),
+		'radius-selector': (
+			label: 'Selector radius', group: 'Shape', type: length,
+			default: 0.5rem, min: 0, max: 2, step: 0.05, unit: rem, units: (px rem em ch),
+			help: 'Corner radius of selectors: checkboxes, toggles, tabs.'
+		),
+		'border': (
+			label: 'Border width', group: 'Shape', type: length,
+			default: 1px, min: 0, max: 3, step: 0.5, unit: px, units: (px rem em ch),
+			help: 'Width of component borders.'
+		),
+		'scale': (
+			label: 'Element size', group: 'Size', type: number,
+			default: 1, min: 0.75, max: 2, step: 0.05,
+			help: 'Grows every frame - paddings, heights, spacing. Text is unaffected.'
+		),
+		'depth': (
+			label: 'Depth', group: 'Effects', type: number,
+			default: 1, min: 0, max: 1, step: 0.05,
+			help: 'Subtle 3D depth on fields and selectors. Faithful to daisyUI, which means almost invisible on a dark theme.'
+		)
+	)
+);
 
-	--border: 1px; /* crisp hairline borders */
-	--depth: 1;    /* daisyUI's subtle 3D depth (its default themes ship 1) */
-}
+@include params.emit($params);
 
 /* Family-owned look. */
 :root {

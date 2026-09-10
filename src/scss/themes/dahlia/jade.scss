@@ -1,0 +1,21 @@
+/* Theme "jade" - Radix jade: a green accent over the same greys */
+:root {
+	color-scheme: light;
+	--color-surface-1: #fcfdfc;
+	--color-surface-2: #f8faf8;
+	--color-surface-3: #eff1ef;
+	--color-surface-4: #e7e9e7;
+	--color-border: #dcdfdc;
+	--color-on-surface: #1a211e;
+	--color-primary: #29a383;
+	--color-secondary: #3e63dd;
+	--color-accent: #0090ff;
+	--color-neutral: #5f6563;
+	--color-info: #0090ff;
+	--color-success: #30a46c;
+	--color-warning: #ffc53d;
+	--color-error: #e5484d;
+	--radius-field: 0.375rem;
+	--radius-box: 0.625rem;
+	--radius-selector: 0.25rem;
+}

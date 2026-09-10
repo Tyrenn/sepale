@@ -62,6 +62,11 @@
 		<nav class="side-nav">
 			<ul class="side-list">
 				<li>
+					<a class="side-link" href="/families" data-active={page.url.pathname === '/families'}>
+						Families
+					</a>
+				</li>
+				<li>
 					<a class="side-link" href="/" data-active={page.url.pathname === '/'}>Theme</a>
 				</li>
 			</ul>

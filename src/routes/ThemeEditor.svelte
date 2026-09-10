@@ -8,26 +8,28 @@
 	// first. Any group a family invents that is not listed falls in at the end.
 	const ORDER = ['Colors', 'Shape', 'Size', 'Effects', 'Elevation'];
 
-	// The palette is laid out as tiles, not rows: the three surface levels plus
-	// a contrast sample, then the eight semantics two per line. Every group
-	// shows a second, NON-editable tile painting an "A" in its on-colour —
+	// The palette is laid out as tiles, not rows, and it is derived from
+	// whatever the family declares — a family with four surfaces, or with
+	// names of its own, comes through unchanged. Each tile that has a matching
+	// on-colour shows a second, NON-editable tile painting an "A" in it:
 	// on-colours are derived in CSS, so that tile is a live contrast check
 	// rather than a control. Hovering any tile shows its variable name.
-	// Surfaces, lowest first. Each shows its own tile plus the text drawn on it.
-	const SURFACES: [string, string][] = [
-		['color-surface', 'surface'],
-		['color-surface-high', 'surface-high'],
-		['color-surface-peak', 'surface-peak']
-	];
+	let colorTokens = $derived(playground.tokens.filter((t) => t.type === 'color'));
 
-	const PAIRS = [
-		['primary', 'secondary'],
-		['accent', 'neutral'],
-		['info', 'success'],
-		['warning', 'error']
-	];
+	/** Surfaces first, lowest to most raised — they read as one stack. */
+	let surfaces = $derived(colorTokens.filter((t) => t.name.startsWith('color-surface')));
 
-	let byName = $derived(new Map(playground.tokens.map((t) => [t.name, t])));
+	/** Semantics: everything that is neither a surface nor plain ink. */
+	let semantics = $derived(
+		colorTokens.filter(
+			(t) => !t.name.startsWith('color-surface') && !['color-on-surface', 'color-border'].includes(t.name)
+		)
+	);
+
+	/** Ink: the text and hairline colours, when the family exposes them. */
+	let ink = $derived(colorTokens.filter((t) => ['color-on-surface', 'color-border'].includes(t.name)));
+
+	const shortName = (name: string) => name.replace(/^color-/, '');
 
 	let groups = $derived.by(() => {
 		const map = new Map<string, ThemeToken[]>();
@@ -62,46 +64,48 @@
 
 		{#if name === 'Colors'}
 			<div class="pal">
-				<!-- The three surface levels, lowest to most raised, then the
-				     text they all carry. -->
-				{#each SURFACES as [key, label] (key)}
-					{@const token = byName.get(key)}
-					{#if token}
-						<div class="pal-item">
-							<div class="pal-tiles">
-								<ColorField {token} />
-								<span
-									class="ct ct-derived"
-									style="background:var(--{key}); color:var(--color-on-surface);"
-									title="--color-on-surface — derived from the surface colour"
-								>
-									<span class="ct-glyph">A</span>
-								</span>
-							</div>
-							<span class="pal-label">{label}</span>
+				<!-- Surfaces, lowest to most raised, each showing the text it
+				     carries. However many the family declares. -->
+				{#each surfaces as token (token.name)}
+					<div class="pal-item">
+						<div class="pal-tiles">
+							<ColorField {token} />
+							<span
+								class="ct ct-derived"
+								style="background:var(--{token.name}); color:var(--color-on-surface);"
+								title="--color-on-surface — derived from the surface colour"
+							>
+								<span class="ct-glyph">A</span>
+							</span>
 						</div>
-					{/if}
+						<span class="pal-label">{shortName(token.name)}</span>
+					</div>
 				{/each}
 
-				{#each PAIRS as pair (pair[0])}
-					{#each pair as key (key)}
-						{@const token = byName.get(`color-${key}`)}
-						{#if token}
-							<div class="pal-item">
-								<div class="pal-tiles">
-									<ColorField {token} />
-									<span
-										class="ct ct-derived"
-										style="background:var(--color-{key}); color:var(--color-on-{key});"
-										title="--color-on-{key} — derived from --color-{key}"
-									>
-										<span class="ct-glyph">A</span>
-									</span>
-								</div>
-								<span class="pal-label">{key}</span>
-							</div>
-						{/if}
-					{/each}
+				{#each ink as token (token.name)}
+					<div class="pal-item">
+						<div class="pal-tiles">
+							<ColorField {token} />
+						</div>
+						<span class="pal-label">{shortName(token.name)}</span>
+					</div>
+				{/each}
+
+				{#each semantics as token (token.name)}
+					{@const key = shortName(token.name)}
+					<div class="pal-item">
+						<div class="pal-tiles">
+							<ColorField {token} />
+							<span
+								class="ct ct-derived"
+								style="background:var(--{token.name}); color:var(--color-on-{key});"
+								title="--color-on-{key} — derived from --{token.name}"
+							>
+								<span class="ct-glyph">A</span>
+							</span>
+						</div>
+						<span class="pal-label">{key}</span>
+					</div>
 				{/each}
 			</div>
 		{:else}

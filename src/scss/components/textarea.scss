@@ -12,7 +12,7 @@
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface / --color-surface-high / --color-on-surface
+	--color-surface-1 / --color-surface-2 / --color-on-surface
 	--color-{variant}       semantic accent (set by color-variants)
 	--border / --radius-field
 	--depth                 flat-skin inset intensity (skin-flat only)
@@ -29,7 +29,7 @@
 		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
 
 		border: var(--border) solid #0000;
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		border-radius: var(--radius-field);
 		min-height: calc(5em * var(--scale));
 		flex-shrink: 1;
@@ -76,8 +76,8 @@
 
 	.textarea:has(> textarea[disabled]),
 	.textarea:is(:disabled, [disabled]) {
-		border-color: var(--color-surface-high);
-		background-color: var(--color-surface-high);
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
 		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
 		cursor: not-allowed;
 		box-shadow: none;
@@ -127,7 +127,7 @@
 	.textarea-ghost:focus,
 	.textarea-ghost:focus-within {
 		color: var(--color-on-surface);
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		border-color: #0000;
 		box-shadow: none;
 	}

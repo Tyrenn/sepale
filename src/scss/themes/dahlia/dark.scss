@@ -1,0 +1,21 @@
+/* Theme "dark" - Radix dark: the same twelve steps, inverted */
+:root {
+	color-scheme: dark;
+	--color-surface-1: #111113;
+	--color-surface-2: #18191b;
+	--color-surface-3: #212225;
+	--color-surface-4: #272a2d;
+	--color-border: #3a3f42;
+	--color-on-surface: #edeef0;
+	--color-primary: #3e63dd;
+	--color-secondary: #8e4ec6;
+	--color-accent: #0090ff;
+	--color-neutral: #696e77;
+	--color-info: #0090ff;
+	--color-success: #30a46c;
+	--color-warning: #ffc53d;
+	--color-error: #e5484d;
+	--radius-field: 0.375rem;
+	--radius-box: 0.625rem;
+	--radius-selector: 0.25rem;
+}

@@ -1,0 +1,22 @@
+/* Theme "dark" - the same blocks on a near-black page, shadows in white */
+:root {
+	color-scheme: dark;
+	--color-surface-1: #171717;
+	--color-surface-2: #262626;
+	--color-surface-3: #3f3f46;
+	--color-border: #fafafa;
+	--color-on-surface: #fafafa;
+	--color-primary: #ff6b6b;
+	--color-secondary: #a3e635;
+	--color-accent: #60a5fa;
+	--color-neutral: #fafafa;
+	--color-info: #7dd3fc;
+	--color-success: #4ade80;
+	--color-warning: #fbbf24;
+	--color-error: #f87171;
+	--sunflower-shadow-color: #fafafa;
+	--radius-field: 0.3125rem;
+	--radius-box: 0.3125rem;
+	--radius-selector: 0.25rem;
+	--border: 2px;
+}

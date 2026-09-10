@@ -25,7 +25,7 @@
 	--fontsize            font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface        default thumb background
+	--color-surface-1        default thumb background
 	--color-{variant} / --color-on-{variant}  track / thumb colors (color-variants)
 	--radius-selector       thumb and track corner radius
 	--depth                 shadow intensity multiplier
@@ -39,7 +39,7 @@
    ------------------------------------------------------------ */
 @mixin base {
 	.range {
-		--range-thumb: var(--color-surface);
+		--range-thumb: var(--color-surface-1);
 		--range-thumb-size: calc(1.5em * var(--scale));
 		--range-progress: currentColor;
 		--range-fill: 1;

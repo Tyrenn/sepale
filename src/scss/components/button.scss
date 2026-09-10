@@ -23,7 +23,7 @@
 	--fontsize     font size (set by `size-variants` classes)
 
    External variables (theme / family):
-	--color-surface-high          default button background
+	--color-surface-2          default button background
 	--color-on-surface      default text color
 	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
 	--radius-field            corner radius
@@ -57,7 +57,7 @@
 	.btn {
 		/* Internal variables — neutral defaults, skins re-assign */
 		--size: calc(2.5em * var(--scale));
-		--btn-bg: var(--btn-color, var(--color-surface-high));
+		--btn-bg: var(--btn-color, var(--color-surface-2));
 		--btn-fg: var(--color-on-surface);
 		--btn-p: calc(1em * var(--scale)); /* daisyUI ships 1rem — half of this was an outlier */
 		--btn-border: transparent;
@@ -184,7 +184,7 @@
 	/* Hover darken (pointer devices only) */
 	@media (hover: hover) {
 		.btn:hover {
-			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 7%);
+			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
 		}
 	}
 
@@ -193,14 +193,14 @@
 	   restyle the pressed state (poppy lowers elevation). */
 	.btn:active:not(.btn-active) {
 		translate: 0 0.5px;
-		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 5%);
-		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 7%);
+		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 5%);
+		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
 		--btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0), var(--shadow-light, );
 	}
 
 	/* Active (forced) */
 	.btn-active {
-		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 7%);
+		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
 		--btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0), var(--shadow-light, );
 		isolation: isolate;
 	}
@@ -321,16 +321,16 @@
 	.btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
 		--btn-shadow: ;
 		--btn-fg: var(--btn-color, var(--color-on-surface));
-		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface));
-		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface));
+		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
 	}
 
 	@media (hover: none) {
 		.btn-soft:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
 			--btn-shadow: ;
 			--btn-fg: var(--btn-color, var(--color-on-surface));
-			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface));
-			--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface));
+			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+			--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
 		}
 	}
 }

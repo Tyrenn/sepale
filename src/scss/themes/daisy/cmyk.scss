@@ -1,9 +1,9 @@
 /* Theme « cmyk » — editable variables only (colors + radii). */
 :root {
 	color-scheme: light;
-	--color-surface: oklch(100% 0 0);
-	--color-surface-high: oklch(95% 0 0);
-	--color-surface-peak: oklch(90% 0 0);
+	--color-surface-1: oklch(100% 0 0);
+	--color-surface-2: oklch(95% 0 0);
+	--color-surface-3: oklch(90% 0 0);
 	--color-on-surface: oklch(20% 0 0);
 	--color-primary: oklch(71.772% 0.133 239.443);
 	--color-on-primary: oklch(14.354% 0.026 239.443);

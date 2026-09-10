@@ -6,7 +6,7 @@
    pattern).
 
    External variables (theme / family):
-	--color-surface   floating label background (hides the field border)
+	--color-surface-1   floating label background (hides the field border)
 	--border           inline divider width inside .input / .select
 	--size-field       floating label vertical center position
    ============================================================ */
@@ -79,7 +79,7 @@
 	}
 
 	.floating-label > span {
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		position: absolute;
 		inset-inline-start: calc(0.75em * var(--scale));
 		z-index: 1;

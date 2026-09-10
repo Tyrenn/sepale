@@ -20,7 +20,7 @@
 $semantics: primary, secondary, accent, neutral, info, success, warning, error;
 
 :where(:root) {
-	--color-on-surface: oklch(from var(--color-surface) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
+	--color-on-surface: oklch(from var(--color-surface-1) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
 
 	/* Borders are almost always a wash of the text color over the surface.
 	   Derived so a theme has only three surfaces to supply — but a theme

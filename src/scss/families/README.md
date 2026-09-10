@@ -68,7 +68,7 @@ $params: (
   }
 
   /* Bindings: assign plumbing variables, never re-declare paint. */
-  .btn { --btn-bg: var(--color-surface); --btn-shadow: var(--clay-raised); }
+  .btn { --btn-bg: var(--color-surface-1); --btn-shadow: var(--clay-raised); }
   .input { --input-shadow: none; }
 }
 ```

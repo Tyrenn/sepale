@@ -16,7 +16,7 @@
 	--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) error
 
    External variables (theme / family):
-	--color-surface        track background when checked
+	--color-surface-1        track background when checked
 	--color-on-surface    thumb color when checked
 	--color-{variant}       checked color (color-variants)
 	--border                border width — MUST carry a unit (0px, not 0):
@@ -88,12 +88,12 @@
 	}
 
 	.toggle > *:nth-child(2) {
-		color: var(--color-surface);
+		color: var(--color-surface-1);
 		rotate: 0deg;
 	}
 
 	.toggle > *:nth-child(3) {
-		color: var(--color-surface);
+		color: var(--color-surface-1);
 		opacity: 0;
 		rotate: -15deg;
 	}
@@ -152,7 +152,7 @@
 	.toggle[aria-checked="true"],
 	.toggle:has(> input:checked) {
 		grid-template-columns: 1fr 1fr 0fr;
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		--input-color: var(--color-on-surface);
 	}
 
@@ -223,7 +223,7 @@
 	.toggle-track[aria-checked="true"]::before,
 	.toggle-track:has(> input:checked)::before {
 		background-color: var(--color-on-surface);
-		box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-surface);
+		box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-surface-1);
 	}
 }
 

@@ -36,31 +36,35 @@ families so markup stays interchangeable.
 
 **Base**:
 The family-agnostic half of a component: layout, intrinsic sizing, states,
-accessibility, and the plumbing variables. It paints nothing.
+accessibility, and the paint slots. It paints nothing.
 
 **Surface**:
-One of the three neutral grounds a family paints on, from lowest to most
-raised: `surface` (the page, and the inside of fields — a field is a hole cut
-in the page), `surface-high` (objects resting on it: plain buttons, chips,
-skeletons), `surface-peak` (the most raised: the dock). The names describe
-elevation; a light theme makes the higher levels darker, a dark theme lighter.
-_Avoid_: base, background, base-100/200/300
+A neutral ground a family paints on, numbered by elevation: `surface-1` is the
+lowest (the page, and the inside of fields — a field is a hole cut in the page),
+`surface-2` the objects resting on it (plain buttons, chips, skeletons),
+`surface-3` the chrome pinned to the edge of the screen (dock, navbar). Three is
+what daisy needs, not a ceiling: a family declares as many levels as its look
+requires. A light theme makes the higher numbers darker, a dark theme lighter.
+_Avoid_: base, background, base-100/200/300, surface-high, surface-peak
 
 **On-color**:
 The color of whatever is drawn *on* a surface or on a semantic color —
-`on-surface` for text on the three surfaces, `on-primary` for the label of a
-primary button. Never themed: every family derives it from the color it sits
-on, so contrast cannot drift out of sync with the color it belongs to.
+`on-surface` for text on the surfaces, `on-primary` for the label of a primary
+button. Never themed: every family derives it from the color it sits on, so
+contrast cannot drift out of sync with the color it belongs to. One
+`on-surface` covers every level; a family whose grounds diverge may declare
+`--color-on-surface-2` and so on for the levels that need their own.
 _Avoid_: content color, foreground, text color
 
-**Plumbing variable**:
-The contract between a component's base and whatever paints it — `--btn-bg`,
-`--btn-fg`, `--btn-border`, `--btn-shadow`. Base reads them, skins and variants
-assign them. Painting a component means assigning its plumbing variables, never
-re-declaring `background-color`.
+**Paint slot**:
+A variable a component reads instead of declaring a value — `--btn-bg`,
+`--btn-fg`, `--btn-border`, `--btn-shadow`. The component paints from the slot
+(`background-color: var(--btn-bg)`); skins and variants fill it. Painting a
+component means filling its slots, never re-declaring `background-color`.
+_Avoid_: plumbing variable, hook, token
 
 **Skin**:
-The look half of a component: what a family assigns to the plumbing variables,
+The look half of a component: what a family fills the paint slots with,
 plus its hover/press/checked feedback. A skin lives with whoever uses it — in
 `components/` when two or more families share it, in the family file otherwise.
 _Avoid_: style, variant, look

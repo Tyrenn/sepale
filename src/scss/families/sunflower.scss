@@ -1,0 +1,371 @@
+/* ============================================================
+   STYLE FAMILY — « sunflower »  (neo-brutalist)
+
+   A sunflower is enormous, bright yellow and completely without
+   subtlety. So is this look.
+
+   The look: a heavy black outline on every control, a hard
+   shadow offset down-right with no blur at all, and a press that
+   PUSHES THE ELEMENT INTO ITS OWN SHADOW — the element slides by
+   exactly the offset while the shadow shrinks to nothing. That
+   one interaction is the whole family.
+
+   Changes made to fit our contract:
+     - The offset is a length in em, not px, so it grows with the
+       control instead of looking dainty on a large button and
+       crushing a small one.
+     - Neo-brutalism has no `ghost`, `soft` or `dash` in the usual
+       sense; those shared variants still exist here and simply
+       lose the shadow, which is the honest translation.
+     - It adds two of its own: `.btn-noshadow` (flat, outline
+       only) and `.btn-reverse` (the shadow on the other side, so
+       the press pushes up-left instead).
+
+   Build: static/families/sunflower.css via `npm run build:css`.
+   ============================================================ */
+
+@use 'sass:map';
+@use '../params';
+@use 'lib';
+@use 'derived-content';
+
+$params: map.merge(
+	params.colors((
+		'color-surface-1': #ffefc8,
+		'color-surface-2': #ffdb33,
+		'color-surface-3': #ffc700,
+		'color-border': #000000,
+		'color-on-surface': #000000,
+		'color-primary': #ff6b6b,
+		'color-secondary': #a3e635,
+		'color-accent': #60a5fa,
+		'color-neutral': #000000,
+		'color-info': #7dd3fc,
+		'color-success': #4ade80,
+		'color-warning': #fbbf24,
+		'color-error': #f87171
+	)),
+	(
+		'radius-field': (
+			label: 'Field radius', group: 'Shape', type: length,
+			default: 0.3125rem, min: 0, max: 1.5, step: 0.025, unit: rem, units: (px rem em),
+			help: 'Neo-brutalism keeps a small radius so the outline reads as drawn, not printed.'
+		),
+		'radius-box': (
+			label: 'Box radius', group: 'Shape', type: length,
+			default: 0.3125rem, min: 0, max: 2, step: 0.05, unit: rem, units: (px rem em),
+			help: 'Corner radius of larger boxes.'
+		),
+		'border': (
+			label: 'Outline width', group: 'Shape', type: length,
+			default: 2px, min: 1, max: 6, step: 0.5, unit: px, units: (px em),
+			help: 'The heavy black line around everything. Below 2px the family stops working.'
+		),
+		'scale': (
+			label: 'Element size', group: 'Size', type: number,
+			default: 1, min: 0.75, max: 2, step: 0.05,
+			help: 'Grows every frame — paddings, heights, spacing. Text is unaffected.'
+		),
+		'sunflower-offset': (
+			label: 'Shadow offset', group: 'Effects', type: length,
+			default: 0.25em, min: 0, max: 1, step: 0.025, unit: em, units: (em rem px),
+			help: 'How far the hard shadow sits down and right — and therefore how far a press travels. This is the family.'
+		),
+		'sunflower-shadow-color': (
+			label: 'Shadow colour', group: 'Effects', type: color,
+			default: #000000,
+			help: 'The hard shadow has no blur and no transparency, so its colour is a flat block.'
+		)
+	)
+);
+
+@include params.emit($params);
+
+/* Family-owned: everything is drawn. No ambient light at all.
+   --radius-selector is NOT a parameter here: in this look every
+   selector — toggle, slider, radio — is a full pill or a circle,
+   and letting a theme square them off would simply break it. */
+:root {
+	--depth: 0;
+	--light-intensity: 0;
+	--radius-selector: 999px;
+	--root-bg: var(--color-surface-1);
+}
+
+@include lib.structure;
+
+/* ── Family look ───────────────────────────────────────────────
+   One recipe, declared per element so it resolves against that
+   element's own font size (ADR 0006). */
+
+:where(*) {
+	--sf-o: var(--sunflower-offset, 0.25em);
+	--sf-shadow: var(--sf-o) var(--sf-o) 0 0 var(--sunflower-shadow-color, #000);
+}
+
+.btn,
+.input,
+.select,
+.textarea,
+.file-input,
+.chip,
+.list,
+.tab-box .tab {
+	border: var(--border) solid var(--color-border);
+}
+
+.btn {
+	--btn-bg: var(--btn-color, var(--color-surface-2));
+	--btn-fg: var(--color-on-surface);
+	--btn-border: var(--color-border);
+	--btn-shadow: var(--sf-shadow);
+	font-weight: 700;
+	transition: translate 0.08s ease-out, box-shadow 0.08s ease-out;
+}
+
+/* The press: slide by exactly the offset, and the shadow is gone. */
+.btn:active:not(.btn-active),
+.btn.btn-active {
+	translate: var(--sf-o) var(--sf-o);
+	--btn-shadow: 0 0 0 0 #0000;
+}
+
+@media (hover: hover) {
+	.btn:not(:disabled, [disabled], .btn-disabled):hover {
+		translate: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5);
+		--btn-shadow: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5) 0 0 var(--sunflower-shadow-color, #000);
+	}
+}
+
+/* variant-noshadow — sunflower only. Outline, no block. */
+.btn-noshadow {
+	--btn-shadow: 0 0 0 0 #0000;
+	translate: none;
+}
+
+/* variant-reverse — sunflower only. The block sits up and left,
+   so the press travels the other way. */
+.btn-reverse {
+	--btn-shadow: calc(var(--sf-o) * -1) calc(var(--sf-o) * -1) 0 0 var(--sunflower-shadow-color, #000);
+}
+
+.btn-reverse:active:not(.btn-active) {
+	translate: calc(var(--sf-o) * -1) calc(var(--sf-o) * -1);
+}
+
+/* The shared soft/ghost/dash weights keep the outline and drop
+   the block — the honest translation of variants this look has
+   no opinion about. */
+.btn:is(.btn-ghost, .btn-soft, .btn-dash, .btn-link) {
+	--btn-shadow: 0 0 0 0 #0000;
+}
+
+/* Fields: same outline, same block, no focus glow. */
+.input,
+.select,
+.textarea,
+.file-input {
+	--input-color: var(--color-border);
+	background-color: var(--color-surface-1);
+}
+
+.input:focus,
+.input:focus-within,
+.select:focus,
+.select:focus-within,
+.textarea:focus,
+.textarea:focus-within,
+.file-input:focus-within {
+	outline: none;
+	translate: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5);
+	box-shadow: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5) 0 0 var(--sunflower-shadow-color, #000);
+}
+
+.checkbox,
+.radio,
+.toggle {
+	--input-color: var(--color-border);
+	border-color: var(--color-border);
+}
+
+.checkbox:checked,
+.checkbox[aria-checked='true'],
+.radio:checked,
+.radio[aria-checked='true'] {
+	--input-color: var(--color-primary);
+}
+
+.chip {
+	font-weight: 700;
+}
+
+/* ── Range ─────────────────────────────────────────────────────
+   neobrutalism-components/slider.tsx: the track is `h-3
+   rounded-base border-2 border-border bg-secondary-background`
+   and the thumb `h-5 w-5 rounded-full border-2 bg-white`.
+   Note what is NOT there: neither carries shadow-shadow.
+
+   Our base paints the filled portion with a shadow cast by the
+   thumb, clipped to the control box — so the fill is always as
+   tall as the CONTROL, never as tall as the rail. A thin rail
+   with a big handle and a filled portion cannot all three hold
+   here, so the fill is off and the rail reads as one line. */
+.range {
+	--rail: calc(0.75em * var(--scale));
+	--range-thumb-size: calc(1.25em * var(--scale));
+	--range-fill: 0;
+	--range-p: 0px;
+	--range-thumb: var(--color-surface-1);
+	--range-bg: var(--color-surface-1);
+	--range-progress: var(--color-primary);
+	color: var(--color-primary);
+}
+
+.range::-webkit-slider-runnable-track {
+	height: var(--rail);
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--radius-field);
+}
+
+.range::-moz-range-track {
+	height: var(--rail);
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--radius-field);
+}
+
+.range::-webkit-slider-thumb {
+	border: var(--border) solid var(--color-border);
+	border-radius: 999px;
+}
+
+.range::-moz-range-thumb {
+	border: var(--border) solid var(--color-border);
+	border-radius: 999px;
+}
+/* ── Toggle, checkbox, radio ───────────────────────────────────
+   Pills and circles, outlined, each casting its block. The
+   checkbox is the one square in the family, and it keeps the
+   small radius the outline needs to read as drawn. */
+.toggle {
+	--input-color: var(--color-surface-1);
+	border: var(--border) solid var(--color-border);
+	border-radius: 999px;
+	background-color: var(--color-surface-1);
+}
+
+.toggle::before {
+	border-radius: 999px;
+	background-color: var(--color-border);
+}
+
+.toggle:checked,
+.toggle[aria-checked='true'],
+.toggle:has(> input:checked) {
+	--input-color: var(--color-border);
+	background-color: var(--color-primary);
+}
+
+.checkbox {
+	border-radius: var(--radius-field);
+}
+
+.radio {
+	border-radius: 999px;
+}
+
+/* ── Progress ──────────────────────────────────────────────────
+   A bordered pill with a flat block inside it, casting like
+   everything else. */
+.progress {
+	border: var(--border) solid var(--color-border);
+	border-radius: 999px;
+	height: calc(1em * var(--scale));
+	background-color: var(--color-surface-1);
+	color: var(--color-primary);
+	overflow: hidden;
+}
+
+.progress::-webkit-progress-bar {
+	background-color: var(--color-surface-1);
+}
+
+.progress::-webkit-progress-value {
+	background-color: var(--color-primary);
+	border-radius: 0;
+}
+
+.progress::-moz-progress-bar {
+	background-color: var(--color-primary);
+	border-radius: 0;
+}
+
+.radial-progress,
+.loading {
+	color: var(--color-primary);
+}
+
+/* ── Chips and fields ──────────────────────────────────────────
+   Read from the source: `input.tsx`, `progress.tsx`, `switch.tsx`
+   and `slider.tsx` all carry `border-2 border-border` and NONE of
+   them carries `shadow-shadow`. The hard block belongs to buttons
+   and cards; putting it on every field is the mistake that makes
+   a neo-brutalist page look like a sticker sheet. */
+.chip {
+	border: var(--border) solid var(--color-border);
+	border-radius: 999px;
+	background-color: var(--chip-color, var(--color-surface-2));
+	font-weight: 700;
+}
+
+.input,
+.select,
+.textarea,
+.file-input {
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────
+   Tabs are blocks too: the active one is pressed into the page. */
+.tab {
+	--tab-border-color: var(--color-border);
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--radius-field);
+	font-weight: 700;
+	transition: translate 0.08s ease-out, box-shadow 0.08s ease-out;
+}
+
+.tab-active {
+	background-color: var(--color-primary);
+	color: var(--color-on-primary);
+	translate: var(--sf-o) var(--sf-o);
+	box-shadow: 0 0 0 0 #0000;
+}
+
+@media (hover: hover) {
+	.tab:not(.tab-active, :disabled):hover {
+		translate: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5);
+		box-shadow: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5) 0 0 var(--sunflower-shadow-color, #000);
+	}
+}
+
+/* ── Lists, chrome, the rest ───────────────────────────────────── */
+.list,
+.dock,
+.navbar {
+	background-color: var(--color-surface-1);
+	border: var(--border) solid var(--color-border);
+}
+
+.skeleton {
+	background-color: var(--color-surface-3);
+	border: var(--border) solid var(--color-border);
+	border-radius: var(--radius-field);
+}
+
+.breadcrumbs {
+	font-weight: 700;
+}
+
+.link {
+	font-weight: 700;
+	text-decoration-thickness: var(--border);
+}

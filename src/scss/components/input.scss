@@ -15,8 +15,8 @@
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface        field background
-	--color-surface-high        disabled background and border
+	--color-surface-1        field background
+	--color-surface-2        disabled background and border
 	--color-on-surface    default text color
 	--color-{variant}       semantic accent (set by color-variants)
 	--border                border width
@@ -54,7 +54,7 @@
 		vertical-align: middle;
 		white-space: nowrap;
 		position: relative;
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		width: clamp(3rem, 20rem, 100%);
 		height: var(--size);
 		font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -116,8 +116,8 @@
 	.input:has(> input[disabled]),
 	.input:is(:disabled, [disabled]),
 	fieldset:disabled .input {
-		border-color: var(--color-surface-high);
-		background-color: var(--color-surface-high);
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
 		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
 		cursor: not-allowed;
 		box-shadow: none;
@@ -197,7 +197,7 @@
 	.input-ghost:focus,
 	.input-ghost:focus-within {
 		color: var(--color-on-surface);
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		border-color: #0000;
 		box-shadow: none;
 	}

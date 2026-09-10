@@ -12,7 +12,7 @@
 	--fontsize         font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface / --color-surface-high / --color-on-surface
+	--color-surface-1 / --color-surface-2 / --color-on-surface
 	--color-primary         selected suggestion highlight
 	--border / --radius-box / --radius-field
 	--shadow-light          family shadow system
@@ -30,7 +30,7 @@
 		display: flex;
 		flex-direction: column;
 		font-size: var(--fontsize, var(--base, var(--default-base)));
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		border-start-start-radius: var(--join-ss, var(--radius-box));
 		border-start-end-radius:   var(--join-se, var(--radius-box));
 		border-end-start-radius:   var(--join-es, var(--radius-box));
@@ -94,7 +94,7 @@
 @mixin variant-suggestions {
 	.list-suggestions {
 		padding: calc(0.25em * var(--scale));
-		border: var(--border) solid var(--color-surface-high);
+		border: var(--border) solid var(--color-surface-2);
 		box-shadow:
 			0 8px 16px -4px color-mix(in oklab, var(--color-on-surface) 10%, #0000),
 			var(--shadow-light, );

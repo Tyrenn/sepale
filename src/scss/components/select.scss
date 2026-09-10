@@ -13,8 +13,8 @@
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface        field background
-	--color-surface-high        disabled background and border
+	--color-surface-1        field background
+	--color-surface-2        disabled background and border
 	--color-on-surface    default text color
 	--color-neutral / --color-on-neutral   active option highlight
 	--color-{variant}       semantic accent (set by color-variants)
@@ -43,7 +43,7 @@
 		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
 
 		border: var(--border) solid #0000;
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		position: relative;
 		display: inline-flex;
 		flex-shrink: 1;
@@ -128,8 +128,8 @@
 	.select:has(> select[disabled]),
 	.select:is(:disabled, [disabled]),
 	fieldset:disabled .select {
-		border-color: var(--color-surface-high);
-		background-color: var(--color-surface-high);
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
 		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
 		cursor: not-allowed;
 	}
@@ -157,7 +157,7 @@
 		max-height: min(24rem, 70dvh);
 		margin-inline: calc(0.5em * var(--scale));
 		translate: calc(-0.5em * var(--scale)) 0;
-		border: var(--border) solid var(--color-surface-high);
+		border: var(--border) solid var(--color-surface-2);
 		border-radius: var(--radius-box);
 		margin-block: calc(0.5em * var(--scale));
 		padding: calc(0.5em * var(--scale));
@@ -255,7 +255,7 @@
 	.select-ghost:focus,
 	.select-ghost:focus-within {
 		color: var(--color-on-surface);
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		border-color: #0000;
 		box-shadow: none;
 	}

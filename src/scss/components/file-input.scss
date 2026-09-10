@@ -19,7 +19,7 @@
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface / --color-surface-high / --color-on-surface
+	--color-surface-1 / --color-surface-2 / --color-on-surface
 	--color-{variant} / --color-on-{variant}  semantic colors (color-variants)
 	--border / --radius-field
 	--shadow-light          family shadow system
@@ -38,13 +38,13 @@
 	.file-input {
 		--size: calc(2.5em * var(--scale));
 		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
-		--btn-bg: var(--btn-color, var(--color-surface-high));
+		--btn-bg: var(--btn-color, var(--color-surface-2));
 		--btn-fg: var(--color-on-surface);
 		--btn-border: transparent;
 
 		cursor: pointer;
 		border: var(--border) solid #0000;
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		display: inline-flex;
 		appearance: none;
 		align-items: center;
@@ -91,8 +91,8 @@
 
 	.file-input:has(> input[disabled]),
 	.file-input:is(:disabled, [disabled]) {
-		border-color: var(--color-surface-high);
-		background-color: var(--color-surface-high);
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
 		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
 		cursor: not-allowed;
 		box-shadow: none;
@@ -100,8 +100,8 @@
 
 	.file-input:has(> input[disabled])::file-selector-button,
 	.file-input:is(:disabled, [disabled])::file-selector-button {
-		border-color: var(--color-surface-high);
-		background-color: var(--color-surface-high);
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
 		cursor: not-allowed;
 		--btn-border: #0000;
 		--btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
@@ -171,7 +171,7 @@
 	.file-input-ghost:focus,
 	.file-input-ghost:focus-within {
 		color: var(--color-on-surface);
-		background-color: var(--color-surface);
+		background-color: var(--color-surface-1);
 		border-color: #0000;
 		box-shadow: none;
 	}

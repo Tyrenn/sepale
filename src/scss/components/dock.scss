@@ -6,7 +6,7 @@
    pattern).
 
    External variables (theme / family):
-	--color-surface-peak  dock background (the most raised surface)
+	--color-surface-3  dock background (the most raised surface)
 	--color-on-surface  disabled item text color mix
 	--radius-box          item corner radius
    ============================================================ */
@@ -17,7 +17,7 @@
    ------------------------------------------------------------ */
 @mixin base {
 	.dock {
-		background-color: var(--color-surface-peak);
+		background-color: var(--color-surface-3);
 		position: fixed;
 		right: 0;
 		bottom: 0;

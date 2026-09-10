@@ -234,16 +234,16 @@
 	<section class="tp-block">
 		<h3 class="tp-title">Surfaces &amp; depth</h3>
 		<div class="tp-surfaces">
-			<div class="tp-surf" style="background:var(--color-surface);">
-				<span>surface</span>
+			<div class="tp-surf" style="background:var(--color-surface-1);">
+				<span>surface-1</span>
 				<Button>plain</Button>
 			</div>
-			<div class="tp-surf" style="background:var(--color-surface-high);">
-				<span>surface-high</span>
+			<div class="tp-surf" style="background:var(--color-surface-2);">
+				<span>surface-2</span>
 				<Button>plain</Button>
 			</div>
-			<div class="tp-surf" style="background:var(--color-surface-peak);">
-				<span>surface-peak</span>
+			<div class="tp-surf" style="background:var(--color-surface-3);">
+				<span>surface-3</span>
 				<Button>plain</Button>
 			</div>
 		</div>

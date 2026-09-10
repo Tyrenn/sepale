@@ -1,0 +1,21 @@
+/* Theme "paper" - PaperCSS proper: ink on off-white stock */
+:root {
+	color-scheme: light;
+	--color-surface-1: #fdfdf6;
+	--color-surface-2: #f5f3e8;
+	--color-surface-3: #eae7d6;
+	--color-border: #41403e;
+	--color-on-surface: #41403e;
+	--color-primary: #41403e;
+	--color-secondary: #7f8c8d;
+	--color-accent: #f6c667;
+	--color-neutral: #41403e;
+	--color-info: #6ca9d6;
+	--color-success: #86b98a;
+	--color-warning: #f6c667;
+	--color-error: #d97b6c;
+	--radius-field: 0.75rem;
+	--radius-box: 1rem;
+	--radius-selector: 0.5rem;
+	--border: 2px;
+}

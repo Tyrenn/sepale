@@ -1,0 +1,22 @@
+/* Theme "light" - the canonical yellow-on-black neo-brutalist page */
+:root {
+	color-scheme: light;
+	--color-surface-1: #ffefc8;
+	--color-surface-2: #ffdb33;
+	--color-surface-3: #ffc700;
+	--color-border: #000000;
+	--color-on-surface: #000000;
+	--color-primary: #ff6b6b;
+	--color-secondary: #a3e635;
+	--color-accent: #60a5fa;
+	--color-neutral: #000000;
+	--color-info: #7dd3fc;
+	--color-success: #4ade80;
+	--color-warning: #fbbf24;
+	--color-error: #f87171;
+	--sunflower-shadow-color: #000000;
+	--radius-field: 0.3125rem;
+	--radius-box: 0.3125rem;
+	--radius-selector: 0.25rem;
+	--border: 2px;
+}

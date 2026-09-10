@@ -128,7 +128,7 @@
 	.box {
 		border: 1px solid color-mix(in oklab, var(--color-on-surface) 12%, transparent);
 		border-radius: 0.85rem;
-		background: var(--color-surface);
+		background: var(--color-surface-1);
 		overflow: hidden;
 	}
 
@@ -159,7 +159,7 @@
 	}
 	.box-tab[aria-selected='true'] {
 		color: var(--color-on-surface);
-		background: var(--color-surface);
+		background: var(--color-surface-1);
 		border-color: color-mix(in oklab, var(--color-on-surface) 10%, transparent);
 	}
 
@@ -186,7 +186,7 @@
 
 	.box-code {
 		position: relative;
-		background: color-mix(in oklab, var(--color-surface-high) 70%, var(--color-surface-peak));
+		background: color-mix(in oklab, var(--color-surface-2) 70%, var(--color-surface-3));
 	}
 	.box-code pre {
 		margin: 0;
@@ -207,7 +207,7 @@
 		padding: 0.2rem 0.55rem;
 		border: 1px solid color-mix(in oklab, var(--color-on-surface) 18%, transparent);
 		border-radius: 0.35rem;
-		background: var(--color-surface);
+		background: var(--color-surface-1);
 		color: inherit;
 		cursor: pointer;
 		opacity: 0.75;

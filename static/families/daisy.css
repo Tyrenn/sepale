@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /* ============================================================
-   STYLE FAMILY — « daisy »
+   STYLE FAMILY — « daisy »  (after DaisyUI 5)
    ============================================================
 
    What a family is
@@ -30,7 +30,7 @@
    in plain CSS — no Tailwind, no `@apply`. Same class names (`btn`,
    `btn-primary`, `input`, `badge`, …) and same look, so the markup is
    interchangeable — but NOT the theme: our variables carry our own
-   names (--color-surface / --color-on-surface / --color-border, see
+   names (--color-surface-1 / --color-on-surface / --color-border, see
    CONTEXT.md), so a DaisyUI theme pasted as-is will not apply.
 
    Characteristics:
@@ -43,7 +43,7 @@
 
    Theme variables consumed (see also each component's header)
    -----------------------------------------------------------
-     --color-surface/200/300    surfaces (page, raised, sunken)
+     --color-surface-1/200/300    surfaces (page, raised, sunken)
      --color-on-surface        default foreground color
      --color-{semantic} / --color-on-{semantic} primary/secondary/accent/neutral/
                                   info/success/warning/error + fg
@@ -51,6 +51,45 @@
 
    Build: compiled to static/families/daisy.css by `npm run build:css`.
    ============================================================ */
+/* ============================================================
+   _params.scss — a family declares the variables it exposes.
+
+   Every family owns its own set of parameters. Sharing a name
+   with another family is a convenience, never an obligation:
+   a family may expose five surfaces, or none, or knobs nobody
+   else has.
+
+   A family writes one map and includes `params.emit($params)`,
+   which does two things:
+
+     1. emits the defaults on `:where(:root)` (specificity 0, so
+        any theme wins in any load order);
+     2. emits the map as one machine-readable comment, which the
+        build reads back to feed the configurator and the
+        Families page. One source of truth: this map.
+
+   Shape of an entry:
+
+     'radius-field': (
+       label: 'Field radius', group: 'Shape', type: length,
+       default: 0.375rem, min: 0, max: 2, step: 0.05,
+       unit: rem, units: (px rem em ch),
+       help: 'Corner radius of buttons, inputs and selects.',
+     )
+
+   `type` is color | length | number. `min`/`max`/`step` turn the
+   control into a slider; `units` adds a unit picker.
+   ============================================================ */
+/* Serialise the map to JSON on a single line, so the build can
+   pull it out of the compiled CSS with one regex. */
+/* Defaults + the machine-readable declaration. */
+/* ------------------------------------------------------------
+   colors() — metadata for the colour names families tend to
+   share. Convenience only: a family passes the values it wants,
+   under whatever names it wants, and gets labels and help text
+   for the ones this table knows. Unknown names still work, they
+   just get their raw name as a label.
+   ------------------------------------------------------------ */
 /* ============================================================
    _lib.scss — shared base/utilities emission + component libraries.
 
@@ -200,7 +239,7 @@ img, video {
 }
 
 :where(:root, [data-theme]) {
-  --root-bg: var(--color-surface);
+  --root-bg: var(--color-surface-1);
 }
 
 /* ============================================================
@@ -448,7 +487,7 @@ img, video {
 	--fontsize     font size (set by `size-variants` classes)
 
    External variables (theme / family):
-	--color-surface-high          default button background
+	--color-surface-2          default button background
 	--color-on-surface      default text color
 	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
 	--radius-field            corner radius
@@ -518,8 +557,8 @@ img, video {
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface        field background
-	--color-surface-high        disabled background and border
+	--color-surface-1        field background
+	--color-surface-2        disabled background and border
 	--color-on-surface    default text color
 	--color-{variant}       semantic accent (set by color-variants)
 	--border                border width
@@ -561,8 +600,8 @@ img, video {
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface        field background
-	--color-surface-high        disabled background and border
+	--color-surface-1        field background
+	--color-surface-2        disabled background and border
 	--color-on-surface    default text color
 	--color-neutral / --color-on-neutral   active option highlight
 	--color-{variant}       semantic accent (set by color-variants)
@@ -604,7 +643,7 @@ img, video {
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface / --color-surface-high / --color-on-surface
+	--color-surface-1 / --color-surface-2 / --color-on-surface
 	--color-{variant}       semantic accent (set by color-variants)
 	--border / --radius-field
 	--depth                 flat-skin inset intensity (skin-flat only)
@@ -682,7 +721,7 @@ img, video {
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface        background when checked
+	--color-surface-1        background when checked
 	--color-{variant}       accent color (color-variants)
 	--border
    ============================================================ */
@@ -717,7 +756,7 @@ img, video {
 	--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) error
 
    External variables (theme / family):
-	--color-surface        track background when checked
+	--color-surface-1        track background when checked
 	--color-on-surface    thumb color when checked
 	--color-{variant}       checked color (color-variants)
 	--border                border width — MUST carry a unit (0px, not 0):
@@ -769,7 +808,7 @@ img, video {
 	--fontsize            font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface        default thumb background
+	--color-surface-1        default thumb background
 	--color-{variant} / --color-on-{variant}  track / thumb colors (color-variants)
 	--radius-selector       thumb and track corner radius
 	--depth                 shadow intensity multiplier
@@ -803,7 +842,7 @@ img, video {
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface / --color-surface-high / --color-on-surface
+	--color-surface-1 / --color-surface-2 / --color-on-surface
 	--color-{variant} / --color-on-{variant}  semantic colors (color-variants)
 	--border / --radius-field
 	--shadow-light          family shadow system
@@ -846,7 +885,7 @@ img, video {
 	--fontsize    font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface / --color-surface-high / --color-on-surface
+	--color-surface-1 / --color-surface-2 / --color-on-surface
 	--color-{variant} / --color-on-{variant}  seed / text colors (color-variants)
 	--border / --radius-selector
 	--shadow-light          family shadow system
@@ -864,7 +903,7 @@ img, video {
    variant-soft — faint tinted fill of the seed color.
    ------------------------------------------------------------ */
 /* ------------------------------------------------------------
-   variant-ghost — muted surface-high fill.
+   variant-ghost — muted surface-2 fill.
    ------------------------------------------------------------ */
 /* ------------------------------------------------------------
    color-variants — .chip-{primary,…}: seed --chip-color / --chip-fg.
@@ -922,7 +961,7 @@ img, video {
 	--tabcontent-order / --tabcontent-margin / --tabcontent-radius-*  content panel
 
    External variables (theme / family):
-	--color-surface/200/300 / --color-neutral / --color-on-surface
+	--color-surface-1/200/300 / --color-neutral / --color-on-surface
 	--border / --radius-field / --radius-box
 	--depth               shadow intensity (variant-box active shadow)
 	--fontsize            tab font size (set by size-variants classes)
@@ -1014,8 +1053,8 @@ img, video {
    pattern).
 
    External variables (theme / family):
-	--color-surface      shimmer highlight color
-	--color-surface-high      skeleton base background
+	--color-surface-1      shimmer highlight color
+	--color-surface-2      skeleton base background
 	--color-on-surface  .skeleton-text shimmer
 	--radius-box          corner radius
    ============================================================ */
@@ -1034,7 +1073,7 @@ img, video {
 	--fontsize         font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface / --color-surface-high / --color-on-surface
+	--color-surface-1 / --color-surface-2 / --color-on-surface
 	--color-primary         selected suggestion highlight
 	--border / --radius-box / --radius-field
 	--shadow-light          family shadow system
@@ -1109,7 +1148,7 @@ img, video {
    pattern).
 
    External variables (theme / family):
-	--color-surface-peak  dock background (the most raised surface)
+	--color-surface-3  dock background (the most raised surface)
 	--color-on-surface  disabled item text color mix
 	--radius-box          item corner radius
    ============================================================ */
@@ -1166,7 +1205,7 @@ img, video {
    pattern).
 
    External variables (theme / family):
-	--color-surface   floating label background (hides the field border)
+	--color-surface-1   floating label background (hides the field border)
 	--border           inline divider width inside .input / .select
 	--size-field       floating label vertical center position
    ============================================================ */
@@ -1195,7 +1234,18 @@ img, video {
    base — valid/invalid color driving + error hint.
    ------------------------------------------------------------ */
 /* ------------------------------------------------------------
-   flat-components — the daisyUI reference selection.
+   structure — every component's base and variants, and NO skin.
+
+   This is where a family starts when it writes its own look: it
+   gets the layout, the intrinsic sizing, the states and the paint
+   slots, and paints them itself afterwards. `base` already renders
+   something sane from neutral defaults, so a family only has to
+   speak where it disagrees.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   flat-components — the daisyUI-inspired selection used by daisy:
+   `structure` plus the flat skin on the eight components that
+   carry one.
    ------------------------------------------------------------ */
 /* ============================================================
    _derived-content.scss — automatic `--color-on-*` colors, plus the
@@ -1214,7 +1264,7 @@ img, video {
    can still override any of them explicitly if it wants to.
    ============================================================ */
 :where(:root) {
-  --color-on-surface: oklch(from var(--color-surface) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
+  --color-on-surface: oklch(from var(--color-surface-1) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
   /* Borders are almost always a wash of the text color over the surface.
      Derived so a theme has only three surfaces to supply — but a theme
      (or a family like wireframe) can still set --color-border outright. */
@@ -1245,17 +1295,30 @@ img, video {
   );
 }
 
-/* Themeable fallbacks — a theme's :root overrides these. Unlike the other
-   families, daisy also exposes daisyUI's effect variables (--border and
-   --depth) to the theme, mirroring the upstream theme API. */
+/* The variables daisy exposes. Emitted on :where(:root) so any theme
+   wins, and declared once here so the configurator and the Families
+   page read the same source. */
 :where(:root) {
+  --color-surface-1: oklch(100% 0 0deg);
+  --color-surface-2: oklch(96% 0 0deg);
+  --color-surface-3: oklch(92% 0 0deg);
+  --color-primary: oklch(55% 0.21 264deg);
+  --color-secondary: oklch(60% 0.2 330deg);
+  --color-accent: oklch(65% 0.18 165deg);
+  --color-neutral: oklch(28% 0.01 285deg);
+  --color-info: oklch(70% 0.13 230deg);
+  --color-success: oklch(72% 0.16 145deg);
+  --color-warning: oklch(80% 0.15 85deg);
+  --color-error: oklch(63% 0.22 25deg);
   --radius-field: 0.25rem;
   --radius-box: 0.5rem;
   --radius-selector: 0.5rem;
-  --border: 1px; /* crisp hairline borders */
-  --depth: 1; /* daisyUI's subtle 3D depth (its default themes ship 1) */
+  --border: 1px;
+  --scale: 1;
+  --depth: 1;
 }
 
+/*! uu-params [{"name":"color-surface-1","label":"Surface 1","group":"Colors","type":"color","value":"oklch(100% 0 0deg)","description":"The ground: page background, and the inside of fields."},{"name":"color-surface-2","label":"Surface 2","group":"Colors","type":"color","value":"oklch(96% 0 0deg)","description":"Objects resting on the ground: plain buttons, chips, skeletons."},{"name":"color-surface-3","label":"Surface 3","group":"Colors","type":"color","value":"oklch(92% 0 0deg)","description":"Chrome pinned to the edge of the screen: dock, navbar."},{"name":"color-primary","label":"Primary","group":"Colors","type":"color","value":"oklch(55% 0.21 264deg)","description":"Main brand and action colour."},{"name":"color-secondary","label":"Secondary","group":"Colors","type":"color","value":"oklch(60% 0.2 330deg)","description":"Secondary brand colour."},{"name":"color-accent","label":"Accent","group":"Colors","type":"color","value":"oklch(65% 0.18 165deg)","description":"Accent and highlight colour."},{"name":"color-neutral","label":"Neutral","group":"Colors","type":"color","value":"oklch(28% 0.01 285deg)","description":"Strong neutral tone for filled, unbranded elements."},{"name":"color-info","label":"Info","group":"Colors","type":"color","value":"oklch(70% 0.13 230deg)","description":"Informational state."},{"name":"color-success","label":"Success","group":"Colors","type":"color","value":"oklch(72% 0.16 145deg)","description":"Success state."},{"name":"color-warning","label":"Warning","group":"Colors","type":"color","value":"oklch(80% 0.15 85deg)","description":"Warning state."},{"name":"color-error","label":"Error","group":"Colors","type":"color","value":"oklch(63% 0.22 25deg)","description":"Error and danger state."},{"name":"radius-field","label":"Field radius","group":"Shape","type":"length","value":"0.25rem","description":"Corner radius of fields: buttons, inputs, selects.","min":0,"max":2,"step":0.05,"unit":"rem","units":["px","rem","em","ch"]},{"name":"radius-box","label":"Box radius","group":"Shape","type":"length","value":"0.5rem","description":"Corner radius of larger boxes: lists, dropdowns.","min":0,"max":3,"step":0.05,"unit":"rem","units":["px","rem","em","ch"]},{"name":"radius-selector","label":"Selector radius","group":"Shape","type":"length","value":"0.5rem","description":"Corner radius of selectors: checkboxes, toggles, tabs.","min":0,"max":2,"step":0.05,"unit":"rem","units":["px","rem","em","ch"]},{"name":"border","label":"Border width","group":"Shape","type":"length","value":"1px","description":"Width of component borders.","min":0,"max":3,"step":0.5,"unit":"px","units":["px","rem","em","ch"]},{"name":"scale","label":"Element size","group":"Size","type":"number","value":"1","description":"Grows every frame - paddings, heights, spacing. Text is unaffected.","min":0.75,"max":2,"step":0.05},{"name":"depth","label":"Depth","group":"Effects","type":"number","value":"1","description":"Subtle 3D depth on fields and selectors. Faithful to daisyUI, which means almost invisible on a dark theme.","min":0,"max":1,"step":0.05}] */
 /* Family-owned look. */
 :root {
   --light-intensity: 0; /* no directional shadow */
@@ -1277,7 +1340,7 @@ img, video {
 .btn {
   /* Internal variables — neutral defaults, skins re-assign */
   --size: calc(2.5em * var(--scale));
-  --btn-bg: var(--btn-color, var(--color-surface-high));
+  --btn-bg: var(--btn-color, var(--color-surface-2));
   --btn-fg: var(--color-on-surface);
   --btn-p: calc(1em * var(--scale)); /* daisyUI ships 1rem — half of this was an outlier */
   --btn-border: transparent;
@@ -1381,7 +1444,7 @@ img, video {
 /* Hover darken (pointer devices only) */
 @media (hover: hover) {
   .btn:hover {
-    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 7%);
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
   }
 }
 /* Click / press. Only the two depth shadows are zeroed; the family
@@ -1389,14 +1452,14 @@ img, video {
    restyle the pressed state (poppy lowers elevation). */
 .btn:active:not(.btn-active) {
   translate: 0 0.5px;
-  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 5%);
-  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 7%);
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 5%);
+  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
   --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0), var(--shadow-light, );
 }
 
 /* Active (forced) */
 .btn-active {
-  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-high)), #000 7%);
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
   --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0), var(--shadow-light, );
   isolation: isolate;
 }
@@ -1516,16 +1579,16 @@ img, video {
 .btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
   --btn-shadow: ;
   --btn-fg: var(--btn-color, var(--color-on-surface));
-  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface));
-  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface));
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
 }
 
 @media (hover: none) {
   .btn-soft:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
     --btn-shadow: ;
     --btn-fg: var(--btn-color, var(--color-on-surface));
-    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface));
-    --btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface));
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+    --btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
   }
 }
 .btn-xxs {
@@ -1631,7 +1694,7 @@ img, video {
   vertical-align: middle;
   white-space: nowrap;
   position: relative;
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   width: clamp(3rem, 20rem, 100%);
   height: var(--size);
   font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -1692,8 +1755,8 @@ img, video {
 .input:has(> input[disabled]),
 .input:is(:disabled, [disabled]),
 fieldset:disabled .input {
-  border-color: var(--color-surface-high);
-  background-color: var(--color-surface-high);
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
   color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
   cursor: not-allowed;
   box-shadow: none;
@@ -1758,7 +1821,7 @@ fieldset:disabled .input::placeholder {
 .input-ghost:focus,
 .input-ghost:focus-within {
   color: var(--color-on-surface);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
@@ -1839,7 +1902,7 @@ fieldset:disabled .input::placeholder {
   --size: calc(2.5em * var(--scale));
   --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
   border: var(--border) solid rgba(0, 0, 0, 0);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   position: relative;
   display: inline-flex;
   flex-shrink: 1;
@@ -1916,8 +1979,8 @@ fieldset:disabled .input::placeholder {
 .select:has(> select[disabled]),
 .select:is(:disabled, [disabled]),
 fieldset:disabled .select {
-  border-color: var(--color-surface-high);
-  background-color: var(--color-surface-high);
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
   color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
   cursor: not-allowed;
 }
@@ -1945,7 +2008,7 @@ fieldset:disabled .select {
   max-height: min(24rem, 70dvh);
   margin-inline: calc(0.5em * var(--scale));
   translate: calc(-0.5em * var(--scale)) 0;
-  border: var(--border) solid var(--color-surface-high);
+  border: var(--border) solid var(--color-surface-2);
   border-radius: var(--radius-box);
   margin-block: calc(0.5em * var(--scale));
   padding: calc(0.5em * var(--scale));
@@ -2025,7 +2088,7 @@ fieldset:disabled .select {
 .select-ghost:focus,
 .select-ghost:focus-within {
   color: var(--color-on-surface);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
@@ -2107,7 +2170,7 @@ fieldset:disabled .select {
 .textarea {
   --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
   border: var(--border) solid rgba(0, 0, 0, 0);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   border-radius: var(--radius-field);
   min-height: calc(5em * var(--scale));
   flex-shrink: 1;
@@ -2153,8 +2216,8 @@ fieldset:disabled .select {
 }
 .textarea:has(> textarea[disabled]),
 .textarea:is(:disabled, [disabled]) {
-  border-color: var(--color-surface-high);
-  background-color: var(--color-surface-high);
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
   color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
   cursor: not-allowed;
   box-shadow: none;
@@ -2189,7 +2252,7 @@ fieldset:disabled .select {
 .textarea-ghost:focus,
 .textarea-ghost:focus-within {
   color: var(--color-on-surface);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
@@ -2460,7 +2523,7 @@ fieldset:disabled .select {
 
 .radio:checked,
 .radio[aria-checked=true] {
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   border-color: currentColor;
 }
 
@@ -2623,12 +2686,12 @@ fieldset:disabled .select {
 }
 
 .toggle > *:nth-child(2) {
-  color: var(--color-surface);
+  color: var(--color-surface-1);
   rotate: 0deg;
 }
 
 .toggle > *:nth-child(3) {
-  color: var(--color-surface);
+  color: var(--color-surface-1);
   opacity: 0;
   rotate: -15deg;
 }
@@ -2682,7 +2745,7 @@ fieldset:disabled .select {
 .toggle[aria-checked=true],
 .toggle:has(> input:checked) {
   grid-template-columns: 1fr 1fr 0fr;
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   --input-color: var(--color-on-surface);
 }
 
@@ -2772,7 +2835,7 @@ fieldset:disabled .select {
 .toggle-track[aria-checked=true]::before,
 .toggle-track:has(> input:checked)::before {
   background-color: var(--color-on-surface);
-  box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-surface);
+  box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-surface-1);
 }
 
 .toggle-xs {
@@ -2796,7 +2859,7 @@ fieldset:disabled .select {
 }
 
 .range {
-  --range-thumb: var(--color-surface);
+  --range-thumb: var(--color-surface-1);
   --range-thumb-size: calc(1.5em * var(--scale));
   --range-progress: currentColor;
   --range-fill: 1;
@@ -2957,12 +3020,12 @@ fieldset:disabled .select {
 .file-input {
   --size: calc(2.5em * var(--scale));
   --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
-  --btn-bg: var(--btn-color, var(--color-surface-high));
+  --btn-bg: var(--btn-color, var(--color-surface-2));
   --btn-fg: var(--color-on-surface);
   --btn-border: transparent;
   cursor: pointer;
   border: var(--border) solid rgba(0, 0, 0, 0);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   display: inline-flex;
   appearance: none;
   align-items: center;
@@ -3009,8 +3072,8 @@ fieldset:disabled .select {
 
 .file-input:has(> input[disabled]),
 .file-input:is(:disabled, [disabled]) {
-  border-color: var(--color-surface-high);
-  background-color: var(--color-surface-high);
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
   color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
   cursor: not-allowed;
   box-shadow: none;
@@ -3018,8 +3081,8 @@ fieldset:disabled .select {
 
 .file-input:has(> input[disabled])::file-selector-button,
 .file-input:is(:disabled, [disabled])::file-selector-button {
-  border-color: var(--color-surface-high);
-  background-color: var(--color-surface-high);
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
   cursor: not-allowed;
   --btn-border: #0000;
   --btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
@@ -3064,7 +3127,7 @@ fieldset:disabled .select {
 .file-input-ghost:focus,
 .file-input-ghost:focus-within {
   color: var(--color-on-surface);
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
@@ -3206,7 +3269,7 @@ fieldset:disabled .select {
 }
 
 .chip {
-  --chip-bg: var(--chip-color, var(--color-surface));
+  --chip-bg: var(--chip-color, var(--color-surface-1));
   --chip-fg: var(--color-on-surface);
   --size: calc(1.6em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -3217,7 +3280,7 @@ fieldset:disabled .select {
   gap: calc(0.5em * var(--scale));
   vertical-align: middle;
   color: var(--chip-fg);
-  border: var(--border) solid var(--chip-color, var(--color-surface-high));
+  border: var(--border) solid var(--chip-color, var(--color-surface-2));
   width: fit-content;
   background-color: var(--chip-bg);
   height: var(--size);
@@ -3246,14 +3309,14 @@ fieldset:disabled .select {
 
 .chip-soft {
   color: var(--chip-color, var(--color-on-surface));
-  background-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 8%, var(--color-surface));
-  border-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 10%, var(--color-surface));
+  background-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+  border-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 10%, var(--color-surface-1));
   background-image: none;
 }
 
 .chip-ghost {
-  border-color: var(--color-surface-high);
-  background-color: var(--color-surface-high);
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
   color: var(--color-on-surface);
   background-image: none;
 }
@@ -3400,7 +3463,7 @@ fieldset:disabled .select {
 .tab {
   --tab-p: calc(0.75em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
-  --tab-bg: var(--color-surface);
+  --tab-bg: var(--color-surface-1);
   --tab-border-color: var(--color-border);
   --tab-radius-ss: 0;
   --tab-radius-se: 0;
@@ -3728,7 +3791,7 @@ label:has(:checked),
 
 .tabs-box {
   --tabs-box-radius: calc(3 * var(--radius-field));
-  background-color: var(--color-surface-high);
+  background-color: var(--color-surface-2);
   padding: calc(0.25em * var(--scale));
   border-radius: calc(min(var(--tab-height) / 2, var(--radius-field)) + min(0.25rem, var(--tabs-box-radius)));
   box-shadow: 0 -0.5px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 0.5px oklch(0% 0 0/calc(var(--depth) * 0.05)) inset;
@@ -3751,7 +3814,7 @@ label:has(:checked),
 .tabs-box > :is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tab-disabled, [disabled]),
 .tabs-box > :is(input:checked),
 .tabs-box > :is(label:has(:checked)) {
-  background-color: var(--tab-bg, var(--color-surface));
+  background-color: var(--tab-bg, var(--color-surface-1));
   box-shadow: 0 1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px 1px -1px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 50%), rgba(0, 0, 0, 0)), 0 1px 6px -4px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 100%), rgba(0, 0, 0, 0));
 }
 
@@ -3991,10 +4054,10 @@ label:has(:checked),
 }
 
 .skeleton {
-  background-color: var(--color-surface-high);
+  background-color: var(--color-surface-2);
   border-radius: var(--radius-box);
   will-change: background-position;
-  background-image: linear-gradient(105deg, rgba(0, 0, 0, 0) 0% 40%, var(--color-surface) 50%, rgba(0, 0, 0, 0) 60% 100%);
+  background-image: linear-gradient(105deg, rgba(0, 0, 0, 0) 0% 40%, var(--color-surface-1) 50%, rgba(0, 0, 0, 0) 60% 100%);
   background-size: 200% auto;
   background-position-x: -50%;
 }
@@ -4028,7 +4091,7 @@ label:has(:checked),
   display: flex;
   flex-direction: column;
   font-size: var(--fontsize, var(--base, var(--default-base)));
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   border-start-start-radius: var(--join-ss, var(--radius-box));
   border-start-end-radius: var(--join-se, var(--radius-box));
   border-end-start-radius: var(--join-es, var(--radius-box));
@@ -4089,7 +4152,7 @@ label:has(:checked),
 
 .list-suggestions {
   padding: calc(0.25em * var(--scale));
-  border: var(--border) solid var(--color-surface-high);
+  border: var(--border) solid var(--color-surface-2);
   box-shadow: 0 8px 16px -4px color-mix(in oklab, var(--color-on-surface) 10%, rgba(0, 0, 0, 0)), var(--shadow-light, );
   overflow-y: auto;
   max-height: min(16rem, 60dvh);
@@ -4410,7 +4473,7 @@ label:has(:checked),
 }
 
 .dock {
-  background-color: var(--color-surface-peak);
+  background-color: var(--color-surface-3);
   position: fixed;
   right: 0;
   bottom: 0;
@@ -4834,7 +4897,7 @@ label:has(:checked),
 }
 
 .floating-label > span {
-  background-color: var(--color-surface);
+  background-color: var(--color-surface-1);
   position: absolute;
   inset-inline-start: calc(0.75em * var(--scale));
   z-index: 1;
