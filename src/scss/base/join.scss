@@ -1,0 +1,87 @@
+/* ============================================================
+   join.scss — .join mixin library (group adjacent form elements)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   Exported variables (injected into child .join-item elements,
+   consumed by input, select, button, … via
+   var(--join-ss, var(--radius-field))):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+
+   External variables (theme / family):
+	--border        used for negative margin to merge borders
+	--radius-field  default corner radius applied to first/last items
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   base — horizontal grouping: corner radius distribution, border
+   merging, button height stretch.
+   ------------------------------------------------------------ */
+
+@mixin base {
+	.join {
+		display: inline-flex;
+		align-items: stretch;
+	}
+	.join :where(.join-item) {
+		border-start-start-radius: var(--join-ss, 0);
+		border-start-end-radius: var(--join-se, 0);
+		border-end-start-radius: var(--join-es, 0);
+		border-end-end-radius: var(--join-ee, 0);
+	}
+	.join :where(.join-item) * {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+	/* First direct child */
+	.join > .join-item:where(:first-child) {
+		--join-ss: var(--radius-field);
+		--join-es: var(--radius-field);
+	}
+	.join :first-child:not(:last-child) :where(.join-item) {
+		--join-ss: var(--radius-field);
+		--join-es: var(--radius-field);
+	}
+	/* Last direct child */
+	.join > .join-item:where(:last-child) {
+		--join-se: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+	.join :last-child:not(:first-child) :where(.join-item) {
+		--join-se: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+	/* Only child */
+	.join > .join-item:where(:only-child) {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+	.join :only-child :where(.join-item) {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+	/* Focus */
+	.join > :where(:focus, :has(:focus)) {
+		z-index: 1;
+	}
+	@media (hover: hover) {
+		.join > :where(.btn:hover, :has(.btn:hover)) {
+		isolation: isolate;
+	}
+	}
+	/* join-item height fix.
+		   Buttons use a compact em-based height (--size) while field elements
+		   (input, select) use a taller one. Override height → auto so the button
+		   can stretch to match its siblings via align-items: stretch on .join.
+		   min-height keeps it from collapsing below its natural size. */
+	/* Border merging */
+}

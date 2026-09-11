@@ -1,0 +1,91 @@
+@use '../../_mixins' as m;
+@use '../../_config' as c;
+
+/* aster — radio.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.radio {
+		--size: calc(1em * var(--scale)); /* Ant Design checkbox/radio are 16px. */
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		border-radius: 9999px;
+		padding: calc(0.15em * var(--scale));
+		border: var(--border) solid var(--input-color, color-mix(in srgb, currentColor 20%, #0000));
+	}
+	.radio::before {
+		width: 100%;
+		height: 100%;
+		border-radius: 9999px;
+	}
+	.radio:focus-visible {
+		outline: 2px solid currentColor;
+	}
+	.radio:checked,
+		.radio[aria-checked="true"] {
+		border-color: currentColor;
+	}
+	.radio:checked::before,
+		.radio[aria-checked="true"]::before {
+		background-color: currentColor;
+	}
+	@media (forced-colors: active) {
+		.radio:checked::before,
+			.radio[aria-checked="true"]::before {
+		outline-style: solid;
+		outline-offset: -0.25rem;
+	}
+	}
+	@media print {
+		.radio:checked::before,
+			.radio[aria-checked="true"]::before {
+		outline: 0.25rem solid;
+		outline-offset: -1rem;
+	}
+	}
+	.radio:disabled {
+		opacity: 0.2;
+	}
+	@keyframes radio {
+		0% {
+		padding: 5px;
+	}
+		50% {
+		padding: 3px;
+	}
+	}
+
+	/* variant square */
+	.radio-square {
+		border-radius: 0;
+	}
+
+	.radio-square::before {
+		border-radius: 0;
+	}
+
+	/* color variants */
+	@each $color in c.$color-list {
+		.radio-#{$color} { --input-color: var(--color-#{$color}); }
+	}
+
+	/* size variants */
+	@include m.size-variants('radio');
+
+	.radio-xl:is([type="radio"]) {
+		--size: calc(2em * var(--scale));
+	}
+
+	.radio {
+		--input-color: var(--color-border);
+	}
+
+	.radio:checked,
+	.radio[aria-checked='true'] {
+		--input-color: var(--color-primary);
+	}
+
+}

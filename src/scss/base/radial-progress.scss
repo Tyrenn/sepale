@@ -1,0 +1,53 @@
+@use '../_mixins' as m;
+
+/* ============================================================
+   radial-progress.scss — .radial-progress mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Ring uses currentColor.
+
+   User-set variables (provided in HTML style or CSS):
+	--value       progress value 0–100 (required)
+	--size        ring diameter (default: 5em, scales with font)
+	--thickness   ring stroke width (default: --size / 10)
+
+   Internal variables:
+	--radialprogress   computed from --value (animated CSS property)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   base — conic ring + rounded cap.
+   ------------------------------------------------------------ */
+
+@mixin base {
+	.radial-progress {
+		position: relative;
+		display: inline-grid;
+		height: var(--size);
+		width: var(--size);
+		place-content: center;
+		vertical-align: middle;
+		box-sizing: content-box;
+	}
+	.radial-progress::before {
+		content: "";
+		position: absolute;
+		-webkit-mask: radial-gradient(
+				farthest-side,
+				#0000 calc(100% - var(--thickness)),
+				#000 calc(100% + 0.5px - var(--thickness))
+			);
+		mask: radial-gradient(
+				farthest-side,
+				#0000 calc(100% - var(--thickness)),
+				#000 calc(100% + 0.5px - var(--thickness))
+			);
+	}
+	.radial-progress::after {
+		content: "";
+		position: absolute;
+		transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
+	}
+}

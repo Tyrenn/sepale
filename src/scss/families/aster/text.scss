@@ -1,0 +1,68 @@
+/* aster — text. */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.title {
+		font-weight: 800;
+		line-height: 1.15;
+		letter-spacing: -0.02em;
+	}
+	.subtitle-s1 {
+		font-weight: 700;
+		line-height: 1.25;
+		letter-spacing: -0.01em;
+	}
+	.subtitle-s2 {
+		font-weight: 600;
+		line-height: 1.35;
+	}
+	.text-s1-b1 {
+		font-weight: 600;
+		line-height: 1.6;
+	}
+	.text-s1-b2 {
+		font-weight: 500;
+		line-height: 1.6;
+	}
+	.text-s1-b3 {
+		font-weight: 400;
+		line-height: 1.6;
+	}
+	.text-s2-b1 {
+		font-weight: 600;
+		line-height: 1.6;
+	}
+	.text-s2-b2 {
+		font-weight: 500;
+		line-height: 1.6;
+	}
+	.text-s2-b3 {
+		font-weight: 400;
+		line-height: 1.6;
+	}
+	.text-s3-b1 {
+		font-weight: 600;
+		line-height: 1.55;
+	}
+	.text-s3-b2 {
+		font-weight: 500;
+		line-height: 1.55;
+	}
+	.text-s3-b3 {
+		font-weight: 400;
+		line-height: 1.55;
+	}
+	.text-s4-b1 {
+		font-weight: 600;
+		line-height: 1.5;
+	}
+	.text-s4-b2 {
+		font-weight: 500;
+		line-height: 1.5;
+	}
+	.text-s4-b3 {
+		font-weight: 400;
+		line-height: 1.5;
+	}
+}

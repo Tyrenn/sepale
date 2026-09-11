@@ -1,0 +1,49 @@
+/* sunflower — skeleton.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.skeleton {
+		background-image: linear-gradient(
+				105deg,
+				#0000 0% 40%,
+				var(--color-surface-1) 50%,
+				#0000 60% 100%
+			);
+		background-size: 200% auto;
+		background-position-x: -50%;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.skeleton {
+		transition-duration: 15s;
+	}
+	}
+	.skeleton-text {
+		background-clip: text;
+		color: transparent;
+		background-image: linear-gradient(
+				105deg,
+				color-mix(in oklab, var(--color-on-surface) 20%, transparent) 0% 40%,
+				var(--color-on-surface) 50%,
+				color-mix(in oklab, var(--color-on-surface) 20%, transparent) 60% 100%
+			);
+	}
+	@keyframes skeleton {
+		0% {
+		background-position: 150%;
+	}
+		100% {
+		background-position: -50%;
+	}
+	}
+
+	.skeleton {
+		background-color: var(--color-surface-3);
+		border: var(--border) solid var(--color-border);
+		border-radius: var(--radius-field);
+	}
+
+}

@@ -72,7 +72,7 @@ function parseParams(family) {
  * listed under "Changes made to fit our contract".
  */
 function parseDoc(family) {
-	const src = readFileSync(join(familiesDir, `${family}.scss`), 'utf8');
+	const src = readFileSync(join(familiesDir, family, 'index.scss'), 'utf8');
 	const empty = { title: cap(family), after: '', blurb: '', changes: [] };
 
 	const header = src.match(/\/\*\s*=+([\s\S]*?)=+\s*\*\//);
@@ -108,7 +108,10 @@ function parseDoc(family) {
 	return { title: cap(family), after, blurb, changes };
 }
 
-const families = scssNames(familiesDir);
+/* A family is a directory with an index.scss (ADR 0008). */
+const families = readdirSync(familiesDir)
+	.filter((name) => existsSync(join(familiesDir, name, 'index.scss')))
+	.sort();
 
 const themesByFamily = {};
 const paramsByFamily = {};

@@ -1,0 +1,146 @@
+/* aster — join.
+   Variants inherited from the shared set when families still
+   shared one. They belong to this family now: edit them here,
+   or delete the ones this look has no use for (ADR 0008). */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.join {
+		--join-ss: 0;
+		--join-se: 0;
+		--join-es: 0;
+		--join-ee: 0;
+	}
+	.join > .join-item:where(:first-child) {
+		--join-se: 0;
+		--join-ee: 0;
+	}
+	.join :first-child:not(:last-child) :where(.join-item) {
+		--join-se: 0;
+		--join-ee: 0;
+	}
+	.join > .join-item:where(:last-child) {
+		--join-ss: 0;
+		--join-es: 0;
+	}
+	.join :last-child:not(:first-child) :where(.join-item) {
+		--join-ss: 0;
+		--join-es: 0;
+	}
+	.join > .join-item:where(.btn) {
+		height: unset;
+		min-height: var(--size, calc(2.5em * var(--scale)));
+	}
+	.join-item:where(*:not(:first-child, :disabled, [disabled], .btn-disabled)) {
+		margin-inline-start: calc(var(--border, 1px) * -1);
+		margin-block-start: 0;
+	}
+	.join-item:where(*:is(:disabled, [disabled], .btn-disabled)) {
+		border-width: var(--border, 1px) 0 var(--border, 1px) var(--border, 1px);
+	}
+
+	/* variant vertical */
+	.join-vertical {
+		flex-direction: column;
+	}
+
+	.join-vertical > .join-item:first-child {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: 0;
+		--join-ee: 0;
+	}
+
+	.join-vertical :first-child:not(:last-child) .join-item {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: 0;
+		--join-ee: 0;
+	}
+
+	.join-vertical > .join-item:last-child {
+		--join-ss: 0;
+		--join-se: 0;
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-vertical :last-child:not(:first-child) .join-item {
+		--join-ss: 0;
+		--join-se: 0;
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-vertical > .join-item:only-child {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-vertical :only-child .join-item {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-vertical .join-item:where(*:not(:first-child)) {
+		margin-inline-start: 0;
+		margin-block-start: calc(var(--border, 1px) * -1);
+	}
+
+	/* variant horizontal */
+	.join-horizontal {
+		flex-direction: row;
+	}
+
+	.join-horizontal > .join-item:first-child {
+		--join-ss: var(--radius-field);
+		--join-se: 0;
+		--join-es: var(--radius-field);
+		--join-ee: 0;
+	}
+
+	.join-horizontal :first-child:not(:last-child) .join-item {
+		--join-ss: var(--radius-field);
+		--join-se: 0;
+		--join-es: var(--radius-field);
+		--join-ee: 0;
+	}
+
+	.join-horizontal > .join-item:last-child {
+		--join-ss: 0;
+		--join-se: var(--radius-field);
+		--join-es: 0;
+		--join-ee: var(--radius-field);
+	}
+
+	.join-horizontal :last-child:not(:first-child) .join-item {
+		--join-ss: 0;
+		--join-se: var(--radius-field);
+		--join-es: 0;
+		--join-ee: var(--radius-field);
+	}
+
+	.join-horizontal > .join-item:only-child {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-horizontal :only-child .join-item {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-horizontal .join-item:where(*:not(:first-child)) {
+		margin-inline-start: calc(var(--border, 1px) * -1);
+		margin-block-start: 0;
+	}
+}

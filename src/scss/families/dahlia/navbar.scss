@@ -1,0 +1,12 @@
+/* dahlia — navbar.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+
+@mixin emit {
+	.navbar {
+		background-color: var(--color-surface-3);
+		border-color: var(--color-border);
+	}
+
+}

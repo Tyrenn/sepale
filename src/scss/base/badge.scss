@@ -1,0 +1,40 @@
+/* ============================================================
+   badge.scss — .badge mixin library (badge overlay wrapper)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   Internal variables (position control):
+	--badge-t    top offset (default: 0)
+	--badge-b    bottom offset (default: auto)
+	--badge-s    inset-inline-start offset (default: auto)
+	--badge-e    inset-inline-end offset (default: 0)
+	--badge-x    horizontal translate (default: 50%)
+	--badge-y    vertical translate (default: -50%)
+
+   Usage: combine the .badge wrapper with .badge-{position}
+   modifiers; the inner .chip is the positioned badge itself.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   base — wrapper + positioned inner chip.
+   ------------------------------------------------------------ */
+
+@mixin base {
+	.badge {
+		position: relative;
+		display: inline-flex;
+	}
+	.badge :where(.chip) {
+		z-index: 1;
+		position: absolute;
+		white-space: nowrap;
+		top: var(--badge-t, 0);
+		bottom: var(--badge-b, auto);
+		left: var(--badge-s, auto);
+		right: var(--badge-e, 0);
+		translate: var(--badge-x, 50%) var(--badge-y, -50%);
+	}
+}

@@ -1,0 +1,99 @@
+@use '../../_mixins' as m;
+@use '../../_config' as c;
+
+/* gladiolus — file-input.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.file-input {
+		--size: calc(2.5em * var(--scale));
+		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+		--btn-border: transparent;
+		border: var(--border) solid #0000;
+		width: clamp(3rem, 20rem, 100%);
+		padding-inline-end: calc(0.75em * var(--scale));
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		line-height: 2;
+	}
+	.file-input::file-selector-button {
+		margin-inline-end: calc(1em * var(--scale));
+		padding-inline: calc(1em * var(--scale));
+		height: calc(100% + var(--border) * 2);
+		margin-block: calc(var(--border) * -1);
+		margin-inline-start: calc(var(--border) * -1);
+		font-size: 0.875rem;
+		font-weight: 600;
+		border-style: solid;
+		border-start-start-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
+		border-end-start-radius: calc(var(--join-es, var(--radius-field)) - var(--border));
+	}
+	.file-input:focus {
+		outline: 2px solid var(--input-color);
+		outline-offset: 2px;
+	}
+	.file-input:has(> input[disabled]),
+		.file-input:is(:disabled, [disabled]) {
+		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+		box-shadow: none;
+	}
+	.file-input:has(> input[disabled])::file-selector-button,
+		.file-input:is(:disabled, [disabled])::file-selector-button {
+		--btn-border: #0000;
+		--btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+	}
+
+	/* variant ghost */
+	.file-input-ghost {
+		background-color: transparent;
+		transition: background-color 0.2s;
+		box-shadow: none;
+		border-color: #0000;
+	}
+
+	.file-input-ghost::file-selector-button {
+		margin-inline-start: 0;     /* ms-0 */
+		margin-inline-end: calc(1em * var(--scale));
+		height: 100%;
+		cursor: pointer;
+		padding-inline: calc(1em * var(--scale));
+		user-select: none;
+		margin-block: 0;
+		border-start-end-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
+		border-end-end-radius:   calc(var(--join-es, var(--radius-field)) - var(--border));
+	}
+
+	.file-input-ghost:focus,
+	.file-input-ghost:focus-within {
+		color: var(--color-on-surface);
+		background-color: var(--color-surface-1);
+		border-color: #0000;
+		box-shadow: none;
+	}
+
+	/* color variants */
+	@each $color in c.$color-list {
+		.file-input-#{$color} { --btn-color: var(--color-#{$color}); }
+		.file-input-#{$color}::file-selector-button { color: var(--color-on-#{$color}); }
+		.file-input-#{$color},
+		.file-input-#{$color}:focus,
+		.file-input-#{$color}:focus-within { --input-color: var(--color-#{$color}); }
+	}
+
+	/* size variants */
+	@include m.size-variants('file-input');
+
+	.file-input-xl {
+		padding-inline-end: calc(1.5em * var(--scale));
+	}
+
+	.file-input {
+		--input-color: transparent;
+		background-color: var(--color-surface-2);
+		border-block-end: var(--border) solid var(--color-border);
+	}
+
+}

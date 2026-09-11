@@ -1,0 +1,112 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   button.scss — .btn mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s the pieces it wants. `base` carries the
+   structure every family shares (layout, intrinsic sizing, state
+   plumbing); every look decision (borders, elevation, hover/press
+   feedback, style variants) is an opt-in mixin. A family is just a
+   selection of these mixins plus its own extra rules.
+
+   Plumbing contract — custom properties painted by `base`, assigned
+   by skins/variants (and overridable per family):
+	--btn-color    color seed — set by `color-variants`, drives bg/outline
+	--btn-bg       resolved background color
+	--btn-fg       resolved text color
+	--btn-border   resolved border color        (base default: transparent)
+	--btn-shadow   box-shadow value             (base default: var(--shadow-light))
+	--btn-p        inline padding
+	--size         button height
+	--fontsize     font size (set by `size-variants` classes)
+
+   External variables (theme / family):
+	--color-surface-2          default button background
+	--color-on-surface      default text color
+	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
+	--radius-field            corner radius
+	--border                  border width (px value)
+	--shadow-light            family shadow system (see base/default.scss)
+
+   Join integration (set by join.scss when inside .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   base — structure shared by all families.
+   Layout, intrinsic sizing, typography plumbing, paint plumbing
+   (background/border/shadow read the --btn-* variables), keyboard
+   focus, checkbox/radio-as-button behavior, disabled state.
+   No look decision: border/shadow resolve to transparent/family
+   shadow until a skin assigns them.
+   ------------------------------------------------------------ */
+
+@mixin base {
+	/* Width reset in some contexts (e.g. join) */
+	/* btn links inside prose: no underline */
+	.btn {
+		/* Internal variables — neutral defaults, skins re-assign */
+		--btn-bg: var(--btn-color, var(--color-surface-2));
+		--btn-fg: var(--color-on-surface);
+		/* daisyUI ships 1rem — half of this was an outlier */
+		--btn-shadow: var(--shadow-light, );
+		/* Layout */
+		display: inline-flex;
+		flex-shrink: 0;
+		flex-wrap: nowrap;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		vertical-align: middle;
+		user-select: none;
+		touch-action: manipulation;
+		/* Dimensions */
+		height: var(--size);
+		padding-inline: var(--btn-p);
+		/* Typography */
+		color: var(--btn-fg);
+		--tw-prose-links: var(--btn-fg);
+		/* Paint plumbing */
+		background-color: var(--btn-bg);
+		border-width: var(--border);
+		border-color: var(--btn-border);
+		box-shadow: var(--btn-shadow);
+		/* Corner radius (join-compatible) */
+		border-start-start-radius: var(--join-ss, var(--radius-field));
+		border-start-end-radius: var(--join-se, var(--radius-field));
+		border-end-start-radius: var(--join-es, var(--radius-field));
+		border-end-end-radius: var(--join-ee, var(--radius-field));
+		/* Outline */
+		outline-color: var(--btn-color, var(--color-on-surface));
+		/* Transition */
+		/* Other */
+		cursor: pointer;
+	}
+	/* Keyboard focus */
+	.btn:focus-visible,
+		.btn:has(:focus-visible) {
+		isolation: isolate;
+	}
+	/* Checkbox / radio styled as button */
+	.btn:is(input[type="checkbox"], input[type="radio"]) {
+		appearance: none;
+	}
+	.btn:is(input[type="checkbox"], input[type="radio"])[aria-label]::after {
+		content: attr(aria-label);
+	}
+	/* Checked checkbox/radio: seed the primary color */
+	.btn:where(input:checked:not(.filter .btn)) {
+		--btn-color: var(--color-primary);
+		--btn-fg: var(--color-on-primary);
+		isolation: isolate;
+	}
+	/* Disabled */
+	.btn-disabled,
+		.btn:disabled,
+		.btn[disabled] {
+		pointer-events: none;
+	}
+}

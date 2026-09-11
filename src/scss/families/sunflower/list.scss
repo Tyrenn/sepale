@@ -1,0 +1,90 @@
+@use '../../_mixins' as m;
+
+/* sunflower — list.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.list {
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.list-row {
+		--list-grid-cols: minmax(0, auto) 1fr;
+		gap: calc(1em * var(--scale));
+		padding: calc(1em * var(--scale));
+	}
+	.list > .list-row:not(:last-child)::after,
+		.list > :not(:last-child) .list-row::after {
+		bottom: 0;
+		inset-inline: calc(1em * var(--scale));
+		border-bottom: var(--border) solid
+				color-mix(in oklab, var(--color-on-surface) 5%, #0000);
+	}
+	.list-row:has(.list-col-grow:nth-child(1)) {
+		--list-grid-cols: 1fr;
+	}
+	.list-row:has(.list-col-grow:nth-child(2)) {
+		--list-grid-cols: minmax(0, auto) 1fr;
+	}
+	.list-row:has(.list-col-grow:nth-child(3)) {
+		--list-grid-cols: minmax(0, auto) minmax(0, auto) 1fr;
+	}
+	.list-row:has(.list-col-grow:nth-child(4)) {
+		--list-grid-cols: minmax(0, auto) minmax(0, auto) minmax(0, auto) 1fr;
+	}
+	.list-row:has(.list-col-grow:nth-child(5)) {
+		--list-grid-cols: minmax(0, auto) minmax(0, auto) minmax(0, auto) minmax(0, auto) 1fr;
+	}
+
+	/* variant suggestions */
+	.list-suggestions {
+		padding: calc(0.25em * var(--scale));
+		border: var(--border) solid var(--color-surface-2);
+		box-shadow:
+			0 8px 16px -4px color-mix(in oklab, var(--color-on-surface) 10%, #0000),
+			var(--shadow-light, );
+		overflow-y: auto;
+		max-height: min(16rem, 60dvh);
+	}
+
+	.suggestion-item {
+		display: flex;
+		align-items: center;
+		gap: calc(0.5em * var(--scale));
+		padding: calc(0.4em * var(--scale)) calc(0.75em * var(--scale));
+		border-radius: var(--radius-field);
+		cursor: pointer;
+		transition: background-color 0.1s;
+		user-select: none;
+	}
+
+	@media (hover: hover) {
+		.suggestion-item:hover {
+			background-color: color-mix(in oklab, var(--color-on-surface) 7%, #0000);
+		}
+	}
+
+	/* Keyboard-navigated active item */
+	.suggestion-item-active,
+	.suggestion-item[aria-selected="true"] {
+		background-color: color-mix(in oklab, var(--color-primary) 12%, #0000);
+		color: var(--color-primary);
+		font-weight: 500;
+	}
+
+	/* size variants */
+	@include m.size-variants('list');
+
+	.list {
+		border: var(--border) solid var(--color-border);
+	}
+
+	.list {
+		background-color: var(--color-surface-2);
+		border: var(--border) solid var(--color-border);
+	}
+
+}

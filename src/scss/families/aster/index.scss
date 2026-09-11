@@ -1,0 +1,148 @@
+@use 'sass:map';
+@use '../../params';
+@use '../../base';
+@use '../derived-content';
+@use 'badge';
+@use 'breadcrumbs';
+@use 'button';
+@use 'checkbox';
+@use 'chip';
+@use 'dock';
+@use 'fieldset';
+@use 'file-input';
+@use 'input';
+@use 'join';
+@use 'label';
+@use 'link';
+@use 'list';
+@use 'loading';
+@use 'navbar';
+@use 'progress';
+@use 'radial-progress';
+@use 'radio';
+@use 'range';
+@use 'select';
+@use 'skeleton';
+@use 'tab';
+@use 'text';
+@use 'textarea';
+@use 'toggle';
+@use 'validator';
+
+
+
+/* ============================================================
+   STYLE FAMILY — « aster »  (after Ant Design 5)
+
+   An aster is the tidy, dependable garden staple: nothing
+   flamboyant, everything in its place. Which is Ant Design.
+
+   The look: a crisp 1px hairline, a 6px radius, white controls
+   that answer on hover by taking the accent colour rather than
+   by moving, and one small downward shadow on solid buttons —
+   the only depth in the whole family.
+
+   Changes made to fit our contract:
+     - Ant sizes controls at 32px with 14px text (2.29em). We keep
+       our 2.5em so aster sits at the same height as every other
+       family; the ratio is the part that matters, not the pixel.
+     - Ant derives its whole palette algorithmically from a seed
+       (10 steps per hue). We expose the seeds only: a theme sets
+       primary, and hover/active tints are computed in CSS with
+       color-mix rather than pre-baked.
+     - Ant has no `dash` button. Ours inherits the shared one.
+
+   Build: static/families/aster.css via `npm run build:css`.
+   ============================================================ */
+
+
+$params: map.merge(
+	params.colors((
+		'color-surface-1': #ffffff,
+		'color-surface-2': #fafafa,
+		'color-surface-3': #f5f5f5,
+		'color-border': #d9d9d9,
+		'color-on-surface': #202124,
+		'color-primary': #1677ff,
+		'color-secondary': #722ed1,
+		'color-accent': #13c2c2,
+		'color-neutral': #262626,
+		'color-info': #1677ff,
+		'color-success': #52c41a,
+		'color-warning': #faad14,
+		'color-error': #ff4d4f
+	)),
+	(
+		'radius-field': (
+			label: 'Field radius', group: 'Shape', type: length,
+			default: 0.375rem, min: 0, max: 1.5, step: 0.025, unit: rem, units: (px rem em),
+			help: 'Corner radius of buttons, inputs and selects. Ant uses 6px.'
+		),
+		'radius-box': (
+			label: 'Box radius', group: 'Shape', type: length,
+			default: 0.5rem, min: 0, max: 2, step: 0.05, unit: rem, units: (px rem em),
+			help: 'Corner radius of larger boxes and dropdowns.'
+		),
+		'radius-selector': (
+			label: 'Selector radius', group: 'Shape', type: length,
+			default: 0.25rem, min: 0, max: 1.5, step: 0.025, unit: rem, units: (px rem em),
+			help: 'Corner radius of checkboxes, toggles and tabs.'
+		),
+		'border': (
+			label: 'Hairline width', group: 'Shape', type: length,
+			default: 1px, min: 0, max: 3, step: 0.5, unit: px, units: (px rem em),
+			help: 'The 1px line that draws every control. Aster is built on it.'
+		),
+		'scale': (
+			label: 'Element size', group: 'Size', type: number,
+			default: 1, min: 0.75, max: 2, step: 0.05,
+			help: 'Grows every frame — paddings, heights, spacing. Text is unaffected.'
+		),
+		'aster-lift': (
+			label: 'Control shadow', group: 'Effects', type: number,
+			default: 1, min: 0, max: 3, step: 0.1,
+			help: 'Strength of the small downward shadow under solid buttons. 0 removes the only depth aster has.'
+		)
+	)
+);
+
+@include params.emit($params);
+
+/* Family-owned: aster is flat. No retro depth, no ambient shadow —
+   the one shadow it has is drawn by hand on solid buttons below. */
+:root {
+	--depth: 0;
+	--light-intensity: 0;
+}
+
+/* The shared mechanism: structure, states, intrinsic sizing, slots. */
+@include base.components;
+
+/* What aster decides, one file per component. */
+
+@include badge.emit;
+@include breadcrumbs.emit;
+@include button.emit;
+@include checkbox.emit;
+@include chip.emit;
+@include dock.emit;
+@include fieldset.emit;
+@include file-input.emit;
+@include input.emit;
+@include join.emit;
+@include label.emit;
+@include link.emit;
+@include list.emit;
+@include loading.emit;
+@include navbar.emit;
+@include progress.emit;
+@include radial-progress.emit;
+@include radio.emit;
+@include range.emit;
+@include select.emit;
+@include skeleton.emit;
+@include tab.emit;
+@include text.emit;
+@include textarea.emit;
+@include toggle.emit;
+@include validator.emit;

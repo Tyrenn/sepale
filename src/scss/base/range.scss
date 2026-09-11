@@ -1,0 +1,85 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   range.scss — .range mixin library (slider input)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Note: the thumb box-shadow recipe stays in `base` — it implements
+   the track-fill trick (a 100cqw shadow cast from the thumb) and
+   cannot be split from the look. Its depth-gated lines are inert
+   when the family sets --depth: 0.
+
+   Plumbing contract:
+	--range-thumb         thumb background color
+	--range-thumb-size    thumb diameter (1.5em, scales with font)
+	--range-progress      track fill color (currentColor by default)
+	--range-fill          1 = fill track before thumb, 0 = no fill
+	--range-p             thumb border / padding (0.25em)
+	--range-bg            empty track color
+	--range-dir           RTL direction multiplier (-1 when [dir="rtl"])
+	--radius-selector-max workaround for PostCSS/Nuxt calc(min(calc())) error
+	--fontsize            font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        default thumb background
+	--color-{variant} / --color-on-{variant}  track / thumb colors (color-variants)
+	--radius-selector       thumb and track corner radius
+	--depth                 shadow intensity multiplier
+	--shadow-light          family shadow system
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   base — the whole slider: track, thumb (with the fill-shadow
+   trick), focus, disabled.
+   ------------------------------------------------------------ */
+
+@mixin base {
+	.range {
+		--range-thumb: var(--color-surface-1);
+		/* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
+		appearance: none;
+		-webkit-appearance: none;
+		cursor: pointer;
+		overflow: hidden;
+		vertical-align: middle;
+		height: var(--range-thumb-size);
+	}
+	/* Track — WebKit */
+	.range::-webkit-slider-runnable-track {
+		background-color: var(--range-bg);
+		border-radius: var(--radius-selector);
+	}
+	/* Thumb — WebKit */
+	.range::-webkit-slider-thumb {
+		position: relative;
+		box-sizing: border-box;
+		background-color: var(--range-thumb);
+		height: var(--range-thumb-size);
+		width: var(--range-thumb-size);
+		appearance: none;
+		-webkit-appearance: none;
+		color: var(--range-progress);
+		transform: translateY(-50%);
+	}
+	/* Track — Firefox */
+	.range::-moz-range-track {
+		background-color: var(--range-bg);
+		border-radius: var(--radius-selector);
+	}
+	/* Thumb — Firefox */
+	.range::-moz-range-thumb {
+		position: relative;
+		box-sizing: border-box;
+		height: var(--range-thumb-size);
+		width: var(--range-thumb-size);
+		color: var(--range-progress);
+	}
+	.range:disabled {
+		cursor: not-allowed;
+	}
+}

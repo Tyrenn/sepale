@@ -1,0 +1,58 @@
+@use '../../_config' as c;
+
+/* gladiolus — link.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+
+@mixin emit {
+	/* .bx--link: `color: #0f62fe; text-decoration: none`, and the underline
+	   only appears on hover, where the colour also darkens. Ours was an
+	   underlined, uncoloured link — the opposite of Carbon on both counts. */
+	.link {
+		color: var(--color-primary);
+		text-decoration: none;
+	}
+
+	@media (hover: hover) {
+		.link:hover {
+			color: color-mix(in oklab, var(--color-primary), #000 25%);
+			text-decoration: underline;
+		}
+	}
+
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.link {
+		text-decoration: underline;
+	}
+	.link:focus {
+		outline: none;
+	}
+	.link:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+	.link-hover {
+		text-decoration: none;
+	}
+	.link-hover:hover {
+		text-decoration: underline;
+	}
+
+	/* color variants */
+	@each $color in c.$color-list {
+		.link-#{$color} { color: var(--color-#{$color}); }
+	}
+
+	@media (hover: hover) {
+		@each $color in c.$color-list {
+			.link-#{$color}:hover { color: color-mix(in oklab, var(--color-#{$color}) 80%, #000); }
+		}
+	}
+
+	.link {
+		text-underline-offset: 0.15em;
+	}
+
+}

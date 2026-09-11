@@ -1,0 +1,54 @@
+@use '../_config' as c;
+
+/* ============================================================
+   progress.scss — .progress mixin library (linear progress bar)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   External variables (theme / family):
+	--color-on-surface  default track/fill color
+	--color-{variant}     fill color (color-variants)
+	--radius-box          bar corner radius
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   base — track + fill (WebKit/Firefox), indeterminate animation.
+   Color driven by currentColor; height fixed at 0.5rem.
+   ------------------------------------------------------------ */
+
+@mixin base {
+	.progress {
+		border-radius: var(--radius-box);
+		color: var(--color-on-surface);
+		position: relative;
+		appearance: none;
+		overflow: hidden;
+		/* bg-current/20 */
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.progress:indeterminate {
+		animation: progress 5s ease-in-out infinite;
+	}
+	}
+	@supports (-moz-appearance: none) {
+		@media (prefers-reduced-motion: no-preference) {
+		.progress:indeterminate::-moz-progress-bar {
+		animation: progress 5s ease-in-out infinite;
+	}
+	}
+		.progress::-moz-progress-bar {
+		border-radius: var(--radius-box);
+	}
+	}
+	@supports (-webkit-appearance: none) {
+		.progress::-webkit-progress-bar {
+		border-radius: var(--radius-box);
+	}
+		.progress::-webkit-progress-value {
+		border-radius: var(--radius-box);
+	}
+	}
+}

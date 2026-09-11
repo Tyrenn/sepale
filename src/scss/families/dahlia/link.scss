@@ -1,0 +1,38 @@
+@use '../../_config' as c;
+
+/* dahlia — link.
+   Variants inherited from the shared set when families still
+   shared one. They belong to this family now: edit them here,
+   or delete the ones this look has no use for (ADR 0008). */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.link {
+		text-decoration: underline;
+	}
+	.link:focus {
+		outline: none;
+	}
+	.link:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+	.link-hover {
+		text-decoration: none;
+	}
+	.link-hover:hover {
+		text-decoration: underline;
+	}
+
+	/* color variants */
+	@each $color in c.$color-list {
+		.link-#{$color} { color: var(--color-#{$color}); }
+	}
+
+	@media (hover: hover) {
+		@each $color in c.$color-list {
+			.link-#{$color}:hover { color: color-mix(in oklab, var(--color-#{$color}) 80%, #000); }
+		}
+	}
+}

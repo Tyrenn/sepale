@@ -1,0 +1,149 @@
+@use 'sass:map';
+@use '../../params';
+@use '../../base';
+@use '../derived-content';
+@use 'badge';
+@use 'breadcrumbs';
+@use 'button';
+@use 'checkbox';
+@use 'chip';
+@use 'dock';
+@use 'fieldset';
+@use 'file-input';
+@use 'input';
+@use 'join';
+@use 'label';
+@use 'link';
+@use 'list';
+@use 'loading';
+@use 'navbar';
+@use 'progress';
+@use 'radial-progress';
+@use 'radio';
+@use 'range';
+@use 'select';
+@use 'skeleton';
+@use 'tab';
+@use 'text';
+@use 'textarea';
+@use 'toggle';
+@use 'validator';
+
+
+
+/* ============================================================
+   STYLE FAMILY — « snowdrop »  (after Geist, Vercel)
+
+   A snowdrop is white on white: the flower you notice by its
+   shadow. Geist is the same trick — an achromatic greyscale, one
+   accent held in reserve, and contrast doing all the work.
+
+   The look: black-and-white first. The primary button is black
+   (or white, inverted, in the dark theme), everything else is a
+   hairline on white. Colour appears only for state — and even
+   then, sparingly.
+
+   Changes made to fit our contract:
+     - Geist ships its own typeface. We do not bundle fonts, so
+       snowdrop names a stack and falls back to the system face.
+       Set --default-font-family in a theme to use the real one.
+     - Geist has no `secondary` or `accent` in the brand sense:
+       its palette is grey plus semantic states. We keep the eight
+       slots (they are shared plumbing) but seed secondary and
+       accent from the greyscale, so an unmodified snowdrop reads
+       monochrome as intended.
+     - No shadows at rest. Geist separates with lines, not depth.
+
+   Build: static/families/snowdrop.css via `npm run build:css`.
+   ============================================================ */
+
+
+$params: map.merge(
+	params.colors((
+		'color-surface-1': #ffffff,
+		'color-surface-2': #fafafa,
+		'color-surface-3': #f2f2f2,
+		'color-border': #eaeaea,
+		'color-on-surface': #171717,
+		'color-primary': #171717,
+		'color-secondary': #666666,
+		'color-accent': #0070f3,
+		'color-neutral': #000000,
+		'color-info': #0070f3,
+		'color-success': #17c964,
+		'color-warning': #f5a623,
+		'color-error': #ee0000
+	)),
+	(
+		'radius-field': (
+			label: 'Field radius', group: 'Shape', type: length,
+			default: 0.375rem, min: 0, max: 1.5, step: 0.025, unit: rem, units: (px rem em),
+			help: 'Geist uses 6px everywhere. Push it to 999px for its pill buttons.'
+		),
+		'radius-box': (
+			label: 'Box radius', group: 'Shape', type: length,
+			default: 0.75rem, min: 0, max: 2, step: 0.05, unit: rem, units: (px rem em),
+			help: 'Corner radius of larger boxes.'
+		),
+		'radius-selector': (
+			label: 'Selector radius', group: 'Shape', type: length,
+			default: 0.25rem, min: 0, max: 1.5, step: 0.025, unit: rem, units: (px rem em),
+			help: 'Corner radius of checkboxes, toggles and tabs.'
+		),
+		'border': (
+			label: 'Hairline width', group: 'Shape', type: length,
+			default: 1px, min: 0, max: 3, step: 0.5, unit: px, units: (px rem em),
+			help: 'Snowdrop separates with lines rather than depth. This is that line.'
+		),
+		'scale': (
+			label: 'Element size', group: 'Size', type: number,
+			default: 1, min: 0.75, max: 2, step: 0.05,
+			help: 'Grows every frame — paddings, heights, spacing. Text is unaffected.'
+		),
+		'snowdrop-hover': (
+			label: 'Hover strength', group: 'Effects', type: number,
+			default: 1, min: 0, max: 3, step: 0.1,
+			help: 'How far a hover shifts a surface towards its opposite. The only motion in the family.'
+		)
+	)
+);
+
+@include params.emit($params);
+
+/* Family-owned: no depth, no cast shadow, ever. */
+:root {
+	--depth: 0;
+	--light-intensity: 0;
+}
+
+/* The shared mechanism: structure, states, intrinsic sizing, slots. */
+@include base.components;
+
+/* What snowdrop decides, one file per component. */
+
+@include badge.emit;
+@include breadcrumbs.emit;
+@include button.emit;
+@include checkbox.emit;
+@include chip.emit;
+@include dock.emit;
+@include fieldset.emit;
+@include file-input.emit;
+@include input.emit;
+@include join.emit;
+@include label.emit;
+@include link.emit;
+@include list.emit;
+@include loading.emit;
+@include navbar.emit;
+@include progress.emit;
+@include radial-progress.emit;
+@include radio.emit;
+@include range.emit;
+@include select.emit;
+@include skeleton.emit;
+@include tab.emit;
+@include text.emit;
+@include textarea.emit;
+@include toggle.emit;
+@include validator.emit;

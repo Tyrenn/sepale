@@ -1,0 +1,88 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   toggle.scss — .toggle mixin library (checkbox-based switch)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   track/thumb color (color-variants set it on :checked)
+	--size          toggle height (1.5em, scales with font); width derived
+	--toggle-p      inner padding between track border and thumb
+	--fontsize      font size (set by size-variants classes)
+	--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) error
+
+   External variables (theme / family):
+	--color-surface-1        track background when checked
+	--color-on-surface    thumb color when checked
+	--color-{variant}       checked color (color-variants)
+	--border                border width — MUST carry a unit (0px, not 0):
+	                        it is summed with lengths in the width calc()
+	--radius-selector       thumb and track corner radius
+	--shadow-light          family shadow system
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   base — structure: grid track, sliding thumb, optional icons,
+   checked/indeterminate states, focus ring, disabled.
+   ------------------------------------------------------------ */
+
+@mixin base {
+	.toggle {
+		/* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
+		color: var(--input-color);
+		position: relative;
+		display: inline-grid;
+		flex-shrink: 0;
+		cursor: pointer;
+		appearance: none;
+		place-content: center;
+		vertical-align: middle;
+		user-select: none;
+		grid-template-columns: 0fr 1fr 1fr;
+		padding: var(--toggle-p);
+		box-shadow: var(--shadow-light, );
+		height: var(--size);
+	}
+	/* Optional icons inside the toggle */
+	.toggle > * {
+		z-index: 1;
+		grid-column: span 1;
+		grid-column-start: 2;
+		grid-row-start: 1;
+		cursor: pointer;
+		appearance: none;
+	}
+	.toggle > *:nth-child(2) {
+		color: var(--color-surface-1);
+	}
+	.toggle > *:nth-child(3) {
+		color: var(--color-surface-1);
+	}
+	/* Toggle thumb */
+	.toggle::before {
+		--tw-content: "";
+		content: var(--tw-content);
+		border-radius: var(--radius-selector);
+		position: relative;
+		grid-column-start: 2;
+		grid-row-start: 1;
+	}
+	.toggle:checked,
+		.toggle[aria-checked="true"],
+		.toggle:has(> input:checked) {
+		grid-template-columns: 1fr 1fr 0fr;
+		background-color: var(--color-surface-1);
+		--input-color: var(--color-on-surface);
+	}
+	.toggle:indeterminate {
+		grid-template-columns: 0.5fr 1fr 0.5fr;
+	}
+	.toggle:disabled {
+		cursor: not-allowed;
+	}
+}

@@ -1,168 +1,137 @@
-# Adding a family
+# Writing a family
 
-> **Status — target architecture, not yet built.** This describes the design
-> agreed for the restart: manifest, registry, cascade layers, parameter maps.
-> The code still uses explicit `@include` lists (see `git log`). Steps 3–5 of
-> the plan implement it. Read this first: if you cannot picture writing a
-> family from it, the architecture is wrong and we fix that before any Sass.
+A **family** is one opinionated look, and it is the only place a value is ever
+written. `base/` gives you the mechanism — structure, states, intrinsic sizing,
+accessibility, and named slots — and **no values at all** (ADR 0008). You never
+override `base`; you fill it.
 
-A **family** is one opinionated look. It ships as compiled CSS and is tuned
-only through its **parameters**. A family lives in **one self-contained file**:
-adding or deleting one touches nothing else (ADR 0003).
+```
+families/aster/
+  index.scss     parameters, root tokens, the include order
+  button.scss    everything aster decides about .btn, variants included
+  input.scss
+  range.scss
+  …              one file per component this family paints
+```
 
-Everything in `CONTEXT.md` — family, parameter, theme, base, skin, variant,
-recipe, registry, manifest — is used here with that exact meaning.
+`base` paints nothing, so a component with no family file renders unstyled.
+That is deliberate: an omission is visible, never a silent grey.
 
-## The shape of a family file
+## The index
 
 ```scss
-// families/clay.scss
-@use '../lib';
+@use 'sass:map';
+@use '../../params';
+@use '../../base';
+@use '../derived-content';   // optional: derives --color-on-* from the seeds
+@use 'button';
+@use 'input';
 
-/* ── 1. Parameters ─────────────────────────────────────────────
-   What the configurator shows for this family, on top of the
-   standard colours and radii every family gets. The default is
-   also the CSS fallback: declared once, here. (ADR: single
-   source of truth — the app reads this map, it does not repeat
-   it in TypeScript.) */
-$params: (
-  'clay-softness': (
-    label: 'Softness',  group: 'Relief',  type: number,
-    default: 0.35,      min: 0, max: 1, step: 0.05,
-    help: 'How far the surface bulges before it flattens.',
-  ),
+/* 1. What this family exposes to a theme. Declared once, here; the build
+      reads it back out of the compiled CSS and the configurator follows. */
+$params: map.merge(
+  params.colors((
+    'color-surface-1': #ffffff,
+    'color-primary': #1677ff,
+    // as many or as few as this family needs — dahlia declares four surfaces
+  )),
+  (
+    'radius-field': (
+      label: 'Field radius', group: 'Shape', type: length,
+      default: 0.375rem, min: 0, max: 1.5, step: 0.025, unit: rem, units: (px rem em),
+      help: 'Corner radius of buttons, inputs and selects.'
+    ),
+  )
 );
 
-/* ── 2. Manifest ───────────────────────────────────────────────
-   What gets emitted, and in what order. The emitter walks the
-   registry in ../_lib.scss; anything it cannot find is an
-   @error naming the component and the mixin. */
-@include lib.family((
-  label: 'Claymorphism',      // shown in the family picker
-  params: $params,
-  owned: (                    // family-owned, NOT themeable → :root
-    border: 0px,              // a length, never unitless 0: summed in calc()
-    depth: 0,
-    light-intensity: 0,
-  ),
-  skin: none,                 // no shared skin: this family paints itself
-                              // (use `flat` to start from the shared flat look)
-  drop: (skeleton),           // not shipped at all — no file in the bundle
-  components: (
-    button: (drop: (outline, dash, soft)),  // borders contradict soft clay
-    toggle: (add: (track)),
-  ),
-));
+@include params.emit($params);
 
-/* ── 3. Recipes and bindings ───────────────────────────────────
-   This family's own look: ordinary SCSS, written after the
-   manifest, in the uu.family layer so it wins over the shared
-   skins and variants selected above. */
-@layer uu.family {
-  /* Recipes on :where(*), not :root — they must resolve against
-     each element's own font-size and per-state overrides. */
-  :where(*) {
-    --clay-lift: calc(var(--clay-softness, .35) * 1em);
-    --clay-raised: 0 var(--clay-lift) calc(var(--clay-lift) * 2)
-                   color-mix(in oklab, #000 12%, #0000);
+/* 2. Family-owned values a theme must not touch. */
+:root {
+  --depth: 0;
+  --light-intensity: 0;
+}
+
+/* 3. The shared mechanism, then this family's files — in that order. */
+@include base.components;
+
+@include button.emit;
+@include input.emit;
+```
+
+## A component file
+
+```scss
+/* aster — button. */
+@mixin emit {
+  .btn {
+    --size: calc(2.5em * var(--scale));
+    --btn-p: calc(1em * var(--scale));
+    --btn-bg: var(--btn-color, var(--color-surface-1));
+    --btn-fg: var(--color-on-surface);
+    --btn-border: var(--color-border);
   }
 
-  /* Bindings: assign plumbing variables, never re-declare paint. */
-  .btn { --btn-bg: var(--color-surface-1); --btn-shadow: var(--clay-raised); }
-  .input { --input-shadow: none; }
+  /* Variants are this family's. Declare the ones this look wants, drop the
+     ones it has no opinion about. */
+  @each $color in c.$color-list {
+    .btn-#{$color} { --btn-color: var(--color-#{$color}); }
+  }
 }
 ```
 
-That is the whole family. No `@use` of individual components, no include
-order to remember, no separate skins file.
+## The rules that matter
 
-## The three levers, cheapest first
+1. **Fill slots, do not re-declare paint.** `base` writes
+   `background-color: var(--btn-bg)`. Setting `--btn-bg` composes with every
+   variant; writing `background-color:` directly starts a specificity war and
+   breaks `join`, which injects its children's radii through their slots.
+2. **An omission is invisible, not neutral**, and `var()` with no value poisons
+   the whole declaration: `border: var(--border) solid var(--btn-border)` with
+   `--border` unset gives **no border at all**, not a thin one.
+3. **Sizes are yours, the mechanism is not.** `base` guarantees em-based sizing
+   driven by the element's own font-size and reactive to `--scale`. You write
+   the numbers.
+4. **Nothing is shared between families.** `src/scss/_mixins.scss` is a toolbox
+   — colour loops, size scales — that saves typing and emits nothing until you
+   call it. Two families wanting the same look copy it; we group later if it
+   ever proves worth it.
+5. **Recipes go on `:where(*)`**, zero specificity, resolved per element —
+   custom properties, not Sass, so they recompute on `:hover` (ADR 0006).
+   Family-wide recipes live in `index.scss`, above the includes.
+6. **A thin rail with a filled trail needs `m.railed-fill`.** The trail is a
+   100cqw box-shadow cast by the thumb, and WebKit gives it the thumb's height;
+   the mixin clips the thumb's painting to a band of `--rail` plus the knob, so
+   a 2px Carbon rail and a 14px knob can coexist. Set `--range-fill: 1`, define
+   `--rail`, and offset the fill by `--range-thumb-size + --range-halo`.
+7. **Class names stay renameable**: always a plain token in the selector, never
+   assembled from fragments (ADR 0007).
 
-Reach for the next one only when the previous cannot say what you mean.
+## Adding one
 
-### 1. Parameters and owned variables
+1. `families/<name>/index.scss` — header paragraph (what the look is, what it
+   departs from and why), `$params`, `:root`, `@include base.components;`.
+2. A file per component you paint.
+3. `themes/<name>/*.scss` — at least one theme, setting exactly the parameters
+   this family declares (ADR 0005).
+4. `npm run build:css` — a family is discovered by having an `index.scss`.
+5. **Look at it**: `node scripts/shoot.mjs <name>`. Every family shipped
+   without that step had to be redone.
 
-Most of a family's identity is values. `--light-intensity`, `--light-depth`,
-`--border`, `--depth`, `--scale` and the radii flow into every component, so
-changing a handful restyles the whole kit. `poppy` (Material) is almost
-entirely this: `--light-intensity: 1.4; --light-depth: 2` plus rounder radii,
-and inputs, chips, tabs and lists all pick up the Material shadow with no extra
-CSS.
+## Reading the source you are porting
 
-The split matters:
-
-| where | what | why |
-|---|---|---|
-| `params:` | tunable — colours, radii, your own knobs | emitted at `:where(:root)` (specificity 0) so any theme wins, in any load order |
-| `owned:` | the family's identity, not up for tuning | emitted at `:root`, beating the `:where(:root)` defaults of `base/default.scss` |
-
-**Rule of thumb: if a difference is a value, it is a parameter; if it is a
-different recipe or a state behaviour, it is CSS you write in step 3.**
-
-### 2. Selection
-
-`skin:`, `drop:` and `components:` pick from what already exists. Everything
-available is listed in the registry in `../_lib.scss` — that file is the
-answer to "what can I pick from?".
-
-Not including something is a design statement: a family built on a soft,
-borderless material has no reason to ship `button.variant-outline`. Say why in
-the file header.
-
-### 3. Your own look
-
-Neumorphism cannot be reached by tuning the flat recipes — it needs different
-shadow maths. That is step 3 of the file above: recipes as custom properties,
-then bindings. It stays in your family file until a **second** family wants the
-same look; then it is promoted into `components/` and added to the registry
-(ADR 0003).
-
-## Rules that keep families from fighting each other
-
-1. **Assign plumbing variables, do not re-declare paint.** `base` paints from
-   `--btn-bg` / `--btn-fg` / `--btn-border` / `--btn-shadow`; each component
-   documents its own set in its header. A binding that sets variables composes
-   with every variant; one that sets `background-color` starts a specificity
-   war.
-2. **Recipes go on `:where(*)`**, zero specificity, resolved per element. They
-   are custom properties on purpose — a Sass mixin cannot recompute on `:hover`
-   (ADR 0006). Pseudo-elements are *not* matched by `*`: rebuild the recipe
-   inside `::before` / `::after` at the scale you need.
-3. **Cascade order is not your problem any more.** The emitter orders
-   `base → shared skin → variants` inside `uu.components`; your own rules sit
-   in `uu.family`, which comes after (ADR 0004).
-4. **Neutral defaults belong to `base`.** If your look needs a new hook — a
-   thumb colour, say — add the variable with a neutral default in the
-   component's `base`, then assign it in your family. Never fork `base`.
-5. **State feedback is a look decision.** Hover / press / checked responses
-   belong to your family (flat darkens, neu carves, material lowers). `base`
-   owns only semantic plumbing: focus ring, disabled, checked → seed colour.
-6. **Class names are never assembled from fragments** — a prefix is applied by
-   substitution when the bundle is built (ADR 0007).
-
-## Step by step
-
-1. **`families/clay.scss`** — header paragraph (what the look is, what it skips
-   and why), then the three sections above.
-2. **`themes/clay/<name>.scss`** — at least one theme: `color-scheme` first,
-   the colours, the radii, and any of your parameters worth pinning. A theme
-   belongs to its family and may only set parameters that family exposes
-   (ADR 0005). `-content` colours are never themed: they are derived in
-   `_derived-content.scss`.
-3. **Build** — `npm run build:css`. The family is discovered automatically
-   (any non-underscore `families/*.scss`), along with its themes. Output:
-   `static/families/clay.css` (one file, for the app preview) and
-   `static/families/clay/*.css` (one per component, for the bundle). The
-   parameter map is emitted with it and read by the configurator — nothing to
-   register by hand.
-4. **Verify** — `npm run dev`, switch family in the picker, walk every
-   component in a light and a dark theme, and check hover / focus / disabled /
-   checked. `/lab` is the page for a family still being written.
+Read the library's compiled CSS, not its documentation. The gap between them is
+where every mistake in this project has come from: WebTUI's button is filled by
+default, Carbon's slider rail is `.125rem` in the *same* near-black as its
+thumb, neobrutalism's inputs carry **no** shadow, PaperCSS rotates **six**
+corner recipes across siblings rather than using one. None of that is in the
+docs; all of it is in the stylesheet.
 
 ## Checklist
 
-- [ ] `families/<name>.scss` — header, `$params`, manifest, `@layer uu.family`
-- [ ] At least one theme in `themes/<name>/`
-- [ ] Anything you skipped is justified in the header
-- [ ] `npm run build:css` green, the family appears in the picker
-- [ ] Every component walked, light + dark, all interactive states
+- [ ] `index.scss` with a header, `$params`, `:root`, and the include order
+- [ ] A file per component the family paints
+- [ ] At least one theme
+- [ ] `npm run build:css` green, the family in the picker
+- [ ] Screenshot walked: every component, light and dark, hover / focus /
+      disabled / checked

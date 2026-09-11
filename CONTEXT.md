@@ -9,10 +9,10 @@ the distribution channel — it previews the result and hands you the files.
 ### The two customisation levels
 
 **Family**:
-An opinionated visual direction, shipped as compiled CSS. It commits to one
-look (flat, neumorphic, glass, material) and owns every decision a parameter
-cannot express: shadow recipes, borders, state feedback. Changing family is
-changing a stylesheet, never the markup.
+An opinionated visual direction, shipped as compiled CSS — a directory of
+`src/scss/families/<name>/`, one file per component plus an index. It owns every
+value in the kit: colours, dimensions, variants, state feedback. Changing family
+is changing a stylesheet, never the markup.
 _Avoid_: collection, kit, style pack, preset
 
 **Parameter**:
@@ -35,8 +35,10 @@ One nameable UI element with its own class namespace and its own stylesheet —
 families so markup stays interchangeable.
 
 **Base**:
-The family-agnostic half of a component: layout, intrinsic sizing, states,
-accessibility, and the paint slots. It paints nothing.
+The shared half of a component, in `src/scss/base/<component>.scss`: structure,
+states, intrinsic sizing, accessibility, and the named slots a family fills. It
+owns the **mechanism and no values** — it writes `height: var(--size)` and never
+`--size:`. Base alone renders nothing usable, by design.
 
 **Surface**:
 A neutral ground a family paints on, numbered by elevation: `surface-1` is the
@@ -63,14 +65,8 @@ A variable a component reads instead of declaring a value — `--btn-bg`,
 component means filling its slots, never re-declaring `background-color`.
 _Avoid_: plumbing variable, hook, token
 
-**Skin**:
-The look half of a component: what a family fills the paint slots with,
-plus its hover/press/checked feedback. A skin lives with whoever uses it — in
-`components/` when two or more families share it, in the family file otherwise.
-_Avoid_: style, variant, look
-
 **Variant**:
-An opt-in class that modifies a component without changing its family —
+An opt-in class a family declares for one of its components —
 `.btn-outline`, `.btn-sm`, `.badge-primary`. Part of the design language, not a
 customisation layer bolted on top.
 
@@ -82,14 +78,9 @@ they re-resolve per element and per state.
 ### Authoring
 
 **Registry**:
-The written list, in `_lib.scss`, of every component and the shared mixins it
-offers. It answers "what can I pick from?" and is what the emitter dispatches
-against.
-
-**Manifest**:
-The map at the heart of a family file, declaring what that family emits: its
-default skin, per-component additions and removals, its parameters and their
-defaults. The emitter turns it into CSS in a guaranteed cascade order.
+What the build reads back out of the SCSS and hands to the app: the families,
+their themes, and the parameters each one declares. Generated, never written by
+hand — a family renames a variable and the configurator follows.
 
 ### Distribution
 

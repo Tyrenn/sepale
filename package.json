@@ -3,10 +3,7 @@
 	"version": "0.0.1",
 	"scripts": {
 		"gen:registry": "node scripts/gen-registry.mjs",
-		"build:families": "sass src/scss/families:static/families --no-source-map --style=expanded",
-		"build:themes": "sass src/scss/themes:static/themes --no-source-map --style=expanded",
-		"build:css": "npm run build:families && npm run build:themes && npm run gen:registry",
-		"watch:css": "sass --watch src/scss/families:static/families src/scss/themes:static/themes --no-source-map",
+		"build:css": "node scripts/build-css.mjs && npm run gen:registry",
 		"dev": "npm run build:css && vite dev",
 		"build": "npm run build:css && vite build && npm run prepack",
 		"preview": "vite preview",

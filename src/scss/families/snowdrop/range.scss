@@ -1,0 +1,131 @@
+@use '../../_mixins' as m;
+@use '../../_config' as c;
+
+/* snowdrop — range.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.range {
+		--range-thumb-size: calc(1.5em * var(--scale));
+		--range-progress: currentColor;
+		--range-fill: 1;
+		--range-p: calc(0.25em * var(--scale));
+		--range-bg: color-mix(in oklab, currentColor 10%, #0000);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		--radius-selector-max: calc(
+				var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
+			);
+		background-color: transparent;
+		width: clamp(3rem, 20rem, 100%);
+		border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+		border: none;
+	}
+	[dir="rtl"] .range {
+		--range-dir: -1;
+	}
+	.range:focus {
+		outline: none;
+	}
+	.range:focus-visible {
+		outline: 2px solid;
+		outline-offset: 2px;
+	}
+	.range::-webkit-slider-runnable-track {
+		width: 100%;
+		height: calc(var(--range-thumb-size) * 0.5);
+	}
+	@media (forced-colors: active) {
+		.range::-webkit-slider-runnable-track {
+		border: 1px solid;
+	}
+	}
+	.range::-webkit-slider-thumb {
+		border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+		border: var(--range-p) solid;
+		top: 50%;
+		box-shadow: 0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset,
+				0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+				0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000),
+				0 0 0 2rem var(--range-thumb) inset,
+				calc((var(--range-dir, 1) * -100cqw) - (var(--range-dir, 1) * (var(--range-thumb-size) + var(--range-halo, 0px))))
+					0 0 calc(100cqw * var(--range-fill)),
+				var(--shadow-light, );
+	}
+	.range::-moz-range-track {
+		width: 100%;
+		height: calc(var(--range-thumb-size) * 0.5);
+	}
+	@media (forced-colors: active) {
+		.range::-moz-range-track {
+		border: 1px solid;
+	}
+	}
+	.range::-moz-range-thumb {
+		border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+		background-color: currentColor;
+		border: var(--range-p) solid;
+		top: 50%;
+		box-shadow: 0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset,
+				0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+				0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000),
+				0 0 0 2rem var(--range-thumb) inset,
+				calc((var(--range-dir, 1) * -100cqw) - (var(--range-dir, 1) * (var(--range-thumb-size) + var(--range-halo, 0px))))
+					0 0 calc(100cqw * var(--range-fill)),
+				var(--shadow-light, );
+	}
+	.range:disabled {
+		opacity: 0.3;
+	}
+
+	/* color variants */
+	@each $color in c.$color-list {
+		.range-#{$color} {
+			color: var(--color-#{$color});
+			--range-thumb: var(--color-on-#{$color});
+		}
+	}
+
+	/* size variants */
+	@include m.size-variants('range');
+
+	.range {
+		--rail: calc(0.25em * var(--scale));
+		--range-thumb-size: calc(0.875em * var(--scale));
+		--range-fill: 1;
+		--range-p: 0px;
+		/* Geist's handle is a white disc on a black trail, not a black dot. */
+		--range-thumb: var(--color-surface-1);
+		--range-bg: var(--color-surface-3);
+		--range-progress: var(--color-on-surface);
+		color: var(--color-on-surface);
+	}
+
+	.range::-webkit-slider-runnable-track {
+		height: var(--rail);
+		border-radius: 999px;
+	}
+
+	.range::-moz-range-track {
+		height: var(--rail);
+		border-radius: 999px;
+	}
+
+	.range::-webkit-slider-thumb {
+		@include m.railed-fill;
+		border-radius: 999px;
+		border: none;
+		--shadow-light: 0 0 0 1px color-mix(in oklab, var(--color-on-surface) 22%, #0000), 0 1px 2px color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	}
+
+	.range::-moz-range-thumb {
+		@include m.railed-fill;
+		border-radius: 999px;
+		border: none;
+		--shadow-light: 0 0 0 1px color-mix(in oklab, var(--color-on-surface) 22%, #0000), 0 1px 2px color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	}
+
+}

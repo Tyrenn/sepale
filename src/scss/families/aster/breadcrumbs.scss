@@ -1,0 +1,63 @@
+@use '../../_mixins' as m;
+
+/* aster — breadcrumbs.
+   Variants inherited from the shared set when families still
+   shared one. They belong to this family now: edit them here,
+   or delete the ones this look has no use for (ADR 0008). */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.breadcrumbs {
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		max-width: 100%;
+		padding-block: 0.5em;
+	}
+	.breadcrumbs > menu,
+		.breadcrumbs > ul,
+		.breadcrumbs > ol {
+		min-height: min-content;
+	}
+	.breadcrumbs > menu > li > *,
+		.breadcrumbs > ul > li > *,
+		.breadcrumbs > ol > li > * {
+		gap: 0.5em;
+	}
+	.breadcrumbs > menu > li > *:hover,
+		.breadcrumbs > ul > li > *:hover,
+		.breadcrumbs > ol > li > *:hover {
+		text-decoration: underline;
+	}
+	.breadcrumbs > menu > li > *:focus,
+		.breadcrumbs > ul > li > *:focus,
+		.breadcrumbs > ol > li > *:focus {
+		outline: none;
+	}
+	.breadcrumbs > menu > li > *:focus-visible,
+		.breadcrumbs > ul > li > *:focus-visible,
+		.breadcrumbs > ol > li > *:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+	.breadcrumbs > menu > li + *::before,
+		.breadcrumbs > ul > li + *::before,
+		.breadcrumbs > ol > li + *::before {
+		margin-inline-end: 0.75em;
+		margin-inline-start: 0.5em;
+		height: 0.375em;
+		width: 0.375em;
+		opacity: 0.4;
+		rotate: 45deg;
+		border-top: 1px solid;
+		border-right: 1px solid;
+		background-color: #0000;
+	}
+	[dir="rtl"] .breadcrumbs > menu > li + *::before,
+		[dir="rtl"] .breadcrumbs > ul > li + *::before,
+		[dir="rtl"] .breadcrumbs > ol > li + *::before {
+		rotate: -135deg;
+	}
+
+	/* size variants */
+	@include m.size-variants('breadcrumbs');
+}

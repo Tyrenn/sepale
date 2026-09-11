@@ -1,0 +1,44 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   chip.scss — .chip mixin library (small inline label)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--chip-color  seed color (set by color-variants)
+	--chip-bg     resolved background color
+	--chip-fg     resolved text color
+	--size        chip height (1.6em, scales with font); padding derived
+	--fontsize    font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-{variant} / --color-on-{variant}  seed / text colors (color-variants)
+	--border / --radius-selector
+	--shadow-light          family shadow system
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   base — structure and paint plumbing (bg/fg/border from --chip-*).
+   ------------------------------------------------------------ */
+
+@mixin base {
+	.chip {
+		--chip-bg: var(--chip-color, var(--color-surface-1));
+		--chip-fg: var(--color-on-surface);
+		border-radius: var(--radius-selector);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		vertical-align: middle;
+		color: var(--chip-fg);
+		background-color: var(--chip-bg);
+		height: var(--size);
+		box-shadow: var(--shadow-light, );
+	}
+}

@@ -1,0 +1,158 @@
+@use 'sass:map';
+@use '../../params';
+@use '../../base';
+@use '../derived-content';
+@use 'badge';
+@use 'breadcrumbs';
+@use 'button';
+@use 'checkbox';
+@use 'chip';
+@use 'dock';
+@use 'fieldset';
+@use 'file-input';
+@use 'input';
+@use 'join';
+@use 'label';
+@use 'link';
+@use 'list';
+@use 'loading';
+@use 'navbar';
+@use 'progress';
+@use 'radial-progress';
+@use 'radio';
+@use 'range';
+@use 'select';
+@use 'skeleton';
+@use 'tab';
+@use 'text';
+@use 'textarea';
+@use 'toggle';
+@use 'validator';
+
+
+
+/* ============================================================
+   STYLE FAMILY — « gladiolus »  (after Carbon, IBM)
+
+   The gladiolus is the sword lily: tall, straight, no curve
+   anywhere. Carbon is the same posture in software — a strict
+   grid, right angles, and typography doing the talking.
+
+   The look: radius zero, everywhere. Tall controls. A button
+   puts its label on the LEFT and leaves a gutter on the right —
+   Carbon's most recognisable move, and the reason its buttons
+   never look like anyone else's. Focus is a hard inset ring,
+   not a glow.
+
+   Changes made to fit our contract:
+     - Carbon's button is 48px tall with a 64px right gutter, both
+       absolute. Ours are ratios: 3em tall, and a gutter expressed
+       as a multiple of the frame, so a `.btn-sm` keeps the shape
+       instead of losing the gutter.
+     - Carbon's palette is a 100-step grey ramp (`gray-10`,
+       `gray-90`…). We expose the four grounds its themes actually
+       switch between, and let the rest derive.
+     - Carbon has a `tertiary` button — a transparent frame that
+       fills on hover — which none of our shared variants covers.
+       gladiolus adds `.btn-tertiary` as its own class. It exists
+       only while gladiolus is selected. This is the family
+       exercising its right to a class nobody else has.
+
+   Build: static/families/gladiolus.css via `npm run build:css`.
+   ============================================================ */
+
+
+$params: map.merge(
+	params.colors((
+		'color-surface-1': #ffffff,
+		'color-surface-2': #f4f4f4,
+		'color-surface-3': #e0e0e0,
+		'color-border': #8d8d8d,
+		'color-on-surface': #161616,
+		'color-primary': #0f62fe,
+		'color-secondary': #393939,
+		'color-accent': #6929c4,
+		'color-neutral': #161616,
+		'color-info': #0043ce,
+		'color-success': #24a148,
+		'color-warning': #f1c21b,
+		'color-error': #da1e28
+	)),
+	(
+		'radius-field': (
+			label: 'Field radius', group: 'Shape', type: length,
+			default: 0rem, min: 0, max: 1, step: 0.025, unit: rem, units: (px rem em),
+			help: 'Zero is the point. Raising it stops being Carbon almost immediately.'
+		),
+		'radius-box': (
+			label: 'Box radius', group: 'Shape', type: length,
+			default: 0rem, min: 0, max: 1.5, step: 0.05, unit: rem, units: (px rem em),
+			help: 'Corner radius of larger boxes.'
+		),
+		'radius-selector': (
+			label: 'Selector radius', group: 'Shape', type: length,
+			default: 0rem, min: 0, max: 1, step: 0.025, unit: rem, units: (px rem em),
+			help: 'Corner radius of checkboxes, toggles and tabs.'
+		),
+		'border': (
+			label: 'Hairline width', group: 'Shape', type: length,
+			default: 1px, min: 0, max: 3, step: 0.5, unit: px, units: (px rem em),
+			help: 'Field underline and frame width.'
+		),
+		'scale': (
+			label: 'Element size', group: 'Size', type: number,
+			default: 1, min: 0.75, max: 2, step: 0.05,
+			help: 'Grows every frame — paddings, heights, spacing. Text is unaffected.'
+		),
+		'gladiolus-gutter': (
+			label: 'Button gutter', group: 'Effects', type: number,
+			default: 2, min: 0, max: 5, step: 0.25,
+			help: 'The empty space Carbon leaves to the right of a button label, as a multiple of the frame padding. 0 centres the label like every other family.'
+		),
+		'gladiolus-focus': (
+			label: 'Focus ring', group: 'Effects', type: length,
+			default: 2px, min: 0, max: 4, step: 0.5, unit: px, units: (px em),
+			help: 'Thickness of the hard inset focus ring. Carbon uses 2px, inside the frame.'
+		)
+	)
+);
+
+@include params.emit($params);
+
+/* Family-owned: no depth, no cast shadow. Carbon is drawn, not lit. */
+:root {
+	--depth: 0;
+	--light-intensity: 0;
+}
+
+/* The shared mechanism: structure, states, intrinsic sizing, slots. */
+@include base.components;
+
+/* What gladiolus decides, one file per component. */
+
+@include badge.emit;
+@include breadcrumbs.emit;
+@include button.emit;
+@include checkbox.emit;
+@include chip.emit;
+@include dock.emit;
+@include fieldset.emit;
+@include file-input.emit;
+@include input.emit;
+@include join.emit;
+@include label.emit;
+@include link.emit;
+@include list.emit;
+@include loading.emit;
+@include navbar.emit;
+@include progress.emit;
+@include radial-progress.emit;
+@include radio.emit;
+@include range.emit;
+@include select.emit;
+@include skeleton.emit;
+@include tab.emit;
+@include text.emit;
+@include textarea.emit;
+@include toggle.emit;
+@include validator.emit;

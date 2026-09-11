@@ -1,0 +1,154 @@
+@use '../../_mixins' as m;
+@use '../../_config' as c;
+
+/* snowdrop — toggle.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.toggle {
+		--input-color: color-mix(in oklab, var(--color-on-surface) 50%, #0000);
+		--size: calc(1.5em * var(--scale));
+		--toggle-p: calc(var(--size) * 0.125);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		--radius-selector-max: calc(
+				var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
+			);
+		border: var(--border) solid currentColor;
+		border-radius: calc(
+				var(--radius-selector) + min(var(--toggle-p), var(--radius-selector-max)) +
+					min(var(--border), var(--radius-selector-max))
+			);
+		width: calc((var(--size) * 2) - (var(--border) + var(--toggle-p)) * 2);
+		transition: color 0.3s,
+				grid-template-columns 0.2s;
+	}
+	.toggle > * {
+		height: 100%;
+		background-color: transparent;
+		padding: calc(0.125em * var(--scale));
+		transition: opacity 0.2s,
+				rotate 0.4s;
+		border: none;
+	}
+	.toggle > *:focus {
+		outline: none;
+	}
+	.toggle > *:nth-child(2) {
+		rotate: 0deg;
+	}
+	.toggle > *:nth-child(3) {
+		opacity: 0;
+		rotate: -15deg;
+	}
+	.toggle:has(:checked) > :nth-child(2) {
+		opacity: 0;
+		rotate: 15deg;
+	}
+	.toggle:has(:checked) > :nth-child(3) {
+		opacity: 1;
+		rotate: 0deg;
+	}
+	.toggle::before {
+		inset-inline-start: 0;
+		aspect-ratio: 1 / 1;
+		height: 100%;
+		width: 100%;
+		background-color: currentColor;
+		translate: 0;
+		transition: background-color 0.1s,
+				translate 0.2s,
+				inset-inline-start 0.2s;
+	}
+	@media (forced-colors: active) {
+		.toggle::before {
+		outline-style: solid;
+		outline-offset: -0.25rem;
+	}
+	}
+	@media print {
+		.toggle::before {
+		outline: 0.25rem solid;
+		outline-offset: -1rem;
+	}
+	}
+	.toggle:focus-visible,
+		.toggle:has(:focus-visible) {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+	.toggle:checked::before,
+		.toggle[aria-checked="true"]::before,
+		.toggle:has(> input:checked)::before {
+		background-color: currentColor;
+	}
+	@starting-style {
+		.toggle:checked::before,
+			.toggle[aria-checked="true"]::before,
+			.toggle:has(> input:checked)::before {
+		opacity: 0;
+	}
+	}
+	.toggle:disabled {
+		opacity: 0.3;
+	}
+	.toggle:disabled::before {
+		background-color: transparent;
+		border: var(--border) solid currentColor;
+	}
+
+	/* variant track */
+	.toggle-track:checked,
+	.toggle-track[aria-checked="true"],
+	.toggle-track:has(> input:checked) {
+		background-color: var(--input-color, var(--color-on-surface));
+		background-clip: content-box; /* track stays inside padding = inset/thinner effect */
+	}
+
+	.toggle-track:checked::before,
+	.toggle-track[aria-checked="true"]::before,
+	.toggle-track:has(> input:checked)::before {
+		background-color: var(--color-on-surface);
+		box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-surface-1);
+	}
+
+	/* color variants */
+	@each $color in c.$color-list {
+		.toggle-#{$color}:checked,
+		.toggle-#{$color}[aria-checked="true"] { --input-color: var(--color-#{$color}); }
+	}
+
+	/* size variants */
+	@include m.size-variants('toggle');
+
+	.toggle {
+		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	}
+
+	.toggle {
+		--radius-selector: 999px;
+		--input-color: var(--color-surface-3);
+		border-radius: 999px;
+		border-color: var(--color-border);
+		background-color: var(--color-surface-3);
+		transition: background-color 0.15s, border-color 0.15s;
+	}
+
+	.toggle::before {
+		border-radius: 999px;
+		background-color: var(--color-surface-1);
+		box-shadow: 0 1px 2px color-mix(in oklab, var(--color-on-surface) 15%, #0000);
+	}
+
+	.toggle:checked,
+	.toggle[aria-checked='true'],
+	.toggle:has(> input:checked) {
+		--input-color: var(--color-surface-1);
+		background-color: var(--color-on-surface);
+		border-color: var(--color-on-surface);
+	}
+
+}

@@ -1,0 +1,177 @@
+@use 'sass:map';
+@use '../../params';
+@use '../../base';
+@use '../derived-content';
+@use 'badge';
+@use 'breadcrumbs';
+@use 'button';
+@use 'checkbox';
+@use 'chip';
+@use 'dock';
+@use 'fieldset';
+@use 'file-input';
+@use 'input';
+@use 'join';
+@use 'label';
+@use 'link';
+@use 'list';
+@use 'loading';
+@use 'progress';
+@use 'radial-progress';
+@use 'radio';
+@use 'range';
+@use 'select';
+@use 'skeleton';
+@use 'tab';
+@use 'text';
+@use 'textarea';
+@use 'toggle';
+@use 'validator';
+
+
+/* ============================================================
+   STYLE FAMILY — « daisy »  (after DaisyUI 5)
+   ============================================================
+
+   What a family is
+   ----------------
+   A family is a SELECTION of component mixins (structure `base` +
+   opt-in look mixins) plus its own root variables. A family commits
+   to ONE visual direction and is tuned through its THEME only — a
+   set of CSS custom properties (colors and radii). A family never
+   ships a structural customization mechanism: if you need to
+   fundamentally reshape a component, that is a different family.
+
+   Style variants that belong to the design language are allowed
+   (e.g. button `outline` / `ghost` / `soft`), because they are part
+   of the look itself, not a customization layer bolted on top.
+
+   Variable ownership
+   ------------------
+   - FAMILY-OWNED look variables are set on `:root` here (borders,
+     family's identity and are not meant to be themed.
+   - THEMEABLE variables (colors, radii) get family fallbacks on
+     `:where(:root)` (specificity 0) so a theme's `:root` rules
+     always win, in any load order.
+
+   The « daisy » family
+   --------------------
+   Heavily inspired by DaisyUI v5 (https://github.com/saadeghi/daisyui),
+   in plain CSS — no Tailwind, no `@apply`. Same class names (`btn`,
+   `btn-primary`, `input`, `badge`, …) and same look, so the markup is
+   interchangeable — but NOT the theme: our variables carry our own
+   names (--color-surface-1 / --color-on-surface / --color-border, see
+   CONTEXT.md), so a DaisyUI theme pasted as-is will not apply.
+
+   Characteristics:
+     - Truly flat aesthetic: crisp 1px borders, NO elevation. Both the
+       retro 3D depth (--depth) and the soft directional shadow
+       (--light-intensity) are OFF — this matches DaisyUI's default
+       light/coffee themes exactly (depth 0, no shadow).
+     - Intrinsic em-based sizing: components scale with `font-size`;
+       size variants only set `--fontsize`. No breakpoints.
+
+   Theme variables consumed (see also each component's header)
+   -----------------------------------------------------------
+     --color-surface-1/200/300    surfaces (page, raised, sunken)
+     --color-on-surface        default foreground color
+     --color-{semantic} / --color-on-{semantic} primary/secondary/accent/neutral/
+                                  info/success/warning/error + fg
+     --radius-field/box/selector corner radii (fields / boxes / selectors)
+
+   Build: compiled to static/families/daisy.css by `npm run build:css`.
+   ============================================================ */
+
+
+/* The variables daisy exposes. Emitted on :where(:root) so any theme
+   wins, and declared once here so the configurator and the Families
+   page read the same source. */
+$params: map.merge(
+	params.colors((
+		'color-surface-1': oklch(100% 0 0),
+		'color-surface-2': oklch(96% 0 0),
+		'color-surface-3': oklch(92% 0 0),
+		'color-primary': oklch(55% 0.21 264),
+		'color-secondary': oklch(60% 0.2 330),
+		'color-accent': oklch(65% 0.18 165),
+		'color-neutral': oklch(28% 0.01 285),
+		'color-info': oklch(70% 0.13 230),
+		'color-success': oklch(72% 0.16 145),
+		'color-warning': oklch(80% 0.15 85),
+		'color-error': oklch(63% 0.22 25)
+	)),
+	(
+		'radius-field': (
+			label: 'Field radius', group: 'Shape', type: length,
+			default: 0.25rem, min: 0, max: 2, step: 0.05, unit: rem, units: (px rem em ch),
+			help: 'Corner radius of fields: buttons, inputs, selects.'
+		),
+		'radius-box': (
+			label: 'Box radius', group: 'Shape', type: length,
+			default: 0.5rem, min: 0, max: 3, step: 0.05, unit: rem, units: (px rem em ch),
+			help: 'Corner radius of larger boxes: lists, dropdowns.'
+		),
+		'radius-selector': (
+			label: 'Selector radius', group: 'Shape', type: length,
+			default: 0.5rem, min: 0, max: 2, step: 0.05, unit: rem, units: (px rem em ch),
+			help: 'Corner radius of selectors: checkboxes, toggles, tabs.'
+		),
+		'border': (
+			label: 'Border width', group: 'Shape', type: length,
+			default: 1px, min: 0, max: 3, step: 0.5, unit: px, units: (px rem em ch),
+			help: 'Width of component borders.'
+		),
+		'scale': (
+			label: 'Element size', group: 'Size', type: number,
+			default: 1, min: 0.75, max: 2, step: 0.05,
+			help: 'Grows every frame - paddings, heights, spacing. Text is unaffected.'
+		),
+		'depth': (
+			label: 'Depth', group: 'Effects', type: number,
+			default: 1, min: 0, max: 1, step: 0.05,
+			help: 'Subtle 3D depth on fields and selectors. Faithful to daisyUI, which means almost invisible on a dark theme.'
+		)
+	)
+);
+
+@include params.emit($params);
+
+/* Family-owned look. */
+:root {
+	--light-intensity: 0; /* no directional shadow */
+	--light-depth: 1;
+}
+
+/* ── Component mixin selection ──────────────────────────────────────
+   daisy = the reference daisyUI selection, nothing more. */
+
+/* The shared mechanism: structure, states, intrinsic sizing, slots. */
+@include base.components;
+
+/* What daisy decides, one file per component. */
+
+@include badge.emit;
+@include breadcrumbs.emit;
+@include button.emit;
+@include checkbox.emit;
+@include chip.emit;
+@include dock.emit;
+@include fieldset.emit;
+@include file-input.emit;
+@include input.emit;
+@include join.emit;
+@include label.emit;
+@include link.emit;
+@include list.emit;
+@include loading.emit;
+@include progress.emit;
+@include radial-progress.emit;
+@include radio.emit;
+@include range.emit;
+@include select.emit;
+@include skeleton.emit;
+@include tab.emit;
+@include text.emit;
+@include textarea.emit;
+@include toggle.emit;
+@include validator.emit;
