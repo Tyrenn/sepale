@@ -74,9 +74,8 @@
 
 	.textarea {
 		border: var(--border) solid var(--color-border);
-		/* Tall box: the pen wobbles by the same amount it does on a
-		   button, not by the same number of pixels. */
-		--ca: 0.35;
+		/* A tall box drifts less than a button: same pen, fewer pixels. */
+		--cw: var(--cosmos-wobble-box, 0.2);
 		border-radius: var(--c4);
 		rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
 	}

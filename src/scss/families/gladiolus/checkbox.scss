@@ -98,8 +98,15 @@
 	/* size variants */
 	@include m.size-variants('checkbox');
 
+	/* .cds--checkbox-label::before: a 1px box in the ink colour with a 2px
+	   radius — the only corner Carbon rounds on a square, and it is what
+	   stops the box reading as a table cell. Checked, the box fills with
+	   the ink, never with the accent. */
 	.checkbox {
 		--input-color: var(--color-on-surface);
+		border-radius: 2px;
+		transition: background-color var(--gl-fast) var(--gl-ease-in),
+			border-color var(--gl-fast) var(--gl-ease-in);
 	}
 
 }

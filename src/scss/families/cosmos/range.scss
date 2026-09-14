@@ -93,6 +93,7 @@
 	@include m.size-variants('range');
 
 	.range {
+		--cw: var(--cosmos-wobble-selector, 0.7);
 		--rail: calc(0.55em * var(--scale));
 		--range-thumb-size: calc(1.1em * var(--scale));
 		--range-fill: 1;

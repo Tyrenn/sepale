@@ -24,7 +24,7 @@
 		max-width: 8rem;
 		gap: 1px;
 		background-color: transparent;
-		transition: opacity 0.2s ease-out;
+		transition: opacity var(--gl-dur) var(--gl-ease-out);
 	}
 	@media (hover: hover) {
 		.dock > *:hover {

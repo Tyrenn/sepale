@@ -20,13 +20,10 @@
 		RadialProgress,
 		Skeleton,
 		List,
-		Link,
 		Tabs,
-		Tab,
 		Breadcrumbs,
 		Dock,
-		Join,
-		ValidatorHint
+		Join
 	} from '$lib/index.js';
 
 	const COLORS = [
@@ -90,7 +87,7 @@
 		<Textarea placeholder="Message"></Textarea>
 		<FileInput />
 		<Input color="error" value="not-an-email" />
-		<ValidatorHint>Enter a valid email address</ValidatorHint>
+		<p class="validator-hint">Enter a valid email address</p>
 		<div class="tp-row">
 			<Button color="primary">Submit</Button>
 			<Button variant="ghost">Cancel</Button>
@@ -147,45 +144,47 @@
 		<div class="tp-row">
 			<RadialProgress value={35} />
 			<RadialProgress value={70} />
-			<Loading kind="spinner" />
-			<Loading kind="dots" />
-			<Loading kind="ring" />
-			<Loading kind="ball" />
+			<Loading variant="spinner" />
+			<Loading variant="dots" />
+			<Loading variant="ring" />
+			<Loading variant="ball" />
 		</div>
 	</section>
 
 	<!-- Data: a real list, where badges and chips actually live. -->
 	<section class="tp-block">
 		<h3 class="tp-title">Data</h3>
-		<List style="border:1px solid var(--color-border);">
-			<li class="list-row">
-				<div>
-					<p style="font-weight:600;">Deployment</p>
-					<p style="opacity:.6; font-size:.875em;">production</p>
-				</div>
-				<div class="list-col-grow" style="text-align:right;">
-					<Chip color="success">live</Chip>
-				</div>
-			</li>
-			<li class="list-row">
-				<div>
-					<p style="font-weight:600;">Build</p>
-					<p style="opacity:.6; font-size:.875em;">queued 2 min ago</p>
-				</div>
-				<div class="list-col-grow" style="text-align:right;">
-					<Chip color="warning" variant="soft">pending</Chip>
-				</div>
-			</li>
-			<li class="list-row">
-				<div>
-					<p style="font-weight:600;">Rollback</p>
-					<p style="opacity:.6; font-size:.875em;">failed</p>
-				</div>
-				<div class="list-col-grow" style="text-align:right;">
-					<Chip color="error" variant="outline">error</Chip>
-				</div>
-			</li>
-		</List>
+		{#snippet deployRow()}
+			<div>
+				<p style="font-weight:600;">Deployment</p>
+				<p style="opacity:.6; font-size:.875em;">production</p>
+			</div>
+			<div class="list-col-grow" style="text-align:right;">
+				<Chip color="success">live</Chip>
+			</div>
+		{/snippet}
+		{#snippet buildRow()}
+			<div>
+				<p style="font-weight:600;">Build</p>
+				<p style="opacity:.6; font-size:.875em;">queued 2 min ago</p>
+			</div>
+			<div class="list-col-grow" style="text-align:right;">
+				<Chip color="warning" variant="soft">pending</Chip>
+			</div>
+		{/snippet}
+		{#snippet rollbackRow()}
+			<div>
+				<p style="font-weight:600;">Rollback</p>
+				<p style="opacity:.6; font-size:.875em;">failed</p>
+			</div>
+			<div class="list-col-grow" style="text-align:right;">
+				<Chip color="error" variant="outline">error</Chip>
+			</div>
+		{/snippet}
+		<List
+			rows={[deployRow, buildRow, rollbackRow]}
+			style="border:1px solid var(--color-border);"
+		/>
 		<div class="tp-row">
 			<Skeleton style="width:3rem; height:3rem; border-radius:9999px" />
 			<Skeleton style="flex:1; height:1rem; border-radius:4px" />
@@ -200,16 +199,11 @@
 			<li><a href="#preview">Library</a></li>
 			<li>Theme</li>
 		</Breadcrumbs>
-		<Tabs variant="border">
-			<Tab active>Overview</Tab>
-			<Tab>Settings</Tab>
-			<Tab>Billing</Tab>
-		</Tabs>
-		<Tabs variant="box">
-			<Tab active>Day</Tab>
-			<Tab>Week</Tab>
-			<Tab>Month</Tab>
-		</Tabs>
+		<Tabs
+			variant="border"
+			tabs={[{ label: 'Overview' }, { label: 'Settings' }, { label: 'Billing' }]}
+		/>
+		<Tabs variant="box" tabs={[{ label: 'Day' }, { label: 'Week' }, { label: 'Month' }]} />
 		<div class="tp-dock">
 			<Dock style="position:absolute;">
 				<button>
@@ -264,10 +258,10 @@
 		</p>
 		<p class="text-s3-b3" style="opacity:.7;">Secondary copy, one step down the scale.</p>
 		<div class="tp-row">
-			<Link href="#preview">Default</Link>
-			<Link color="primary" href="#preview">Primary</Link>
-			<Link color="success" href="#preview">Success</Link>
-			<Link color="error" href="#preview">Error</Link>
+			<a class="link" href="#preview">Default</a>
+			<a class="link link-primary" href="#preview">Primary</a>
+			<a class="link link-success" href="#preview">Success</a>
+			<a class="link link-error" href="#preview">Error</a>
 		</div>
 	</section>
 </div>

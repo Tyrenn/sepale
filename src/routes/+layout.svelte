@@ -59,34 +59,32 @@
 			</label>
 		</div>
 
+		<!-- The app's own navigation is a .menu of the active family: the
+		     chrome is built from the kit it ships, so a family that gets its
+		     menu wrong is visible immediately. -->
 		<nav class="side-nav">
-			<ul class="side-list">
+			<ul class="menu menu-sm">
 				<li>
-					<a class="side-link" href="/families" data-active={page.url.pathname === '/families'}>
-						Families
+					<a href="/description" class:menu-active={page.url.pathname === '/description'}>
+						Description
 					</a>
 				</li>
-				<li>
-					<a class="side-link" href="/" data-active={page.url.pathname === '/'}>Theme</a>
-				</li>
-			</ul>
+				<li><a href="/" class:menu-active={page.url.pathname === '/'}>Theme</a></li>
 
-			{#each COMPONENTS as group (group.group)}
-				<p class="side-group">{group.group}</p>
-				<ul class="side-list">
+				{#each COMPONENTS as group (group.group)}
+					<li class="menu-title">{group.group}</li>
 					{#each group.items as item (item.id)}
 						<li>
 							<a
-								class="side-link"
 								href="/components/{item.id}"
-								data-active={page.url.pathname === `/components/${item.id}`}
+								class:menu-active={page.url.pathname === `/components/${item.id}`}
 							>
 								{item.label}
 							</a>
 						</li>
 					{/each}
-				</ul>
-			{/each}
+				{/each}
+			</ul>
 		</nav>
 	</aside>
 

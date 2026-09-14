@@ -1,0 +1,24 @@
+@use '../../_mixins' as m;
+
+/* daisy — navbar.
+   daisyUI ships .navbar as bare geometry and leaves you to paint it
+   with utilities. We have no utilities, so the family paints: the
+   raised chrome surface, no divider, and the ambient shadow every
+   other daisy object casts. */
+
+@mixin emit {
+	.navbar {
+		--navbar-bg: var(--color-surface-3);
+		--navbar-fg: var(--color-on-surface);
+		--navbar-border: #0000;
+		--navbar-border-width: 0;
+		--navbar-shadow: var(--shadow-light);
+		--navbar-h: calc(4em * var(--scale));
+		--navbar-px: calc(0.5em * var(--scale));
+		--navbar-py: calc(0.5em * var(--scale));
+		--navbar-gap: calc(0.5em * var(--scale));
+	}
+
+	/* size variants */
+	@include m.size-variants('navbar');
+}

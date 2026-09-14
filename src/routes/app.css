@@ -66,33 +66,9 @@ body {
 	padding: 0.5rem 0.5rem 2rem;
 }
 
-.side-group {
-	margin: 0.875rem 0 0.2rem;
-	padding-inline: 0.5rem;
-	color: color-mix(in oklch, var(--color-on-surface) 45%, #0000);
-	letter-spacing: 0.05em;
-	text-transform: uppercase;
-	font-size: 0.625rem;
-	font-weight: 600;
-}
-
-.side-list { list-style: none; margin: 0; padding: 0; }
-
-.side-link {
-	display: block;
-	padding: 0.3rem 0.5rem;
-	border-radius: var(--radius-field, 4px);
-	text-decoration: none;
-	font-size: 0.875rem;
-	color: var(--color-on-surface);
-	transition: background 0.15s;
-	cursor: pointer;
-}
-.side-link:hover { background-color: color-mix(in oklab, var(--color-on-surface) 8%, #0000); }
-.side-link[data-active='true'] {
-	background-color: color-mix(in oklab, var(--color-primary) 16%, #0000);
-	color: var(--color-primary);
-	font-weight: 600;
+/* The nav is a family .menu; the rail only tells it to fill the width. */
+.side-nav .menu {
+	width: 100%;
 }
 
 /* ── Theme editor: second column, against the sidebar ────────────────────── */
@@ -154,29 +130,22 @@ body {
 	opacity: 0.6;
 }
 
-/* A colour tile: the whole square is the <input type="color">. */
+/* A colour tile is a .swatch of the active family; the app only tells it how
+   to share the row. */
 .ct {
 	position: relative;
 	flex: 1;
 	aspect-ratio: 1;
 	min-width: 0;
-	display: grid;
-	place-items: center;
-	border-radius: 0.5rem;
-	border: 1px solid color-mix(in oklab, var(--color-on-surface) 12%, #0000);
+	width: auto;
+	height: auto;
+	font-weight: 700;
 	cursor: pointer;
 	overflow: hidden;
 }
 
 /* The derived-content tiles are samples, not controls. */
 .ct-derived { cursor: default; }
-
-.ct-glyph {
-	font-size: 0.85rem;
-	font-weight: 700;
-	line-height: 1;
-	pointer-events: none;
-}
 
 /* The native picker fills the tile and stays invisible. */
 .ct-input {
@@ -375,32 +344,9 @@ dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
 }
 .export-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
 
-/* ── Families page ───────────────────────────────────────────────────────── */
+/* ── Description page ───────────────────────────────────────────────────────── */
 
 .fam { max-width: 62rem; margin-inline: auto; gap: 0; }
-
-.fam-picker {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.35rem;
-	margin-bottom: 1.5rem;
-}
-
-.fam-chip {
-	font: inherit;
-	font-size: 0.75rem;
-	padding: 0.25rem 0.6rem;
-	border-radius: 999px;
-	border: 1px solid var(--color-border);
-	background: transparent;
-	color: inherit;
-	cursor: pointer;
-}
-.fam-chip[data-active='true'] {
-	background: var(--color-primary);
-	color: var(--color-on-primary);
-	border-color: transparent;
-}
 
 .fam-head { display: flex; align-items: baseline; gap: 0.75rem; }
 .fam-title { margin: 0; font-size: 2rem; letter-spacing: -0.02em; }

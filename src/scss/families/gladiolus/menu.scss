@@ -1,0 +1,77 @@
+@use '../../_mixins' as m;
+
+/* gladiolus — menu.
+   Carbon's UI Shell side-nav: square corners everywhere, links 2rem
+   tall with 1rem of inline padding, hover `#e5e5e5`, the selected
+   link on `#e0e0e0` in bold with a 3px interactive-blue rule down
+   its leading edge. The panel sits on `#f4f4f4` — our surface-2 —
+   and the category title is plain small text: Carbon does not shout
+   it in caps. */
+
+@mixin emit {
+	.menu {
+		--menu-bg: var(--color-surface-2);
+		--menu-fg: var(--color-on-surface);
+		--menu-border: #0000;
+		--menu-border-width: 0;
+		--menu-shadow: none;
+		--menu-p: 0px;
+		--menu-gap: 0px;
+
+		--menu-item-py: calc(0.4375em * var(--scale));
+		--menu-item-px: calc(1em * var(--scale));
+		--menu-item-gap: calc(1em * var(--scale));
+		--menu-item-radius: 0;
+		--menu-item-bg: #0000;
+		--menu-item-fg: inherit;
+		--menu-item-transition: background-color var(--gl-dur) var(--gl-ease), color var(--gl-dur) var(--gl-ease);
+
+		--menu-hover-bg: var(--color-surface-3);
+		--menu-hover-fg: var(--color-on-surface);
+		--menu-active-bg: var(--color-surface-3);
+		--menu-active-fg: var(--color-on-surface);
+		--menu-disabled-bg: #0000;
+		--menu-disabled-fg: color-mix(in oklab, var(--color-on-surface) 25%, #0000);
+		--menu-focus-outline: 2px solid var(--color-primary);
+		--menu-focus-offset: -2px;
+
+		--menu-title-py: calc(0.5em * var(--scale));
+		--menu-title-px: calc(1em * var(--scale));
+		--menu-title-fg: color-mix(in oklab, var(--color-on-surface) 65%, #0000);
+		--menu-title-size: 0.875em;
+		--menu-title-weight: 400;
+		--menu-title-transform: none;
+		--menu-title-tracking: normal;
+
+		--menu-divider: var(--color-border);
+		--menu-divider-size: 1px;
+		--menu-divider-gap: calc(0.5em * var(--scale));
+		--menu-divider-inset: 0px;
+
+		--menu-sub-indent: calc(2em * var(--scale));
+		--menu-sub-transition: var(--gl-dur) var(--gl-ease);
+
+		border-radius: 0;
+	}
+
+	/* The selected link carries Carbon's 3px interactive rule and goes bold. */
+	.menu .menu-active,
+	.menu li > :is(a, button, span).menu-active {
+		box-shadow: inset calc(0.1875em * var(--scale)) 0 0 0 var(--color-primary);
+		font-weight: 600;
+	}
+
+	.menu .menu-toggle::after {
+		width: calc(0.375em * var(--scale));
+		height: calc(0.375em * var(--scale));
+		box-shadow: 1px 1px inset;
+		rotate: 45deg;
+		transition: rotate var(--gl-dur) var(--gl-ease);
+	}
+	.menu li:has(> .menu-sub-closed) > .menu-toggle::after {
+		rotate: -135deg;
+	}
+
+	/* size variants */
+	@include m.size-variants('menu');
+}

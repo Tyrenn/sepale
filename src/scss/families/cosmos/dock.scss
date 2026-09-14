@@ -126,6 +126,8 @@
 	.dock {
 		background-color: var(--color-surface-1);
 		border: var(--border) solid var(--color-border);
+		/* A tall box drifts less than a button: same pen, fewer pixels. */
+		--cw: var(--cosmos-wobble-box, 0.2);
 		border-radius: var(--c6);
 	}
 

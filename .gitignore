@@ -13,6 +13,7 @@ node_modules
 /static/families
 /static/themes
 /src/lib/generated
+/src/generated
 
 # OS
 .DS_Store

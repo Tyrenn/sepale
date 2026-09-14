@@ -9,6 +9,7 @@
 @use 'chip';
 @use 'dock';
 @use 'fieldset';
+@use 'floating-label';
 @use 'file-input';
 @use 'input';
 @use 'join';
@@ -16,6 +17,7 @@
 @use 'link';
 @use 'list';
 @use 'loading';
+@use 'menu';
 @use 'navbar';
 @use 'progress';
 @use 'radial-progress';
@@ -23,7 +25,8 @@
 @use 'range';
 @use 'select';
 @use 'skeleton';
-@use 'tab';
+@use 'swatch';
+@use 'tabs';
 @use 'text';
 @use 'textarea';
 @use 'toggle';
@@ -119,13 +122,17 @@ $params: map.merge(
 
 	/* Neo-brutalism has ONE colour. neobrutalism.dev ships --main and two
 	   grounds: --background, a pale wash of main that the page sits on, and
-	   --secondary-background, which is plain white or plain near-black and is
-	   what every form control, card and bar is drawn on. So surface-1 is
-	   derived from the primary and is not a parameter, and the other two
-	   answer to the colour-scheme rather than to the theme. */
-	--color-surface-1: color-mix(in oklab, var(--color-primary) 28%, light-dark(#ffffff, #0d0d0d));
-	--color-surface-2: light-dark(#ffffff, #212121);
-	--color-surface-3: light-dark(#e7e7e7, #2f2f2f);
+	   --secondary-background, which is the plain sheet every form control,
+	   card and bar is drawn on. So surface-1 is derived from the primary and
+	   is not a parameter, and the other two are the sheet and its shade.
+
+	   The family is light only. A dark reading of it existed and was dropped:
+	   the look is black ink on bright paper, and inverting it turns the hard
+	   shadow into a halo and the yellow into a highlighter stain. Every theme
+	   here therefore sets `color-scheme: light`. */
+	--color-surface-1: color-mix(in oklab, var(--color-primary) 28%, #ffffff);
+	--color-surface-2: #ffffff;
+	--color-surface-3: #e7e7e7;
 }
 
 /* The shared mechanism: structure, states, intrinsic sizing, slots. */
@@ -146,6 +153,7 @@ $params: map.merge(
 @include chip.emit;
 @include dock.emit;
 @include fieldset.emit;
+@include floating-label.emit;
 @include file-input.emit;
 @include input.emit;
 @include join.emit;
@@ -153,6 +161,7 @@ $params: map.merge(
 @include link.emit;
 @include list.emit;
 @include loading.emit;
+@include menu.emit;
 @include navbar.emit;
 @include progress.emit;
 @include radial-progress.emit;
@@ -160,7 +169,8 @@ $params: map.merge(
 @include range.emit;
 @include select.emit;
 @include skeleton.emit;
-@include tab.emit;
+@include swatch.emit;
+@include tabs.emit;
 @include text.emit;
 @include textarea.emit;
 @include toggle.emit;

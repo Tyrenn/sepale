@@ -1,0 +1,78 @@
+@use '../../_mixins' as m;
+
+/* daisy — menu.
+   Ported from daisyUI's `.menu`: a block of navigation links, item
+   padding `.375rem / .75rem`, `--radius-field` corners, the active
+   item painted in the neutral colour. daisyUI leaves the block
+   transparent and expects a `bg-base-200` utility next to it — we
+   have no utilities, so the block paints surface-2 itself, which is
+   what daisyUI's own examples end up looking like. */
+
+@mixin emit {
+	.menu {
+		--menu-bg: var(--color-surface-2);
+		--menu-fg: var(--color-on-surface);
+		--menu-border: #0000;
+		--menu-border-width: 0;
+		--menu-shadow: none;
+		--menu-p: calc(0.5em * var(--scale));
+		--menu-gap: 0px;
+
+		--menu-item-py: calc(0.375em * var(--scale));
+		--menu-item-px: calc(0.75em * var(--scale));
+		--menu-item-gap: calc(0.5em * var(--scale));
+		--menu-item-radius: var(--radius-field);
+		--menu-item-bg: #0000;
+		--menu-item-fg: inherit;
+		--menu-item-transition: color 0.2s cubic-bezier(0, 0, 0.2, 1),
+			background-color 0.2s cubic-bezier(0, 0, 0.2, 1),
+			box-shadow 0.2s cubic-bezier(0, 0, 0.2, 1);
+
+		--menu-hover-bg: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+		--menu-hover-fg: var(--color-on-surface);
+		--menu-active-bg: var(--color-neutral);
+		--menu-active-fg: var(--color-on-neutral);
+		--menu-disabled-bg: #0000;
+		--menu-disabled-fg: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+		--menu-focus-outline: 2px solid currentColor;
+		--menu-focus-offset: 2px;
+
+		--menu-title-py: calc(0.5em * var(--scale));
+		--menu-title-px: calc(0.75em * var(--scale));
+		--menu-title-fg: color-mix(in oklab, var(--color-on-surface) 40%, #0000);
+		--menu-title-size: 1em;
+		--menu-title-weight: 600;
+		--menu-title-transform: none;
+		--menu-title-tracking: normal;
+
+		--menu-divider: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+		--menu-divider-size: 1px;
+		--menu-divider-gap: calc(0.5em * var(--scale));
+		--menu-divider-inset: calc(1em * var(--scale));
+
+		--menu-sub-indent: calc(1em * var(--scale));
+		--menu-sub-transition: 0.25s cubic-bezier(0, 0, 0.2, 1);
+
+		width: fit-content;
+	}
+
+	/* The chevron daisyUI draws: a small square with two inset edges, turned
+	   -135° when the sub-menu is closed and 45° when it is open. */
+	.menu .menu-toggle::after {
+		width: calc(0.375em * var(--scale));
+		height: calc(0.375em * var(--scale));
+		box-shadow: 2px 2px inset;
+		transform-origin: 50%;
+		pointer-events: none;
+		rotate: 45deg;
+		translate: 0 1px;
+		transition: rotate 0.2s, translate 0.2s;
+	}
+	.menu li:has(> .menu-sub-closed) > .menu-toggle::after {
+		rotate: -135deg;
+		translate: 0 -1px;
+	}
+
+	/* size variants */
+	@include m.size-variants('menu');
+}

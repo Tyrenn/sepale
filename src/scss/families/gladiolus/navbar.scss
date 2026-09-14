@@ -1,12 +1,23 @@
+@use '../../_mixins' as m;
+
 /* gladiolus — navbar.
-   Everything this family decides about the component: its look,
-   its states and its variants. base supplies the mechanism and
-   no values at all (ADR 0008). */
+   Carbon's UI shell header: a bar with square corners, no shadow,
+   and a single hairline of $border-subtle underneath. Carbon never
+   floats anything — the rule does the separating. */
 
 @mixin emit {
 	.navbar {
-		background-color: var(--color-surface-1);
-		border-color: var(--color-surface-3);
+		--navbar-bg: var(--color-surface-2);
+		--navbar-fg: var(--color-on-surface);
+		--navbar-border: var(--color-surface-3);
+		--navbar-border-width: var(--border);
+		--navbar-shadow: none;
+		--navbar-h: calc(3em * var(--scale));
+		--navbar-px: calc(1em * var(--scale));
+		--navbar-py: 0px;
+		--navbar-gap: calc(0.5em * var(--scale));
 	}
 
+	/* size variants */
+	@include m.size-variants('navbar');
 }

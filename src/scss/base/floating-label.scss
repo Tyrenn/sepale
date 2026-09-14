@@ -1,0 +1,37 @@
+/* ============================================================
+   floating-label.scss — .floating-label mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s the pieces it wants.
+
+   A container that WRAPS a field, unlike `.label`, which is inline
+   and lives inside one. Two roles, two components (ADR 0009).
+
+   base owns the stacking and the state plumbing; where the text
+   sits, how big it is and what it is painted on are the family's
+   (ADR 0008).
+
+   External variables (theme / family):
+	--color-surface-1   the span's ground, so it can hide the field border
+	--size-field        vertical centre of the floated text
+   ============================================================ */
+
+@mixin base {
+	.floating-label {
+		position: relative;
+		display: block;
+	}
+	.floating-label input {
+		display: block;
+	}
+	.floating-label > span {
+		position: absolute;
+		z-index: 1;
+		pointer-events: none;
+	}
+	.floating-label:focus-within > span,
+	.floating-label:not(:has(input:placeholder-shown, textarea:placeholder-shown)) > span {
+		pointer-events: auto;
+		z-index: 2;
+	}
+}

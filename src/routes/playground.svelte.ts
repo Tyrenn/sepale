@@ -9,52 +9,80 @@ export function categoryFor(family: string): string {
 	return familyCategory[family] ?? '';
 }
 
-/** Gallery order: every component previewed on the page, grouped. */
-export const COMPONENTS: { group: string; items: { id: string; label: string }[] }[] = [
+/**
+ * Which group a component page belongs to, and in what order. Editorial: no
+ * rule says a toggle is a form control and a chip is not.
+ *
+ * The LIST of pages is not written here. It is read from the doc files, so a
+ * page that exists is a page that appears — the way `fieldset` and `label`
+ * had stylesheets, components and no entry in the nav for months.
+ */
+const GROUPS: { group: string; ids: string[] }[] = [
 	{
 		group: 'Form',
-		items: [
-			{ id: 'button', label: 'Button' },
-			{ id: 'input', label: 'Input' },
-			{ id: 'select', label: 'Select' },
-			{ id: 'textarea', label: 'Textarea' },
-			{ id: 'checkbox', label: 'Checkbox' },
-			{ id: 'radio', label: 'Radio' },
-			{ id: 'toggle', label: 'Toggle' },
-			{ id: 'range', label: 'Range' },
-			{ id: 'file-input', label: 'File input' }
+		ids: [
+			'button',
+			'input',
+			'select',
+			'textarea',
+			'checkbox',
+			'radio',
+			'toggle',
+			'range',
+			'file-input',
+			'fieldset',
+			'label',
+			'floating-label'
 		]
 	},
 	{
 		group: 'Display',
-		items: [
-			{ id: 'chip', label: 'Chip' },
-			{ id: 'badge', label: 'Badge' },
-			{ id: 'tab', label: 'Tab' },
-			{ id: 'loading', label: 'Loading' },
-			{ id: 'progress', label: 'Progress' },
-			{ id: 'radial-progress', label: 'Radial progress' },
-			{ id: 'skeleton', label: 'Skeleton' },
-			{ id: 'list', label: 'List' },
-			{ id: 'text', label: 'Text' },
-			{ id: 'link', label: 'Link' }
+		ids: [
+			'chip',
+			'badge',
+			'tabs',
+			'loading',
+			'progress',
+			'radial-progress',
+			'skeleton',
+			'list',
+			'text',
+			'link',
+			'swatch'
 		]
 	},
-	{
-		group: 'Navigation',
-		items: [
-			{ id: 'breadcrumbs', label: 'Breadcrumbs' },
-			{ id: 'dock', label: 'Dock' }
-		]
-	},
-	{
-		group: 'Other',
-		items: [
-			{ id: 'join', label: 'Join' },
-			{ id: 'validator', label: 'Validator' }
-		]
-	}
+	{ group: 'Navigation', ids: ['breadcrumbs', 'menu', 'navbar', 'dock'] },
+	{ group: 'Other', ids: ['join', 'validator', 'rounded'] }
 ];
+
+/* Paths only — the modules themselves are never loaded here, or the nav would
+   import the pages that import the nav. */
+const pageIds = Object.keys(import.meta.glob('./components/docs/*.svelte')).map((path) =>
+	path.slice('./components/docs/'.length, -'.svelte'.length)
+);
+
+/** `file-input` → `File input`, for a page nobody has given a label. */
+function labelFor(id: string): string {
+	const words = id.replace(/-/g, ' ');
+	return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/** Gallery order: every component page there is, grouped. */
+export const COMPONENTS: { group: string; items: { id: string; label: string }[] }[] = (() => {
+	const placed = new Set(GROUPS.flatMap((g) => g.ids));
+	const groups = GROUPS.map((g) => ({
+		group: g.group,
+		items: g.ids.filter((id) => pageIds.includes(id)).map((id) => ({ id, label: labelFor(id) }))
+	}));
+	/* A page nobody grouped still gets a link: the nav follows the files, not
+	   the other way round. */
+	const loose = pageIds.filter((id) => !placed.has(id)).sort();
+	if (loose.length) {
+		const other = groups.find((g) => g.group === 'Other')!;
+		other.items.push(...loose.map((id) => ({ id, label: labelFor(id) })));
+	}
+	return groups.filter((g) => g.items.length);
+})();
 
 /** Themes available for a family (falls back to the first family's). */
 export function themesFor(family: string): ThemeData[] {

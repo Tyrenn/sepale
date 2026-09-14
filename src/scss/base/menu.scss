@@ -1,0 +1,190 @@
+@use '../_mixins' as m;
+
+/* ============================================================
+   menu.scss — .menu mixin library (navigation list)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   A menu is navigation: links, one active, optional section titles
+   and optional nested sub-menus. It owns its frame — unlike `dock`
+   and `navbar`, which are placement only. `list` holds rows of data;
+   `tabs` chooses which panel is visible; `menu` goes somewhere.
+
+   Markup: a <ul> of <li>. An item is either marked `.menu-item` or
+   simply the interactive child of an <li> — both are styled, so
+   plain markup works and the explicit class is there when the
+   structure is unusual.
+
+	<ul class="menu">
+	  <li class="menu-title">Form</li>
+	  <li><a class="menu-active" href="#">Button</a></li>
+	  <li>
+	    <button class="menu-toggle">Display</button>
+	    <ul class="menu-sub menu-sub-closed"> … </ul>
+	  </li>
+	  <li></li>                      <!-- empty item = separator -->
+	</ul>
+
+   The sub-menu is open by default: a family that ships it closed
+   without JS would make it unreachable. `.menu-sub-closed` collapses
+   it, `.menu-sub-open` says so explicitly; a script (or, later, the
+   Svelte wrapper) only swaps the class — the animation is here.
+
+   To turn the toggle's marker when the sub-menu opens, a family
+   writes the value on:
+	.menu li:has(> .menu-sub-closed) > .menu-toggle::after
+
+   Plumbing contract:
+	--menu-bg / --menu-fg / --menu-border / --menu-border-width
+	--menu-shadow
+	--menu-p              padding around the whole block
+	--menu-gap            space between items
+	--menu-item-py/-px    item padding
+	--menu-item-gap       space between an item's icon, label and badge
+	--menu-item-bg/-fg    item paint, idle
+	--menu-item-radius    item corner radius
+	--menu-item-transition
+	--menu-hover-bg/-fg   item paint on hover
+	--menu-active-bg/-fg  item paint when .menu-active
+	--menu-disabled-bg/-fg
+	--menu-focus-outline / --menu-focus-offset
+	--menu-title-*        section title paint, padding and type
+	--menu-divider        color of an empty <li>
+	--menu-divider-size / -gap / -inset
+	--menu-sub-indent     how far a sub-menu is pushed in
+	--menu-sub-transition the open/close timing
+	--fontsize            font size (set by size-variants classes)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   base — the block, its items, their states, section titles,
+   separators, and the collapsible sub-menu.
+   ------------------------------------------------------------ */
+
+@mixin base {
+	.menu {
+		display: flex;
+		flex-direction: column;
+		gap: var(--menu-gap);
+		padding: var(--menu-p);
+		background-color: var(--menu-bg);
+		color: var(--menu-fg);
+		border: var(--menu-border-width) solid var(--menu-border);
+		border-radius: var(--radius-box);
+		box-shadow: var(--menu-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		list-style: none;
+	}
+	.menu-horizontal {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	/* An <li> is layout only: it never paints, so an item can be a link, a
+	   button or a span without the row moving. */
+	.menu li {
+		display: flex;
+		flex-direction: column;
+		list-style: none;
+	}
+
+	/* The item. Three columns — leading icon, label, trailing badge — so an
+	   icon and a counter line up down the whole menu. */
+	.menu .menu-item,
+	.menu li > :is(a, button, span):not(.menu-title) {
+		position: relative;
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: max-content auto max-content;
+		align-items: center;
+		gap: var(--menu-item-gap);
+		width: 100%;
+		padding-block: var(--menu-item-py);
+		padding-inline: var(--menu-item-px);
+		border-radius: var(--menu-item-radius);
+		background-color: var(--menu-item-bg);
+		color: var(--menu-item-fg);
+		text-align: start;
+		text-decoration: none;
+		user-select: none;
+		transition: var(--menu-item-transition);
+	}
+	.menu li > :is(a, button) {
+		cursor: pointer;
+	}
+
+	@media (hover: hover) {
+		.menu li > :is(a, button):not(.menu-active, .menu-disabled, :disabled, [disabled]):hover {
+			background-color: var(--menu-hover-bg);
+			color: var(--menu-hover-fg);
+		}
+	}
+	.menu li > :is(a, button):focus-visible {
+		outline: var(--menu-focus-outline);
+		outline-offset: var(--menu-focus-offset);
+	}
+	/* The item selector is deliberately structural, which makes it specific;
+	   a state has to be written in the same shape or it loses the cascade. */
+	.menu .menu-active,
+	.menu li > :is(a, button, span).menu-active {
+		background-color: var(--menu-active-bg);
+		color: var(--menu-active-fg);
+	}
+	.menu .menu-disabled,
+	.menu li > :is(a, button, span):is(.menu-disabled, :disabled, [disabled]) {
+		pointer-events: none;
+		background-color: var(--menu-disabled-bg);
+		color: var(--menu-disabled-fg);
+	}
+
+	/* A section title. Not interactive, so it is not an item. */
+	.menu .menu-title {
+		padding-block: var(--menu-title-py);
+		padding-inline: var(--menu-title-px);
+		color: var(--menu-title-fg);
+		font-size: var(--menu-title-size);
+		font-weight: var(--menu-title-weight);
+		text-transform: var(--menu-title-transform);
+		letter-spacing: var(--menu-title-tracking);
+	}
+
+	/* An empty <li> is a separator — no class to remember, and it cannot be
+	   mistaken for an item because there is nothing to click. */
+	.menu li:empty {
+		height: var(--menu-divider-size);
+		margin-block: var(--menu-divider-gap);
+		margin-inline: var(--menu-divider-inset);
+		background-color: var(--menu-divider);
+	}
+
+	/* Sub-menu. The row count is animated on the <li>, so the <ul> needs no
+	   wrapper and no measured height: auto → 0fr collapses it. :has() lets the
+	   state class stay on the sub-menu it describes. */
+	.menu li:has(> .menu-sub) {
+		display: grid;
+		grid-template-rows: auto 1fr;
+		transition: grid-template-rows var(--menu-sub-transition);
+	}
+	.menu li:has(> .menu-sub-closed) {
+		grid-template-rows: auto 0fr;
+	}
+	.menu .menu-sub {
+		display: flex;
+		flex-direction: column;
+		gap: var(--menu-gap);
+		min-height: 0;
+		overflow: hidden;
+		margin-inline-start: var(--menu-sub-indent);
+		list-style: none;
+	}
+
+	/* The toggle carries whatever the author puts in it; the family draws the
+	   marker and turns it when the sub-menu is open. */
+	.menu .menu-toggle::after {
+		content: "";
+		justify-self: flex-end;
+	}
+}

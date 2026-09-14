@@ -49,7 +49,7 @@
 	/* variant ghost */
 	.file-input-ghost {
 		background-color: transparent;
-		transition: background-color 0.2s;
+		transition: background-color var(--gl-dur) var(--gl-ease);
 		box-shadow: none;
 		border-color: #0000;
 	}

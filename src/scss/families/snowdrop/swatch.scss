@@ -1,0 +1,57 @@
+@use '../../_mixins' as m;
+@use '../../_config' as c;
+
+/* snowdrop — swatch.
+   Geist's palette tiles: a 6px square, one hairline of the border
+   gray, and selection marked in black rather than in colour — the
+   accent stays reserved for actions. */
+
+@mixin emit {
+	.swatch {
+		--swatch-color: var(--color-surface-1);
+		--swatch-size: calc(2em * var(--scale));
+		--swatch-disabled-opacity: 0.4;
+		--swatch-focus-outline: 2px solid currentColor;
+		--swatch-focus-offset: 2px;
+
+		/* Same flip as --color-on-*: a light sample gets near-black, a dark one
+		   near-white, keeping a whisper of the sample's own hue. */
+		--swatch-on-color: oklch(
+			from var(--swatch-color) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h
+		);
+
+		/* Two crossed quarters make the checkerboard; the colour layer sits on
+		   top, so a semi-transparent sample lets it through. */
+		--swatch-checks: conic-gradient(
+			from 90deg,
+			var(--color-surface-3) 25%,
+			var(--color-surface-2) 0 50%,
+			var(--color-surface-3) 0 75%,
+			var(--color-surface-2) 0
+		);
+		background-size: auto, calc(0.5em * var(--scale)) calc(0.5em * var(--scale));
+		font-weight: 600;
+		--swatch-radius: var(--radius-field);
+		--swatch-border-width: 1px;
+		--swatch-border: var(--color-border);
+		--swatch-shadow: none;
+		--swatch-transition: box-shadow 0.15s, border-color 0.15s;
+	}
+
+	.swatch-active {
+		--swatch-shadow: 0 0 0 2px var(--color-surface-1), 0 0 0 4px var(--color-on-surface);
+	}
+
+	.swatch-circle {
+		--swatch-radius: 999px;
+	}
+
+	@each $color in c.$color-list {
+		.swatch-#{$color} {
+			--swatch-color: var(--color-#{$color});
+		}
+	}
+
+	/* size variants */
+	@include m.size-variants('swatch');
+}

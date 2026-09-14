@@ -1,29 +1,56 @@
-<script lang="ts">
-	import type { HTMLInputAttributes } from 'svelte/elements';
-	import type { Color, FieldSize } from '../types.js';
-	import { cx, mod } from '../internal/cx.js';
+<script module lang="ts">
+	/** What .input is made of, classified. Only this block differs between
+	    this file and the copy generated for each family — see
+	    scripts/gen-components.mjs. */
+	export const PREFIX = 'input';
 
-	interface Props extends Omit<HTMLInputAttributes, 'size'> {
-		color?: Color;
-		fieldSize?: FieldSize;
-		/** Style variant within the family. */
-		variant?: 'ghost';
-		value?: string | number;
-		class?: string;
-	}
+	export const AXES = {
+		color: ['primary', 'secondary', 'accent', 'neutral', 'info', 'success', 'warning', 'error'],
+		size: ['xs', 'sm', 'md', 'lg', 'xl'],
+		variant: ['ghost']
+	} as const;
 
-	let {
-		color,
-		fieldSize,
-		variant,
-		value = $bindable(''),
-		class: klass = '',
-		...rest
-	}: Props = $props();
-
-	let classes = $derived(
-		cx('input', mod('input', color), mod('input', fieldSize), mod('input', variant), klass)
-	);
+	export const FLAGS = [] as const;
+	export const PARTS = [] as const;
 </script>
 
-<input class={classes} bind:value {...rest} />
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
+
+	// `size` is ours — the HTML attribute of the same name is a character count
+	// our CSS overrides anyway.
+	interface Props extends AxisProps<typeof AXES>, Omit<HTMLInputAttributes, 'size' | 'color'> {
+		/**
+		 * Colour the field by its own validity and reveal `hint` once the
+		 * browser marks it invalid. The CSS drives this off `:user-invalid`,
+		 * so it only fires after the visitor has actually had a go.
+		 */
+		validator?: boolean;
+		/**
+		 * Shown under the field when it is invalid. It has to be the field's
+		 * next sibling for the CSS to reach it, which is the whole reason this
+		 * is a prop and not something you write yourself.
+		 */
+		hint?: Snippet;
+		class?: string;
+		value?: string | number;
+	}
+
+	// The axes are deliberately NOT destructured: they travel in `axes` and are
+	// resolved by name, so an axis a family drops changes nothing down here.
+	let {
+		validator = false,
+		hint,
+		value = $bindable(''),
+		class: klass = '',
+		...axes
+	}: Props = $props();
+
+	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let classes = $derived(cx(PREFIX, applied.classes, validator && 'validator', klass));
+</script>
+
+<input {...applied.rest} class={classes} bind:value />
+{#if hint}<p class="validator-hint">{@render hint()}</p>{/if}

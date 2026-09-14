@@ -1,12 +1,23 @@
+@use '../../_mixins' as m;
+
 /* dahlia — navbar.
-   Everything this family decides about the component: its look,
-   its states and its variants. base supplies the mechanism and
-   no values at all (ADR 0008). */
+   Radix keeps its chrome on a raised panel colour with a hairline
+   under it, and reserves shadow for things that actually float.
+   A bar pinned to the top does not float. */
 
 @mixin emit {
 	.navbar {
-		background-color: var(--color-surface-3);
-		border-color: var(--color-border);
+		--navbar-bg: var(--color-surface-3);
+		--navbar-fg: var(--color-on-surface);
+		--navbar-border: var(--color-border);
+		--navbar-border-width: 1px;
+		--navbar-shadow: none;
+		--navbar-h: calc(3.5em * var(--scale));
+		--navbar-px: calc(1em * var(--scale));
+		--navbar-py: calc(0.375em * var(--scale));
+		--navbar-gap: calc(0.5em * var(--scale));
 	}
 
+	/* size variants */
+	@include m.size-variants('navbar');
 }

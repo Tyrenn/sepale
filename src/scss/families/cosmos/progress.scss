@@ -66,6 +66,7 @@
 
 	.progress {
 		border: var(--border) solid var(--color-border);
+		--cw: var(--cosmos-wobble-selector, 0.7);
 		border-radius: var(--c5);
 		height: calc(1.1em * var(--scale));
 		background-color: var(--color-surface-1);

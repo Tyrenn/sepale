@@ -125,4 +125,11 @@
 		border: none;
 	}
 
+	/* .cds--slider__thumb: the knob is the ink until you touch it, then it
+	   is the interactive blue. The rail never changes colour. */
+	.range:hover,
+	.range:focus-visible {
+		--range-thumb: var(--color-primary);
+	}
+
 }

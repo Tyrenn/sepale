@@ -1,0 +1,69 @@
+@use '../../_mixins' as m;
+
+/* aster — menu.
+   Ant Design's Menu, light mode: rows 40px tall, 16px inline
+   padding, 8px corners with a small gutter, the selected row painted
+   in `controlItemBgActive` — the primary colour at 10% — with
+   primary text, hover a 6% wash of the text colour. The container is
+   the page, not a card: no border, no shadow. Group titles are 45%
+   of the text colour. */
+
+@mixin emit {
+	.menu {
+		--menu-bg: var(--color-surface-1);
+		--menu-fg: var(--color-on-surface);
+		--menu-border: #0000;
+		--menu-border-width: 0;
+		--menu-shadow: none;
+		--menu-p: calc(0.25em * var(--scale));
+		--menu-gap: calc(0.25em * var(--scale));
+
+		--menu-item-py: calc(0.5em * var(--scale));
+		--menu-item-px: calc(1em * var(--scale));
+		--menu-item-gap: calc(0.625em * var(--scale));
+		--menu-item-radius: var(--radius-field);
+		--menu-item-bg: #0000;
+		--menu-item-fg: inherit;
+		--menu-item-transition: background-color 0.2s, color 0.2s;
+
+		--menu-hover-bg: color-mix(in oklab, var(--color-on-surface) 6%, #0000);
+		--menu-hover-fg: var(--color-on-surface);
+		--menu-active-bg: color-mix(in oklab, var(--color-primary) 10%, #0000);
+		--menu-active-fg: var(--color-primary);
+		--menu-disabled-bg: #0000;
+		--menu-disabled-fg: color-mix(in oklab, var(--color-on-surface) 25%, #0000);
+		--menu-focus-outline: 2px solid var(--color-primary);
+		--menu-focus-offset: 1px;
+
+		--menu-title-py: calc(0.5em * var(--scale));
+		--menu-title-px: calc(1em * var(--scale));
+		--menu-title-fg: color-mix(in oklab, var(--color-on-surface) 45%, #0000);
+		--menu-title-size: 0.875em;
+		--menu-title-weight: 400;
+		--menu-title-transform: none;
+		--menu-title-tracking: normal;
+
+		--menu-divider: var(--color-border);
+		--menu-divider-size: 1px;
+		--menu-divider-gap: calc(0.25em * var(--scale));
+		--menu-divider-inset: 0px;
+
+		--menu-sub-indent: calc(1.5em * var(--scale));
+		--menu-sub-transition: 0.2s ease;
+	}
+
+	/* Ant's submenu arrow: a thin chevron, pointing down when open. */
+	.menu .menu-toggle::after {
+		width: calc(0.375em * var(--scale));
+		height: calc(0.375em * var(--scale));
+		box-shadow: 1.5px 1.5px inset;
+		rotate: 45deg;
+		transition: rotate 0.2s;
+	}
+	.menu li:has(> .menu-sub-closed) > .menu-toggle::after {
+		rotate: -135deg;
+	}
+
+	/* size variants */
+	@include m.size-variants('menu');
+}

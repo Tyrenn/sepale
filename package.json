@@ -3,7 +3,8 @@
 	"version": "0.0.1",
 	"scripts": {
 		"gen:registry": "node scripts/gen-registry.mjs",
-		"build:css": "node scripts/build-css.mjs && npm run gen:registry",
+		"gen:components": "node scripts/gen-components.mjs",
+		"build:css": "node scripts/build-css.mjs && npm run gen:registry && npm run gen:components",
 		"dev": "npm run build:css && vite dev",
 		"build": "npm run build:css && vite build && npm run prepack",
 		"preview": "vite preview",

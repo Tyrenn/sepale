@@ -9,6 +9,7 @@
 @use 'chip';
 @use 'dock';
 @use 'fieldset';
+@use 'floating-label';
 @use 'file-input';
 @use 'input';
 @use 'join';
@@ -16,6 +17,7 @@
 @use 'link';
 @use 'list';
 @use 'loading';
+@use 'menu';
 @use 'navbar';
 @use 'progress';
 @use 'radial-progress';
@@ -23,7 +25,8 @@
 @use 'range';
 @use 'select';
 @use 'skeleton';
-@use 'tab';
+@use 'swatch';
+@use 'tabs';
 @use 'text';
 @use 'textarea';
 @use 'toggle';
@@ -42,7 +45,12 @@
    puts its label on the LEFT and leaves a gutter on the right —
    Carbon's most recognisable move, and the reason its buttons
    never look like anyone else's. Focus is a hard inset ring,
-   not a glow.
+   not a glow. Type is IBM Plex Sans, tracked a hair open, and it
+   does as much of the work as the geometry does. Motion is short
+   and mechanical: 70–110ms on Carbon's own productive curves,
+   never a bounce. Tags are the ONE thing that is round, and they
+   are tinted rather than filled, which is what keeps a Carbon
+   page calm while it is still colour-coded.
 
    Changes made to fit our contract:
      - Carbon's button is 48px tall with a 64px right gutter, both
@@ -52,6 +60,16 @@
      - Carbon's palette is a 100-step grey ramp (`gray-10`,
        `gray-90`…). We expose the four grounds its themes actually
        switch between, and let the rest derive.
+     - Carbon IS IBM Plex Sans; most of what people recognise as
+       "Carbon" is the face. We ship no fonts, so gladiolus names
+       the stack and falls back to the system sans. Install Plex,
+       or link it, and the family arrives.
+     - Carbon's tag colours are a hand-picked pair per hue
+       (`$tag-background-blue` / `$tag-color-blue`). We only have
+       one colour per name, so the pair is mixed from it — 22%
+       toward the ground for the fill, 75% toward it for the text.
+       That reads the same and survives a theme we have never
+       seen.
      - Carbon has a `tertiary` button — a transparent frame that
        fills on hover — which none of our shared variants covers.
        gladiolus adds `.btn-tertiary` as its own class. It exists
@@ -79,6 +97,11 @@ $params: map.merge(
 		'color-error': #da1e28
 	)),
 	(
+		'default-font-family': (
+			label: 'Typeface', group: 'Typography', type: text,
+			default: ('IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif),
+			help: 'Carbon is IBM Plex Sans. We ship no fonts — install or link Plex and the family arrives; without it this degrades to the system sans and the look goes generic.'
+		),
 		'radius-field': (
 			label: 'Field radius', group: 'Shape', type: length,
 			default: 0rem, min: 0, max: 1, step: 0.025, unit: rem, units: (px rem em),
@@ -123,10 +146,41 @@ $params: map.merge(
 :root {
 	--depth: 0;
 	--light-intensity: 0;
+	--root-bg: var(--color-surface-1);
+
+	/* Carbon's productive motion, the only motion it has: two short
+	   durations and three curves. Nothing here eases out slowly and
+	   nothing overshoots — a Carbon control snaps. */
+	--gl-fast: 70ms;                              /* duration-fast-01 */
+	--gl-dur: 110ms;                              /* duration-fast-02 */
+	--gl-ease: cubic-bezier(0.2, 0, 0.38, 0.9); /* productive standard */
+	--gl-ease-in: cubic-bezier(0, 0, 0.38, 0.9);  /* productive entrance */
+	--gl-ease-out: cubic-bezier(0.2, 0, 1, 0.9);  /* productive exit */
+
+	/* Carbon tracks its small type open: 0.16px at 14px, 0.32px at 12px.
+	   Written in em it holds that ratio at every size we have, which is
+	   closer to the intent than one absolute number would be. */
+	letter-spacing: 0.011em;
 }
 
 /* The shared mechanism: structure, states, intrinsic sizing, slots. */
 @include base.components;
+
+/* Family-wide: the focus ring. Carbon draws ONE focus indicator —
+   2px of the interactive blue — and the only thing that changes is
+   which side of the edge it sits on. A frame takes it inside, so the
+   control does not grow; a small drawn selector takes it outside,
+   because inside there is nothing left to draw on. */
+:is(.checkbox, .radio, .toggle, .range, .chip, .swatch, .link, .tabs-item):focus-visible,
+.menu li > :is(a, button, span):focus-visible {
+	outline: var(--gladiolus-focus, 2px) solid var(--color-primary);
+	outline-offset: 1px;
+}
+
+.menu li > :is(a, button, span):focus-visible,
+.tabs-item:focus-visible {
+	outline-offset: calc(var(--gladiolus-focus, 2px) * -1);
+}
 
 /* What gladiolus decides, one file per component. */
 
@@ -137,6 +191,7 @@ $params: map.merge(
 @include chip.emit;
 @include dock.emit;
 @include fieldset.emit;
+@include floating-label.emit;
 @include file-input.emit;
 @include input.emit;
 @include join.emit;
@@ -144,6 +199,7 @@ $params: map.merge(
 @include link.emit;
 @include list.emit;
 @include loading.emit;
+@include menu.emit;
 @include navbar.emit;
 @include progress.emit;
 @include radial-progress.emit;
@@ -151,7 +207,8 @@ $params: map.merge(
 @include range.emit;
 @include select.emit;
 @include skeleton.emit;
-@include tab.emit;
+@include swatch.emit;
+@include tabs.emit;
 @include text.emit;
 @include textarea.emit;
 @include toggle.emit;

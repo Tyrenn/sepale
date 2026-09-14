@@ -71,12 +71,10 @@
 						<div class="pal-tiles">
 							<ColorField {token} />
 							<span
-								class="ct ct-derived"
-								style="background:var(--{token.name}); color:var(--color-on-surface);"
+								class="swatch ct ct-derived"
+								style="--swatch-color:var(--{token.name}); --swatch-on-color:var(--color-on-surface);"
 								title="--color-on-surface — derived from the surface colour"
-							>
-								<span class="ct-glyph">A</span>
-							</span>
+							>A</span>
 						</div>
 						<span class="pal-label">{shortName(token.name)}</span>
 					</div>
@@ -97,12 +95,10 @@
 						<div class="pal-tiles">
 							<ColorField {token} />
 							<span
-								class="ct ct-derived"
-								style="background:var(--{token.name}); color:var(--color-on-{key});"
+								class="swatch ct ct-derived"
+								style="--swatch-color:var(--{token.name}); --swatch-on-color:var(--color-on-{key});"
 								title="--color-on-{key} — derived from --{token.name}"
-							>
-								<span class="ct-glyph">A</span>
-							</span>
+							>A</span>
 						</div>
 						<span class="pal-label">{key}</span>
 					</div>
