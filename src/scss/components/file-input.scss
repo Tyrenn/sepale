@@ -1,0 +1,66 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   file-input.scss — .file-input, whole.
+
+   The one component that belongs to two sections, and honestly so:
+   its frame is a field and the thing you press inside it is a
+   button. So it takes `m.field-frame` like `.input` does, and its
+   `::file-selector-button` paints from the Actions variables — the
+   same `--action-bg`, `--action-border-*` and weight every other
+   button in the kit uses.
+
+   That is not a special case to be tidied away later. A section is
+   an editorial grouping of controls (CONTEXT.md), not a partition
+   of the CSS, and a component is free to read from two of them.
+   ============================================================ */
+
+@include m.field-frame('file-input', '.file-input');
+
+.file-input {
+	cursor: pointer;
+	display: inline-flex;
+	appearance: none;
+	align-items: center;
+	vertical-align: middle;
+	user-select: none;
+	height: var(--_fld-height);
+	padding-inline-end: var(--_fld-padding-x);
+	width: clamp(3rem, 20rem, 100%);
+	line-height: 2;
+}
+
+/* The button. It sits flush inside the frame, which is why every offset
+   below is negated against the field's own border width. */
+.file-input::file-selector-button {
+	cursor: pointer;
+	user-select: none;
+	color: var(--action-fg);
+	background-color: var(--action-bg);
+	border-width: var(--action-variant-border-width);
+	border-style: var(--action-border-style);
+	border-color: var(--action-border-color);
+	font-weight: var(--action-font-weight);
+	font-size: var(--file-input-button-size);
+	margin-inline-end: var(--file-input-button-gap);
+	padding-inline: var(--file-input-button-padding-x);
+	height: calc(100% + var(--action-variant-border-width) * 2);
+	margin-block: calc(var(--action-variant-border-width) * -1);
+	margin-inline-start: calc(var(--action-variant-border-width) * -1);
+	border-start-start-radius: var(--_fld-corners);
+	border-end-start-radius: var(--_fld-corners);
+	border-start-end-radius: 0;
+	border-end-end-radius: 0;
+}
+
+.file-input:has(> input[disabled])::file-selector-button,
+.file-input:is(:disabled, [disabled])::file-selector-button {
+	color: color-mix(in oklch, var(--color-on-surface) var(--_fld-disabled-fg-mix), #0000);
+	background-color: color-mix(in oklch, var(--color-on-surface) var(--_fld-disabled-mix), var(--color-surface-1));
+	border-color: #0000;
+	cursor: not-allowed;
+}
+
+/* ── Axis: size ─────────────────────────────────────────────────── */
+@include m.size-variants('file-input', c.$sizes-field);

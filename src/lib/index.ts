@@ -1,11 +1,9 @@
 // u.u — the Svelte layer.
 //
-// Every component emits the class names of whatever family stylesheet is
-// loaded; bring `families/<name>.css` and a theme alongside. A component
-// declares its own vocabulary in an AXES block, and the build writes a copy
-// per family with that block filtered down to the classes the family actually
-// ships — so an exported component cannot offer a variant its stylesheet has
-// never heard of.
+// Every component emits class names; bring `kit.css` and a theme alongside.
+// A component declares its own vocabulary in an AXES block, and the build
+// fails if the stylesheet ships a class no component accounts for — so the
+// two cannot drift apart (ADR 0010).
 //
 // `text`, `link` and `validator` have no component here on purpose: they are
 // one class on one element, with no axis and no structure, and a wrapper would
@@ -53,15 +51,7 @@ export { default as Join } from './components/Join.svelte';
 
 export { type Axis, type AxisProps, type Values } from './internal/variants.js';
 
-// Registry of style families + their themes, auto-generated from src/scss.
-export { families, themesByFamily, type ThemeData } from './generated/registry.js';
-export {
-	defaultTheme,
-	familyCategory,
-	cloneTheme,
-	serializeTheme,
-	tokensToInlineStyle,
-	tokensForFamily,
-	type ThemeToken,
-	type TokenType
-} from './theme.js';
+// What the kit ships, classified: which classes exist and which axis, flag or
+// part each one is. Written by scripts/gen-classes.mjs from static/kit.css and
+// the components' own AXES blocks.
+export { classes, axes, flags, type ClassInfo } from './generated/classes.js';

@@ -1,0 +1,160 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   range.scss — .range, whole.
+
+   Section: Selectors. This is the component that was expected to
+   need a structural variant, and it does not.
+
+   The two geometries the families had look like different objects:
+   daisyUI fills the track with a bar AS TALL AS THE THUMB, sitting
+   proud of a thinner rail; everyone else fills a rail the thumb
+   merely rides. There is no property that switches between them —
+   the trail is the 100cqw box-shadow the thumb casts, and WebKit
+   gives that shadow the thumb's own height whether you want it or
+   not. What cuts it down is a clip-path.
+
+   So the difference is the HEIGHT OF THE BAND that clip cuts:
+   set `--range-trail-height` to the rail and the trail is thin;
+   set it to the thumb's own size and the band covers the thumb, the
+   clip stops cutting, and the fat bar is back. One length. No
+   variant, no branch, and the same rule runs either way.
+
+   The trail is a shadow rather than a gradient because a gradient
+   cannot know where the thumb is without JavaScript. `cqw` units
+   make it relative to the control, so the offset is exact at any
+   width — which is why `.range` establishes a container.
+   ============================================================ */
+
+.range {
+	@include m.selector-slots('range');
+
+	container-type: inline-size;
+	appearance: none;
+	-webkit-appearance: none;
+	cursor: pointer;
+	overflow: hidden;
+	vertical-align: middle;
+	background-color: transparent;
+	border: none;
+	width: clamp(3rem, 20rem, 100%);
+	height: var(--range-thumb-size);
+	font-size: var(--fontsize, var(--base, var(--default-base)));
+	color: var(--range-progress);
+}
+
+[dir='rtl'] .range {
+	--range-dir: -1;
+}
+
+.range:focus {
+	outline: none;
+}
+
+.range:focus-visible {
+	outline: var(--_sel-focus-width) var(--focus-style) var(--_sel-focus-color);
+	outline-offset: var(--_sel-focus-offset);
+}
+
+.range:disabled,
+.range[disabled] {
+	cursor: not-allowed;
+	opacity: var(--_sel-disabled-opacity);
+}
+
+/* ── The rail ───────────────────────────────────────────────────── */
+
+.range::-webkit-slider-runnable-track {
+	width: 100%;
+	height: var(--range-rail);
+	background-color: var(--range-track-bg);
+	border-width: var(--range-track-border-width);
+	border-style: solid;
+	border-color: var(--range-track-border-color);
+	border-radius: var(--range-track-corners);
+}
+
+.range::-moz-range-track {
+	width: 100%;
+	height: var(--range-rail);
+	background-color: var(--range-track-bg);
+	border-width: var(--range-track-border-width);
+	border-style: solid;
+	border-color: var(--range-track-border-color);
+	border-radius: var(--range-track-corners);
+}
+
+@media (forced-colors: active) {
+	.range::-webkit-slider-runnable-track,
+	.range::-moz-range-track {
+		border: 1px solid;
+	}
+}
+
+/* ── The thumb, and the trail it casts ──────────────────────────
+   The last shadow in the list is the trail: one hundred container
+   widths of colour, pushed off to the left so only the part before the
+   thumb shows. `--range-fill: 0` turns it off by giving it no spread. */
+
+.range::-webkit-slider-thumb {
+	@include m.railed-fill;
+	position: relative;
+	box-sizing: border-box;
+	appearance: none;
+	-webkit-appearance: none;
+	top: 50%;
+	transform: translateY(-50%);
+	height: var(--range-thumb-size);
+	width: var(--range-thumb-size);
+	color: var(--range-progress);
+	background-color: var(--range-thumb-bg);
+	border: var(--range-thumb-border-width) solid var(--range-thumb-border-color);
+	border-radius: var(--range-thumb-corners);
+	box-shadow:
+		0 -1px oklch(0% 0 0 / calc(var(--_sel-depth) * 0.1)) inset,
+		0 8px 0 -4px oklch(100% 0 0 / calc(var(--_sel-depth) * 0.1)) inset,
+		0 1px color-mix(in oklab, currentColor calc(var(--_sel-depth) * 10%), #0000),
+		0 0 0 2rem var(--range-thumb-bg) inset,
+		var(--range-thumb-shadow),
+		calc(
+				(var(--range-dir, 1) * -100cqw) -
+					(var(--range-dir, 1) * (var(--range-thumb-size) + var(--range-halo)))
+			)
+			0 0 calc(100cqw * var(--range-fill));
+}
+
+.range::-moz-range-thumb {
+	@include m.railed-fill;
+	position: relative;
+	box-sizing: border-box;
+	top: 50%;
+	height: var(--range-thumb-size);
+	width: var(--range-thumb-size);
+	color: var(--range-progress);
+	background-color: var(--range-thumb-bg);
+	border: var(--range-thumb-border-width) solid var(--range-thumb-border-color);
+	border-radius: var(--range-thumb-corners);
+	box-shadow:
+		0 -1px oklch(0% 0 0 / calc(var(--_sel-depth) * 0.1)) inset,
+		0 8px 0 -4px oklch(100% 0 0 / calc(var(--_sel-depth) * 0.1)) inset,
+		0 1px color-mix(in oklab, currentColor calc(var(--_sel-depth) * 10%), #0000),
+		0 0 0 2rem var(--range-thumb-bg) inset,
+		var(--range-thumb-shadow),
+		calc(
+				(var(--range-dir, 1) * -100cqw) -
+					(var(--range-dir, 1) * (var(--range-thumb-size) + var(--range-halo)))
+			)
+			0 0 calc(100cqw * var(--range-fill));
+}
+
+/* ── Axis: colour ───────────────────────────────────────────────── */
+@each $color in c.$color-list {
+	.range-#{$color} {
+		--range-progress: var(--color-#{$color});
+		--range-thumb-bg: var(--color-on-#{$color});
+	}
+}
+
+/* ── Axis: size ─────────────────────────────────────────────────── */
+@include m.size-variants('range', c.$sizes-field);

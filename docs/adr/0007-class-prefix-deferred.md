@@ -4,8 +4,7 @@ status: proposed
 
 # A class prefix is a bundle-time rename, deferred
 
-Class names are unprefixed (`btn`, `btn-primary`) and identical across
-families. A configurable prefix is wanted eventually; when it lands it will be
+Class names are unprefixed (`btn`, `btn-primary`). A configurable prefix is wanted eventually; when it lands it will be
 a **rename applied while the bundle is assembled** — a substitution over the
 compiled CSS and over the `class=` attributes of the Svelte wrappers — not a
 Sass-level concern.

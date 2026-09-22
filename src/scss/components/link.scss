@@ -1,0 +1,65 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   link.scss — .link, whole.
+
+   Section: Text.
+
+   A link. Text-natured, so no frame and no `--scale`. What a look
+   decides is whether the underline is always there, only on hover,
+   or never — and `.link-hover` is the variant for the second.
+
+   `badge` is this section's `join`: it has no values at all. It
+   positions a `.chip` against whatever it wraps and paints nothing,
+   so it has no controls either.
+   ============================================================ */
+
+/* ── Structure ────────────────────────────────── */
+
+
+.link {
+	cursor: pointer;
+}
+
+/* ── Paint ────────────────────────────────────── */
+
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.link {
+	text-decoration: var(--link-decoration);
+	text-decoration-thickness: var(--link-underline-width);
+	text-underline-offset: var(--link-underline-offset);
+	font-weight: var(--link-weight);
+}
+.link:focus {
+	outline: none;
+}
+.link:focus-visible {
+	outline: var(--link-focus-width) var(--focus-style) var(--link-focus-color);
+	outline-offset: var(--link-focus-offset);
+}
+.link-hover {
+	text-decoration: none;
+}
+.link-hover:hover {
+	text-decoration: var(--link-hover-decoration);
+}
+
+/* color variants */
+@each $color in c.$color-list {
+	.link-#{$color} { color: var(--color-#{$color}); }
+}
+
+@media (hover: hover) {
+	@each $color in c.$color-list {
+		.link-#{$color}:hover {
+			color: color-mix(
+				in oklab,
+				var(--color-#{$color}),
+				var(--link-hover-mix-color) var(--link-hover-mix)
+			);
+		}
+	}
+}

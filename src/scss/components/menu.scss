@@ -1,0 +1,209 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   menu.scss — .menu, whole.
+
+   Section: Containers.
+
+   A column of links or actions, with groups, dividers and
+   sub-menus. The component with the most slots in the kit — forty
+   of them — which is exactly why it migrated without argument:
+   every family was already filling slots rather than writing rules.
+
+   Two looks add a rule of their own on top, and both are real:
+   neo-brutalism draws a line just inside a row rather than around
+   it, and the hand-drawn look gives every other row the opposite
+   tilt. They are `--menu-item-line` and `--menu-item-rotate`.
+   ============================================================ */
+
+/* ── Structure ────────────────────────────────────── */
+
+
+.menu {
+	display: flex;
+	flex-direction: column;
+	gap: var(--menu-gap);
+	padding: var(--menu-p);
+	background-color: var(--menu-bg);
+	color: var(--menu-fg);
+	border: var(--menu-border-width) solid var(--menu-border);
+	border-radius: var(--container-corners);
+	box-shadow: var(--menu-shadow);
+	font-size: var(--fontsize, var(--base, var(--default-base)));
+	list-style: none;
+}
+.menu-horizontal {
+	flex-direction: row;
+	align-items: center;
+}
+
+/* An <li> is layout only: it never paints, so an item can be a link, a
+   button or a span without the row moving. */
+.menu li {
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+}
+
+/* The item. Three columns — leading icon, label, trailing badge — so an
+   icon and a counter line up down the whole menu. */
+.menu .menu-item,
+.menu li > :is(a, button, span):not(.menu-title) {
+	position: relative;
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: max-content auto max-content;
+	align-items: center;
+	gap: var(--menu-item-gap);
+	width: 100%;
+	padding-block: var(--menu-item-py);
+	padding-inline: var(--menu-item-px);
+	border-radius: var(--menu-item-radius);
+	background-color: var(--menu-item-bg);
+	color: var(--menu-item-fg);
+	text-align: start;
+	text-decoration: none;
+	user-select: none;
+	transition: var(--menu-item-transition);
+}
+.menu li > :is(a, button) {
+	cursor: pointer;
+}
+
+@media (hover: hover) {
+	.menu li > :is(a, button):not(.menu-active, .menu-disabled, :disabled, [disabled]):hover {
+		background-color: var(--menu-hover-bg);
+		color: var(--menu-hover-fg);
+	}
+}
+.menu li > :is(a, button):focus-visible {
+	outline: var(--menu-focus-outline);
+	outline-offset: var(--menu-focus-offset);
+}
+/* The item selector is deliberately structural, which makes it specific;
+   a state has to be written in the same shape or it loses the cascade. */
+.menu .menu-active,
+.menu li > :is(a, button, span).menu-active {
+	background-color: var(--menu-active-bg);
+	color: var(--menu-active-fg);
+}
+.menu .menu-disabled,
+.menu li > :is(a, button, span):is(.menu-disabled, :disabled, [disabled]) {
+	pointer-events: none;
+	background-color: var(--menu-disabled-bg);
+	color: var(--menu-disabled-fg);
+}
+
+/* A section title. Not interactive, so it is not an item. */
+.menu .menu-title {
+	padding-block: var(--menu-title-py);
+	padding-inline: var(--menu-title-px);
+	color: var(--menu-title-fg);
+	font-size: var(--menu-title-size);
+	font-weight: var(--menu-title-weight);
+	text-transform: var(--menu-title-transform);
+	letter-spacing: var(--menu-title-tracking);
+}
+
+/* An empty <li> is a separator — no class to remember, and it cannot be
+   mistaken for an item because there is nothing to click. */
+.menu li:empty {
+	height: var(--menu-divider-size);
+	margin-block: var(--menu-divider-gap);
+	margin-inline: var(--menu-divider-inset);
+	background-color: var(--menu-divider);
+}
+
+/* Sub-menu. The row count is animated on the <li>, so the <ul> needs no
+   wrapper and no measured height: auto → 0fr collapses it. :has() lets the
+   state class stay on the sub-menu it describes. */
+.menu li:has(> .menu-sub) {
+	display: grid;
+	grid-template-rows: auto 1fr;
+	transition: grid-template-rows var(--menu-sub-transition);
+}
+.menu li:has(> .menu-sub-closed) {
+	grid-template-rows: auto 0fr;
+}
+.menu .menu-sub {
+	display: flex;
+	flex-direction: column;
+	gap: var(--menu-gap);
+	min-height: 0;
+	overflow: hidden;
+	margin-inline-start: var(--menu-sub-indent);
+	list-style: none;
+}
+
+/* The toggle carries whatever the author puts in it; the family draws the
+   marker and turns it when the sub-menu is open. */
+.menu .menu-toggle::after {
+	content: "";
+	justify-self: flex-end;
+}
+
+/* ── Paint ────────────────────────────────────────── */
+
+
+/* Its values live in _defaults.scss with the rest of the section: they
+   were a theme’s worth of declarations sitting in a family file. */
+.menu {
+	width: fit-content;
+}
+
+/* The chevron daisyUI draws: a small square with two inset edges, turned
+   -135° when the sub-menu is closed and 45° when it is open. */
+.menu .menu-toggle::after {
+	width: calc(0.375em * var(--scale));
+	height: calc(0.375em * var(--scale));
+	box-shadow: 2px 2px inset;
+	transform-origin: 50%;
+	pointer-events: none;
+	rotate: 45deg;
+	translate: 0 1px;
+	transition: rotate 0.2s, translate 0.2s;
+}
+.menu li:has(> .menu-sub-closed) > .menu-toggle::after {
+	rotate: -135deg;
+	translate: 0 -1px;
+}
+
+/* size variants */
+@include m.size-variants('menu', c.$sizes-field);
+
+/* ── What two looks add on top ──────────────────────────────────
+   Neo-brutalism draws a row's line just INSIDE it rather than around it,
+   because `outline` is already the focus ring here and a second one would
+   fight it. An inset box-shadow puts the same line in the same place and
+   leaves focus visible on top of it.
+
+   The hand-drawn look gives every other row the opposite tilt, so a column
+   of them reads as written rather than printed. Both are off at 0. */
+
+.menu .menu-item,
+.menu li > :is(a, button, span):not(.menu-title) {
+	box-shadow: inset 0 0 0 var(--container-border-width) var(--menu-item-line);
+	rotate: var(--menu-item-rotate);
+	font-weight: var(--menu-item-weight);
+}
+
+.menu li:nth-child(2n) > :is(a, button, span):not(.menu-title) {
+	rotate: var(--menu-item-rotate-alt);
+}
+
+@media (hover: hover) {
+	.menu li > :is(a, button):not(.menu-disabled, :disabled, [disabled]):hover {
+		--menu-item-line: var(--menu-item-hover-line);
+	}
+}
+
+.menu .menu-active,
+.menu li > :is(a, button, span).menu-active {
+	--menu-item-line: var(--menu-item-active-line);
+	font-weight: var(--menu-item-active-weight);
+}
+
+.menu {
+	rotate: var(--menu-rest-rotate);
+}

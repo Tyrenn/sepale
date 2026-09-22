@@ -2,9 +2,10 @@
 	/**
 	 * The hand-written half of this page: what the component is, what each
 	 * of its classes does, and what its props mean. WHICH classes exist is
-	 * not written here — that is read back from the active family's compiled
-	 * CSS (src/lib/generated/components.ts), so a page cannot claim a class
-	 * the family does not ship.
+	 * not written here — that is read back from the compiled kit
+	 * (src/lib/generated/classes.ts), so a page cannot claim a class the
+	 * stylesheet does not have, and the build fails on a class no page
+	 * describes.
 	 *
 	 * `namespaces` is the one piece of structure: it says which classes
 	 * belong here. Nothing else can know that `.title` is part of `text`.
@@ -21,7 +22,7 @@
 				{
 					name: "sample",
 					type: "string",
-					description: "The colour to show. It is DATA, not a theme value, so it is written here at the call site and never by the family."
+					description: "The colour to show. It is DATA, not a theme value, so it is written here at the call site and never by a theme."
 				},
 				{
 					name: "active",
@@ -100,7 +101,7 @@
 
 	<Section
 		title="Semantic colours"
-		subtitle="The family declares one class per colour it names, so a swatch can point at the theme instead of a literal."
+		subtitle="The kit declares one class per colour the theme names, so a swatch can point at the theme instead of a literal."
 		svelte={`<Swatch color="primary" />
 <Swatch color="success" />
 <Swatch color="error" />`}

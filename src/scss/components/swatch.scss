@@ -1,0 +1,114 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   swatch.scss — .swatch, whole.
+
+   Section: Selectors. A sample of one colour, and the only
+   component in the kit whose colour is DATA rather than a theme
+   value: the author passes it at the call site and no theme ever
+   writes it.
+
+	<span class="swatch" style="--swatch-color:#1677ff">A</span>
+	<button class="swatch swatch-active" style="--swatch-color:#0000"></button>
+
+   Two consequences the rest of the kit does not have:
+
+   - A transparent sample has to READ as transparent, so the colour
+     is a flat gradient layer over a checkerboard rather than a
+     background-color. How much of the checks shows through is
+     exactly how transparent the sample is, for free.
+   - What is written on it cannot be a theme colour either, because
+     nobody knew the sample at authoring time. `--swatch-on-color`
+     derives it from the sample with the same lightness flip the
+     kit uses for `--color-on-*`.
+
+   This component was already written against named slots before the
+   merge, so all four families differed only in what they put in
+   them. It is the cleanest migration in the kit.
+   ============================================================ */
+
+.swatch {
+	--swatch-on-color: oklch(
+		from var(--swatch-color) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h
+	);
+
+	display: inline-grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: var(--swatch-size);
+	height: var(--swatch-size);
+	padding: 0;
+	border: var(--swatch-border-width) solid var(--swatch-border-color);
+	border-radius: var(--swatch-corners);
+	box-shadow: var(--swatch-shadow);
+	color: var(--swatch-on-color);
+	font-size: var(--fontsize, var(--base, var(--default-base)));
+	font-weight: var(--swatch-font-weight);
+	line-height: 1;
+	vertical-align: middle;
+	user-select: none;
+	overflow: hidden;
+	rotate: var(--swatch-rest-rotate);
+	/* The colour is its own flat layer so the checkerboard below shows
+	   through exactly as much as the colour is transparent. */
+	background-color: transparent;
+	background-image:
+		linear-gradient(var(--swatch-color), var(--swatch-color)),
+		var(--swatch-checks);
+	background-size: auto, var(--swatch-check-size) var(--swatch-check-size);
+	transition-property: box-shadow, border-color, translate, rotate;
+	transition-duration: var(--swatch-transition-duration);
+	transition-timing-function: var(--_sel-easing, ease);
+}
+
+:is(a, button, label).swatch,
+.swatch:is([role='button'], [tabindex]) {
+	cursor: pointer;
+}
+
+.swatch:focus-visible {
+	outline: var(--selector-focus-width) var(--focus-style) var(--selector-focus-color);
+	outline-offset: var(--selector-focus-offset);
+}
+
+.swatch:is(:disabled, [disabled], .swatch-disabled) {
+	pointer-events: none;
+	opacity: var(--selector-disabled-opacity);
+}
+
+/* An <input type="color"> can be a swatch too: its own chrome is removed so
+   the element paints from the slots like any other. */
+input[type='color'].swatch {
+	appearance: none;
+	-webkit-appearance: none;
+}
+input[type='color'].swatch::-webkit-color-swatch-wrapper {
+	padding: 0;
+}
+input[type='color'].swatch::-webkit-color-swatch,
+input[type='color'].swatch::-moz-color-swatch {
+	border: none;
+	border-radius: inherit;
+}
+
+/* ── Flag: selected ─────────────────────────────────────────────── */
+.swatch-active {
+	box-shadow: var(--swatch-active-shadow);
+	translate: var(--swatch-active-x) var(--swatch-active-y);
+}
+
+/* ── Axis: shape ────────────────────────────────────────────────── */
+.swatch-circle {
+	--swatch-corners: 999px;
+}
+
+/* ── Axis: colour ───────────────────────────────────────────────── */
+@each $color in c.$color-list {
+	.swatch-#{$color} {
+		--swatch-color: var(--color-#{$color});
+	}
+}
+
+/* ── Axis: size ─────────────────────────────────────────────────── */
+@include m.size-variants('swatch', c.$sizes-field);

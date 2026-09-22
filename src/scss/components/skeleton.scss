@@ -1,0 +1,64 @@
+/* ============================================================
+   skeleton.scss — .skeleton, whole.
+
+   Section: Feedback.
+
+   A placeholder that shimmers while something loads. The shimmer is
+   a moving gradient, so `prefers-reduced-motion` stops it.
+   ============================================================ */
+
+/* ── Structure ────────────────────────────────── */
+
+
+.skeleton {
+	background-color: var(--skeleton-bg);
+	border-radius: var(--feedback-corners);
+	will-change: background-position;
+}
+@media (prefers-reduced-motion: no-preference) {
+	.skeleton {
+	animation: skeleton 1.8s ease-in-out infinite;
+}
+}
+.skeleton-text {
+	-webkit-background-clip: text;
+}
+
+/* ── Paint ────────────────────────────────────── */
+
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.skeleton {
+	background-image: linear-gradient(
+			105deg,
+			#0000 0% 40%,
+			var(--skeleton-shimmer) 50%,
+			#0000 60% 100%
+		);
+	background-size: 200% auto;
+	background-position-x: -50%;
+}
+@media (prefers-reduced-motion: reduce) {
+	.skeleton {
+	transition-duration: 15s;
+}
+}
+.skeleton-text {
+	background-clip: text;
+	color: transparent;
+	background-image: linear-gradient(
+			105deg,
+			var(--skeleton-mask-edge) 0% 40%,
+			var(--skeleton-mask-peak) 50%,
+			var(--skeleton-mask-edge) 60% 100%
+		);
+}
+@keyframes skeleton {
+	0% {
+	background-position: 150%;
+}
+	100% {
+	background-position: -50%;
+}
+}

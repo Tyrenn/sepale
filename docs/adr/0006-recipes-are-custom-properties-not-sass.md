@@ -1,3 +1,9 @@
+> **Reading note (ADR 0010).** Where this text says "family" and "the family
+> file", read "theme" and `_defaults.scss`. The decision below is unchanged and
+> now covers the whole kit rather than one family's formulas — every shadow,
+> corner and motion a control writes is a custom property for exactly the
+> reason given here.
+
 # Look recipes are CSS custom properties, not Sass mixins
 
 A family's look formulas — neumorphic relief, directional shadow, glass fill —

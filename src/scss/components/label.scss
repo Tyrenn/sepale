@@ -1,0 +1,57 @@
+/* ============================================================
+   label.scss — .label, whole.
+
+   The INLINE label: a piece of text or an icon that sits inside a
+   field, before or after its content. The container that wraps a
+   field and floats its name is a different component with a
+   different namespace (ADR 0009, floating-label.scss).
+
+   Section: Fields. It is the quietest thing in the kit and the four
+   families disagreed about none of it — the whole difference across
+   all four was zero lines — so everything here is a value only
+   because a value is what a theme can reach.
+   ============================================================ */
+
+.label {
+	display: inline-flex;
+	align-items: center;
+	white-space: nowrap;
+	gap: var(--label-gap);
+	color: color-mix(in oklch, currentColor var(--label-mix), #0000);
+}
+
+.label:has(input) {
+	cursor: pointer;
+}
+
+/* A label used as a prefix or a suffix inside a field. It eats the field's
+   own side padding and gives it back as its own, so the divider lands where
+   the padding used to be. */
+.input > .label,
+.select > .label,
+.file-input > .label {
+	display: flex;
+	align-items: center;
+	white-space: nowrap;
+	height: calc(100% - var(--label-inset));
+	padding-inline: var(--_fld-padding-x);
+	font-size: inherit;
+}
+
+.input > .label:first-child,
+.select > .label:first-child,
+.file-input > .label:first-child {
+	margin-inline-start: calc(var(--_fld-padding-x) * -1);
+	margin-inline-end: var(--_fld-padding-x);
+	border-inline-end: var(--label-divider-width) solid
+		color-mix(in oklab, currentColor var(--label-divider-mix), #0000);
+}
+
+.input > .label:last-child,
+.select > .label:last-child,
+.file-input > .label:last-child {
+	margin-inline-start: var(--_fld-padding-x);
+	margin-inline-end: calc(var(--_fld-padding-x) * -1);
+	border-inline-start: var(--label-divider-width) solid
+		color-mix(in oklab, currentColor var(--label-divider-mix), #0000);
+}

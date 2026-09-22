@@ -1,0 +1,76 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   navbar.scss — .navbar, whole.
+
+   Section: Containers.
+
+   A bar across the top. It is PLACEMENT, not navigation: it says
+   "across the top", it does not say what goes in it. A set of links
+   inside one is a `menu`; a row of actions is a row of buttons.
+   Compare `dock`, which is the same idea pinned to the bottom.
+   ============================================================ */
+
+/* ── Structure ────────────────────────────────────── */
+
+
+.navbar {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: var(--navbar-gap);
+	box-sizing: border-box;
+	width: 100%;
+	min-height: var(--navbar-h);
+	padding-block: var(--navbar-py);
+	padding-inline: var(--navbar-px);
+	background-color: var(--navbar-bg);
+	color: var(--navbar-fg);
+	border-block-end: var(--navbar-border-width) solid var(--navbar-border);
+	box-shadow: var(--navbar-shadow);
+	font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+/* The zones. start and end absorb the slack so that center — which
+   keeps its intrinsic width — stays put when either side grows. */
+.navbar-start,
+.navbar-center,
+.navbar-end {
+	display: flex;
+	align-items: center;
+	gap: var(--navbar-gap);
+	min-width: 0;
+}
+.navbar-start {
+	flex: 1 1 0;
+	justify-content: flex-start;
+}
+.navbar-center {
+	flex: 0 0 auto;
+	justify-content: center;
+}
+.navbar-end {
+	flex: 1 1 0;
+	justify-content: flex-end;
+}
+
+/* A bar that follows the page. Absolute, because it answers to the
+   viewport rather than to its content (see CLAUDE.md). */
+.navbar-sticky {
+	position: sticky;
+	top: var(--navbar-sticky-top, 0);
+	z-index: 1;
+}
+
+/* ── Paint ────────────────────────────────────────── */
+
+
+/* Its values live in _defaults.scss with the rest of the section: they
+   were a theme’s worth of declarations sitting in a family file. */
+.navbar {
+	--navbar-gap: calc(0.5em * var(--scale));
+}
+
+/* size variants */
+@include m.size-variants('navbar', c.$sizes-field);

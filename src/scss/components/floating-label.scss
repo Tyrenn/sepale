@@ -1,0 +1,99 @@
+/* ============================================================
+   floating-label.scss — .floating-label, whole.
+
+   A container that WRAPS a field and floats its name into the
+   border when the field is filled or focused. Not a setting of the
+   inline `.label`, which lives inside a field: two roles, two
+   components (ADR 0009).
+
+   Section: Fields. The span is painted on its own ground so it can
+   sit on top of the field's edge and hide it — which is the only
+   value the four families disagreed about, and only one of them:
+   a look whose fields are drawn on white floats its label on white
+   too, or the trick shows.
+   ============================================================ */
+
+.floating-label {
+	position: relative;
+	display: block;
+}
+
+.floating-label input {
+	display: block;
+}
+
+.floating-label > span {
+	position: absolute;
+	z-index: 1;
+	pointer-events: none;
+	background-color: var(--floating-label-bg);
+	inset-inline-start: var(--_fld-padding-x, 0.75em);
+	padding-inline: var(--floating-label-padding-x);
+	font-size: var(--floating-label-size);
+	top: var(--floating-label-rest-top);
+	line-height: 1;
+	border-radius: var(--floating-label-radius);
+	opacity: 0;
+	translate: 0 -50%;
+	transition:
+		top var(--floating-label-duration) ease-out,
+		translate var(--floating-label-duration) ease-out,
+		scale var(--floating-label-duration) ease-out,
+		opacity var(--floating-label-duration) ease-out;
+}
+
+.floating-label input::placeholder,
+.floating-label textarea::placeholder {
+	transition:
+		top var(--floating-label-duration) ease-out,
+		translate var(--floating-label-duration) ease-out,
+		scale var(--floating-label-duration) ease-out,
+		opacity var(--floating-label-duration) ease-out;
+}
+
+/* Filled or focused: the placeholder leaves, the name takes its place on
+   the edge. Both move on the same path so they read as one object. */
+.floating-label:focus-within ::placeholder,
+.floating-label:not(:has(input:placeholder-shown, textarea:placeholder-shown)) ::placeholder {
+	opacity: 0;
+	top: 0;
+	translate: -12.5% calc(-50% - 0.125em);
+	scale: var(--floating-label-scale);
+	pointer-events: auto;
+}
+
+.floating-label:focus-within > span,
+.floating-label:not(:has(input:placeholder-shown, textarea:placeholder-shown)) > span {
+	opacity: 1;
+	z-index: 2;
+	pointer-events: auto;
+	top: 0;
+	translate: -12.5% calc(-50% - 0.125em);
+	scale: var(--floating-label-scale);
+}
+
+.floating-label:has(:disabled, [disabled]) > span {
+	opacity: 0;
+}
+
+/* The resting position follows the field's height, so a small field floats
+   its label from where its own middle is rather than from a fixed number. */
+.floating-label:has(.input-xs, .select-xs, .textarea-xs) span {
+	font-size: calc(var(--floating-label-size) * 0.79);
+	top: calc(var(--floating-label-rest-top) * 0.6);
+}
+
+.floating-label:has(.input-sm, .select-sm, .textarea-sm) span {
+	font-size: calc(var(--floating-label-size) * 0.86);
+	top: calc(var(--floating-label-rest-top) * 0.8);
+}
+
+.floating-label:has(.input-lg, .select-lg, .textarea-lg) span {
+	font-size: calc(var(--floating-label-size) * 1.29);
+	top: calc(var(--floating-label-rest-top) * 1.2);
+}
+
+.floating-label:has(.input-xl, .select-xl, .textarea-xl) span {
+	font-size: calc(var(--floating-label-size) * 1.57);
+	top: calc(var(--floating-label-rest-top) * 1.4);
+}

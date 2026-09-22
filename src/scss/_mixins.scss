@@ -32,21 +32,27 @@
 	}
 }
 
-// A filled trail on a rail thinner than the thumb.
+// A filled trail whose height you choose.
 //
-// The trail is the 100cqw box-shadow the thumb casts (see base/range.scss).
+// The trail is the 100cqw box-shadow the thumb casts (see components/range).
 // WebKit gives that shadow the thumb's own height, so on a thin rail it reads
-// as a fat bar and every family had to turn it off (--range-fill: 0).
-// clip-path cuts the thumb's whole painting — shadow included — down to a
-// cross: a band as tall as --rail spanning the control, plus the square the
-// knob and its ring occupy. It is the only shape that keeps a thin trail and a
-// knob taller than it at the same time. The band is symmetric, so RTL needs
-// nothing. Pair it with a fill offset of --range-thumb-size + --range-halo so
-// the trail stops at the clip instead of leaving a stub beside the knob.
-@mixin railed-fill($halo: 0.125em) {
-	--range-halo: #{$halo};
-	--rail-top: calc((var(--range-thumb-size) - var(--rail)) / 2);
-	--rail-bottom: calc((var(--range-thumb-size) + var(--rail)) / 2);
+// as a fat bar — which is daisyUI's look and nobody else's. clip-path cuts the
+// thumb's whole painting, shadow included, down to a cross: a band spanning
+// the control plus the square the knob and its ring occupy.
+//
+// The band's height is `--range-trail-height`, and THAT is the whole of what
+// looked like a structural difference between the families. Set it to the rail
+// and the trail is thin; set it to the thumb's own size and the band covers the
+// thumb, the clip stops cutting anything, and you are back to the fat bar. One
+// length, no variant, no branch.
+//
+// The halo has to be at least the thumb's border, or the clip eats the ring.
+@mixin railed-fill {
+	/* `--rail` is what the families still being migrated set; the fallbacks
+	   keep them compiling until they go. */
+	--range-halo: var(--range-thumb-halo, 0.125em);
+	--rail-top: calc((var(--range-thumb-size) - var(--range-trail-height, var(--rail))) / 2);
+	--rail-bottom: calc((var(--range-thumb-size) + var(--range-trail-height, var(--rail))) / 2);
 	clip-path: polygon(
 		-100vw var(--rail-top),
 		calc(0px - var(--range-halo)) var(--rail-top),
@@ -110,6 +116,264 @@
 		}
 		60% {
 			background-position: 0 100%, 50% 100%, 100% 0;
+		}
+	}
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// field-frame($ns) — everything .input, .select and .textarea agree on.
+//
+// The three are one section of the theme generator (Fields) and one set of
+// variables, `--field-*`. This mixin is where that set becomes CSS, emitted
+// once per component so each keeps its own namespace and its own structure.
+//
+// TWO LEVELS, per ADR 0010. Every value is read as
+//
+//     var(--<component>-x, var(--field-x))
+//
+// so the generator writes one `--field-x` today, and the day a component has
+// to break ranks it gets `--input-x` without a migration. The nesting is
+// written once, here, into private `--_fld-*` slots; the rules below read the
+// slots and never the theme.
+//
+// `--_fld-seed` is the accent a colour variant puts on the element
+// (`.input-error`). It is not the border colour: daisyUI draws a transparent
+// border and paints the edge with an inset shadow tinted from the seed, which
+// is why the two are separate variables and not one.
+// ─────────────────────────────────────────────────────────────────────────
+
+@mixin field-slots($ns) {
+	--_fld-bg: var(--#{$ns}-bg, var(--field-bg));
+	--_fld-fg: var(--#{$ns}-fg, var(--field-fg));
+	--_fld-accent: var(--#{$ns}-accent-color, var(--field-accent-color));
+	--_fld-seed: var(--_fld-accent);
+	--_fld-border-width: var(--#{$ns}-border-width, var(--field-border-width));
+	--_fld-border-style: var(--#{$ns}-border-style, var(--field-border-style));
+	--_fld-border-color: var(--#{$ns}-border-color, var(--field-border-color));
+	--_fld-border-from-fill: var(--#{$ns}-border-from-fill, var(--field-border-from-fill));
+	--_fld-corners: var(--#{$ns}-corners, var(--field-corners));
+	--_fld-height: var(--#{$ns}-height, var(--field-height));
+	--_fld-padding-x: var(--#{$ns}-padding-x, var(--field-padding-x));
+	--_fld-gap: var(--#{$ns}-gap, var(--field-gap));
+	--_fld-depth: var(--#{$ns}-depth, var(--field-depth));
+	--_fld-placeholder-mix: var(--#{$ns}-placeholder-mix, var(--field-placeholder-mix));
+	--_fld-disabled-mix: var(--#{$ns}-disabled-mix, var(--field-disabled-mix));
+	--_fld-disabled-fg-mix: var(--#{$ns}-disabled-fg-mix, var(--field-disabled-fg-mix));
+	--_fld-duration: var(--#{$ns}-transition-duration, var(--field-transition-duration));
+	--_fld-easing: var(--#{$ns}-transition-easing, var(--field-transition-easing));
+	--_fld-rest-rotate: var(--#{$ns}-rest-rotate, var(--field-rest-rotate));
+
+	@each $n in (1, 2) {
+		@each $k in (inset, x, y, blur, spread, color) {
+			--_fld-s#{$n}-#{$k}: var(
+				--#{$ns}-shadow-#{$n}-#{$k},
+				var(--field-shadow-#{$n}-#{$k})
+			);
+		}
+	}
+}
+
+// The resting paint. `$sel` is the component's root selector.
+@mixin field-frame($ns, $sel) {
+	#{$sel} {
+		@include field-slots($ns);
+
+		/* Neutral at rest; the focus rule below fills them in. */
+		--_fld-ring-width: 0px;
+		--_fld-ring-color: #0000;
+		--_fld-cast-x: 0px;
+		--_fld-cast-y: 0px;
+		--_fld-cast-color: #0000;
+		--_fld-shadow-scale: 1;
+
+		/* The border is an explicit colour with some of the fill blended in,
+		   exactly as a button's is — so a look whose edge is "the ground, a
+		   shade darker" says it with a number instead of a colour. */
+		--_fld-border: color-mix(in oklab, var(--_fld-border-color), var(--_fld-bg) var(--_fld-border-from-fill));
+
+		/* Ring, then the focus cast, then the two configurable layers, then
+		   the relief. The relief tints with the seed, so it resolves here on
+		   the element and can never be a theme value. */
+		--_fld-shadow:
+			0 0 0 var(--_fld-ring-width) var(--_fld-ring-color),
+			var(--_fld-cast-x) var(--_fld-cast-y) 0 0 var(--_fld-cast-color),
+			var(--_fld-s1-inset) calc(var(--_fld-s1-x) * var(--_fld-shadow-scale))
+				calc(var(--_fld-s1-y) * var(--_fld-shadow-scale))
+				calc(var(--_fld-s1-blur) * var(--_fld-shadow-scale))
+				var(--_fld-s1-spread) var(--_fld-s1-color),
+			var(--_fld-s2-inset) calc(var(--_fld-s2-x) * var(--_fld-shadow-scale))
+				calc(var(--_fld-s2-y) * var(--_fld-shadow-scale))
+				calc(var(--_fld-s2-blur) * var(--_fld-shadow-scale))
+				var(--_fld-s2-spread) var(--_fld-s2-color),
+			0 1px color-mix(in oklab, var(--_fld-seed) calc(var(--_fld-depth) * 10%), #0000) inset,
+			0 -1px oklch(100% 0 0 / calc(var(--_fld-depth) * 0.1)) inset;
+
+		background-color: var(--_fld-bg);
+		color: var(--_fld-fg);
+		border-width: var(--_fld-border-width);
+		border-style: var(--_fld-border-style);
+		border-color: var(--_fld-border);
+		border-radius: var(--_fld-corners);
+		box-shadow: var(--_fld-shadow);
+		rotate: var(--_fld-rest-rotate);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		transition-property: color, background-color, border-color, box-shadow, translate, rotate;
+		transition-duration: var(--_fld-duration);
+		transition-timing-function: var(--_fld-easing);
+	}
+
+	#{$sel}::placeholder,
+	#{$sel} :where(input, textarea)::placeholder {
+		color: color-mix(in oklch, var(--_fld-fg) var(--_fld-placeholder-mix), #0000);
+	}
+
+	/* One focus treatment for the three of them. Which of the four shapes it
+	   takes — an outline, a ring, a push, nothing — is four numbers, and the
+	   generator picks them (see the Focus effect in sections/fields.ts). */
+	#{$sel}:focus,
+	#{$sel}:focus-within {
+		--_fld-seed: var(--field-focus-accent-color);
+		--_fld-border-color: var(--field-focus-border-color);
+		--_fld-ring-width: var(--field-focus-ring-width);
+		--_fld-ring-color: var(--field-focus-ring-color);
+		--_fld-cast-x: var(--field-focus-cast-x);
+		--_fld-cast-y: var(--field-focus-cast-y);
+		--_fld-cast-color: var(--field-focus-cast-color);
+		--_fld-shadow-scale: var(--field-focus-shadow-scale);
+		translate: var(--field-focus-x) var(--field-focus-y);
+		/* The line style is the kit's, not this section's: one focus ring for
+		   everything is an accessibility decision, not a look. */
+		outline: var(--field-focus-outline-width) var(--focus-style)
+			var(--field-focus-outline-color);
+		outline-offset: var(--field-focus-outline-offset);
+		isolation: isolate;
+	}
+
+	/* The inner native control never draws its own ring: the wrapper does. */
+	#{$sel} :where(input, textarea, select):focus,
+	#{$sel} :where(input, textarea, select):focus-within {
+		outline: none;
+	}
+
+	#{$sel}:has(:disabled),
+	#{$sel}:is(:disabled, [disabled]),
+	fieldset:disabled #{$sel} {
+		/* Mixed from the OPAQUE ink, not from --_fld-fg: that variable is
+		   redefined two lines down to a translucent grey, and mixing with a
+		   translucent colour tints the result. */
+		--_fld-bg: color-mix(in oklch, var(--color-on-surface) var(--_fld-disabled-mix), var(--color-surface-1));
+		--_fld-fg: color-mix(in oklch, var(--color-on-surface) var(--_fld-disabled-fg-mix), #0000);
+		--_fld-shadow: none;
+		cursor: not-allowed;
+	}
+
+	/* Colour variants seed the accent; the border follows it when the look
+	   draws one, and the relief tints with it when it does not. */
+	@each $color in c.$color-list {
+		#{$sel}-#{$color},
+		#{$sel}-#{$color}:focus,
+		#{$sel}-#{$color}:focus-within {
+			--_fld-accent: var(--color-#{$color});
+			--_fld-border-color: var(--color-#{$color});
+		}
+	}
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// selector-frame($ns, $sel) — what .checkbox, .radio and .toggle agree on.
+//
+// The same two-level cascade as the fields: every value is read as
+// `var(--<component>-x, var(--selector-x))`, resolved once into `--_sel-*`
+// slots. Two components already need the override and both reasons are real:
+// a radio is a circle by definition, and a toggle's thumb is not the same
+// thing as a checkbox's tick even when a look gives them the same colour.
+//
+// A selector has two states that matter and they are not "hover" and "press":
+// it is checked or it is not. So the frame is written twice — the resting
+// paint, then the checked paint — rather than as a shift from one to the
+// other, because a look is free to change all three of fill, edge and mark
+// at once, and three of the four do.
+// ─────────────────────────────────────────────────────────────────────────
+
+@mixin selector-slots($ns) {
+	--_sel-size: var(--#{$ns}-size, var(--selector-size));
+	--_sel-padding: var(--#{$ns}-padding, var(--selector-padding));
+	--_sel-bg: var(--#{$ns}-bg, var(--selector-bg));
+	--_sel-border-width: var(--#{$ns}-border-width, var(--selector-border-width));
+	--_sel-border-style: var(--#{$ns}-border-style, var(--selector-border-style));
+	--_sel-border-color: var(--#{$ns}-border-color, var(--selector-border-color));
+	--_sel-corners: var(--#{$ns}-corners, var(--selector-corners));
+	--_sel-mark: var(--#{$ns}-mark, var(--selector-mark));
+	--_sel-checked-bg: var(--#{$ns}-checked-bg, var(--selector-checked-bg));
+	--_sel-checked-border-color: var(
+		--#{$ns}-checked-border-color,
+		var(--selector-checked-border-color)
+	);
+	--_sel-checked-mark: var(--#{$ns}-checked-mark, var(--selector-checked-mark));
+	--_sel-depth: var(--#{$ns}-depth, var(--selector-depth));
+	--_sel-disabled-opacity: var(--#{$ns}-disabled-opacity, var(--selector-disabled-opacity));
+	--_sel-duration: var(--#{$ns}-transition-duration, var(--selector-transition-duration));
+	--_sel-easing: var(--#{$ns}-transition-easing, var(--selector-transition-easing));
+	--_sel-focus-width: var(--#{$ns}-focus-width, var(--selector-focus-width));
+	--_sel-focus-offset: var(--#{$ns}-focus-offset, var(--selector-focus-offset));
+	--_sel-focus-color: var(--#{$ns}-focus-color, var(--selector-focus-color));
+}
+
+@mixin selector-frame($ns, $sel) {
+	#{$sel} {
+		@include selector-slots($ns);
+
+		position: relative;
+		display: inline-block;
+		flex-shrink: 0;
+		cursor: pointer;
+		appearance: none;
+		vertical-align: middle;
+		width: var(--_sel-size);
+		height: var(--_sel-size);
+		padding: var(--_sel-padding);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		color: var(--_sel-mark);
+		background-color: var(--_sel-bg);
+		border-width: var(--_sel-border-width);
+		border-style: var(--_sel-border-style);
+		border-color: var(--_sel-border-color);
+		border-radius: var(--_sel-corners);
+		/* The relief, gated at 0 like everywhere else: a groove at the top
+		   and nothing when the look does not ask for one. */
+		box-shadow: 0 1px oklch(0% 0 0 / calc(var(--_sel-depth) * 0.1)) inset;
+		transition-property: color, background-color, border-color, box-shadow;
+		transition-duration: var(--_sel-duration);
+		transition-timing-function: var(--_sel-easing);
+	}
+
+	#{$sel}:checked,
+	#{$sel}[aria-checked='true'] {
+		color: var(--_sel-checked-mark);
+		background-color: var(--_sel-checked-bg);
+		border-color: var(--_sel-checked-border-color);
+	}
+
+	/* One ring, on the class the browser gives keyboard focus to. */
+	#{$sel}:focus-visible {
+		outline: var(--_sel-focus-width) var(--focus-style) var(--_sel-focus-color);
+		outline-offset: var(--_sel-focus-offset);
+	}
+
+	#{$sel}:disabled,
+	#{$sel}[disabled] {
+		cursor: not-allowed;
+		opacity: var(--_sel-disabled-opacity);
+	}
+
+	/* A colour variant names the CHECKED state, not the resting one: an
+	   unticked box is not red because it might one day be wrong. */
+	@each $color in c.$color-list {
+		#{$sel}-#{$color}:checked,
+		#{$sel}-#{$color}[aria-checked='true'] {
+			--_sel-checked-bg: var(--color-#{$color});
+			--_sel-checked-border-color: var(--color-#{$color});
+			--_sel-checked-mark: var(--color-on-#{$color});
 		}
 	}
 }

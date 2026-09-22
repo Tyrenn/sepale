@@ -2,9 +2,10 @@
 	/**
 	 * The hand-written half of this page: what the component is, what each
 	 * of its classes does, and what its props mean. WHICH classes exist is
-	 * not written here — that is read back from the active family's compiled
-	 * CSS (src/lib/generated/components.ts), so a page cannot claim a class
-	 * the family does not ship.
+	 * not written here — that is read back from the compiled kit
+	 * (src/lib/generated/classes.ts), so a page cannot claim a class the
+	 * stylesheet does not have, and the build fails on a class no page
+	 * describes.
 	 *
 	 * `namespaces` is the one piece of structure: it says which classes
 	 * belong here. Nothing else can know that `.title` is part of `text`.
@@ -162,7 +163,7 @@
 
 	<Section
 		title="Classic and surface"
-		subtitle="dahlia only. Radix separates a raised button from a flat one drawn on a surface — two treatments the other families fold into soft and outline."
+		subtitle="Two weights Radix separates and soft and outline do not: a raised button, and a flat one drawn on a surface. They came from one look and belong to every theme now."
 		svelte={`<Button variant="classic" color="primary">Classic</Button>
 <Button variant="surface" color="primary">Surface</Button>`}
 		html={`<button class="btn btn-classic btn-primary">Classic</button>
@@ -176,7 +177,7 @@
 
 	<Section
 		title="Moving the shadow"
-		subtitle="sunflower only. The hard shadow IS the family, so where it sits — or whether it sits at all — is an axis of its own, and it combines with every other one."
+		subtitle="Where the cast shadow sits, or whether it sits at all. Its own axis, so it combines with every other one — and it costs nothing under a theme that casts no shadow, since both classes only move offsets that are already zero."
 		svelte={`<Button color="primary">Default</Button>
 <Button color="primary" shadow="reverse">Reverse</Button>
 <Button color="primary" shadow="none">None</Button>`}

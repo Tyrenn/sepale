@@ -1,0 +1,442 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   tabs.scss — .tabs, whole.
+
+   Section: Selectors. The largest component in the kit and the one
+   that was most nearly shared already: the four families agreed on
+   98% of it line for line, and the 2% they did not is the resting
+   edge, the corner, the tilt and the paint of the active item.
+   Those are the variables at the top of `.tabs-item`.
+
+   Why it was already shared is worth keeping in mind for the
+   sections still to come. The big departures here — an underline, a
+   lifted folder, a boxed pill, a strip along the top or the bottom —
+   are already VARIANTS, and every family shipped all of them. A look
+   that cannot be a value had been made a class long before this
+   merge, by whoever wrote it, without anyone deciding so.
+
+   The lifted variant's corners are gradients rather than borders: a
+   folder tab curves OUTWARD where it meets the strip, and no
+   border-radius draws that. `--tab-radius-grad` is that recipe, and
+   the `--tab-*` variables generally are internal geometry, not
+   theme values — the strip works them out from the item's size.
+   ============================================================ */
+
+/* ── Structure ────────────────────────────────────────────
+   The strip, the item, the radio/label plumbing, and which content
+   panel is shown. None of it is a look decision. */
+
+
+.tabs {
+	display: flex;
+	flex-wrap: wrap;
+	height: var(--tabs-height);
+	flex-direction: var(--tabs-direction);
+}
+.tabs-item {
+	/* The active tab's ground. It is an internal slot the variants read,
+	   seeded from the section's value rather than from a fixed surface —
+	   hard-coding it here shadowed every theme that changed it. */
+	--tab-bg: var(--tabs-active-bg);
+	--tab-border-color: var(--color-border);
+	position: relative;
+	display: inline-flex;
+	cursor: pointer;
+	appearance: none;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	user-select: none;
+	order: var(--tab-order);
+	height: var(--tab-height);
+	padding-inline: var(--tab-p);
+}
+.tabs-item:hover {
+	color: var(--tabs-active-color);
+}
+.tabs-item:is(input[type="radio"])::after {
+	content: attr(aria-label);
+}
+.tabs-item:is(label) {
+	position: relative;
+}
+.tabs-item:is(label) input {
+	position: absolute;
+	cursor: pointer;
+	appearance: none;
+}
+/* Show active tab content */
+.tabs-item:checked + .tabs-item-content,
+	.tabs-item:is(label:has(:checked)) + .tabs-item-content,
+	.tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]) + .tabs-item-content {
+	display: block;
+}
+/* Inactive tab */
+.tabs-item:not(input):empty {
+	flex-grow: 1;
+	cursor: default;
+}
+.tabs-item[disabled] {
+	pointer-events: none;
+}
+.tabs-item-content {
+	order: 1;
+	display: none;
+	--tabcontent-radius-ss: var(--tabs-box-corners);
+	--tabcontent-radius-se: var(--tabs-box-corners);
+	--tabcontent-radius-es: var(--tabs-box-corners);
+	--tabcontent-radius-ee: var(--tabs-box-corners);
+	margin: var(--tabcontent-margin);
+	order: var(--tabcontent-order);
+	border-width: var(--tabs-border-width);
+	border-start-start-radius: var(--tabcontent-radius-ss);
+	border-start-end-radius: var(--tabcontent-radius-se);
+	border-end-start-radius: var(--tabcontent-radius-es);
+	border-end-end-radius: var(--tabcontent-radius-ee);
+}
+.tabs-item-disabled {
+	pointer-events: none;
+}
+
+/* ── Paint ─────────────────────────────────────────────── */
+
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.tabs {
+	--tabs-height: auto;
+	--tabs-direction: row;
+	--tab-height: var(--tabs-height-item);
+}
+.tabs-item {
+	/* What a look repaints, and all four repainted exactly this: the resting
+	   edge, the corner, the tilt, and the paint of the active item. */
+	--tab-border-color: var(--tabs-border-color);
+	border-width: var(--tabs-border-width);
+	border-radius: var(--tabs-corners);
+	rotate: var(--tabs-rest-rotate);
+	transition-property: color, background-color, border-color, box-shadow, rotate;
+	transition-duration: var(--tabs-transition-duration);
+	transition-timing-function: var(--tabs-transition-easing);
+
+	--tab-p: var(--tabs-padding-x);
+	font-size: var(--fontsize, var(--base, var(--default-base)));
+	--tab-radius-ss: 0;
+	--tab-radius-se: 0;
+	--tab-radius-es: 0;
+	--tab-radius-ee: 0;
+	--tab-order: 0;
+	--tab-radius-min: calc(0.75rem - var(--tabs-border-width));
+	--tab-radius-limit: min(var(--tabs-corners), var(--tab-radius-min));
+	--tab-radius-grad: #0000 calc(69% - var(--tabs-border-width)),
+			var(--tab-border-color) calc(69% - var(--tabs-border-width) + 0.25px),
+			var(--tab-border-color) 69%,
+			var(--tab-bg) calc(69% + 0.25px);
+	border-color: #0000;
+	font-size: var(--tabs-font-size);
+}
+.tabs-item:is(input[type="radio"]) {
+	min-width: fit-content;
+}
+.tabs-item:is(label) input {
+	inset: 0;
+	opacity: 0;
+}
+.tabs-item:not(
+		:checked,
+		label:has(:checked),
+		:hover,
+		.tabs-item-active,
+		[aria-selected="true"],
+		[aria-current="true"],
+		[aria-current="page"]
+	) {
+	color: var(--tabs-idle-color);
+}
+.tabs-item:focus {
+	outline: none;
+}
+.tabs-item:focus-visible,
+	.tabs-item:is(label:has(:checked:focus-visible)) {
+	outline: var(--selector-focus-width) var(--focus-style) var(--tabs-focus-color);
+	outline-offset: var(--tabs-focus-offset);
+}
+.tabs-item[disabled] {
+	opacity: var(--tabs-disabled-opacity);
+}
+.tabs-item-content {
+	border-color: transparent;
+	--tabcontent-order: 1;
+	width: 100%;
+	height: calc(100% - var(--tab-height) + var(--tabs-border-width));
+}
+.tabs-item-disabled {
+	opacity: var(--tabs-disabled-opacity);
+}
+
+/* variant border */
+.tabs-border > .tabs-item {
+	--tab-border-color: #0000 #0000 var(--tab-border-color) #0000;
+	position: relative;
+	border-radius: var(--tabs-corners);
+}
+
+.tabs-border > .tabs-item::before {
+	content: "";
+	background-color: var(--tab-border-color);
+	transition: background-color 0.2s ease;
+	width: 80%;
+	height: 3px;
+	border-radius: var(--tabs-corners);
+	bottom: 0;
+	left: 10%;
+	position: absolute;
+}
+
+.tabs-border > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled])::before,
+.tabs-border > .tabs-item:is(input:checked)::before,
+.tabs-border > .tabs-item:is(label:has(:checked))::before {
+	--tab-border-color: currentColor;
+	border-top: 3px solid;
+}
+
+/* variant lift */
+.tabs-lift {
+	--tabs-height: auto;
+	--tabs-direction: row;
+}
+
+.tabs-lift > .tabs-item {
+	--tab-border: 0 0 var(--tabs-border-width) 0;
+	--tab-radius-ss: var(--tab-radius-limit);
+	--tab-radius-se: var(--tab-radius-limit);
+	--tab-radius-es: 0;
+	--tab-radius-ee: 0;
+	--tab-paddings: var(--tabs-border-width) var(--tab-p) 0 var(--tab-p);
+	--tab-border-colors: #0000 #0000 var(--tab-border-color) #0000;
+	--tab-corner-width: calc(100% + var(--tab-radius-limit) * 2);
+	--tab-corner-height: var(--tab-radius-limit);
+	--tab-corner-position: top left, top right;
+
+	border-width: var(--tab-border);
+	border-start-start-radius: var(--tab-radius-ss);
+	border-start-end-radius:   var(--tab-radius-se);
+	border-end-start-radius:   var(--tab-radius-es);
+	border-end-end-radius:     var(--tab-radius-ee);
+	padding: var(--tab-paddings);
+	border-color: var(--tab-border-colors);
+}
+
+.tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]),
+.tabs-lift > .tabs-item:is(input:checked, label:has(:checked)) {
+	--tab-border: var(--tabs-border-width) var(--tabs-border-width) 0 var(--tabs-border-width);
+	--tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+	--tab-paddings: 0 calc(var(--tab-p) - var(--tabs-border-width)) var(--tabs-border-width) calc(var(--tab-p) - var(--tabs-border-width));
+	--tab-inset: auto auto 0 auto;
+	--radius-start: radial-gradient(circle at top left, var(--tab-radius-grad));
+	--radius-end: radial-gradient(circle at top right, var(--tab-radius-grad));
+	background-color: var(--tab-bg);
+}
+
+.tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled])::before,
+.tabs-lift > .tabs-item:is(input:checked, label:has(:checked))::before {
+	z-index: 1;
+	content: "";
+	display: block;
+	position: absolute;
+	width: var(--tab-corner-width);
+	height: var(--tab-corner-height);
+	background-position: var(--tab-corner-position);
+	background-image: var(--radius-start), var(--radius-end);
+	background-size: var(--tab-radius-limit) var(--tab-radius-limit);
+	background-repeat: no-repeat;
+	inset: var(--tab-inset);
+}
+
+.tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]):first-child::before,
+.tabs-lift > .tabs-item:is(input:checked, label:has(:checked)):first-child::before {
+	--radius-start: none;
+}
+
+[dir="rtl"] .tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]):first-child::before,
+[dir="rtl"] .tabs-lift > .tabs-item:is(input:checked, label:has(:checked)):first-child::before {
+	transform: rotateY(180deg);
+}
+
+.tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]):last-child::before,
+.tabs-lift > .tabs-item:is(input:checked, label:has(:checked)):last-child::before {
+	--radius-end: none;
+}
+
+[dir="rtl"] .tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]):last-child::before,
+[dir="rtl"] .tabs-lift > .tabs-item:is(input:checked, label:has(:checked)):last-child::before {
+	transform: rotateY(180deg);
+}
+
+.tabs-lift:has(> .tabs-item-content) > .tabs-item:first-child:not(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]) {
+	--tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+}
+
+.tabs-lift > .tabs-item-content {
+	--tabcontent-margin: calc(-1 * var(--tabs-border-width)) 0 0 0;
+	--tabcontent-radius-ss: 0;
+	--tabcontent-radius-se: var(--tabs-box-corners);
+	--tabcontent-radius-es: var(--tabs-box-corners);
+	--tabcontent-radius-ee: var(--tabs-box-corners);
+}
+
+.tabs-lift :checked + .tabs-item-content:nth-child(1),
+.tabs-lift :checked + .tabs-item-content:nth-child(n+3),
+.tabs-lift label:has(:checked) + .tabs-item-content:nth-child(1),
+.tabs-lift label:has(:checked) + .tabs-item-content:nth-child(n+3),
+.tabs-lift :is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]) + .tabs-item-content:nth-child(1),
+.tabs-lift :is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]) + .tabs-item-content:nth-child(n+3) {
+	--tabcontent-radius-ss: var(--tabs-box-corners);
+}
+
+/* variant top bottom */
+.tabs-top { --tabs-height: auto; --tabs-direction: row; }
+
+.tabs-top > .tabs-item {
+	--tab-order: 0;
+	--tab-border: 0 0 var(--tabs-border-width) 0;
+	--tab-radius-ss: var(--tab-radius-limit);
+	--tab-radius-se: var(--tab-radius-limit);
+	--tab-radius-es: 0;
+	--tab-radius-ee: 0;
+	--tab-paddings: var(--tabs-border-width) var(--tab-p) 0 var(--tab-p);
+	--tab-border-colors: #0000 #0000 var(--tab-border-color) #0000;
+	--tab-corner-width: calc(100% + var(--tab-radius-limit) * 2);
+	--tab-corner-height: var(--tab-radius-limit);
+	--tab-corner-position: top left, top right;
+}
+
+.tabs-top > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]),
+.tabs-top > .tabs-item:is(input:checked),
+.tabs-top > .tabs-item:is(label:has(:checked)) {
+	--tab-border: var(--tabs-border-width) var(--tabs-border-width) 0 var(--tabs-border-width);
+	--tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+	--tab-paddings: 0 calc(var(--tab-p) - var(--tabs-border-width)) var(--tabs-border-width) calc(var(--tab-p) - var(--tabs-border-width));
+	--tab-inset: auto auto 0 auto;
+	--radius-start: radial-gradient(circle at top left, var(--tab-radius-grad));
+	--radius-end: radial-gradient(circle at top right, var(--tab-radius-grad));
+}
+
+.tabs-top:has(> .tabs-item-content) > .tabs-item:first-child:not(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]) {
+	--tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+}
+
+.tabs-top > .tabs-item-content {
+	--tabcontent-order: 1;
+	--tabcontent-margin: calc(-1 * var(--tabs-border-width)) 0 0 0;
+	--tabcontent-radius-ss: 0;
+	--tabcontent-radius-se: var(--tabs-box-corners);
+	--tabcontent-radius-es: var(--tabs-box-corners);
+	--tabcontent-radius-ee: var(--tabs-box-corners);
+}
+
+.tabs-bottom { --tabs-height: auto; --tabs-direction: row; }
+
+.tabs-bottom > .tabs-item {
+	--tab-order: 1;
+	--tab-border: var(--tabs-border-width) 0 0 0;
+	--tab-radius-ss: 0;
+	--tab-radius-se: 0;
+	--tab-radius-es: var(--tab-radius-limit);
+	--tab-radius-ee: var(--tab-radius-limit);
+	--tab-border-colors: var(--tab-border-color) #0000 #0000 #0000;
+	--tab-paddings: 0 var(--tab-p) var(--tabs-border-width) var(--tab-p);
+	--tab-corner-width: calc(100% + var(--tab-radius-limit) * 2);
+	--tab-corner-height: var(--tab-radius-limit);
+	--tab-corner-position: top left, top right;
+}
+
+.tabs-bottom > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]),
+.tabs-bottom > .tabs-item:is(input:checked),
+.tabs-bottom > .tabs-item:is(label:has(:checked)) {
+	--tab-border: 0 var(--tabs-border-width) var(--tabs-border-width) var(--tabs-border-width);
+	--tab-border-colors: #0000 var(--tab-border-color) var(--tab-border-color) var(--tab-border-color);
+	--tab-paddings: var(--tabs-border-width) calc(var(--tab-p) - var(--tabs-border-width)) 0 calc(var(--tab-p) - var(--tabs-border-width));
+	--tab-inset: 0 auto auto auto;
+	--radius-start: radial-gradient(circle at bottom left, var(--tab-radius-grad));
+	--radius-end: radial-gradient(circle at bottom right, var(--tab-radius-grad));
+}
+
+.tabs-bottom:has(> .tabs-item-content) > .tabs-item:first-child:not(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]) {
+	--tab-border-colors: #0000 var(--tab-border-color) var(--tab-border-color) var(--tab-border-color);
+}
+
+.tabs-bottom > .tabs-item-content {
+	--tabcontent-order: 0;
+	--tabcontent-margin: 0 0 calc(-1 * var(--tabs-border-width)) 0;
+	--tabcontent-radius-ss: var(--tabs-box-corners);
+	--tabcontent-radius-se: var(--tabs-box-corners);
+	--tabcontent-radius-es: 0;
+	--tabcontent-radius-ee: var(--tabs-box-corners);
+}
+
+.tabs-bottom > :checked + .tabs-item-content:not(:nth-child(2)),
+.tabs-bottom > :is(label:has(:checked)) + .tabs-item-content:not(:nth-child(2)),
+.tabs-bottom > :is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]) + .tabs-item-content:not(:nth-child(2)) {
+	--tabcontent-radius-es: var(--tabs-box-corners);
+}
+
+/* variant box */
+.tabs-box {
+	--tabs-box-radius: calc(3 * var(--tabs-corners));
+	background-color: var(--tabs-box-bg);
+	padding: calc(0.25em * var(--scale));
+	border-radius: calc(
+		min(var(--tab-height) / 2, var(--tabs-corners)) + min(0.25rem, var(--tabs-box-radius))
+	);
+	box-shadow:
+		0 -0.5px oklch(100% 0 0 / calc(var(--tabs-depth) * 0.1)) inset,
+		0 0.5px oklch(0% 0 0 / calc(var(--tabs-depth) * 0.05)) inset;
+}
+
+.tabs-box > .tabs-item {
+	border-radius: var(--tabs-corners);
+	border-style: none;
+}
+
+.tabs-box > .tabs-item:focus-visible,
+.tabs-box > .tabs-item:is(label:has(:checked:focus-visible)) {
+	outline-offset: 2px;
+}
+
+.tabs-box > .tabs-item:focus-visible {
+	z-index: 1;
+}
+
+.tabs-box > :is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]),
+.tabs-box > :is(input:checked),
+.tabs-box > :is(label:has(:checked)) {
+	background-color: var(--tab-bg, var(--tabs-active-bg));
+	box-shadow:
+		0 1px oklch(100% 0 0 / calc(var(--tabs-depth) * 0.1)) inset,
+		0 1px 1px -1px color-mix(in oklab, var(--tabs-shadow-color) calc(var(--tabs-depth) * 50%), #0000),
+		0 1px 6px -4px color-mix(in oklab, var(--tabs-shadow-color) calc(var(--tabs-depth) * 100%), #0000);
+}
+
+@media (forced-colors: active) {
+	.tabs-box > :is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]),
+	.tabs-box > :is(input:checked),
+	.tabs-box > :is(label:has(:checked)) {
+		border: 1px solid;
+	}
+}
+
+.tabs-box > .tabs-item-content {
+	margin-top: calc(0.25em * var(--scale));
+	height: calc(100% - var(--tab-height) + var(--tabs-border-width) - calc(0.5em * var(--scale)));
+	border-radius: calc(
+		min(var(--tab-height) / 2, var(--tabs-corners)) +
+			min(0.25rem, var(--tabs-box-radius)) - var(--tabs-border-width)
+	);
+}
+
+/* size variants */
+@include m.size-variants('tabs', c.$sizes-field);

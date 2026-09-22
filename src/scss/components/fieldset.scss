@@ -1,0 +1,53 @@
+/* ============================================================
+   fieldset.scss — .fieldset, whole.
+
+   Section: Containers.
+
+   A group of fields with its legend. It draws almost nothing —
+   spacing and a label — which is why all four families said the
+   same thing about it, to within one line.
+   ============================================================ */
+
+/* ── Structure ────────────────────────────────────── */
+
+
+.fieldset {
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-auto-rows: max-content;
+}
+.fieldset-legend {
+	color: var(--fieldset-legend-fg);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+/* Deprecated — replaced by .label, kept to avoid breaking changes */
+.fieldset-label {
+	display: flex;
+	align-items: center;
+}
+.fieldset-label:has(input) {
+	cursor: pointer;
+}
+
+/* ── Paint ────────────────────────────────────────── */
+
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.fieldset {
+	gap: calc(0.375em * var(--scale));
+	padding-block: calc(0.25em * var(--scale));
+	font-size: 0.75rem;
+}
+.fieldset-legend {
+	margin-bottom: calc(-0.25em * var(--scale));
+	gap: calc(0.5em * var(--scale));
+	padding-block: calc(0.5em * var(--scale));
+	font-weight: 600;
+}
+.fieldset-label {
+	color: var(--fieldset-label-fg);
+	gap: calc(0.375em * var(--scale));
+}

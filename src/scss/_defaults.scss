@@ -1,0 +1,646 @@
+/* ============================================================
+   _defaults.scss — every variable the kit reads, declared once.
+
+   The default is ABSENCE (ADR 0010): no border, no shadow, no
+   corner, no motion. A theme is the difference from this file.
+
+   Absence has to be WRITTEN. `border-width: var(--action-border-width)`
+   with the variable unset does not fall back to a hairline — it
+   poisons the whole declaration and produces no border at all. So
+   every variable here carries a real neutral value.
+
+   Absence covers DECORATION only. Colours and geometry keep sane
+   values: a button with no foreground is not neutral, it is
+   invisible, and one with no height is not neutral either.
+
+   Everything is on `:where(:root)` — specificity 0 — so a theme's
+   `:root` wins in any load order.
+
+   Two rules for anyone adding to this file:
+
+   1. A value that reads a PER-ELEMENT slot (`--_btn-bg`, set by a
+      colour variant on the element) cannot live here or in a theme.
+      A custom property resolves its var() references where it is
+      DECLARED, so a `:root` recipe would freeze the slot at root.
+      Those recipes belong in the component stylesheet, gated by a
+      scalar that is 0 here. That is what an *effect* is.
+   2. A theme therefore only ever writes scalars, colours and
+      lengths — never a formula that mentions `--_`.
+   ============================================================ */
+
+@use 'derived-content';
+
+:where(:root) {
+	/* ── Type scale ──────────────────────────────────────────────
+	   Fixed modular scale, ratio 1.125, base 1rem. Deliberately not
+	   fluid: component sizing is intrinsic (em), so a viewport-driven
+	   base would mean two competing size systems. */
+	--default-xxs: 0.7023rem;
+	--default-xs: 0.7901rem;
+	--default-sm: 0.8889rem;
+	--default-base: 1rem;
+	--default-md: 1.125rem;
+	--default-lg: 1.2656rem;
+	--default-xl: 1.4238rem;
+	--default-xxl: 1.6018rem;
+	--default-xxxl: 1.802rem;
+
+	/* ── Sizing ──────────────────────────────────────────────────
+	   --scale grows FRAMES — heights, paddings, gaps — and never
+	   text. Each geometric length is written `calc(Nem * var(--scale))`
+	   at its own site so it stays intrinsic. */
+	--scale: 1;
+
+	/* ── Colours ─────────────────────────────────────────────────
+	   Not absent: a kit with no colours does not render neutrally,
+	   it renders invisibly. `--color-on-*` and `--color-border` are
+	   derived from these (see _derived-content.scss) and a theme may
+	   still set any of them outright. */
+	/* Not decoration: it tells the browser which way to paint scrollbars,
+	   form controls it still owns, and the canvas behind the page. */
+	color-scheme: var(--color-scheme);
+	--color-scheme: light;
+
+	--color-surface-1: oklch(100% 0 0);
+	--color-surface-2: oklch(96% 0 0);
+	--color-surface-3: oklch(92% 0 0);
+	--color-surface-4: oklch(88% 0 0);
+	--color-primary: oklch(55% 0.21 264);
+	--color-secondary: oklch(60% 0.2 330);
+	--color-accent: oklch(65% 0.18 165);
+	--color-neutral: oklch(28% 0.01 285);
+	--color-info: oklch(70% 0.13 230);
+	--color-success: oklch(72% 0.16 145);
+	--color-warning: oklch(80% 0.15 85);
+	--color-error: oklch(63% 0.22 25);
+
+	/* Derived by default, and re-declared here so they are auditable in one
+	   file and reachable from the form. Everything drawn ON a colour follows
+	   its seed automatically (_derived-content.scss) — these two are the
+	   exceptions a look actually asks for: a kit drawn in ink needs a solid
+	   hairline and solid text, not a ten-percent wash. */
+	--color-on-surface: oklch(from var(--color-surface-1) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
+	--color-border: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+
+	/* ── Focus ───────────────────────────────────────────────────
+	   One ring for the whole kit. This one is not absent either:
+	   an invisible focus ring is an accessibility bug, not a look. */
+	--focus-width: 2px;
+	--focus-offset: 2px;
+	--focus-style: solid;
+
+	/* ── Transitions ─────────────────────────────────────────────
+	   Duration 0 is the neutral value: everything still works, it
+	   just snaps. */
+	--transition-duration: 0s;
+	--transition-easing: cubic-bezier(0, 0, 0.2, 1);
+
+
+	/* ════════════════════════════════════════════════════════════
+	   SECTION — Actions   (button)
+	   ════════════════════════════════════════════════════════════ */
+
+	/* Sentinels. Nothing in any stylesheet reads these three. They record
+	   which effect mode produced the numbers below, so the generator can
+	   reopen a theme it wrote instead of seeing an unreadable pile of
+	   offsets (ADR 0010). Delete them and the theme still renders. */
+	--action-corner: radius;
+	--action-shadow: none;
+	--action-press: none;
+	--action-border-sides: 1 1 1 1;
+	--action-wobble: 1;
+	--action-shadow-sides: 0 1 1 0;
+	--action-shadow-offset: 2px;
+	--action-shadow-blur: 6px;
+	--action-shadow-color: #0003;
+	--action-press-amount: 0.5px;
+	--action-press-angle: 0.4deg;
+
+	/* Geometry. */
+	--action-height: calc(2.5em * var(--scale));
+	--action-padding-x: calc(1em * var(--scale));
+	--action-gap: calc(0.375em * var(--scale));
+	--action-font-weight: 400;
+	--action-letter-spacing: normal;
+	--action-text-transform: none;
+
+	/* Fill. `--action-bg` is the seed a colour variant replaces. */
+	--action-bg: var(--color-surface-2);
+	--action-fg: var(--color-on-surface);
+
+	/* Border. The width is a SHORTHAND, which is how sides are
+	   chosen: `2px` is all four, `0 0 2px 0` is the bottom only. */
+	--action-border-width: 0;
+	--action-border-style: solid;
+	--action-border-color: transparent;
+	/* How much of the element's own fill is blended into the border.
+	   0% is an outline in its own colour; 95% over black is "the fill,
+	   five percent darker". */
+	--action-border-from-fill: 0%;
+	/* The width the drawn variants need — dash, surface, classic —
+	   when the look itself draws no border. It is a plain length, not
+	   a shorthand: `max()` over `0 0 2px 0` is not a thing. */
+	--action-variant-border-width: 1px;
+
+	/* Corners. `--action-corners` is the whole `border-radius`
+	   value, so an effect can replace it with an eight-value
+	   asymmetric recipe. Plain themes leave it pointing at the
+	   single radius. */
+	--action-radius: 0;
+	--action-corners: var(--action-radius);
+
+	/* Shadow — two layers, so two opposite sides (a top AND a
+	   bottom edge) are expressible; one layer does any single side
+	   or any corner on its own. `-inset` holds either nothing or
+	   the keyword `inset`. A layer with a transparent colour costs
+	   one entry in the list and draws nothing. */
+	--action-shadow-1-inset: ;
+	--action-shadow-1-x: 0px;
+	--action-shadow-1-y: 0px;
+	--action-shadow-1-blur: 0px;
+	--action-shadow-1-spread: 0px;
+	--action-shadow-1-color: #0000;
+	--action-shadow-2-inset: ;
+	--action-shadow-2-x: 0px;
+	--action-shadow-2-y: 0px;
+	--action-shadow-2-blur: 0px;
+	--action-shadow-2-spread: 0px;
+	--action-shadow-2-color: #0000;
+
+	/* Effect — depth. A retro relief tinted with the element's own
+	   fill, which is why its recipe lives in button.scss and only
+	   its amount lives here. 0 is off. */
+	--action-depth: 0;
+
+	/* Multiplier applied to the shadow offsets, per state. This is how
+	   a press absorbs its own shadow. There is no resting multiplier:
+	   the resting shadow is the offsets themselves. */
+	--action-hover-shadow-scale: 1;
+	--action-press-shadow-scale: 1;
+
+	/* States. A state is a MIX, not a colour: an amount and what to
+	   mix in. An explicit colour is simply 100%. */
+	--action-hover-mix: 0%;
+	--action-hover-mix-color: #0000;
+	--action-hover-border-mix: 0%;
+	--action-hover-border-mix-color: #0000;
+	--action-press-mix: 0%;
+	--action-press-mix-color: #0000;
+	--action-press-border-mix: 0%;
+	--action-press-border-mix-color: #0000;
+	--action-disabled-mix: 10%;
+	--action-disabled-fg-mix: 20%;
+
+	/* Motion. A button sits where it sits, so there is no resting
+	   translation — only a resting ANGLE, which a tilt needs to lean
+	   away from. Hover and press each get their own position. */
+	--action-rest-rotate: 0deg;
+	--action-hover-x: 0px;
+	--action-hover-y: 0px;
+	--action-hover-rotate: var(--action-rest-rotate);
+	--action-press-x: 0px;
+	--action-press-y: 0px;
+	--action-press-rotate: var(--action-rest-rotate);
+
+	--action-transition-duration: var(--transition-duration);
+	--action-transition-easing: var(--transition-easing);
+
+	/* Variant tuning. `--action-soft-mix` is how much colour bleeds
+	   into `.btn-soft`; `--action-tint` does the same for the two
+	   Radix weights, `.btn-surface` and `.btn-classic`. */
+	--action-soft-mix: 8%;
+	--action-tint: 1;
+}
+
+
+:where(:root) {
+	/* ════════════════════════════════════════════════════════════
+	   SECTION — Fields   (input, select, textarea)
+	   ════════════════════════════════════════════════════════════
+
+	   Every one of these is read by the components through
+	   `var(--<component>-x, var(--field-x))`, so a theme writes the
+	   `--field-` name and a component that has to break ranks gets its
+	   own without a migration. Two overrides are declared below
+	   because a control actually writes them today; the rest of the
+	   per-component names do not exist until someone needs one. */
+
+	/* Sentinels — the generator reads them, no stylesheet does. */
+	--field-corner: radius;
+	--field-shadow: none;
+	--field-focus: none;
+	--field-border-sides: 1 1 1 1;
+	--field-wobble: 1;
+	--field-box-wobble: 0.2;
+	--field-shadow-sides: 0 1 1 0;
+	--field-shadow-offset: 2px;
+	--field-shadow-blur: 6px;
+	--field-shadow-color: #0003;
+	--field-focus-amount: 2px;
+
+	/* Fill and text. */
+	--field-bg: var(--color-surface-1);
+	--field-fg: var(--color-on-surface);
+	/* The accent a colour variant replaces. It is not the border: a look
+	   can draw no border at all and still tint its relief from this. */
+	--field-accent-color: var(--color-border);
+	--field-placeholder-mix: 45%;
+
+	/* Border. The width is a shorthand, which is how sides are chosen. */
+	--field-border-width: 0;
+	--field-border-style: solid;
+	--field-border-color: transparent;
+	--field-border-from-fill: 0%;
+
+	/* Corners. A wobble replaces the whole value, and a tall box takes
+	   less drift than a control does — which is why the textarea has an
+	   override of its own rather than sharing the number. */
+	--field-radius: 0;
+	--field-corners: var(--field-radius);
+	--textarea-corners: var(--field-corners);
+
+	/* Shadow: two layers, then the relief. */
+	--field-shadow-1-inset: ;
+	--field-shadow-1-x: 0px;
+	--field-shadow-1-y: 0px;
+	--field-shadow-1-blur: 0px;
+	--field-shadow-1-spread: 0px;
+	--field-shadow-1-color: #0000;
+	--field-shadow-2-inset: ;
+	--field-shadow-2-x: 0px;
+	--field-shadow-2-y: 0px;
+	--field-shadow-2-blur: 0px;
+	--field-shadow-2-spread: 0px;
+	--field-shadow-2-color: #0000;
+	--field-depth: 0;
+
+	/* Focus. Four shapes — nothing, an outline, a ring, a push — and all
+	   four are these numbers. */
+	--field-focus-accent-color: var(--color-on-surface);
+	--field-focus-border-color: var(--field-border-color);
+	--field-focus-ring-width: 0px;
+	--field-focus-ring-color: #0000;
+	--field-focus-cast-x: 0px;
+	--field-focus-cast-y: 0px;
+	--field-focus-cast-color: #0000;
+	--field-focus-shadow-scale: 1;
+	--field-focus-x: 0px;
+	--field-focus-y: 0px;
+	--field-focus-outline-width: 0px;
+	--field-focus-outline-offset: var(--focus-offset);
+	--field-focus-outline-color: var(--color-on-surface);
+
+	/* Geometry. */
+	--field-height: calc(2.5em * var(--scale));
+	--field-padding-x: calc(0.75em * var(--scale));
+	--field-gap: calc(0.5em * var(--scale));
+	--field-rest-rotate: 0deg;
+	--field-transition-duration: var(--transition-duration);
+	--field-transition-easing: var(--transition-easing);
+	--field-disabled-mix: 10%;
+	--field-disabled-fg-mix: 40%;
+
+	/* What belongs to one component only. */
+	--textarea-min-height: calc(5em * var(--scale));
+	--textarea-padding-y: calc(0.5em * var(--scale));
+	--select-chevron-size: 4px;
+	--select-chevron-inset: calc(1.25em * var(--scale));
+	--field-picker-radius: 0.5rem;
+
+	/* The button inside a file input. It paints from the Actions section —
+	   it is a button — and only its geometry belongs here. */
+	--file-input-button-size: 0.875rem;
+	--file-input-button-gap: calc(1em * var(--scale));
+	--file-input-button-padding-x: calc(1em * var(--scale));
+
+	/* The inline label: text or an icon sitting inside a field. */
+	--label-gap: calc(0.375em * var(--scale));
+	--label-mix: 60%;
+	--label-inset: calc(0.5em * var(--scale));
+	--label-divider-width: 1px;
+	--label-divider-mix: 10%;
+
+	/* The container that floats a field's name into its edge. Its ground has
+	   to match what the field is drawn on, or the trick shows. */
+	--floating-label-bg: var(--color-surface-1);
+	--floating-label-padding-x: calc(0.25em * var(--scale));
+	--floating-label-size: 0.875rem;
+	--floating-label-rest-top: calc(1.25em * var(--scale));
+	--floating-label-radius: 2px;
+	--floating-label-scale: 0.75;
+	--floating-label-duration: 0.1s;
+
+	--validator-hint-gap: 0.5em;
+}
+
+
+:where(:root) {
+	/* ════════════════════════════════════════════════════════════
+	   SECTION — Selectors   (checkbox, radio, toggle)
+	   ════════════════════════════════════════════════════════════
+
+	   A selector has two states that matter and they are not hover
+	   and press: it is checked or it is not. So the fill, the edge
+	   and the mark are declared twice rather than as a shift, because
+	   three of the four looks this replaces change all three at once.
+
+	   Same two-level cascade as the fields. Two components already
+	   need the override, and both reasons are real — see radio and
+	   toggle below. */
+
+	/* Sentinels. */
+	--selector-corner: radius;
+	--selector-wobble: 0.7;
+
+	/* The box. */
+	--selector-size: calc(1.5em * var(--scale));
+	--selector-padding: calc(0.1667em * var(--scale));
+	--selector-bg: #0000;
+	--selector-border-width: 1px;
+	--selector-border-style: solid;
+	--selector-border-color: var(--color-border);
+	--selector-radius: 0.5rem;
+	--selector-corners: var(--selector-radius);
+	--selector-mark: var(--color-on-surface);
+
+	/* The checked paint. */
+	--selector-checked-bg: #0000;
+	--selector-checked-border-color: var(--selector-border-color);
+	--selector-checked-mark: var(--color-on-surface);
+
+	--selector-depth: 0;
+	--selector-disabled-opacity: 0.2;
+	--selector-focus-width: var(--focus-width);
+	--selector-focus-offset: var(--focus-offset);
+	--selector-focus-color: var(--color-on-surface);
+	--selector-transition-duration: var(--transition-duration);
+	--selector-transition-easing: var(--transition-easing);
+
+	/* A radio keeps its ground when checked: the accent is the disc
+	   inside it, not the fill behind it. All four looks agreed.
+	   Its roundness is NOT here — a square radio is a checkbox with
+	   the wrong behaviour, so radio.scss pins it and `.radio-square`
+	   exists for the one case where someone really means it. */
+	--radio-checked-bg: var(--color-surface-1);
+	/* Its ring and its disc are one colour and it is not the checkbox's
+	   fill: a radio shows its accent as a dot, not as a block. */
+	--radio-checked-border-color: var(--selector-checked-border-color);
+	--radio-checked-mark: var(--selector-checked-mark);
+	/* The tick animates slower than a colour changes, on purpose. */
+	--checkbox-mark-duration: 0.3s;
+
+	/* A toggle has a track and a thumb, which is not the same pair as
+	   a box and a mark: a look can want a transparent box and a filled
+	   track. daisy uses the split — its thumb is the text colour at
+	   half strength while its tick is that colour at full. */
+	/* A toggle is not the same size as a checkbox even in looks that shrink
+	   their boxes: it has to be wide enough for the thumb to travel. Both
+	   dahlia and sunflower use the split. */
+	--toggle-size: var(--selector-size);
+	--toggle-padding: var(--selector-padding);
+	--toggle-corners: var(--selector-corners);
+	--toggle-track-bg: var(--selector-bg);
+	--toggle-track-border-color: var(--selector-border-color);
+	--toggle-thumb-bg: var(--selector-mark);
+	--toggle-thumb-corners: var(--selector-corners);
+	--toggle-thumb-shadow: none;
+	--toggle-checked-track-bg: var(--selector-checked-bg);
+	--toggle-checked-track-border-color: var(--selector-checked-border-color);
+	--toggle-checked-thumb-bg: var(--selector-checked-mark);
+
+	/* ── The slider ──────────────────────────────────────────────
+	   `--range-trail-height` is the whole of what looked like a
+	   structural difference between the families: the trail is the
+	   shadow the thumb casts, WebKit gives that shadow the thumb's
+	   height, and a clip-path cuts it down to this band. Set it to
+	   the rail and the trail is thin; set it to the thumb's own size
+	   and the clip stops cutting. One length, no variant. */
+	--range-thumb-size: calc(1.5em * var(--scale));
+	--range-rail: calc(var(--range-thumb-size) * 0.5);
+	--range-trail-height: var(--range-rail);
+	--range-track-bg: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+	--range-track-border-width: 0px;
+	--range-track-border-color: #0000;
+	--range-track-corners: 999px;
+	--range-thumb-bg: var(--color-surface-1);
+	--range-thumb-border-width: 0px;
+	--range-thumb-border-color: currentColor;
+	--range-thumb-corners: 999px;
+	--range-thumb-shadow: 0 0 #0000;
+	--range-thumb-halo: 0.125em;
+	--range-progress: var(--color-primary);
+	/* 1 fills the track before the thumb, 0 leaves it empty. */
+	--range-fill: 1;
+
+	/* ── The colour sample ───────────────────────────────────────
+	   `--swatch-color` is DATA: the author passes it at the call
+	   site and no theme writes it. Everything around it is a value. */
+	--swatch-size: calc(2em * var(--scale));
+	--swatch-corners: var(--selector-corners);
+	--swatch-border-width: var(--selector-border-width);
+	--swatch-border-color: var(--selector-border-color);
+	--swatch-shadow: none;
+	--swatch-font-weight: 600;
+	--swatch-rest-rotate: 0deg;
+	--swatch-transition-duration: var(--selector-transition-duration);
+	--swatch-check-size: calc(0.5em * var(--scale));
+	--swatch-checks: conic-gradient(
+		from 90deg,
+		var(--color-surface-3) 25%,
+		var(--color-surface-2) 0 50%,
+		var(--color-surface-3) 0 75%,
+		var(--color-surface-2) 0
+	);
+	--swatch-active-shadow: 0 0 0 2px var(--color-surface-1), 0 0 0 4px var(--color-primary);
+	--swatch-active-x: 0px;
+	--swatch-active-y: 0px;
+
+	/* ── The strip of tabs ───────────────────────────────────────
+	   Its big departures are variants, not values: `.tabs-border`,
+	   `.tabs-lift`, `.tabs-box`, `.tabs-top`, `.tabs-bottom`. */
+	--tabs-height-item: calc(2.5em * var(--scale));
+	--tabs-padding-x: calc(0.75em * var(--scale));
+	--tabs-font-size: 0.875rem;
+	--tabs-border-width: 1px;
+	--tabs-border-color: var(--color-border);
+	--tabs-corners: var(--selector-corners);
+	--tabs-box-corners: 0.5rem;
+	--tabs-box-bg: var(--color-surface-2);
+	--tabs-active-bg: var(--color-surface-1);
+	--tabs-idle-color: color-mix(in oklch, var(--color-on-surface) 50%, #0000);
+	--tabs-active-color: var(--color-on-surface);
+	--tabs-depth: 0;
+	--tabs-shadow-color: var(--color-neutral);
+	--tabs-rest-rotate: 0deg;
+	--tabs-disabled-opacity: 0.4;
+	--tabs-focus-color: currentColor;
+	--tabs-focus-offset: -5px;
+	--tabs-transition-duration: var(--selector-transition-duration);
+	--tabs-transition-easing: var(--selector-transition-easing);
+}
+
+
+:where(:root) {
+	/* ════════════════════════════════════════════════════════════
+	   SECTION — Containers
+	   (fieldset, list, menu, navbar, dock; `join` is not themed)
+	   ════════════════════════════════════════════════════════════
+
+	   `join` has no values at all and never did: it squares the
+	   corners where two controls meet and pulls their borders
+	   together, reading its neighbours' radii rather than deciding
+	   anything. Its 125 rules were byte-identical across all four
+	   families, which is the whole argument for it having no
+	   section and no controls. */
+
+	/* Shared by the boxes. */
+	--container-corners: 0.5rem;
+	--container-item-corners: var(--container-corners);
+	--container-border-width: 1px;
+	--container-shadow: none;
+
+	/* The group of fields. */
+	--fieldset-legend-fg: var(--color-on-surface);
+	--fieldset-label-fg: color-mix(in oklch, var(--color-on-surface) 60%, #0000);
+
+	/* The column of rows. */
+	--list-bg: var(--color-surface-1);
+	--list-divider-width: var(--container-border-width);
+	--list-divider-color: color-mix(in oklab, var(--color-on-surface) 5%, #0000);
+	--list-hover-bg: color-mix(in oklab, var(--color-on-surface) 7%, #0000);
+	--list-active-bg: color-mix(in oklab, var(--color-primary) 12%, #0000);
+	--list-active-fg: var(--color-primary);
+	--list-suggestions-border-color: var(--color-surface-2);
+	--list-suggestions-shadow: 0 8px 16px -4px color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+
+	/* The bar pinned to the bottom. Its height answers to the screen
+	   rather than to its content, which is why it stays absolute. */
+	--dock-bg: var(--color-surface-3);
+	--dock-border-width: 0.5px;
+	--dock-border-color: color-mix(in oklab, var(--color-on-surface) 5%, #0000);
+	--dock-disabled-color: color-mix(in oklch, var(--color-on-surface) 10%, #0000);
+
+	/* The bar across the top. */
+	--navbar-bg: var(--color-surface-3);
+	--navbar-fg: var(--color-on-surface);
+	--navbar-border: #0000;
+	--navbar-border-width: 0;
+	--navbar-shadow: var(--container-shadow);
+	--navbar-h: calc(4em * var(--scale));
+	--navbar-px: calc(0.5em * var(--scale));
+	--navbar-py: calc(0.5em * var(--scale));
+	--navbar-gap: calc(0.5em * var(--scale));
+	/* Where a sticky bar comes to rest. It answers to the viewport, not to
+	   its content, so it stays absolute. */
+	--navbar-sticky-top: 0px;
+
+	/* The column of links. Forty of them, and every family was already
+	   filling exactly these rather than writing rules — which is why
+	   this was the least eventful migration in the kit despite being
+	   the biggest block. */
+	--menu-bg: var(--color-surface-2);
+	--menu-fg: var(--color-on-surface);
+	--menu-border: #0000;
+	--menu-border-width: 0;
+	--menu-shadow: none;
+	--menu-p: calc(0.5em * var(--scale));
+	--menu-gap: 0px;
+	--menu-item-py: calc(0.375em * var(--scale));
+	--menu-item-px: calc(0.75em * var(--scale));
+	--menu-item-gap: calc(0.5em * var(--scale));
+	--menu-item-radius: var(--container-item-corners);
+	--menu-item-bg: #0000;
+	--menu-item-fg: inherit;
+	--menu-item-transition: color 0.2s cubic-bezier(0, 0, 0.2, 1),
+		background-color 0.2s cubic-bezier(0, 0, 0.2, 1),
+		box-shadow 0.2s cubic-bezier(0, 0, 0.2, 1);
+	--menu-hover-bg: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+	--menu-hover-fg: var(--color-on-surface);
+	--menu-active-bg: var(--color-neutral);
+	--menu-active-fg: var(--color-on-neutral);
+	--menu-disabled-bg: #0000;
+	--menu-disabled-fg: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	--menu-focus-outline: 2px solid currentColor;
+	--menu-focus-offset: 2px;
+	--menu-title-py: calc(0.5em * var(--scale));
+	--menu-title-px: calc(0.75em * var(--scale));
+	--menu-title-fg: color-mix(in oklab, var(--color-on-surface) 40%, #0000);
+	--menu-title-size: 1em;
+	--menu-title-weight: 600;
+	--menu-title-transform: none;
+	--menu-title-tracking: normal;
+	--menu-divider: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+	--menu-divider-size: 1px;
+	--menu-divider-gap: calc(0.5em * var(--scale));
+	--menu-divider-inset: calc(1em * var(--scale));
+	--menu-sub-indent: calc(1em * var(--scale));
+	--menu-sub-transition: 0.25s cubic-bezier(0, 0, 0.2, 1);
+
+	/* Two looks add a rule of their own, and both are real: one draws a
+	   line just INSIDE a row rather than around it, the other gives every
+	   other row the opposite tilt. */
+	--menu-item-line: #0000;
+	--menu-item-hover-line: var(--menu-item-line);
+	--menu-item-active-line: var(--menu-item-line);
+	--menu-item-rotate: 0deg;
+	--menu-item-rotate-alt: 0deg;
+	--menu-rest-rotate: 0deg;
+	--menu-item-weight: inherit;
+	--menu-item-active-weight: inherit;
+}
+
+:where(:root) {
+	/* ════════════════════════════════════════════════════════════
+	   SECTION — Markers   (badge, chip, breadcrumbs)
+	   ════════════════════════════════════════════════════════════
+
+	   `badge` has no values at all — it is this section's `join`. It
+	   positions a `.chip` against whatever it wraps and paints
+	   nothing, so it has no controls either. */
+	--marker-bg: var(--color-surface-1);
+	--marker-fg: var(--color-on-surface);
+	--marker-muted-bg: var(--color-surface-2);
+	--marker-border-width: 1px;
+	--marker-border-color: var(--color-surface-2);
+	--marker-corners: 999px;
+	--marker-shadow: none;
+	/* How much colour bleeds into a soft chip, and into its edge. */
+	--marker-soft-mix: 8%;
+	--marker-soft-border-mix: 10%;
+	--marker-font-weight: 400;
+	--marker-rest-rotate: 0deg;
+
+	/* ════════════════════════════════════════════════════════════
+	   SECTION — Feedback
+	   (progress, radial-progress, loading, skeleton)
+	   ════════════════════════════════════════════════════════════ */
+	--feedback-fill: var(--color-on-surface);
+	--feedback-corners: 0.5rem;
+	--feedback-border-width: 1px;
+	--feedback-shadow: none;
+	--feedback-dot-bg: var(--color-surface-2);
+	--skeleton-bg: var(--color-surface-2);
+	--skeleton-shimmer: var(--color-surface-1);
+	--skeleton-mask-edge: color-mix(in oklab, var(--color-on-surface) 20%, transparent);
+	--skeleton-mask-peak: var(--color-on-surface);
+
+	/* ════════════════════════════════════════════════════════════
+	   SECTION — Text   (text, title, subtitle, link)
+	   ════════════════════════════════════════════════════════════
+
+	   Text-natured components draw no frame, so `--scale` does not
+	   touch them (CLAUDE.md). The rule is "does it draw a frame?",
+	   and none of these do. */
+	--text-border-width: 1px;
+	--link-decoration: underline;
+	--link-hover-decoration: underline;
+	--link-focus-width: var(--focus-width);
+	--link-focus-offset: var(--focus-offset);
+	--link-focus-color: currentColor;
+	/* How far a link moves when you hover it, and towards what. */
+	--link-hover-mix: 20%;
+	--link-hover-mix-color: #000;
+	--link-weight: inherit;
+	--link-underline-width: auto;
+	--link-underline-offset: auto;
+}

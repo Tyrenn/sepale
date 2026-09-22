@@ -1,137 +1,219 @@
 <script lang="ts">
-	// Describes the family that is currently selected, in its own words: the
-	// prose from its SCSS header, the departures it had to make from its
-	// source, its themes, and the full list of variables it exposes. All of it
-	// read from the family file at build time — this page cannot drift from
-	// the CSS. Picking a family is the sidebar's job, not this page's.
-	import { playground, families, categoryFor } from '../playground.svelte.js';
-	import { familyDocs, paramsByFamily, themesByFamily } from '$lib/generated/registry.js';
+	import { SECTIONS, NEUTRAL, vars } from '$lib/theme/store.svelte.js';
+	import type { Control, Section } from '$lib/theme/schema.js';
 
-	let doc = $derived(familyDocs[playground.family]);
-	let params = $derived(paramsByFamily[playground.family] ?? []);
-	let themes = $derived(themesByFamily[playground.family] ?? []);
+	/**
+	 * The control → variable table: the documentation of the theme format.
+	 *
+	 * It is not a nicety. A theme is a flat file of custom properties and the
+	 * generator's controls are not one-to-one with them — "press: push" writes
+	 * four — so without this page, "the dev can go in and edit the values by
+	 * hand" is a claim with nothing behind it. This is what makes it true.
+	 *
+	 * Everything here is derived: the sections, their controls, what each one
+	 * writes, and what the neutral default is. Add a control and it appears.
+	 */
 
-	// Grouped in the order the configurator shows them.
-	const ORDER = ['Colors', 'Typography', 'Shape', 'Size', 'Effects', 'Elevation'];
-	let groups = $derived.by(() => {
-		const map = new Map<string, typeof params>();
-		for (const p of params) {
-			if (!map.has(p.group)) map.set(p.group, []);
-			map.get(p.group)!.push(p);
-		}
-		return [...map.entries()].sort((a, b) => {
-			const ia = ORDER.indexOf(a[0]);
-			const ib = ORDER.indexOf(b[0]);
-			return (ia < 0 ? ORDER.length : ia) - (ib < 0 ? ORDER.length : ib);
-		});
-	});
+	let live = $derived(vars());
 
-	function range(p: (typeof params)[number]): string {
-		if (p.min === undefined) return '';
-		return `${p.min} – ${p.max}${p.unit ? ' ' + p.unit : ''}`;
+	/**
+	 * A control and everything nested under it, flattened for the table.
+	 *
+	 * Each row carries its own key: the same control appears under more than
+	 * one mode of an effect — a radius is offered by both Rounded and
+	 * Hand-drawn, with a different default each time — so the control's id is
+	 * not unique here and `mode` is what separates them.
+	 */
+	interface Row {
+		control: Control;
+		depth: number;
+		key: string;
 	}
+
+	function rows(controls: Control[], depth = 0, prefix = ''): Row[] {
+		return controls.flatMap((c) =>
+			c.type === 'effect'
+				? [
+						{ control: c, depth, key: prefix + c.id },
+						...c.modes.flatMap((m) => rows(m.controls, depth + 1, `${prefix}${c.id}:${m.id}/`))
+					]
+				: [{ control: c, depth, key: prefix + c.id }]
+		);
+	}
+
+	function countVars(section: Section): number {
+		return new Set(rows(section.controls).flatMap((r) => r.control.vars)).size;
+	}
+
+	const kind = (c: Control) =>
+		c.type === 'effect' ? `effect (${c.modes.map((m) => m.id).join(' | ')})` : c.type;
 </script>
 
-<main class="content fam">
-	<header class="fam-head">
-		<h1 class="fam-title">{doc.title}</h1>
-		{#if doc.after}<p class="fam-after">{doc.after}</p>{/if}
-	</header>
+<main class="content">
+	<section class="gallery">
+		<h2 class="gallery-title">Variables</h2>
 
-	{#each doc.blurb.split('\n\n') as para (para)}
-		<p class="fam-blurb">{para}</p>
-	{/each}
-
-	{#if doc.changes.length}
-		<section class="fam-section">
-			<h2 class="fam-h2">What had to change</h2>
-			<p class="fam-note">
-				A family keeps our intrinsic, font-size-driven sizing. Everything else is
-				its own — including the variables it exposes. These are the places where
-				the source design had to be read rather than copied.
-			</p>
-			<ul class="fam-changes">
-				{#each doc.changes as change (change)}
-					<li>{change}</li>
-				{/each}
-			</ul>
-		</section>
-	{/if}
-
-	<section class="fam-section">
-		<h2 class="fam-h2">Themes <span class="fam-count">{themes.length}</span></h2>
-		<div class="fam-themes">
-			{#each themes as t (t.name)}
-				<span class="fam-theme" data-scheme={t.scheme}>{t.label}</span>
-			{/each}
-		</div>
-	</section>
-
-	<section class="fam-section">
-		<h2 class="fam-h2">Variables <span class="fam-count">{params.length}</span></h2>
-		<p class="fam-note">
-			These are this family's, and only this family's. Another family may expose
-			more of them, fewer, or different ones entirely — sharing a name is a
-			convenience for whoever writes the themes, never a rule.
+		<p class="doc-lede">
+			Every control in the generator, and the CSS custom properties it writes. A theme is a flat
+			file of these — nothing else — so this table is what lets you edit one by hand instead of
+			going back to the form.
 		</p>
 
-		{#each groups as [group, items] (group)}
-			<h3 class="fam-h3">{group}</h3>
-			<div class="fam-table-wrap">
-				<table class="fam-table">
+		<p class="note">
+			A control is not a variable. Some write several: <code>Press</code> writes four, and the edges
+			of a shadow and its distance both feed the same two <code>box-shadow</code> layers. A few
+			write a variable no stylesheet reads — those are the <strong>sentinels</strong>, and they are
+			how the generator reopens a theme it wrote rather than seeing an unreadable pile of offsets.
+		</p>
+
+		{#each SECTIONS as section (section.id)}
+			<section class="sec">
+				<h3 class="sec-title">
+					{section.label}
+					<span class="sec-count">{countVars(section)} variables</span>
+				</h3>
+				{#if section.help}<p class="note">{section.help}</p>{/if}
+				{#if section.prefixes.length}
+					<p class="note">
+						Prefixes: {#each section.prefixes as p, i (p)}<code
+								>--{p}-</code
+							>{i < section.prefixes.length - 1 ? ', ' : ''}{/each}
+					</p>
+				{/if}
+
+				<table class="tbl">
 					<thead>
-						<tr>
-							<th>Variable</th>
-							<th>Name</th>
-							<th>Default</th>
-							<th>Range</th>
-							<th>What it does</th>
-						</tr>
+						<tr><th>Control</th><th>Writes</th><th>Neutral</th><th>Now</th></tr>
 					</thead>
 					<tbody>
-						{#each items as p (p.name)}
-							<tr>
-								<td class="fam-var">--{p.name}</td>
-								<td>{p.label}</td>
-								<td class="fam-val">
-									{#if p.type === 'color'}
-										<span class="fam-swatch" style="background:var(--{p.name})"></span>
-									{/if}
-									<code>{p.value}</code>
+						{#each rows(section.controls) as { control, depth, key } (section.id + key)}
+							<tr class:nested={depth > 0}>
+								<td>
+									<span class="ctl-name" style="padding-inline-start:{depth * 0.9}rem">
+										{control.label}
+									</span>
+									<span class="ctl-kind">{kind(control)}</span>
+									{#if control.help}<span class="ctl-help">{control.help}</span>{/if}
 								</td>
-								<td class="fam-range">{range(p)}</td>
-								<td class="fam-desc">{p.description ?? ''}</td>
+								<td class="mono">
+									{#each control.vars as v (v)}<span class="var">--{v}</span>{/each}
+									{#if !control.vars.length}<span class="none">—</span>{/if}
+								</td>
+								<td class="mono dim">
+									{#each control.vars as v (v)}<span class="val">{NEUTRAL[v] ?? '—'}</span>{/each}
+								</td>
+								<td class="mono">
+									{#each control.vars as v (v)}<span
+											class="val"
+											class:changed={live[v] !== NEUTRAL[v]}>{live[v] ?? '—'}</span
+										>{/each}
+								</td>
 							</tr>
 						{/each}
 					</tbody>
 				</table>
-			</div>
+			</section>
 		{/each}
 	</section>
-
-	<section class="fam-section">
-		<h2 class="fam-h2">All families</h2>
-		<div class="fam-table-wrap">
-			<table class="fam-table">
-				<thead>
-					<tr>
-						<th>Family</th>
-						<th>After</th>
-						<th>Themes</th>
-						<th>Variables</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each families as f (f)}
-						<tr data-active={playground.family === f}>
-							<td class="fam-var">{f}</td>
-							<td>{categoryFor(f)}</td>
-							<td>{(themesByFamily[f] ?? []).length}</td>
-							<td>{(paramsByFamily[f] ?? []).length}</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	</section>
 </main>
+
+<style>
+	.note {
+		margin: 0.5rem 0 0;
+		max-width: 46rem;
+		font-size: 0.8rem;
+		line-height: 1.55;
+		opacity: 0.7;
+	}
+	.sec {
+		margin-top: 2.5rem;
+	}
+	.sec-title {
+		display: flex;
+		align-items: baseline;
+		gap: 0.6rem;
+		font-size: 0.85rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		margin: 0;
+	}
+	.sec-count {
+		font-size: 0.7rem;
+		font-weight: 400;
+		text-transform: none;
+		letter-spacing: normal;
+		opacity: 0.5;
+	}
+	.tbl {
+		width: 100%;
+		table-layout: fixed;
+		border-collapse: collapse;
+		margin-top: 0.75rem;
+		font-size: 0.75rem;
+	}
+	/* Fixed, because the help text is the widest thing here and an auto
+	   layout gives it one word per line to make room for the values. */
+	.tbl th:nth-child(1) {
+		width: 34%;
+	}
+	.tbl th:nth-child(2) {
+		width: 22%;
+	}
+	.tbl th:nth-child(3),
+	.tbl th:nth-child(4) {
+		width: 22%;
+	}
+	.tbl th {
+		text-align: start;
+		font-size: 0.65rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		opacity: 0.5;
+		padding: 0.4rem 0.6rem;
+		border-bottom: 1px solid color-mix(in oklab, currentColor 15%, transparent);
+	}
+	.tbl td {
+		vertical-align: top;
+		padding: 0.45rem 0.6rem;
+		border-bottom: 1px solid color-mix(in oklab, currentColor 8%, transparent);
+	}
+	.nested td:first-child {
+		opacity: 0.85;
+	}
+	.ctl-name {
+		display: block;
+		font-weight: 600;
+	}
+	.ctl-kind {
+		display: block;
+		font-size: 0.65rem;
+		opacity: 0.5;
+	}
+	.ctl-help {
+		display: block;
+		margin-top: 0.15rem;
+		max-width: 26rem;
+		line-height: 1.4;
+		opacity: 0.6;
+	}
+	.mono {
+		font-family: ui-monospace, monospace;
+		font-size: 0.68rem;
+	}
+	.var,
+	.val {
+		display: block;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.dim {
+		opacity: 0.55;
+	}
+	.changed {
+		font-weight: 700;
+	}
+	.none {
+		opacity: 0.4;
+	}
+</style>

@@ -1,10 +1,9 @@
 <script lang="ts">
 	// One component at a time: what it is, what it is made of, and then the
-	// examples. The two tables describe the ACTIVE FAMILY — switch family in
-	// the sidebar and they change, because a family that does not ship a
-	// variant does not offer it either.
+	// examples. The two tables describe the kit, which is now one stylesheet —
+	// so they describe what there is, full stop (ADR 0010).
 	import { page } from '$app/state';
-	import { playground, COMPONENTS } from '../../playground.svelte.js';
+	import { COMPONENTS } from '../../playground.svelte.js';
 	import { pages, classRows, propRows, hasWrapper } from '../doc.js';
 
 	let id = $derived(page.params.id ?? 'button');
@@ -13,9 +12,9 @@
 		COMPONENTS.flatMap((g) => g.items).find((i) => i.id === id)?.label ?? id
 	);
 
-	let rows = $derived(entry ? classRows(id, playground.family) : []);
-	let props = $derived(entry ? propRows(id, playground.family) : []);
-	let wrapped = $derived(hasWrapper(id, playground.family));
+	let rows = $derived(entry ? classRows(id) : []);
+	let props = $derived(entry ? propRows(id) : []);
+	let wrapped = $derived(hasWrapper(id));
 	let many = $derived(new Set(props.map((p) => p.component)).size > 1);
 
 	let tab = $state<'css' | 'svelte'>('css');
@@ -64,7 +63,7 @@
 					</table>
 					{:else}
 						<p class="api-note api-none">
-							{playground.family} ships no class in this namespace.
+							The kit ships no class in this namespace.
 						</p>
 					{/if}
 				{:else if wrapped}

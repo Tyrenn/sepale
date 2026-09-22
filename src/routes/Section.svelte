@@ -4,8 +4,6 @@
 	// components (passed as children); the Svelte / HTML tabs show source.
 	// HTML is optional — some demos only make sense via the Svelte component.
 	import type { Snippet } from 'svelte';
-	import { classesByFamily, knownClasses } from './components/doc.js';
-	import { playground } from './playground.svelte.js';
 
 	let {
 		title,
@@ -47,36 +45,10 @@
 	let active = $state<TabId>('preview');
 	let code = $derived(active === 'html' ? htmlSrc : svelteSrc);
 
-	/**
-	 * An example demonstrates classes; a family that does not ship them would
-	 * render it as a lie — an unstyled button labelled "soft". So the section
-	 * says so instead of showing it.
-	 *
-	 * The list is read from the example's own HTML sample: nothing to declare,
-	 * and it cannot drift from what the example actually writes. A class the
-	 * kit has never heard of is the app's own markup and is ignored.
-	 */
-	let missing = $derived.by(() => {
-		if (!htmlSrc) return [];
-		const shipped = classesByFamily[playground.family] ?? {};
-		const used = new Set<string>();
-		for (const m of htmlSrc.matchAll(/class="([^"]+)"/g)) {
-			for (const cls of m[1].split(/\s+/)) {
-				if (knownClasses.has(cls) && !(cls in shipped)) used.add(cls);
-			}
-		}
-		return [...used].sort();
-	});
-
-	/* Naming who does have it turns a hidden example into a comparison: the
-	   reader learns the variant exists and where to find it. */
-	let elsewhere = $derived(
-		missing.length
-			? Object.keys(classesByFamily)
-					.filter((f) => f !== playground.family && missing.every((c) => c in classesByFamily[f]))
-					.sort()
-			: []
-	);
+	/* There is one stylesheet now (ADR 0010), and the build fails if it ships a
+	   class no component accounts for — so every class an example writes is a
+	   class the kit has. The "this family does not ship it" branch that used to
+	   live here has nothing left to detect. */
 
 	let copied = $state(false);
 	async function copy() {
@@ -106,14 +78,7 @@
 			{/each}
 		</div>
 
-		{#if missing.length}
-			<p class="box-body box-absent">
-				{playground.family} does not ship
-				{#each missing as cls, i (cls)}<code>.{cls}</code>{i < missing.length - 1
-						? ', '
-						: ''}{/each}, so this example has nothing to show.{#if elsewhere.length}{' '}It belongs to {elsewhere.join(', ')}.{/if}
-			</p>
-		{:else if active === 'preview'}
+		{#if active === 'preview'}
 			<div class="box-body box-preview">{@render children()}</div>
 		{:else}
 			<div class="box-body box-code">
@@ -225,20 +190,6 @@
 	}
 
 	/* A section that vanished would read as a bug; one that says why is doc. */
-	.box-absent {
-		margin: 0;
-		padding: 1.5rem;
-		font-size: 0.85rem;
-		line-height: 1.5;
-		color: color-mix(in oklab, var(--color-on-surface) 60%, transparent);
-	}
-	.box-absent code {
-		font-family: ui-monospace, SFMono-Regular, monospace;
-		font-size: 0.85em;
-		padding: 0.1em 0.3em;
-		border-radius: 0.3rem;
-		background: color-mix(in oklab, var(--color-on-surface) 8%, transparent);
-	}
 
 	.box-code {
 		position: relative;

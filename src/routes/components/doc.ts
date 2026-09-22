@@ -8,20 +8,21 @@
  *                      examples. Plus `namespaces`, the one structural fact
  *                      nothing can derive: that `.title` belongs to `text`.
  *
- *   $lib/generated/    DERIVED — which classes the ACTIVE FAMILY ships, and
- *   components.ts      how its component classifies each one. Written by
- *                      scripts/gen-components.mjs in the same pass that
- *                      narrows the components themselves, so a page cannot
- *                      offer what the stylesheet has never heard of.
+ *   $lib/generated/    DERIVED — which classes the kit ships, and how its
+ *   classes.ts         component classifies each one. Written by
+ *                      scripts/gen-classes.mjs, which fails the build when
+ *                      the stylesheet ships a class no component accounts
+ *                      for — so a page cannot describe what is not there,
+ *                      and nothing is there that no page can describe.
  *
  * A class with no prose still gets a row, with a sentence derived from its
  * classification. Nobody has to write 180 sentences for the page to work.
  */
 
 import type { Component } from 'svelte';
-import { classesByFamily, axesByFamily, flagsByFamily } from '$lib/generated/components.js';
+import { classes, axes as axesOf } from '$lib/generated/classes.js';
 
-export { classesByFamily };
+export { classes };
 
 export interface PropDoc {
 	name: string;
@@ -72,15 +73,14 @@ export interface ClassRow {
 
 const RANK = { root: 0, axis: 1, flag: 2, part: 3, unclassified: 4 } as const;
 
-/** Every class the active family ships in this page's namespaces, classified. */
-export function classRows(id: string, family: string): ClassRow[] {
+/** Every class the kit ships in this page's namespaces, classified. */
+export function classRows(id: string): ClassRow[] {
 	const doc = pages[id]?.doc;
 	if (!doc) return [];
-	const shipped = classesByFamily[family] ?? {};
 	const mine = (cls: string) =>
 		doc.namespaces.some((ns) => cls === ns || cls.startsWith(ns + '-'));
 
-	return Object.entries(shipped)
+	return Object.entries(classes)
 		.filter(([cls]) => mine(cls))
 		.map(([name, info]) => {
 			const written = doc.classes?.[name];
@@ -117,41 +117,23 @@ export interface PropRow extends PropDoc {
 }
 
 /**
- * Which of a component's boolean props are FLAGS — that is, props that write a
- * class. Read as the union over every family, because a family that does not
- * ship one is exactly the case we are trying to catch.
+ * Every prop a component takes. With one stylesheet there is nothing left to
+ * filter these against: an axis the kit ships is an axis the component offers,
+ * which is the whole of what the per-family narrowing used to compute.
  */
-const flagNames = (() => {
-	const cache = new Map<string, Set<string>>();
-	return (component: string) => {
-		let set = cache.get(component);
-		if (!set) {
-			set = new Set(Object.values(flagsByFamily).flatMap((m) => m[component] ?? []));
-			cache.set(component, set);
-		}
-		return set;
-	};
-})();
-
-/**
- * The props the active family leaves standing. An axis it does not ship loses
- * its prop entirely (see AxisProps), so the table says the same thing the
- * generated component's type does.
- */
-export function propRows(id: string, family: string): PropRow[] {
+export function propRows(id: string): PropRow[] {
 	const doc = pages[id]?.doc;
 	if (!doc) return [];
 	const rows: PropRow[] = [];
 
 	/* Driven by the components that own the classes, NOT by the hand-written
 	   prose: `Loading` is all axes and no prose, and it still has props. */
-	for (const component of componentsOf(id, family)) {
+	for (const component of componentsOf(id)) {
 		const props = doc.props?.[component] ?? [];
-		const axes = axesByFamily[family]?.[component] ?? {};
-		const flags = flagsByFamily[family]?.[component] ?? [];
+		const componentAxes = axesOf[component] ?? {};
 
-		/* An axis first: it is the prop whose type changes with the family. */
-		for (const [axis, values] of Object.entries(axes)) {
+		/* An axis first: it is the prop whose type is a list of class names. */
+		for (const [axis, values] of Object.entries(componentAxes)) {
 			rows.push({
 				component,
 				name: axis,
@@ -163,33 +145,23 @@ export function propRows(id: string, family: string): PropRow[] {
 			});
 		}
 
-		for (const p of props) {
-			/* A flag the family cannot paint is a prop that does nothing. Only a
-			   real flag is filtered: `validator` is a boolean too, and it is not
-			   a class this or any family ships. */
-			if (flagNames(component).has(p.name) && !flags.includes(p.name)) continue;
-			rows.push({ ...p, component });
-		}
+		for (const p of props) rows.push({ ...p, component });
 	}
 	return rows;
 }
 
 /**
- * Every class the kit knows about, in any family. A class in an example that is
- * in here but not in the active family is a demo that family cannot honour; a
- * class that is in neither is the app's own markup and none of our business.
+ * Every class the kit knows about. A class in an example that is not in here
+ * is the app's own markup and none of our business.
  */
-export const knownClasses = new Set(
-	Object.values(classesByFamily).flatMap((m) => Object.keys(m))
-);
+export const knownClasses = new Set(Object.keys(classes));
 
-/** The wrappers that own this page's classes, in the active family. */
-export function componentsOf(id: string, family: string): string[] {
+/** The wrappers that own this page's classes. */
+export function componentsOf(id: string): string[] {
 	const doc = pages[id]?.doc;
 	if (!doc) return [];
-	const shipped = classesByFamily[family] ?? {};
 	const names = new Set<string>();
-	for (const [cls, info] of Object.entries(shipped)) {
+	for (const [cls, info] of Object.entries(classes)) {
 		if (!info.component) continue;
 		if (doc.namespaces.some((ns) => cls === ns || cls.startsWith(ns + '-'))) names.add(info.component);
 	}
@@ -204,6 +176,6 @@ export function componentsOf(id: string, family: string): string[] {
  * classification — a class whose owner is named has a wrapper, one with no
  * owner (`text`, `link`, `validator`) has none.
  */
-export function hasWrapper(id: string, family: string): boolean {
-	return componentsOf(id, family).length > 0;
+export function hasWrapper(id: string): boolean {
+	return componentsOf(id).length > 0;
 }

@@ -1,3 +1,9 @@
+> **Reading note (ADR 0010).** Where this text says "a family plus a theme",
+> read "a theme": there is one set of stylesheets now. The decision below is
+> unchanged and deliberately frozen — an npm package became conceivable once
+> there was a single stylesheet to publish, and is out of scope until the
+> rewrite settles.
+
 # Distribution is a downloadable bundle, not an npm package
 
 The kit is delivered by the app: you pick a family, tune its parameters, and

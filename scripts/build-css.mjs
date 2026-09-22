@@ -1,62 +1,33 @@
 /**
- * build-css.mjs — compile every family and every theme.
+ * build-css.mjs — compile the kit.
  *
- * A family is a directory now (ADR 0008): `families/<name>/index.scss` pulls in
- * the shared mechanism from `base/` and then its own file per component. The
- * sass CLI's directory mode cannot express "compile only the index", so the
- * build runs through the JS API instead.
- *
- *   src/scss/families/<name>/index.scss  ->  static/families/<name>.css
- *   src/scss/themes/<family>/<name>.scss ->  static/themes/<family>/<name>.css
- *   src/scss/reset.scss                  ->  static/reset.css
+ *   src/scss/kit.scss    ->  static/kit.css
+ *   src/scss/reset.scss  ->  static/reset.css
  *
  * The reset is compiled on its own because it is optional: a page that
- * already has one does not load it, and base does not depend on it.
+ * already has one does not load it, and the kit does not depend on it.
+ *
+ * The themes are not here. They are generator output, written from the drafts
+ * in src/lib/theme/presets.ts by scripts/build-themes.mjs — by the same code
+ * the download button uses, so a shipped theme and a downloaded one come from
+ * one implementation (ADR 0010).
  */
 
 import { compile } from 'sass';
-import { readdirSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
+import { writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const familiesDir = join(root, 'src/scss/families');
-const themesDir = join(root, 'src/scss/themes');
-const outFamilies = join(root, 'static/families');
-const outThemes = join(root, 'static/themes');
-
-const options = { style: 'expanded', sourceMap: false };
+const options = { style: 'expanded', sourceMap: false, loadPaths: [join(root, 'src/scss')] };
 
 function write(file, css) {
 	mkdirSync(dirname(file), { recursive: true });
 	writeFileSync(file, css);
+	return css.length;
 }
 
-let count = 0;
+const kit = write(join(root, 'static/kit.css'), compile(join(root, 'src/scss/kit.scss'), options).css);
+const reset = write(join(root, 'static/reset.css'), compile(join(root, 'src/scss/reset.scss'), options).css);
 
-const families = readdirSync(familiesDir).filter((name) => {
-	const entry = join(familiesDir, name);
-	return statSync(entry).isDirectory() && existsSync(join(entry, 'index.scss'));
-});
-
-for (const family of families) {
-	const { css } = compile(join(familiesDir, family, 'index.scss'), options);
-	write(join(outFamilies, `${family}.css`), css);
-	count++;
-
-	const dir = join(themesDir, family);
-	if (!existsSync(dir)) continue;
-	for (const file of readdirSync(dir).filter((f) => f.endsWith('.scss') && !f.startsWith('_'))) {
-		const { css: themeCss } = compile(join(dir, file), options);
-		write(join(outThemes, family, file.replace(/\.scss$/, '.css')), themeCss);
-		count++;
-	}
-}
-
-/* Optional, and therefore separate (CONTEXT.md: the bundle ships base.css,
-   theme.css and "an optional reset.css"). */
-const { css: resetCss } = compile(join(root, 'src/scss/reset.scss'), options);
-write(join(root, 'static/reset.css'), resetCss);
-count++;
-
-console.log(`css: ${families.length} families, ${count} files -> static/`);
+console.log(`css: kit.css ${(kit / 1024) | 0} KB, reset.css ${(reset / 1024) | 0} KB -> static/`);

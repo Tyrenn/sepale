@@ -1,0 +1,148 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   select.scss — .select, whole.
+
+   Section: Fields. Same frame as `.input`; what is its own is the
+   chevron and the native `<select>` nested inside the wrapper.
+
+   The chevron is two linear-gradients rather than an SVG, because
+   the kit ships no assets and a gradient takes its colour from
+   `currentColor` for free. Its size and inset are controls; its
+   shape is not, and a look that wants a different mark overrides
+   `background-image` in its own stylesheet.
+
+   `::picker(select)` is styled where it is supported and ignored
+   where it is not. No transition is attached to it — that was
+   rejected on the 90% support floor.
+   ============================================================ */
+
+:where(.select) {
+	width: unset;
+}
+
+@include m.field-frame('select', '.select');
+
+.select {
+	position: relative;
+	display: inline-flex;
+	flex-shrink: 1;
+	appearance: none;
+	align-items: center;
+	vertical-align: middle;
+	touch-action: manipulation;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+	height: var(--_fld-height);
+	gap: var(--_fld-gap);
+	padding-inline-start: var(--_fld-padding-x);
+	padding-inline-end: calc(var(--_fld-padding-x) + var(--select-chevron-inset));
+	width: clamp(3rem, 20rem, 100%);
+
+	background-image:
+		linear-gradient(45deg, #0000 50%, currentColor 50%),
+		linear-gradient(135deg, currentColor 50%, #0000 50%);
+	background-position:
+		calc(100% - var(--select-chevron-inset)) calc(1px + 50%),
+		calc(100% - var(--select-chevron-inset) + var(--select-chevron-size)) calc(1px + 50%);
+	background-size: var(--select-chevron-size) var(--select-chevron-size);
+	background-repeat: no-repeat;
+}
+
+[dir='rtl'] .select {
+	background-position:
+		var(--select-chevron-inset) calc(1px + 50%),
+		calc(var(--select-chevron-inset) + var(--select-chevron-size)) calc(1px + 50%);
+}
+
+/* A list, not a control: no fixed height and no mark. */
+.select[multiple] {
+	height: auto;
+	overflow: auto;
+	padding-block: var(--_fld-padding-x);
+	padding-inline-end: var(--_fld-padding-x);
+	background-image: none;
+}
+
+/* The native element inside the wrapper is stretched to fill it, so the
+   whole frame is the hit area and the wrapper keeps the paint. */
+.select select {
+	appearance: none;
+	align-items: center;
+	margin-inline-start: calc(var(--_fld-padding-x) * -1);
+	margin-inline-end: calc((var(--_fld-padding-x) + var(--select-chevron-inset)) * -1);
+	width: calc(100% + var(--_fld-padding-x) * 2 + var(--select-chevron-inset));
+	padding-inline-start: var(--_fld-padding-x);
+	padding-inline-end: calc(var(--_fld-padding-x) + var(--select-chevron-inset));
+	height: 100%;
+	background: inherit;
+	border-radius: inherit;
+	border-style: none;
+	color: inherit;
+	font: inherit;
+}
+
+.select select:not(:last-child) {
+	background-image: none;
+}
+
+/* ── The picker, where the browser opens one ────────────────────── */
+@supports (appearance: base-select) {
+	.select,
+	.select select {
+		appearance: base-select;
+	}
+	.select::picker(select),
+	.select select::picker(select) {
+		appearance: base-select;
+	}
+}
+
+.select::picker(select),
+.select select::picker(select) {
+	border-radius: var(--field-picker-radius);
+}
+
+.select::picker-icon,
+.select select::picker-icon {
+	display: none;
+}
+
+.select option,
+.select select option {
+	border-radius: var(--_fld-corners);
+	white-space: normal;
+}
+
+.select option:not(:disabled):hover,
+.select option:not(:disabled):focus-visible,
+.select select option:not(:disabled):hover,
+.select select option:not(:disabled):focus-visible {
+	cursor: pointer;
+}
+
+.select option:not(:disabled):active,
+.select select option:not(:disabled):active {
+	background-color: var(--color-neutral);
+	color: var(--color-on-neutral);
+}
+
+/* ── Axis: variant ──────────────────────────────────────────────── */
+.select-ghost {
+	--_fld-bg: #0000;
+	--_fld-border-color: #0000;
+	--_fld-shadow: none;
+}
+
+.select-ghost:focus,
+.select-ghost:focus-within {
+	--_fld-bg: var(--field-bg);
+	--_fld-border-color: #0000;
+	--_fld-shadow: none;
+}
+
+/* ── Axis: size ─────────────────────────────────────────────────── */
+@include m.size-variants('select', c.$sizes-field);

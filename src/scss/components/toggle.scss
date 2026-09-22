@@ -1,0 +1,187 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   toggle.scss — .toggle, whole.
+
+   Section: Selectors, and the one component in it that needs its
+   own words. A checkbox has a box and a mark; a toggle has a TRACK
+   and a THUMB, and the two are not the same pair: a look can give a
+   checkbox a transparent box and still want a filled track.
+
+   So the frame's slots are mapped onto track and thumb explicitly,
+   and each has an override of its own. daisy uses it — its toggle
+   thumb is its text colour at half strength while its checkbox mark
+   is that colour at full — which is a second real use of the
+   two-level cascade rather than a hypothetical one.
+
+   The slide is `grid-template-columns` going from `0fr 1fr 1fr` to
+   `1fr 1fr 0fr`: the thumb sits in the middle column and the two
+   empty ones trade width. Nothing is positioned, so it survives any
+   size and any writing direction.
+   ============================================================ */
+
+.toggle {
+	@include m.selector-slots('toggle');
+
+	--_tg-track-bg: var(--toggle-track-bg);
+	--_tg-track-border: var(--toggle-track-border-color);
+	--_tg-thumb-bg: var(--toggle-thumb-bg);
+
+	position: relative;
+	display: inline-grid;
+	flex-shrink: 0;
+	cursor: pointer;
+	appearance: none;
+	place-content: center;
+	vertical-align: middle;
+	user-select: none;
+	grid-template-columns: 0fr 1fr 1fr;
+	height: var(--_sel-size);
+	width: calc((var(--_sel-size) * 2) - (var(--_sel-border-width) + var(--_sel-padding)) * 2);
+	padding: var(--_sel-padding);
+	/* --_sel-size and --_sel-padding already resolve through
+	   `var(--toggle-x, var(--selector-x))`, so the two lines above pick up
+	   the toggle's own size wherever a look gives it one. */
+	font-size: var(--fontsize, var(--base, var(--default-base)));
+	color: var(--_tg-thumb-bg);
+	background-color: var(--_tg-track-bg);
+	border-width: var(--_sel-border-width);
+	border-style: var(--_sel-border-style);
+	border-color: var(--_tg-track-border);
+	border-radius: var(--_sel-corners);
+	box-shadow: 0 1px color-mix(in oklab, currentColor calc(var(--_sel-depth) * 10%), #0000) inset;
+	transition-property: color, background-color, border-color, box-shadow, grid-template-columns;
+	transition-duration: var(--_sel-duration);
+	transition-timing-function: var(--_sel-easing);
+}
+
+/* The thumb. `--toggle-mark` is the content slot, empty by default and
+   there so a fallback can put a glyph in it. */
+.toggle::before {
+	--toggle-mark: '';
+	content: var(--toggle-mark);
+	position: relative;
+	grid-column-start: 2;
+	grid-row-start: 1;
+	aspect-ratio: 1 / 1;
+	height: 100%;
+	width: 100%;
+	inset-inline-start: 0;
+	border-radius: var(--toggle-thumb-corners);
+	background-color: currentColor;
+	box-shadow: var(--toggle-thumb-shadow);
+	transition:
+		background-color var(--_sel-duration),
+		translate var(--_sel-duration),
+		inset-inline-start var(--_sel-duration);
+}
+
+.toggle:checked,
+.toggle[aria-checked='true'],
+.toggle:has(> input:checked) {
+	grid-template-columns: 1fr 1fr 0fr;
+	color: var(--toggle-checked-thumb-bg);
+	background-color: var(--toggle-checked-track-bg);
+	border-color: var(--toggle-checked-track-border-color);
+}
+
+.toggle:indeterminate {
+	grid-template-columns: 0.5fr 1fr 0.5fr;
+}
+
+.toggle:focus-visible,
+.toggle:has(:focus-visible) {
+	outline: var(--_sel-focus-width) var(--focus-style) var(--_sel-focus-color);
+	outline-offset: var(--_sel-focus-offset);
+}
+
+.toggle:disabled,
+.toggle[disabled] {
+	cursor: not-allowed;
+	opacity: var(--_sel-disabled-opacity);
+}
+
+.toggle:disabled::before {
+	background-color: transparent;
+	border: var(--_sel-border-width) solid currentColor;
+}
+
+/* Optional icons: one for off, one for on, crossfading with a small turn. */
+.toggle > * {
+	z-index: 1;
+	grid-column: span 1;
+	grid-column-start: 2;
+	grid-row-start: 1;
+	cursor: pointer;
+	appearance: none;
+	height: 100%;
+	background-color: transparent;
+	border: none;
+	padding: calc(0.125em * var(--scale));
+	color: var(--_tg-track-bg);
+	transition:
+		opacity var(--_sel-duration),
+		rotate calc(var(--_sel-duration) * 2);
+}
+
+.toggle > *:focus {
+	outline: none;
+}
+
+.toggle > *:nth-child(2) {
+	rotate: 0deg;
+}
+
+.toggle > *:nth-child(3) {
+	opacity: 0;
+	rotate: -15deg;
+}
+
+.toggle:has(:checked) > :nth-child(2) {
+	opacity: 0;
+	rotate: 15deg;
+}
+
+.toggle:has(:checked) > :nth-child(3) {
+	opacity: 1;
+	rotate: 0deg;
+}
+
+@media (forced-colors: active) {
+	.toggle::before {
+		outline-style: solid;
+		outline-offset: -0.25rem;
+	}
+}
+
+@media print {
+	.toggle::before {
+		outline: 0.25rem solid;
+		outline-offset: -1rem;
+	}
+}
+
+/* ── Axis: colour ───────────────────────────────────────────────── */
+@each $color in c.$color-list {
+	.toggle-#{$color}:checked,
+	.toggle-#{$color}[aria-checked='true'],
+	.toggle-#{$color}:has(> input:checked) {
+		--toggle-checked-track-bg: var(--color-#{$color});
+		--toggle-checked-track-border-color: var(--color-#{$color});
+		--toggle-checked-thumb-bg: var(--color-on-#{$color});
+	}
+}
+
+/* ── Axis: variant ──────────────────────────────────────────────── */
+
+/* The track fills inside its own padding rather than edge to edge, which
+   reads as a rail the thumb rides rather than a slab that changes colour. */
+.toggle-track:checked,
+.toggle-track[aria-checked='true'],
+.toggle-track:has(> input:checked) {
+	background-clip: content-box;
+}
+
+/* ── Axis: size ─────────────────────────────────────────────────── */
+@include m.size-variants('toggle', c.$sizes-field);

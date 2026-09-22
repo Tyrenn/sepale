@@ -1,146 +1,88 @@
 # The app, and the chain behind it
 
 What is written by hand, what is generated, who generates it, and who reads it.
-Nothing in `src/lib/generated/` or `src/generated/` is edited: those files are
-output, git-ignored, and rebuilt by `npm run build:css`.
+Nothing in `src/lib/generated/` is edited: those files are output, git-ignored,
+and rebuilt by `npm run build:css`.
 
-The rule the whole chain follows: **the compiled CSS is the source of truth.**
-Not the SCSS sources — class names are interpolated there (`_mixins.scss` writes
-`.#{$prefix}-#{$color}`), so `.btn-primary` exists in no source file. Anything
-that needs to know what a family actually ships reads its compiled stylesheet.
+The rule the chain follows: **the compiled CSS is the source of truth for what
+classes exist.** Not the SCSS sources — class names are interpolated there
+(`_mixins.scss` writes `.#{$prefix}-#{$color}`), so `.btn-primary` exists in no
+source file. Anything that needs to know what the kit ships reads `kit.css`.
+
+The theme is the other way round, and deliberately (ADR 0010): the generator's
+schema is hand-written TypeScript, because one control writes several variables
+and no stylesheet can say that. The two are held together by a check rather
+than by generation — see below.
 
 ## The chain
 
 ```
-src/scss/families/<fam>/*.scss ─┐
-src/scss/base/*.scss            ├─ scripts/build-css.mjs (sass)
-src/scss/themes/<fam>/*.scss ───┘        │
-                                         ▼
-                              static/families/<fam>.css
-                              (+ the uu-params comment a family emits)
-                              static/reset.css  — optional, on its own
-                                         │
-              ┌──────────────────────────┴───────────────────────────┐
-              ▼                                                      ▼
-   scripts/gen-registry.mjs                          scripts/gen-components.mjs
-              │                                        │            │
-              ▼                                        ▼            ▼
-   src/lib/generated/registry.ts          src/generated/     src/lib/generated/
-   families, themes, parameters,          components/<fam>/  components.ts
-   family prose                           narrowed copies    class classification
-              │                                                     │
-              ▼                                                     ▼
-    routes/+page (theme editor)                    routes/components/[id]
-    routes/description                             (the CSS and Svelte tables)
+src/scss/components/*.scss ─┐
+src/scss/_defaults.scss     ├─ scripts/build-css.mjs (sass)
+src/scss/reset.scss ────────┘        │
+                                     ▼
+                            static/kit.css        static/reset.css
+                                     │
+                                     ▼
+                       scripts/gen-classes.mjs
+                       (× the AXES / FLAGS / PARTS blocks
+                          in src/lib/components/*.svelte)
+                                     │
+                                     ▼
+                       src/lib/generated/classes.ts
+                                     │
+           ┌─────────────────────────┴───────────────┐
+           ▼                                         ▼
+  src/routes/components/doc.ts              src/lib/index.ts
+  (+ the hand-written prose in
+   src/routes/components/docs/*.svelte)
+
+
+src/lib/theme/presets.ts ── scripts/build-themes.mjs ──▶ static/themes/*.css
+   (19 drafts)                (the schema's own expand + serialise)
 ```
 
-### `scripts/build-css.mjs`
+## The two checks
 
-Runs Sass. One stylesheet per family into `static/families/`, plus
-`static/reset.css` — compiled on its own because the reset is **optional**: a
-page that already has one does not load it, and `base` does not depend on it
-(every component writes its own `box-sizing`). The app loads it from
-`+layout.svelte` the way a consumer would. A family's
-`index.scss` calls `params.emit($params)`, which writes both the CSS defaults
-**and** a `/* uu-params [...] */` JSON comment — that comment is how a family
-tells the app which variables it exposes.
+Both run in `npm run build:css`, and both exist because the halves they compare
+are written by different hands.
 
-### `scripts/gen-registry.mjs` → `src/lib/generated/registry.ts`
+- **`gen-classes.mjs` fails** when `kit.css` ships a `.prefix-*` class that no
+  component classifies as an axis value, a flag or a part. That class is either
+  a variant nobody exposed or a part nobody renders, and both need a human.
+  It also warns about a class no documentation page claims.
 
-Reads `src/scss/families/` (the list of families and their header prose),
-`src/scss/themes/<family>/` (the themes and their variable values), and the
-`uu-params` comment out of each compiled stylesheet.
+- **`check-theme-vars.mjs` fails** when a control writes a variable
+  `_defaults.scss` does not declare, or when a variable declared under a
+  section's prefixes is reachable from no control. Both directions, because a
+  variable nobody can set is as much a bug as a control nobody reads. Without
+  it a renamed variable breaks nothing visible — the theme simply stops having
+  an effect.
 
-Read by `routes/playground.svelte.ts` (the family and theme pickers),
-`routes/+page.svelte` (the theme editor) and `routes/description/+page.svelte`.
+- **`build-themes.mjs` fails** when a shipped theme does not survive being read
+  back and regenerated byte for byte. That is what the sentinels are for: a
+  flat file of numbers cannot say "push" on its own.
 
-### `scripts/gen-components.mjs` → two outputs
+## The routes
 
-Reads every `src/lib/components/*.svelte` — specifically its `<script module>`
-block: `PREFIX`, `AXES`, `FLAGS`, `PARTS` — and intersects it with the classes
-in each compiled stylesheet.
-
-1. **`src/generated/components/<family>/`** — a copy of every component with
-   *only* its `AXES` block rewritten, filtered down to the classes that family
-   ships. An axis left empty loses its prop entirely, so an exported component
-   cannot offer a variant its stylesheet has never heard of. Nothing in the app
-   imports these yet: they are what the bundle hands over.
-2. **`src/lib/generated/components.ts`** — the same intersection, as data:
-   every class each family ships, classified (`root` / `axis` / `flag` /
-   `part` / `unclassified`), plus the axis values and flags each component has
-   left in that family. The component pages render this.
-
-Both come out of one pass, deliberately: a page cannot describe a class the
-generated component does not offer, because the same code decides both.
-
-**It fails the build** when a family ships a `.prefix-*` class that the
-component owning `prefix` classifies nowhere — that class is either a variant
-nobody exposed or a part nobody draws, and both need a human.
-**It only warns** when a class is classified by no component AND documented by
-no page. That second half matters: `.text-*`, `.link-*` and `.validator-*` have
-no Svelte wrapper by design, so "no component classifies it" is true of them and
-says nothing. To tell the difference, the script reads the `namespaces` out of
-`src/routes/components/docs/*.svelte` — the one place a build script reaches
-into the app, and the reason the warning is a handful of real gaps rather than
-four hundred false ones. Two class names it can never place are written down in
-`EXTERNAL`: `.prose` and `.filter` belong to stylesheets we do not ship and are
-only ever named to qualify our own selectors.
-
-## The app
-
-| Route | File | What it shows |
-| --- | --- | --- |
-| `/` | `+page.svelte` | The theme editor: parameters on the left, `ThemePreview` on the right |
-| `/description` | `description/+page.svelte` | What the active family is, and every variable it exposes — all of it read from `registry.ts` |
-| `/components/<id>` | `components/[id]/+page.svelte` | One component: description, the CSS and Svelte tables, then the examples |
-
-`routes/+layout.svelte` owns the sidebar (family picker, theme picker,
-component nav) and swaps the family stylesheet.
-`routes/playground.svelte.ts` holds the shared reactive state — `family`,
-`theme`, `scheme`, `tokens` — and the nav grouping.
-
-### A component page
-
-Two halves, joined in `routes/components/doc.ts`:
-
-- **`routes/components/docs/<id>.svelte`** — hand-written. Its `<script module>`
-  exports a `DOC`: `namespaces`, `description`, `classes` (class → what it
-  does) and `props` (component → its props). The markup below is the examples,
-  as `<Section>` blocks. One file per page; `import.meta.glob` picks them up, so
-  adding a page is adding a file — the prerender list in `[id]/+page.ts` comes
-  from the same glob.
-- **`src/lib/generated/components.ts`** — derived. Which of those classes the
-  **active family** actually ships, and how each is classified.
-
-`namespaces` is the one structural fact that is written by hand, because
-nothing can derive it: `.title` and `.subtitle-s1` belong to the `text` page,
-and no naming rule says so. Everything else on the page is either prose (yours)
-or read from the family (generated).
-
-A class with no prose still gets a row, with a sentence derived from its
-classification. Writing prose is optional, everywhere.
-
-### Examples that a family cannot honour
-
-`Section.svelte` reads the class names out of its own HTML sample. If the active
-family ships none of them, it says so in place of the preview rather than
-rendering an unstyled button labelled "soft". Nothing to declare: the list comes
-from what the example itself writes.
-
-## Adding things
-
-| To add | Do |
+| route | what it is |
 | --- | --- |
-| a family | `src/scss/families/<name>/` + `src/scss/themes/<name>/`, then `npm run build:css` |
-| a theme | `src/scss/themes/<family>/<name>.scss` |
-| a parameter | declare it in the family's `$params` map; the editor follows |
-| a component | `src/scss/base/<name>.scss` + a file per family + (if a wrapper earns its keep) `src/lib/components/<Name>.svelte` with its `<script module>` block |
-| a component page | `src/routes/components/docs/<name>.svelte` with a `DOC`. The sidebar finds it on its own; add its id to `GROUPS` in `playground.svelte.ts` only to place it in a group rather than under "Other" |
+| `/` | the theme generator: the form, the live preview, the file to copy |
+| `/description` | the control → variable table — the documentation of the theme format |
+| `/components/<id>` | one component: what it is, its classes, its props, its examples |
 
-## Verification
+The sidebar picks one of the nineteen shipped themes and applies it to `:root`,
+so the app is painted by the kit it ships. The switch beside the picker stops
+that, for the case where a draft has pushed the contrast far enough that the
+form itself becomes unusable.
 
-`node scripts/shoot.mjs [family…]` screenshots the theme page per family into
-`.shots/`, using the system Edge through Playwright. CSS that compiles is not
-CSS that looks right. For a refactor meant to be visually neutral, diff the
-sorted rules of the compiled CSS before and after — it catches cascade-order
-regressions the eye misses.
+## Hand-written, and why
+
+- `src/lib/components/*.svelte` — the wrappers. Each carries an
+  `AXES` / `FLAGS` / `PARTS` block declaring what its classes ARE.
+- `src/routes/components/docs/*.svelte` — the prose and the examples. WHICH
+  classes exist is not written here; `namespaces` is, because nothing else can
+  know that `.title` belongs to `text`.
+- `src/lib/theme/sections/*.ts` — the generator's controls, their help text,
+  and the arithmetic that turns an answer into variables.
+- `src/lib/theme/presets.ts` — the nineteen themes, flat and duplicated.

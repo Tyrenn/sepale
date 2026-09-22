@@ -1,0 +1,89 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   radial-progress.scss — .radial-progress, whole.
+
+   Section: Feedback.
+
+   The same idea drawn as a ring, using a registered `@property` so
+   the sweep can be animated — a plain custom property cannot be
+   interpolated, and `--radialprogress` is declared with a syntax in
+   `_defaults.scss` for exactly that reason.
+   ============================================================ */
+
+/* ── Structure ────────────────────────────────── */
+
+
+.radial-progress {
+	position: relative;
+	display: inline-grid;
+	height: var(--size);
+	width: var(--size);
+	place-content: center;
+	vertical-align: middle;
+	box-sizing: content-box;
+}
+.radial-progress::before {
+	content: "";
+	position: absolute;
+	-webkit-mask: radial-gradient(
+			farthest-side,
+			#0000 calc(100% - var(--thickness)),
+			#000 calc(100% + 0.5px - var(--thickness))
+		);
+	mask: radial-gradient(
+			farthest-side,
+			#0000 calc(100% - var(--thickness)),
+			#000 calc(100% + 0.5px - var(--thickness))
+		);
+}
+.radial-progress::after {
+	content: "";
+	position: absolute;
+	transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
+}
+
+/* ── Paint ────────────────────────────────────── */
+
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.radial-progress {
+	--value: 0;
+	--size: calc(5em * var(--scale));
+	--thickness: calc(var(--size) / 10);
+	--radialprogress: calc(var(--value) * 1%);
+	font-size: var(--fontsize, var(--base, var(--default-base)));
+	border-radius: 9999px;
+	background-color: transparent;
+	transition: --radialprogress 0.3s linear;
+}
+.radial-progress::before {
+	inset: 0;
+	border-radius: 9999px;
+	background: radial-gradient(farthest-side, currentColor 98%, #0000) top / var(--thickness) var(--thickness) no-repeat,
+			conic-gradient(currentColor var(--radialprogress), #0000 0);
+}
+.radial-progress::after {
+	border-radius: 9999px;
+	background-color: currentColor;
+	inset: calc(50% - var(--thickness) / 2);
+	transition: transform 0.3s linear;
+}
+
+/* size variants */
+@include m.size-variants('radial-progress', c.$sizes-field);
+
+/* The ring is this family's progress bar bent into a circle: same track,
+   same fill, same thickness (progress.scss holds the flat version). */
+.radial-progress {
+	--thickness: calc(0.5em * var(--scale));
+	color: currentColor;
+}
+
+.radial-progress::before {
+	background: radial-gradient(farthest-side, currentColor 98%, #0000) top / var(--thickness)
+			var(--thickness) no-repeat,
+		conic-gradient(currentColor var(--radialprogress), color-mix(in oklch, currentColor 20%, #0000) 0);
+}

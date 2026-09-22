@@ -1,0 +1,84 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   radio.scss — .radio, whole.
+
+   Section: Selectors. A radio is a checkbox that is round and whose
+   mark is a disc rather than a tick — and the roundness is not a
+   theme's business: a radio that is square is a checkbox with the
+   wrong behaviour. So `--radio-corners` is the first per-component
+   override in this section, pinned to a pill, and a theme that
+   really wants square corners has `.radio-square` for it.
+
+   The other thing only true here: a checked radio keeps its ground
+   rather than filling with the accent, because the accent is the
+   disc inside it. All four families agreed on that.
+   ============================================================ */
+
+@include m.selector-frame('radio', '.radio');
+
+/* Pinned, not themed: see the header. */
+.radio {
+	--_sel-corners: 9999px;
+}
+
+.radio::before {
+	content: '';
+	display: block;
+	width: 100%;
+	height: 100%;
+	border-radius: inherit;
+	background-color: transparent;
+	transition: background-color var(--_sel-duration);
+}
+
+.radio:checked::before,
+.radio[aria-checked='true']::before {
+	background-color: currentColor;
+	box-shadow:
+		0 -1px oklch(0% 0 0 / calc(var(--_sel-depth) * 0.1)) inset,
+		0 8px 0 -4px oklch(100% 0 0 / calc(var(--_sel-depth) * 0.1)) inset,
+		0 1px oklch(0% 0 0 / calc(var(--_sel-depth) * 0.1));
+}
+
+/* Neither forced colours nor print fills a background reliably. */
+@media (forced-colors: active) {
+	.radio:checked::before,
+	.radio[aria-checked='true']::before {
+		outline-style: solid;
+		outline-offset: -0.25rem;
+	}
+}
+
+@media print {
+	.radio:checked::before,
+	.radio[aria-checked='true']::before {
+		outline: 0.25rem solid;
+		outline-offset: -1rem;
+	}
+}
+
+/* ── Axis: colour ───────────────────────────────────────────────
+   Re-stated after the frame, because a radio does not take a colour the
+   way a checkbox does: the accent is its ring and its disc, and its fill
+   stays the ground. A variant that filled the box instead would leave a
+   pale disc on a dark circle, which reads as UNCHECKED. */
+@each $color in c.$color-list {
+	.radio-#{$color}:checked,
+	.radio-#{$color}[aria-checked='true'] {
+		--_sel-checked-bg: var(--radio-checked-bg);
+		--_sel-checked-border-color: var(--color-#{$color});
+		--_sel-checked-mark: var(--color-#{$color});
+	}
+}
+
+/* ── Axis: shape ────────────────────────────────────────────────── */
+.radio-square,
+.radio-square::before {
+	--_sel-corners: 0;
+	border-radius: 0;
+}
+
+/* ── Axis: size ─────────────────────────────────────────────────── */
+@include m.size-variants('radio', c.$sizes-field);

@@ -1,0 +1,121 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   input.scss — .input, whole.
+
+   Section: Fields (ADR 0010). The paint, the focus treatment, the
+   disabled state and the colour variants are shared with `.select`
+   and `.textarea` and live in `m.field-frame`; this file holds what
+   is only true of a single-line text field.
+
+   Every value is read through the two-level cascade
+   `var(--input-x, var(--field-x))`, resolved once into `--_fld-*`
+   slots by the mixin. A theme writes `--field-x`; `--input-x` is
+   there for the day a text field has to break ranks, and costs one
+   nested var() until then.
+   ============================================================ */
+
+:where(.input) {
+	width: unset;
+}
+
+@include m.field-frame('input', '.input');
+
+.input {
+	cursor: text;
+	display: inline-flex;
+	flex-shrink: 1;
+	appearance: none;
+	align-items: center;
+	vertical-align: middle;
+	white-space: nowrap;
+	position: relative;
+	touch-action: manipulation;
+	height: var(--_fld-height);
+	padding-inline: var(--_fld-padding-x);
+	gap: var(--_fld-gap);
+	width: clamp(3rem, 20rem, 100%);
+}
+
+/* The wrapper owns the frame; a nested native input is a bare text run. */
+.input :where(input) {
+	display: inline-flex;
+	appearance: none;
+	height: 100%;
+	width: 100%;
+	background-color: transparent;
+	border: none;
+	color: inherit;
+	font: inherit;
+}
+
+.input:where(input) {
+	display: inline-flex;
+}
+
+.input :where(input[type='url']),
+.input :where(input[type='email']) {
+	direction: ltr;
+}
+
+.input :where(input[type='date']) {
+	display: inline-flex;
+}
+
+/* iOS zooms the page when a focused field is under 16px. Raising the size
+   on focus is the only fix that does not force a 16px minimum everywhere. */
+@media (pointer: coarse) {
+	@supports (-webkit-touch-callout: none) {
+		.input:focus,
+		.input:focus-within {
+			font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+		}
+	}
+}
+
+.input[type='number']::-webkit-inner-spin-button {
+	margin-block: calc(var(--_fld-padding-x) * -1);
+	margin-inline-end: calc(var(--_fld-padding-x) * -1);
+}
+
+.input::-webkit-date-and-time-value {
+	text-align: inherit;
+}
+
+.input::-webkit-calendar-picker-indicator {
+	position: absolute;
+	inset-inline-end: var(--_fld-padding-x);
+}
+
+.input:has(> input[type='date']) :where(input[type='date']) {
+	display: inline-flex;
+	appearance: none;
+}
+
+.input:has(> input[type='date']) input[type='date']::-webkit-calendar-picker-indicator {
+	position: absolute;
+	inset-inline-end: var(--_fld-padding-x);
+	width: 1em;
+	height: 1em;
+	cursor: pointer;
+}
+
+/* ── Axis: variant ──────────────────────────────────────────────── */
+
+/* A field with no frame until you touch it. */
+.input-ghost {
+	--_fld-bg: #0000;
+	--_fld-border-color: #0000;
+	--_fld-shadow: none;
+}
+
+.input-ghost:focus,
+.input-ghost:focus-within {
+	--_fld-bg: var(--field-bg);
+	--_fld-border-color: #0000;
+	--_fld-shadow: none;
+}
+
+/* ── Axis: size ─────────────────────────────────────────────────── */
+@include m.size-variants('input', c.$sizes-field);

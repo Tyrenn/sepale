@@ -1,0 +1,125 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   list.scss — .list, whole.
+
+   Section: Containers.
+
+   A column of rows. `List` draws its own rows from data, so the
+   component owns every class in the namespace and there are no
+   sub-components to keep in step (CONTEXT.md).
+   ============================================================ */
+
+/* ── Structure ────────────────────────────────────── */
+
+
+.list {
+	display: flex;
+	flex-direction: column;
+	background-color: var(--list-bg);
+	border-start-start-radius: var(--join-ss, var(--container-corners));
+	border-start-end-radius: var(--join-se, var(--container-corners));
+	border-end-start-radius: var(--join-es, var(--container-corners));
+	border-end-end-radius: var(--join-ee, var(--container-corners));
+}
+.list-row {
+	position: relative;
+	display: grid;
+	grid-auto-flow: column;
+	grid-template-columns: var(--list-grid-cols);
+	word-break: break-word;
+}
+/* Separator line between rows (all except last) */
+.list > .list-row:not(:last-child)::after,
+	.list > :not(:last-child) .list-row::after {
+	content: "";
+	position: absolute;
+}
+/* Grid column layout — grows at the Nth .list-col-grow child */
+.list-row > * {
+	grid-row-start: 1;
+}
+/* Wrapping column — placed on row 2 (spans full width below the grid) */
+.list-col-wrap {
+	grid-row-start: 2;
+	grid-column: 1 / -1;
+}
+
+/* ── Paint ────────────────────────────────────────── */
+
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.list {
+	font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+.list-row {
+	--list-grid-cols: minmax(0, auto) 1fr;
+	gap: calc(1em * var(--scale));
+	padding: calc(1em * var(--scale));
+}
+.list > .list-row:not(:last-child)::after,
+	.list > :not(:last-child) .list-row::after {
+	bottom: 0;
+	inset-inline: calc(1em * var(--scale));
+	border-bottom: var(--list-divider-width) solid var(--list-divider-color);
+}
+.list-row:has(.list-col-grow:nth-child(1)) {
+	--list-grid-cols: 1fr;
+}
+.list-row:has(.list-col-grow:nth-child(2)) {
+	--list-grid-cols: minmax(0, auto) 1fr;
+}
+.list-row:has(.list-col-grow:nth-child(3)) {
+	--list-grid-cols: minmax(0, auto) minmax(0, auto) 1fr;
+}
+.list-row:has(.list-col-grow:nth-child(4)) {
+	--list-grid-cols: minmax(0, auto) minmax(0, auto) minmax(0, auto) 1fr;
+}
+.list-row:has(.list-col-grow:nth-child(5)) {
+	--list-grid-cols: minmax(0, auto) minmax(0, auto) minmax(0, auto) minmax(0, auto) 1fr;
+}
+
+/* variant suggestions */
+.list-suggestions {
+	padding: calc(0.25em * var(--scale));
+	border: var(--container-border-width) solid var(--list-suggestions-border-color);
+	box-shadow:
+		var(--list-suggestions-shadow),
+		var(--container-shadow);
+	overflow-y: auto;
+	max-height: min(16rem, 60dvh);
+}
+
+.list-suggestions > .list-row {
+	display: flex;
+	align-items: center;
+	gap: calc(0.5em * var(--scale));
+	padding: calc(0.4em * var(--scale)) calc(0.75em * var(--scale));
+	border-radius: var(--container-item-corners);
+	cursor: pointer;
+	transition: background-color 0.1s;
+	user-select: none;
+}
+
+/* A dropdown draws no line between its options. */
+.list-suggestions > .list-row:not(:last-child)::after {
+	content: none;
+}
+
+@media (hover: hover) {
+	.list-suggestions > .list-row:hover {
+		background-color: var(--list-hover-bg);
+	}
+}
+
+/* Keyboard-navigated active item */
+.list-suggestions > .list-row[aria-selected="true"] {
+	background-color: var(--list-active-bg);
+	color: var(--list-active-fg);
+	font-weight: 500;
+}
+
+/* size variants */
+@include m.size-variants('list', c.$sizes-field);

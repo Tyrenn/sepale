@@ -1,0 +1,53 @@
+/* ============================================================
+   validator.scss — .validator, whole.
+
+   Validation states. `.validator` goes ON a field component and
+   drives that field's accent; `.validator-hint` is the sibling that
+   appears when the field is wrong.
+
+   It reaches into another component's private slots — `--_fld-accent`
+   and `--_fld-border-color`, which `m.field-frame` declares on the
+   field itself. That is integration, not ownership (CONTEXT.md): it
+   does not name a single class in the `input` namespace, it sets
+   variables on an element it is put on.
+
+   THIS FILE MUST BE INCLUDED AFTER THE FIELDS. Both selectors are a
+   single class, so source order is what decides, and `.input`'s own
+   declaration of `--_fld-accent` would otherwise win.
+
+   Section: Fields.
+   ============================================================ */
+
+/* Valid. The pseudo-class only fires after the user has interacted, which
+   is what keeps a pristine form from lighting up green. */
+.validator:user-valid,
+.validator:has(:user-valid) {
+	--_fld-accent: var(--color-success);
+	--_fld-border-color: var(--color-success);
+}
+
+/* Invalid, from the browser's own validation or from aria-invalid. */
+.validator:user-invalid,
+.validator:has(:user-invalid),
+.validator[aria-invalid]:not([aria-invalid='false']),
+.validator:has([aria-invalid]:not([aria-invalid='false'])) {
+	--_fld-accent: var(--color-error);
+	--_fld-border-color: var(--color-error);
+}
+
+.validator:user-invalid ~ .validator-hint,
+.validator:has(:user-invalid) ~ .validator-hint,
+.validator[aria-invalid]:not([aria-invalid='false']) ~ .validator-hint,
+.validator:has([aria-invalid]:not([aria-invalid='false'])) ~ .validator-hint {
+	color: var(--color-error);
+	visibility: visible;
+	display: revert-layer;
+}
+
+/* The hint holds its space whether or not it is showing, so a form does not
+   jump a line taller the first time something is wrong. */
+.validator-hint {
+	visibility: hidden;
+	margin-top: var(--validator-hint-gap);
+	font-size: var(--xs, var(--default-xs));
+}

@@ -1,0 +1,89 @@
+/* ============================================================
+   badge.scss — .badge, whole.
+
+   Section: Markers.
+
+   A small count or status, sitting beside or on top of something
+   else. It draws a pill and nothing more, which is why all four
+   families said almost the same thing about it.
+   ============================================================ */
+
+/* ── Structure ────────────────────────────────── */
+
+
+.badge {
+	position: relative;
+	display: inline-flex;
+}
+.badge :where(.chip) {
+	z-index: 1;
+	position: absolute;
+	white-space: nowrap;
+	top: var(--badge-t, 0);
+	bottom: var(--badge-b, auto);
+	left: var(--badge-s, auto);
+	right: var(--badge-e, 0);
+	translate: var(--badge-x, 50%) var(--badge-y, -50%);
+}
+
+/* ── Paint ────────────────────────────────────── */
+
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.badge {
+	width: max-content;
+}
+
+/* position variants */
+.badge-start {
+	--badge-s: 0;
+	--badge-e: auto;
+	--badge-x: -50%;
+}
+
+[dir="rtl"] .badge-start {
+	--badge-s: auto;
+	--badge-e: 0;
+	--badge-x: 50%;
+}
+
+.badge-center {
+	--badge-s: 50%;
+	--badge-e: 50%;
+	--badge-x: -50%;
+}
+
+[dir="rtl"] .badge-center {
+	--badge-x: 50%;
+}
+
+.badge-end {
+	--badge-s: auto;
+	--badge-e: 0;
+	--badge-x: 50%;
+}
+
+[dir="rtl"] .badge-end {
+	--badge-s: 0;
+	--badge-e: auto;
+	--badge-x: -50%;
+}
+
+.badge-top {
+	--badge-t: 0;
+	--badge-b: auto;
+	--badge-y: -50%;
+}
+
+.badge-middle {
+	--badge-t: 50%;
+	--badge-b: 50%;
+	--badge-y: -50%;
+}
+
+.badge-bottom {
+	--badge-t: auto;
+	--badge-b: 0;
+	--badge-y: 50%;
+}
