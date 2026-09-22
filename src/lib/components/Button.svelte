@@ -22,7 +22,7 @@
 		   combinations rather than as orthogonal axes — `dash` is `outline`
 		   plus a dashed border — so they are one axis, and `variant` is the
 		   name we keep for an exclusive group with no better one. */
-		variant: ['outline', 'dash', 'soft', 'ghost', 'link', 'tertiary', 'classic', 'surface'],
+		variant: ['outline', 'dash', 'soft', 'ghost', 'link', 'classic', 'surface'],
 		/* sunflower only: the hard shadow is the family, so moving or removing
 		   it is its own axis and combines with everything above. */
 		shadow: { none: 'noshadow', reverse: 'reverse' }

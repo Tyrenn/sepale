@@ -161,18 +161,6 @@
 	</Section>
 
 	<Section
-		title="Tertiary"
-		subtitle="gladiolus only. Carbon has a third button rank below primary and secondary; the other families stop at two and use ghost for it."
-		svelte={`<Button variant="tertiary">Tertiary</Button>
-<Button variant="tertiary" color="error">Delete</Button>`}
-		html={`<button class="btn btn-tertiary">Tertiary</button>
-<button class="btn btn-tertiary btn-error">Delete</button>`}
-	>
-		<Button variant="tertiary">Tertiary</Button>
-		<Button variant="tertiary" color="error">Delete</Button>
-	</Section>
-
-	<Section
 		title="Classic and surface"
 		subtitle="dahlia only. Radix separates a raised button from a flat one drawn on a surface — two treatments the other families fold into soft and outline."
 		svelte={`<Button variant="classic" color="primary">Classic</Button>

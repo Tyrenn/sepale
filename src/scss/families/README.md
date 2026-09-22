@@ -6,9 +6,9 @@ accessibility, and named slots — and **no values at all** (ADR 0008). You neve
 override `base`; you fill it.
 
 ```
-families/aster/
+families/dahlia/
   index.scss     parameters, root tokens, the include order
-  button.scss    everything aster decides about .btn, variants included
+  button.scss    everything dahlia decides about .btn, variants included
   input.scss
   range.scss
   …              one file per component this family paints
@@ -62,7 +62,7 @@ $params: map.merge(
 ## A component file
 
 ```scss
-/* aster — button. */
+/* dahlia — button. */
 @mixin emit {
   .btn {
     --size: calc(2.5em * var(--scale));

@@ -16,16 +16,7 @@
 		description:
 			"A small standalone token: a status, a tag, a removable value. Distinct from badge, which attaches to something else.",
 		classes: {},
-		props: {
-			Chip: [
-				{
-					name: "clickable",
-					type: "boolean",
-					default: "false",
-					description: "Draw it as something you can act on (gladiolus only)."
-				}
-			]
-		}
+		props: {}
 	};
 </script>
 
@@ -96,14 +87,3 @@
 		<Chip variant="ghost">Ghost</Chip>
 	</Section>
 
-	<Section
-		title="Clickable"
-		subtitle="gladiolus only. Carbon's tag can be dismissed or filtered, so it reacts to the pointer; elsewhere a chip is something you read, and a chip you press is a button."
-		svelte={`<Chip clickable>Filter</Chip>
-<Chip clickable color="primary">Production</Chip>`}
-		html={`<span class="chip chip-clickable">Filter</span>
-<span class="chip chip-clickable chip-primary">Production</span>`}
-	>
-		<Chip clickable>Filter</Chip>
-		<Chip clickable color="primary">Production</Chip>
-	</Section>

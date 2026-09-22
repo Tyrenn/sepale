@@ -13,7 +13,7 @@
 		variant: ['outline', 'dash', 'soft', 'ghost']
 	} as const;
 
-	export const FLAGS = ['clickable'] as const;
+	export const FLAGS = [] as const;
 	export const PARTS = [] as const;
 </script>
 
@@ -23,8 +23,6 @@
 	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
 
 	interface Props extends AxisProps<typeof AXES>, Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
-		/** Draw it as something you can act on (gladiolus only). */
-		clickable?: boolean;
 		class?: string;
 		children?: Snippet;
 	}
@@ -32,14 +30,13 @@
 	// The axes are deliberately NOT destructured: they travel in `axes` and are
 	// resolved by name, so an axis a family drops changes nothing down here.
 	let {
-		clickable = false,
 		class: klass = '',
 		children,
 		...axes
 	}: Props = $props();
 
 	let applied = $derived(applyAxes(PREFIX, AXES, axes));
-	let classes = $derived(cx(PREFIX, applied.classes, clickable && `${PREFIX}-clickable`, klass));
+	let classes = $derived(cx(PREFIX, applied.classes, klass));
 </script>
 
 <span {...applied.rest} class={classes}>{@render children?.()}</span>
