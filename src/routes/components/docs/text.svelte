@@ -13,9 +13,8 @@
 
 	export const DOC: ComponentDoc = {
 		namespaces: ["text", "title", "subtitle"],
-		utility: true,
 		description:
-			"The typographic scale, delivered as classes. Not a component — no frame, no state, no variant, and no Svelte wrapper: write the class on your own element. It owns three namespaces for that reason (ADR 0009).",
+			"The typographic scale, delivered as classes. Not a component — no frame, no state, no variant, and no Svelte wrapper: write the class on your own element. It is three components in one file — `text`, `title` and `subtitle` — because separating them would buy nothing.",
 		classes: {
 			/* The scale is mechanical, so its prose is written the same way. */
 			...Object.fromEntries(

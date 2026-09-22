@@ -47,131 +47,6 @@
    carries a value, so base cannot be used without a family
    (ADR 0008).
    ============================================================ */
-/* Family-agnostic utilities. */
-/* ============================================================
-   DaisyUI — radius.css
-   Classes utilitaires pour les rayons DaisyUI
-   ============================================================ */
-.rounded-box {
-  border-radius: var(--radius-box);
-}
-
-.rounded-field {
-  border-radius: var(--radius-field);
-}
-
-.rounded-selector {
-  border-radius: var(--radius-selector);
-}
-
-.rounded-t-box {
-  border-top-left-radius: var(--radius-box);
-  border-top-right-radius: var(--radius-box);
-}
-
-.rounded-b-box {
-  border-bottom-left-radius: var(--radius-box);
-  border-bottom-right-radius: var(--radius-box);
-}
-
-.rounded-l-box {
-  border-top-left-radius: var(--radius-box);
-  border-bottom-left-radius: var(--radius-box);
-}
-
-.rounded-r-box {
-  border-top-right-radius: var(--radius-box);
-  border-bottom-right-radius: var(--radius-box);
-}
-
-.rounded-tl-box {
-  border-top-left-radius: var(--radius-box);
-}
-
-.rounded-tr-box {
-  border-top-right-radius: var(--radius-box);
-}
-
-.rounded-br-box {
-  border-bottom-right-radius: var(--radius-box);
-}
-
-.rounded-bl-box {
-  border-bottom-left-radius: var(--radius-box);
-}
-
-.rounded-t-field {
-  border-top-left-radius: var(--radius-field);
-  border-top-right-radius: var(--radius-field);
-}
-
-.rounded-b-field {
-  border-bottom-left-radius: var(--radius-field);
-  border-bottom-right-radius: var(--radius-field);
-}
-
-.rounded-l-field {
-  border-top-left-radius: var(--radius-field);
-  border-bottom-left-radius: var(--radius-field);
-}
-
-.rounded-r-field {
-  border-top-right-radius: var(--radius-field);
-  border-bottom-right-radius: var(--radius-field);
-}
-
-.rounded-tl-field {
-  border-top-left-radius: var(--radius-field);
-}
-
-.rounded-tr-field {
-  border-top-right-radius: var(--radius-field);
-}
-
-.rounded-br-field {
-  border-bottom-right-radius: var(--radius-field);
-}
-
-.rounded-bl-field {
-  border-bottom-left-radius: var(--radius-field);
-}
-
-.rounded-t-selector {
-  border-top-left-radius: var(--radius-selector);
-  border-top-right-radius: var(--radius-selector);
-}
-
-.rounded-b-selector {
-  border-bottom-left-radius: var(--radius-selector);
-  border-bottom-right-radius: var(--radius-selector);
-}
-
-.rounded-l-selector {
-  border-top-left-radius: var(--radius-selector);
-  border-bottom-left-radius: var(--radius-selector);
-}
-
-.rounded-r-selector {
-  border-top-right-radius: var(--radius-selector);
-  border-bottom-right-radius: var(--radius-selector);
-}
-
-.rounded-tl-selector {
-  border-top-left-radius: var(--radius-selector);
-}
-
-.rounded-tr-selector {
-  border-top-right-radius: var(--radius-selector);
-}
-
-.rounded-br-selector {
-  border-bottom-right-radius: var(--radius-selector);
-}
-
-.rounded-bl-selector {
-  border-bottom-left-radius: var(--radius-selector);
-}
-
 /* The component bases. Mixin-only: nothing is emitted until a
    family includes them. */
 /* ============================================================
@@ -894,113 +769,6 @@ svg {
   height: 1em;
 }
 
-/* ── reset ── */
-/* reset.css - based on Tailwind CSS 4 preflight - MIT License - Copyright (c) Tailwind Labs, Inc. */
-*,
-::after,
-::backdrop,
-::before,
-::file-selector-button {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  border: 0 solid;
-}
-
-:host,
-html {
-  line-height: 1.5;
-  font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-}
-
-body {
-  line-height: inherit;
-}
-
-hr {
-  height: 0;
-  color: inherit;
-  border-top-width: 1px;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-size: inherit;
-  font-weight: inherit;
-}
-
-a {
-  color: inherit;
-  text-decoration: inherit;
-}
-
-table {
-  text-indent: 0;
-  border-color: inherit;
-  border-collapse: collapse;
-}
-
-::file-selector-button,
-button,
-input,
-optgroup,
-select,
-textarea {
-  font: inherit;
-  font-feature-settings: inherit;
-  font-variation-settings: inherit;
-  letter-spacing: inherit;
-  color: inherit;
-  background: 0 0;
-}
-
-input:where(:not([type=button], [type=reset], [type=submit])),
-select,
-textarea {
-  border-width: 1px;
-}
-
-::file-selector-button,
-button,
-input:where([type=button], [type=reset], [type=submit]) {
-  appearance: button;
-}
-
-:-moz-focusring {
-  outline: auto;
-}
-
-:-moz-ui-invalid {
-  box-shadow: none;
-}
-
-::-webkit-search-decoration {
-  -webkit-appearance: none;
-}
-
-menu, ol, ul {
-  list-style: none;
-}
-
-textarea {
-  resize: vertical;
-}
-
-::placeholder {
-  opacity: 1;
-  color: color-mix(in oklch, currentColor 50%, rgba(0, 0, 0, 0));
-}
-
-audio, canvas, embed, iframe, img, object, svg, video {
-  display: block;
-  vertical-align: middle;
-}
-
-img, video {
-  max-width: 100%;
-  height: auto;
-}
-
 /* ── rootcolor ── */
 /* ============================================================
    DaisyUI â€” rootcolor.css
@@ -1199,10 +967,6 @@ img, video {
    its variants. Moved out of the shared component file, where
    it used to masquerade as the kit's default. */
 /* daisy — input.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — join.
    Everything daisy decides about this component: its look and
    its variants. Moved out of the shared component file, where
    it used to masquerade as the kit's default. */
@@ -1435,7 +1199,6 @@ img, video {
   padding-inline: var(--btn-p);
   /* Typography */
   color: var(--btn-fg);
-  --tw-prose-links: var(--btn-fg);
   /* Paint plumbing */
   background-color: var(--btn-bg);
   border-width: var(--border);
@@ -1469,7 +1232,7 @@ img, video {
 }
 
 /* Checked checkbox/radio: seed the primary color */
-.btn:where(input:checked:not(.filter .btn)) {
+.btn:where(input:checked) {
   --btn-color: var(--color-primary);
   --btn-fg: var(--color-on-primary);
   isolation: isolate;
@@ -1497,8 +1260,8 @@ img, video {
 }
 
 .checkbox::before {
-  --tw-content: "";
-  content: var(--tw-content);
+  --checkbox-mark: "";
+  content: var(--checkbox-mark);
   display: block;
   clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 70% 80%, 70% 100%);
 }
@@ -1516,14 +1279,14 @@ img, video {
 @media (forced-colors: active) {
   .checkbox:checked::before,
   .checkbox[aria-checked=true]::before {
-    --tw-content: "✔︎";
+    --checkbox-mark: "✔︎";
     clip-path: none;
   }
 }
 @media print {
   .checkbox:checked::before,
   .checkbox[aria-checked=true]::before {
-    --tw-content: "✔︎";
+    --checkbox-mark: "✔︎";
     clip-path: none;
   }
 }
@@ -1571,7 +1334,6 @@ img, video {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* gap-px */
 }
 
 .dock > *[aria-disabled=true],
@@ -1587,15 +1349,9 @@ img, video {
 .dock > *::after {
   content: "";
   position: absolute;
-  /* h-1 */
-  /* w-6 */
 }
 
 /* Active state */
-.dock-active::after {
-  /* w-10 */
-}
-
 .fieldset {
   display: grid;
   grid-template-columns: 1fr;
@@ -1835,11 +1591,163 @@ fieldset:disabled .input {
 	   can stretch to match its siblings via align-items: stretch on .join.
 	   min-height keeps it from collapsing below its natural size. */
 /* Border merging */
+/* ── Was one identical file per family until 2026-09-22 ──────────────
+   Seven copies, 125 rules, byte for byte the same. Nothing below is a
+   family's decision: it says which corner of which child is square and
+   how adjacent borders merge. ADR 0008 keeps values out of base, and
+   these are not values — no family would ever write a different one.
+   ------------------------------------------------------------------ */
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.join {
+  --join-ss: 0;
+  --join-se: 0;
+  --join-es: 0;
+  --join-ee: 0;
+}
+
+.join > .join-item:where(:first-child) {
+  --join-se: 0;
+  --join-ee: 0;
+}
+
+.join :first-child:not(:last-child) :where(.join-item) {
+  --join-se: 0;
+  --join-ee: 0;
+}
+
+.join > .join-item:where(:last-child) {
+  --join-ss: 0;
+  --join-es: 0;
+}
+
+.join :last-child:not(:first-child) :where(.join-item) {
+  --join-ss: 0;
+  --join-es: 0;
+}
+
+.join > .join-item:where(.btn) {
+  height: unset;
+  min-height: var(--size, calc(2.5em * var(--scale)));
+}
+
+.join-item:where(*:not(:first-child, :disabled, [disabled], .btn-disabled)) {
+  margin-inline-start: calc(var(--border, 1px) * -1);
+  margin-block-start: 0;
+}
+
+.join-item:where(*:is(:disabled, [disabled], .btn-disabled)) {
+  border-width: var(--border, 1px) 0 var(--border, 1px) var(--border, 1px);
+}
+
+/* variant vertical */
+.join-vertical {
+  flex-direction: column;
+}
+
+.join-vertical > .join-item:first-child {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: 0;
+}
+
+.join-vertical :first-child:not(:last-child) .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: 0;
+}
+
+.join-vertical > .join-item:last-child {
+  --join-ss: 0;
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical :last-child:not(:first-child) .join-item {
+  --join-ss: 0;
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical > .join-item:only-child {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical :only-child .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical .join-item:where(*:not(:first-child)) {
+  margin-inline-start: 0;
+  margin-block-start: calc(var(--border, 1px) * -1);
+}
+
+/* variant horizontal */
+.join-horizontal {
+  flex-direction: row;
+}
+
+.join-horizontal > .join-item:first-child {
+  --join-ss: var(--radius-field);
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: 0;
+}
+
+.join-horizontal :first-child:not(:last-child) .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: 0;
+}
+
+.join-horizontal > .join-item:last-child {
+  --join-ss: 0;
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal :last-child:not(:first-child) .join-item {
+  --join-ss: 0;
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal > .join-item:only-child {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal :only-child .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal .join-item:where(*:not(:first-child)) {
+  margin-inline-start: calc(var(--border, 1px) * -1);
+  margin-block-start: 0;
+}
+
 .label {
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  /* text-current/60 */
 }
 
 .label:has(input) {
@@ -2088,7 +1996,6 @@ fieldset:disabled .input {
   position: relative;
   appearance: none;
   overflow: hidden;
-  /* bg-current/20 */
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -2150,8 +2057,8 @@ fieldset:disabled .input {
 }
 
 .radio::before {
-  --tw-content: "";
-  content: var(--tw-content);
+  --radio-mark: "";
+  content: var(--radio-mark);
   display: block;
   /* rounded-full */
 }
@@ -2599,8 +2506,8 @@ input[type=color].swatch::-moz-color-swatch {
 
 /* Toggle thumb */
 .toggle::before {
-  --tw-content: "";
-  content: var(--tw-content);
+  --toggle-mark: "";
+  content: var(--toggle-mark);
   border-radius: var(--radius-selector);
   position: relative;
   grid-column-start: 2;
@@ -2820,10 +2727,6 @@ input[type=color].swatch::-moz-color-swatch {
   width: unset;
 }
 
-.prose :where(a.btn:not(.btn-link)):not(:where([class~=not-prose], [class~=not-prose] *)) {
-  text-decoration: none;
-}
-
 .btn {
   --size: calc(2.5em * var(--scale));
   --btn-p: calc(1em * var(--scale));
@@ -2939,20 +2842,20 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 /* variant ghost */
-.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn)) {
+.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked) {
   --btn-shadow: ;
   --btn-bg: #0000;
   --btn-border: #0000;
 }
 
-.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn)):not(:disabled, [disabled], .btn-disabled) {
+.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked):not(:disabled, [disabled], .btn-disabled) {
   outline-color: currentColor;
   --btn-fg: var(--btn-color, currentColor);
 }
 
 /* Ghost on touch screens */
 @media (hover: none) {
-  .btn-ghost:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+  .btn-ghost:not(.btn-active, :active, :focus-visible, input:checked):hover {
     outline-color: currentColor;
     --btn-shadow: ;
     --btn-bg: #0000;
@@ -2979,7 +2882,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 /* variant outline */
-.btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
+.btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
   --btn-shadow: ;
   --btn-bg: #0000;
   --btn-fg: var(--btn-color, var(--color-on-surface));
@@ -2987,7 +2890,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 @media (hover: none) {
-  .btn-outline:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+  .btn-outline:not(.btn-active, :active, :focus-visible, input:checked):hover {
     --btn-shadow: ;
     --btn-bg: #0000;
     --btn-fg: var(--btn-color, var(--color-on-surface));
@@ -2995,7 +2898,7 @@ input[type=color].swatch::-moz-color-swatch {
   }
 }
 /* variant dash */
-.btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
+.btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
   --btn-shadow: ;
   --btn-bg: #0000;
   --btn-fg: var(--btn-color, var(--color-on-surface));
@@ -3007,7 +2910,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 @media (hover: none) {
-  .btn-dash:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+  .btn-dash:not(.btn-active, :active, :focus-visible, input:checked):hover {
     --btn-shadow: ;
     --btn-bg: #0000;
     --btn-fg: var(--btn-color, var(--color-on-surface));
@@ -3015,7 +2918,7 @@ input[type=color].swatch::-moz-color-swatch {
   }
 }
 /* variant soft */
-.btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
+.btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
   --btn-shadow: ;
   --btn-fg: var(--btn-color, var(--color-on-surface));
   --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
@@ -3023,7 +2926,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 @media (hover: none) {
-  .btn-soft:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+  .btn-soft:not(.btn-active, :active, :focus-visible, input:checked):hover {
     --btn-shadow: ;
     --btn-fg: var(--btn-color, var(--color-on-surface));
     --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
@@ -3980,153 +3883,6 @@ fieldset:disabled .input::placeholder {
 
 /* Values that used to sit in base. They belong to this family now:
    change them here and nobody else moves (ADR 0008). */
-.join {
-  --join-ss: 0;
-  --join-se: 0;
-  --join-es: 0;
-  --join-ee: 0;
-}
-
-.join > .join-item:where(:first-child) {
-  --join-se: 0;
-  --join-ee: 0;
-}
-
-.join :first-child:not(:last-child) :where(.join-item) {
-  --join-se: 0;
-  --join-ee: 0;
-}
-
-.join > .join-item:where(:last-child) {
-  --join-ss: 0;
-  --join-es: 0;
-}
-
-.join :last-child:not(:first-child) :where(.join-item) {
-  --join-ss: 0;
-  --join-es: 0;
-}
-
-.join > .join-item:where(.btn) {
-  height: unset;
-  min-height: var(--size, calc(2.5em * var(--scale)));
-}
-
-.join-item:where(*:not(:first-child, :disabled, [disabled], .btn-disabled)) {
-  margin-inline-start: calc(var(--border, 1px) * -1);
-  margin-block-start: 0;
-}
-
-.join-item:where(*:is(:disabled, [disabled], .btn-disabled)) {
-  border-width: var(--border, 1px) 0 var(--border, 1px) var(--border, 1px);
-}
-
-/* variant vertical */
-.join-vertical {
-  flex-direction: column;
-}
-
-.join-vertical > .join-item:first-child {
-  --join-ss: var(--radius-field);
-  --join-se: var(--radius-field);
-  --join-es: 0;
-  --join-ee: 0;
-}
-
-.join-vertical :first-child:not(:last-child) .join-item {
-  --join-ss: var(--radius-field);
-  --join-se: var(--radius-field);
-  --join-es: 0;
-  --join-ee: 0;
-}
-
-.join-vertical > .join-item:last-child {
-  --join-ss: 0;
-  --join-se: 0;
-  --join-es: var(--radius-field);
-  --join-ee: var(--radius-field);
-}
-
-.join-vertical :last-child:not(:first-child) .join-item {
-  --join-ss: 0;
-  --join-se: 0;
-  --join-es: var(--radius-field);
-  --join-ee: var(--radius-field);
-}
-
-.join-vertical > .join-item:only-child {
-  --join-ss: var(--radius-field);
-  --join-se: var(--radius-field);
-  --join-es: var(--radius-field);
-  --join-ee: var(--radius-field);
-}
-
-.join-vertical :only-child .join-item {
-  --join-ss: var(--radius-field);
-  --join-se: var(--radius-field);
-  --join-es: var(--radius-field);
-  --join-ee: var(--radius-field);
-}
-
-.join-vertical .join-item:where(*:not(:first-child)) {
-  margin-inline-start: 0;
-  margin-block-start: calc(var(--border, 1px) * -1);
-}
-
-/* variant horizontal */
-.join-horizontal {
-  flex-direction: row;
-}
-
-.join-horizontal > .join-item:first-child {
-  --join-ss: var(--radius-field);
-  --join-se: 0;
-  --join-es: var(--radius-field);
-  --join-ee: 0;
-}
-
-.join-horizontal :first-child:not(:last-child) .join-item {
-  --join-ss: var(--radius-field);
-  --join-se: 0;
-  --join-es: var(--radius-field);
-  --join-ee: 0;
-}
-
-.join-horizontal > .join-item:last-child {
-  --join-ss: 0;
-  --join-se: var(--radius-field);
-  --join-es: 0;
-  --join-ee: var(--radius-field);
-}
-
-.join-horizontal :last-child:not(:first-child) .join-item {
-  --join-ss: 0;
-  --join-se: var(--radius-field);
-  --join-es: 0;
-  --join-ee: var(--radius-field);
-}
-
-.join-horizontal > .join-item:only-child {
-  --join-ss: var(--radius-field);
-  --join-se: var(--radius-field);
-  --join-es: var(--radius-field);
-  --join-ee: var(--radius-field);
-}
-
-.join-horizontal :only-child .join-item {
-  --join-ss: var(--radius-field);
-  --join-se: var(--radius-field);
-  --join-es: var(--radius-field);
-  --join-ee: var(--radius-field);
-}
-
-.join-horizontal .join-item:where(*:not(:first-child)) {
-  margin-inline-start: calc(var(--border, 1px) * -1);
-  margin-block-start: 0;
-}
-
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .label {
   gap: calc(0.375em * var(--scale));
   color: color-mix(in oklch, currentColor 60%, rgba(0, 0, 0, 0));
@@ -4283,7 +4039,7 @@ fieldset:disabled .input::placeholder {
   max-height: min(16rem, 60dvh);
 }
 
-.suggestion-item {
+.list-suggestions > .list-row {
   display: flex;
   align-items: center;
   gap: calc(0.5em * var(--scale));
@@ -4294,14 +4050,18 @@ fieldset:disabled .input::placeholder {
   user-select: none;
 }
 
+/* A dropdown draws no line between its options. */
+.list-suggestions > .list-row:not(:last-child)::after {
+  content: none;
+}
+
 @media (hover: hover) {
-  .suggestion-item:hover {
+  .list-suggestions > .list-row:hover {
     background-color: color-mix(in oklab, var(--color-on-surface) 7%, rgba(0, 0, 0, 0));
   }
 }
 /* Keyboard-navigated active item */
-.suggestion-item-active,
-.suggestion-item[aria-selected=true] {
+.list-suggestions > .list-row[aria-selected=true] {
   background-color: color-mix(in oklab, var(--color-primary) 12%, rgba(0, 0, 0, 0));
   color: var(--color-primary);
   font-weight: 500;

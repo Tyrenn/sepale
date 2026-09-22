@@ -33,13 +33,6 @@ export interface PropDoc {
 export interface ComponentDoc {
 	/** Which class namespaces this page documents. `text` owns three. */
 	namespaces: string[];
-	/**
-	 * Classes that paint without being a UI element — no structure, no state,
-	 * no wrapper. Their classes have no component to classify them, and that is
-	 * the design rather than a hole, so the table says `utility` instead of
-	 * leaving a dash where a kind should be.
-	 */
-	utility?: boolean;
 	/** One or two sentences: what it is, and what it is not. */
 	description: string;
 	/** Class name → what it does. Optional: a missing one is derived. */
@@ -106,10 +99,11 @@ export function classRows(id: string, family: string): ClassRow[] {
 				effect ||= 'Drawn by the component; you never opt into it.';
 				type = 'part';
 			} else {
-				/* No wrapper classifies it. For a utility that is the design; for
-				   anything else the build has already said so on the console. The
-				   page stays quiet either way and shows whatever prose exists. */
-				type = doc.utility ? 'utility' : '—';
+				/* No Svelte wrapper classifies it, which is the design for `text`,
+				   `link` and `validator` — one class on one element, nothing to
+				   wrap. The column has nothing to say, so it says nothing; the
+				   build warns about the classes that are a real gap. */
+				type = '';
 			}
 			return { name, effect, type, rank: RANK[info.kind] };
 		})

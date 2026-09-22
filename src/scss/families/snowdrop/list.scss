@@ -50,7 +50,7 @@
 		max-height: min(16rem, 60dvh);
 	}
 
-	.suggestion-item {
+	.list-suggestions > .list-row {
 		display: flex;
 		align-items: center;
 		gap: calc(0.5em * var(--scale));
@@ -61,15 +61,19 @@
 		user-select: none;
 	}
 
+	/* A dropdown draws no line between its options. */
+	.list-suggestions > .list-row:not(:last-child)::after {
+		content: none;
+	}
+
 	@media (hover: hover) {
-		.suggestion-item:hover {
+		.list-suggestions > .list-row:hover {
 			background-color: color-mix(in oklab, var(--color-on-surface) 7%, #0000);
 		}
 	}
 
 	/* Keyboard-navigated active item */
-	.suggestion-item-active,
-	.suggestion-item[aria-selected="true"] {
+	.list-suggestions > .list-row[aria-selected="true"] {
 		background-color: color-mix(in oklab, var(--color-primary) 12%, #0000);
 		color: var(--color-primary);
 		font-weight: 500;

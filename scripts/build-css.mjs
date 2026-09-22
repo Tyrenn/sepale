@@ -8,6 +8,10 @@
  *
  *   src/scss/families/<name>/index.scss  ->  static/families/<name>.css
  *   src/scss/themes/<family>/<name>.scss ->  static/themes/<family>/<name>.css
+ *   src/scss/reset.scss                  ->  static/reset.css
+ *
+ * The reset is compiled on its own because it is optional: a page that
+ * already has one does not load it, and base does not depend on it.
  */
 
 import { compile } from 'sass';
@@ -48,5 +52,11 @@ for (const family of families) {
 		count++;
 	}
 }
+
+/* Optional, and therefore separate (CONTEXT.md: the bundle ships base.css,
+   theme.css and "an optional reset.css"). */
+const { css: resetCss } = compile(join(root, 'src/scss/reset.scss'), options);
+write(join(root, 'static/reset.css'), resetCss);
+count++;
 
 console.log(`css: ${families.length} families, ${count} files -> static/`);

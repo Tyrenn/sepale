@@ -1,3 +1,14 @@
+---
+status: superseded by ADR-0008
+---
+
+> **Superseded.** The manifest, the registry in `_lib.scss` and the
+> emitter are gone. A family now `@use`s its component files and
+> `@include`s them in its own `index.scss`, in the order it chooses —
+> see ADR 0008, which removed the shared defaults the manifest existed
+> to override. The text below is kept as the record of a decision that
+> was reversed, not as instructions.
+
 # A family declares a manifest instead of listing includes
 
 A family file hands one map to `lib.family(...)` — default skin, per-component

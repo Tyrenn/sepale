@@ -3,9 +3,12 @@
 A **namespace** is the root token a component's classes are built on: `btn`
 gives `.btn`, `.btn-primary`, `.btn-ripple-wave`. A namespace belongs to
 exactly one component, and every class under it is that component's to name,
-paint, document and ship. Owning more than one namespace is reserved for a
-**utility** — classes with no structure, no state and no variant, `text` being
-the only one today.
+paint, document and ship.
+
+The rule has no exception. `text.scss` looked like one — it holds `text`,
+`title` and `subtitle` — but that is three components sharing a file, not one
+component owning three namespaces. Nothing ties a component to a file
+(2026-09-22): the file is a convenience, the namespace is the ownership.
 
 ## Why
 
@@ -24,17 +27,16 @@ settings of one thing: `.label` is inline and lives *inside* a field
 roles, two components — two stylesheets, two wrappers, and the `floating` prop
 disappears.
 
-`text` keeps `text`, `title` and `subtitle`, because it is not a component: it
-draws no frame, holds no state, exposes no variant, and has no wrapper. It is a
-typographic scale delivered as classes. That is what a utility is, and it is
-the only exception the rule admits.
+`text.scss` keeps `text`, `title` and `subtitle` in one file. They are three
+components — three namespaces, three owners — and separating the files would
+buy nothing: each is a handful of declarations, applicable to any tag, and none
+of them draws a frame.
 
 ## Considered options
 
 - **Let a component declare several namespaces** — `OWNS = ['tabs', 'tab']`,
-  with the build checking them all. Rejected for `tabs`: it teaches the
-  detector to accept the anomaly it correctly found. The idea survives for
-  utilities, where several namespaces are the point rather than an accident.
+  with the build checking them all. Rejected: it teaches the detector to accept
+  the anomaly it correctly found.
 - **Rename the strip instead of the item** (`.tabs` → `.tab-strip`). Identical
   cost, and it would cost the three variants people actually type — `.tabs-box`,
   `.tabs-border`, `.tabs-lift` — their daisyUI names.

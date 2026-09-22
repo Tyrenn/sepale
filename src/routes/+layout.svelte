@@ -26,6 +26,9 @@
 </script>
 
 <svelte:head>
+	<!-- The optional reset, now its own file rather than part of base: the app
+	     loads it the way a consumer would. -->
+	<link rel="stylesheet" href="/reset.css" />
 	<!-- Active style family (compiled by `npm run build:css`). The theme
 	     <style> below comes after so its :root values always win. -->
 	<link rel="stylesheet" href={`/families/${playground.family}.css`} />

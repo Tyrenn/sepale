@@ -65,8 +65,8 @@
 	}
 	/* Toggle thumb */
 	.toggle::before {
-		--tw-content: "";
-		content: var(--tw-content);
+		--toggle-mark: "";
+		content: var(--toggle-mark);
 		border-radius: var(--radius-selector);
 		position: relative;
 		grid-column-start: 2;

@@ -12,9 +12,6 @@
 	:where(.btn) {
 		width: unset;
 	}
-	.prose :where(a.btn:not(.btn-link)):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
-		text-decoration: none;
-	}
 	.btn {
 		--size: calc(2.5em * var(--scale));
 		--btn-p: calc(1em * var(--scale));
@@ -53,20 +50,20 @@
 	@include m.seed-color-variants('btn', --btn-color, --btn-fg);
 
 	/* variant ghost */
-	.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn)) {
+	.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked) {
 		--btn-shadow: ;
 		--btn-bg: #0000;
 		--btn-border: #0000;
 	}
 
-	.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn)):not(:disabled, [disabled], .btn-disabled) {
+	.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked):not(:disabled, [disabled], .btn-disabled) {
 		outline-color: currentColor;
 		--btn-fg: var(--btn-color, currentColor);
 	}
 
 	/* Ghost on touch screens */
 	@media (hover: none) {
-		.btn-ghost:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+		.btn-ghost:not(.btn-active, :active, :focus-visible, input:checked):hover {
 			outline-color: currentColor;
 			--btn-shadow: ;
 			--btn-bg: #0000;
@@ -94,7 +91,7 @@
 	}
 
 	/* variant outline */
-	.btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
+	.btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
 		--btn-shadow: ;
 		--btn-bg: #0000;
 		--btn-fg: var(--btn-color, var(--color-on-surface));
@@ -102,7 +99,7 @@
 	}
 
 	@media (hover: none) {
-		.btn-outline:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+		.btn-outline:not(.btn-active, :active, :focus-visible, input:checked):hover {
 			--btn-shadow: ;
 			--btn-bg: #0000;
 			--btn-fg: var(--btn-color, var(--color-on-surface));
@@ -111,7 +108,7 @@
 	}
 
 	/* variant dash */
-	.btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
+	.btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
 		--btn-shadow: ;
 		--btn-bg: #0000;
 		--btn-fg: var(--btn-color, var(--color-on-surface));
@@ -123,7 +120,7 @@
 	}
 
 	@media (hover: none) {
-		.btn-dash:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+		.btn-dash:not(.btn-active, :active, :focus-visible, input:checked):hover {
 			--btn-shadow: ;
 			--btn-bg: #0000;
 			--btn-fg: var(--btn-color, var(--color-on-surface));
@@ -132,7 +129,7 @@
 	}
 
 	/* variant soft */
-	.btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled) {
+	.btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
 		--btn-shadow: ;
 		--btn-fg: var(--btn-color, var(--color-on-surface));
 		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
@@ -140,7 +137,7 @@
 	}
 
 	@media (hover: none) {
-		.btn-soft:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+		.btn-soft:not(.btn-active, :active, :focus-visible, input:checked):hover {
 			--btn-shadow: ;
 			--btn-fg: var(--btn-color, var(--color-on-surface));
 			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));

@@ -68,7 +68,6 @@
 		padding-inline: var(--btn-p);
 		/* Typography */
 		color: var(--btn-fg);
-		--tw-prose-links: var(--btn-fg);
 		/* Paint plumbing */
 		background-color: var(--btn-bg);
 		border-width: var(--border);
@@ -98,7 +97,7 @@
 		content: attr(aria-label);
 	}
 	/* Checked checkbox/radio: seed the primary color */
-	.btn:where(input:checked:not(.filter .btn)) {
+	.btn:where(input:checked) {
 		--btn-color: var(--color-primary);
 		--btn-fg: var(--color-on-primary);
 		isolation: isolate;

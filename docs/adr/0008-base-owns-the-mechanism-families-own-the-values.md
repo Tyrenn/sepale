@@ -47,6 +47,15 @@ numbers.
 
 ## Consequences
 
+- **A custom property in `base` is allowed when it is geometry, not a look**
+  (added 2026-09-22). `base/join.scss` writes `--join-ss: 0` sixty times to say
+  which corner of which child is square inside a group. That is not a value a
+  family decides — no family would ever write a different one — and the proof
+  is that `join`'s seven family files held the same 125 rules byte for byte
+  until they were merged into `base`. The test is one question: *would any
+  family ever write something else here?* If yes, it is a value and it belongs
+  to the family.
+
 - **`var()` with no value poisons the whole declaration.** `border: var(--border)
   solid var(--btn-border)` with `--border` unset does not fall back to a thin
   border — it produces **no border at all**. An incomplete family renders

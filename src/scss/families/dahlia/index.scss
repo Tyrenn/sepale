@@ -12,7 +12,6 @@
 @use 'floating-label';
 @use 'file-input';
 @use 'input';
-@use 'join';
 @use 'label';
 @use 'link';
 @use 'list';
@@ -138,7 +137,6 @@ $params: map.merge(
 @include floating-label.emit;
 @include file-input.emit;
 @include input.emit;
-@include join.emit;
 @include label.emit;
 @include link.emit;
 @include list.emit;

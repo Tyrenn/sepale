@@ -128,3 +128,19 @@
 		style="width:22rem; border:1px solid var(--color-surface-2);"
 	/>
 </Section>
+
+<Section
+	title="Suggestions"
+	subtitle="The dropdown variant: the box floats, the rows lose their separator and gain a hover, and the option the keyboard is on is marked with aria-selected."
+	html={`<ul class="list list-suggestions" role="listbox">
+	<li class="list-row" role="option" aria-selected="false">Paris</li>
+	<li class="list-row" role="option" aria-selected="true">Lyon</li>
+	<li class="list-row" role="option" aria-selected="false">Marseille</li>
+</ul>`}
+>
+	<ul class="list list-suggestions" role="listbox" style="width:14rem;">
+		<li class="list-row" role="option" aria-selected="false">Paris</li>
+		<li class="list-row" role="option" aria-selected="true">Lyon</li>
+		<li class="list-row" role="option" aria-selected="false">Marseille</li>
+	</ul>
+</Section>

@@ -52,7 +52,7 @@ const GROUPS: { group: string; ids: string[] }[] = [
 		]
 	},
 	{ group: 'Navigation', ids: ['breadcrumbs', 'menu', 'navbar', 'dock'] },
-	{ group: 'Other', ids: ['join', 'validator', 'rounded'] }
+	{ group: 'Other', ids: ['join', 'validator'] }
 ];
 
 /* Paths only — the modules themselves are never loaded here, or the nav would

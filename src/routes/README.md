@@ -18,6 +18,7 @@ src/scss/themes/<fam>/*.scss ───┘        │
                                          ▼
                               static/families/<fam>.css
                               (+ the uu-params comment a family emits)
+                              static/reset.css  — optional, on its own
                                          │
               ┌──────────────────────────┴───────────────────────────┐
               ▼                                                      ▼
@@ -35,7 +36,11 @@ src/scss/themes/<fam>/*.scss ───┘        │
 
 ### `scripts/build-css.mjs`
 
-Runs Sass. One stylesheet per family into `static/families/`. A family's
+Runs Sass. One stylesheet per family into `static/families/`, plus
+`static/reset.css` — compiled on its own because the reset is **optional**: a
+page that already has one does not load it, and `base` does not depend on it
+(every component writes its own `box-sizing`). The app loads it from
+`+layout.svelte` the way a consumer would. A family's
 `index.scss` calls `params.emit($params)`, which writes both the CSS defaults
 **and** a `/* uu-params [...] */` JSON comment — that comment is how a family
 tells the app which variables it exposes.
@@ -71,10 +76,15 @@ generated component does not offer, because the same code decides both.
 **It fails the build** when a family ships a `.prefix-*` class that the
 component owning `prefix` classifies nowhere — that class is either a variant
 nobody exposed or a part nobody draws, and both need a human.
-**It only warns** when a class belongs to no declared namespace at all
-(`.text-*`, `.link-*`, `.validator-*` have no Svelte wrapper by design). Those
-still appear on their pages; nobody is forced to write a declaration to make a
-check happy.
+**It only warns** when a class is classified by no component AND documented by
+no page. That second half matters: `.text-*`, `.link-*` and `.validator-*` have
+no Svelte wrapper by design, so "no component classifies it" is true of them and
+says nothing. To tell the difference, the script reads the `namespaces` out of
+`src/routes/components/docs/*.svelte` — the one place a build script reaches
+into the app, and the reason the warning is a handful of real gaps rather than
+four hundred false ones. Two class names it can never place are written down in
+`EXTERNAL`: `.prose` and `.filter` belong to stylesheets we do not ship and are
+only ever named to qualify our own selectors.
 
 ## The app
 
@@ -125,7 +135,7 @@ from what the example itself writes.
 | a theme | `src/scss/themes/<family>/<name>.scss` |
 | a parameter | declare it in the family's `$params` map; the editor follows |
 | a component | `src/scss/base/<name>.scss` + a file per family + (if a wrapper earns its keep) `src/lib/components/<Name>.svelte` with its `<script module>` block |
-| a component page | `src/routes/components/docs/<name>.svelte` with a `DOC`, and an entry in `COMPONENTS` in `playground.svelte.ts` for the sidebar |
+| a component page | `src/routes/components/docs/<name>.svelte` with a `DOC`. The sidebar finds it on its own; add its id to `GROUPS` in `playground.svelte.ts` only to place it in a group rather than under "Other" |
 
 ## Verification
 

@@ -38,7 +38,6 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		/* gap-px */
 	}
 	.dock > *[aria-disabled="true"],
 		.dock > *[disabled] {
@@ -51,11 +50,8 @@
 	.dock > *::after {
 		content: "";
 		position: absolute;
-		/* h-1 */
-		/* w-6 */
 	}
 	/* Active state */
 	.dock-active::after {
-		/* w-10 */
 	}
 }

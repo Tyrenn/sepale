@@ -6,51 +6,25 @@
 		"gen:components": "node scripts/gen-components.mjs",
 		"build:css": "node scripts/build-css.mjs && npm run gen:registry && npm run gen:components",
 		"dev": "npm run build:css && vite dev",
-		"build": "npm run build:css && vite build && npm run prepack",
+		"build": "npm run build:css && vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync && npm run gen:registry || echo ''",
-		"prepack": "svelte-kit sync && svelte-package && publint",
 		"check": "npm run build:css && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
-	"files": [
-		"dist",
-		"!dist/**/*.test.*",
-		"!dist/**/*.spec.*"
-	],
-	"sideEffects": [
-		"**/*.css"
-	],
-	"svelte": "./dist/index.js",
-	"types": "./dist/index.d.ts",
 	"type": "module",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"svelte": "./dist/index.js"
-		}
-	},
-	"peerDependencies": {
-		"svelte": "^5.0.0"
-	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.57.0",
-		"@sveltejs/package": "^2.5.7",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"playwright": "^1.63.0",
-		"publint": "^0.3.18",
 		"sass": "^1.99.0",
 		"svelte": "^5.55.2",
 		"svelte-check": "^4.4.6",
 		"typescript": "^6.0.2",
 		"vite": "^8.0.7"
 	},
-	"keywords": [
-		"svelte"
-	],
-	"description": "* `Source Tailwind` -> Équivalent CSS * `@apply inline-flex shrink-0 …` -> Propriétés CSS explicites * `@apply no-underline` -> text-decoration: none * `@apply appearance-none` -> appearance: none * `@apply rounded-full px-0` -> border-radius: 9999px + padding-inline: 0 * `@apply w-full max-w-64` -> width: 100% + max-width: 16rem * `@apply bg-base-content/10` -> color-mix(in oklch, var(--color-base-content) 10%, #0000)",
-	"main": "svelte.config.js",
+	"description": "A pure-CSS component kit in seven families, plus the SvelteKit app that previews it and hands it over as a downloadable bundle. Not an npm package (ADR 0001): the app ships a zip.",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Tyrenn/u.u.git"

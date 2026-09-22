@@ -42,8 +42,8 @@
 		box-shadow: var(--shadow-light, );
 	}
 	.checkbox::before {
-		--tw-content: "";
-		content: var(--tw-content);
+		--checkbox-mark: "";
+		content: var(--checkbox-mark);
 		display: block;
 		clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 70% 80%, 70% 100%);
 	}
@@ -58,14 +58,14 @@
 	@media (forced-colors: active) {
 		.checkbox:checked::before,
 			.checkbox[aria-checked="true"]::before {
-		--tw-content: "✔︎";
+		--checkbox-mark: "✔︎";
 		clip-path: none;
 	}
 	}
 	@media print {
 		.checkbox:checked::before,
 			.checkbox[aria-checked="true"]::before {
-		--tw-content: "✔︎";
+		--checkbox-mark: "✔︎";
 		clip-path: none;
 	}
 	}
