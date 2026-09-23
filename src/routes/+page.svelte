@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { SECTIONS, generator, themeCss } from '$lib/theme/store.svelte.js';
 	import Control from './Control.svelte';
+	import Palette from './Palette.svelte';
+	import { slide } from 'svelte/transition';
 
 	/**
 	 * The theme generator.
@@ -16,6 +18,16 @@
 	 */
 
 	let css = $derived(themeCss());
+
+	/* Which sections are unfolded. Open by name rather than by index so the
+	   state survives a section being added or reordered. */
+	let opened = $state(new Set(['colors', 'actions']));
+	const isOpen = (id: string) => opened.has(id);
+	function toggle(id: string) {
+		const next = new Set(opened);
+		if (!next.delete(id)) next.add(id);
+		opened = next;
+	}
 
 	let copied = $state(false);
 	async function copy() {
@@ -42,16 +54,37 @@
 		</header>
 
 		{#each SECTIONS as section (section.id)}
-			<details class="section" open={section.id === 'actions'}>
-				<summary>
+			<section class="section" class:section-open={isOpen(section.id)}>
+				<button
+					type="button"
+					class="section-head"
+					aria-expanded={isOpen(section.id)}
+					onclick={() => toggle(section.id)}
+				>
+					<span class="section-chevron" aria-hidden="true"></span>
 					<span class="section-name">{section.label}</span>
 					<span class="section-count">{section.controls.length}</span>
-				</summary>
-				{#if section.help}<p class="note">{section.help}</p>{/if}
-				{#each section.controls as control (control.id)}
-					<Control {control} />
-				{/each}
-			</details>
+				</button>
+
+				<!-- The controls of a folded section do not exist. `slide` then
+				     animates their arrival and their leaving for free, and there is
+				     no height for anyone to measure. -->
+				{#if isOpen(section.id)}
+					<div class="section-body" transition:slide={{ duration: 220 }}>
+						{#if section.help}<p class="note">{section.help}</p>{/if}
+						{#if section.id === 'colors'}
+							<Palette controls={section.controls.filter((c) => c.type === 'color')} />
+							{#each section.controls.filter((c) => c.type !== 'color') as control (control.id)}
+								<Control {control} />
+							{/each}
+						{:else}
+							{#each section.controls as control (control.id)}
+								<Control {control} />
+							{/each}
+						{/if}
+					</div>
+				{/if}
+			</section>
 		{/each}
 	</section>
 
@@ -233,15 +266,35 @@
 </main>
 
 <style>
+	/* Two columns that scroll on their own.
+	   `.content` is the app's scroller, and letting it scroll both together
+	   means losing the form the moment you look at the preview — which is the
+	   one thing you are doing while you edit. So this page takes the height
+	   and hands each column its own overflow. `min-height: 0` is what lets a
+	   grid child shrink below its content and actually scroll. */
 	.gen {
 		display: grid;
 		grid-template-columns: minmax(18rem, 24rem) 1fr;
 		gap: 2rem;
-		align-items: start;
+		align-items: stretch;
+		height: 100%;
+		min-height: 0;
+		padding: 0;
+		overflow: hidden;
+	}
+	.gen > :global(section) {
+		min-height: 0;
+		overflow-y: auto;
+		padding: 2rem 1rem 3rem 2rem;
 	}
 	@media (max-width: 60rem) {
 		.gen {
 			grid-template-columns: 1fr;
+			height: auto;
+			overflow: visible;
+		}
+		.gen > :global(section) {
+			overflow: visible;
 		}
 	}
 	.form-head h1 {
@@ -263,14 +316,43 @@
 	.section {
 		border-top: 1px solid color-mix(in oklab, currentColor 15%, transparent);
 		margin-top: 1rem;
-		padding-top: 0.5rem;
 	}
-	summary {
+	.section-head {
+		appearance: none;
 		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
+		align-items: center;
+		gap: 0.45rem;
+		width: 100%;
+		padding: 0.65rem 0;
+		border: none;
+		background: none;
+		color: inherit;
 		cursor: pointer;
-		list-style: none;
+		text-align: start;
+	}
+	.section-chevron {
+		width: 0.42rem;
+		height: 0.42rem;
+		border-right: 1.5px solid currentColor;
+		border-bottom: 1.5px solid currentColor;
+		rotate: -45deg;
+		opacity: 0.55;
+		transition: rotate 0.22s ease;
+	}
+	.section-open .section-chevron {
+		rotate: 45deg;
+	}
+	.section-count {
+		margin-inline-start: auto;
+	}
+
+	.section-body {
+		padding-bottom: 0.6rem;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.section-chevron {
+			transition: none;
+		}
 	}
 	.section-name {
 		font-size: 0.75rem;

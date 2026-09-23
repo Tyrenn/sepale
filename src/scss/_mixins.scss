@@ -1,5 +1,27 @@
 @use 'config' as c;
 
+// ── The shade ────────────────────────────────────────────────────
+// Every colour in a theme is a PAIR: a source and a shade, in points of
+// OKLCH lightness. The DIRECTION is never asked for — a light source
+// darkens, a dark one lightens — which is why one value serves a theme
+// and its dark twin, and why `color-mix` towards black or white is not
+// used: it desaturates, and a lightened primary drifts to washed pink.
+//
+// The threshold and the 999 ramp are the ones `_derived-content.scss`
+// already uses. Do NOT soften the ramp: a gentle slope makes the
+// derivation vanish for a mid-grey source, which is the one case that
+// must not fail.
+$flip: 'clamp(-1, (0.66 - l) * 999, 1)';
+
+// `shaded(var(--x-color, var(--_slot)), --x-shade)`
+//
+// A source of `initial` is guaranteed-invalid, so the `var()` takes its
+// fallback — which is how a colour derives from the element's OWN fill
+// without any :root rule ever naming a `--_` slot.
+@function shaded($src, $shade) {
+	@return #{'oklch(from ' + $src + ' calc(l + ' + $flip + ' * var(' + $shade + ')) c h)'};
+}
+
 // Size variants — each class only sets --fontsize; intrinsic sizing does the rest.
 @mixin size-variants($prefix, $sizes: c.$sizes-field) {
 	@each $size in $sizes {

@@ -38,6 +38,12 @@
 	vertical-align: middle;
 	background-color: transparent;
 	border: none;
+	/* The control's own shape is what rounds the ENDS of the trail. The trail
+	   is a shadow a hundred container widths wide, so its own rounded end is
+	   far off-screen and `overflow: hidden` is the only thing that cuts it —
+	   at a square edge unless the control is rounded too. Without this the
+	   fill reads as a bar someone sliced. */
+	border-radius: var(--range-corners);
 	width: clamp(3rem, 20rem, 100%);
 	height: var(--range-thumb-size);
 	font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -93,9 +99,18 @@
 }
 
 /* ── The thumb, and the trail it casts ──────────────────────────
-   The last shadow in the list is the trail: one hundred container
-   widths of colour, pushed off to the left so only the part before the
-   thumb shows. `--range-fill: 0` turns it off by giving it no spread. */
+   The last shadow in the list is the trail: one hundred container widths of
+   colour, pushed off to the left so only the part before the thumb shows.
+   `--range-fill: 0` turns it off by giving it no spread.
+
+   WHERE it stops is the whole of it. The shadow's right edge lands at
+   `thumbWidth + spread + offset`, so with an offset of -(100cqw + T/2) it
+   ends at the thumb's CENTRE — which is where the value actually is, and
+   which the thumb then covers whatever shape or border it has.
+
+   Stopping at the thumb's left edge instead leaves a seam the moment the
+   thumb is round, and subtracting the halo on top of that leaves a visible
+   gap. Both were tried; this is the one that has nothing to cover up. */
 
 .range::-webkit-slider-thumb {
 	@include m.railed-fill;
@@ -117,10 +132,7 @@
 		0 1px color-mix(in oklab, currentColor calc(var(--_sel-depth) * 10%), #0000),
 		0 0 0 2rem var(--range-thumb-bg) inset,
 		var(--range-thumb-shadow),
-		calc(
-				(var(--range-dir, 1) * -100cqw) -
-					(var(--range-dir, 1) * (var(--range-thumb-size) + var(--range-halo)))
-			)
+		calc((var(--range-dir, 1) * -100cqw) - (var(--range-dir, 1) * var(--range-thumb-size) / 2))
 			0 0 calc(100cqw * var(--range-fill));
 }
 
@@ -141,10 +153,7 @@
 		0 1px color-mix(in oklab, currentColor calc(var(--_sel-depth) * 10%), #0000),
 		0 0 0 2rem var(--range-thumb-bg) inset,
 		var(--range-thumb-shadow),
-		calc(
-				(var(--range-dir, 1) * -100cqw) -
-					(var(--range-dir, 1) * (var(--range-thumb-size) + var(--range-halo)))
-			)
+		calc((var(--range-dir, 1) * -100cqw) - (var(--range-dir, 1) * var(--range-thumb-size) / 2))
 			0 0 calc(100cqw * var(--range-fill));
 }
 

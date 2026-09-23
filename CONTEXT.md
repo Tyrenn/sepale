@@ -20,26 +20,47 @@ owned its own set), knob
 
 **Control**:
 One field in the theme generator. A control is not a variable. It may write
-several — "press effect: push" writes an offset, two translations and a
+several — "press animation: push" writes an offset, two translations and a
 shadow — and several controls may write one: "shadow sides" and "shadow
 offset" both feed a single `box-shadow`. What a control guarantees is that a
 person can answer it without reading CSS.
 _Avoid_: setting, option, field (a field is a component here)
 
-**Effect**:
-A control that is off by default and reveals its own controls when turned on —
-a wobble, a hard shadow, a press motion. Some effects exclude each other: a
-corner is a radius **or** a wobble, never both. An effect exists only in the
-generator. The CSS never hears its name, only the numbers it expands to, and
-an effect that is off is a number at zero.
+**Group**:
+A named, visually enclosed set of controls inside a section — Border, Shadow,
+Press animation. A group may have a **type**: its own exclusive setting,
+rendered as tabs, which decides how many controls appear under it. A group
+whose type is the whole group is what used to be called an *effect*: turn it
+on and its controls appear, and the CSS never hears its name — only the
+numbers it expands to, an effect that is off being a number at zero.
+_Avoid_: effect (it left on 2026-09-23; it was a group with a type), panel,
+fieldset (a fieldset is a component here)
+
+**Shared**:
+Said of a group whose answer is the same in every section that has it — Focus,
+Disabled, Border, Radius, the hand-drawn look. In **Basic** mode a shared
+group is shown once and each of its controls writes the variables of every
+section at once; in **Advanced** it is shown inside each section and writes
+only that one's. There is no global variable and no second level of cascade: a
+shared control is an ordinary control with a longer list of variables. The
+switch between the two modes is visual; nothing is written until a control is
+moved.
+
+**Box**:
+The one colour control. It offers a fixed colour or a colour **derived** from
+another — a token of the theme, or the element's own fill — by an intensity,
+and it writes exactly two variables: the source and the shade. Its direction
+is never asked: a light source darkens and a dark one lightens, so one answer
+serves a theme and its dark twin.
 
 **Section**:
-A group of controls, and the only structure the generator has. Five are
-global — Colours, Typography, Sizing, Focus, Transitions. Seven gather the
-components that are tuned together: Fields, Actions, Selectors, Containers,
-Markers, Feedback, Text. A section is an editorial judgement about what a
-person tunes in one sitting; it is not a fact about the CSS, and a component
-that fits two sections is placed in one of them by hand.
+A set of groups and controls, and the only top-level structure the generator
+has. Colours and Common hold no components; Action, Field, Selectors,
+Container, Markers and Feedback gather the components that are tuned together.
+A section is an editorial judgement about what a person tunes in one sitting;
+it is not a fact about the CSS, and a component that fits two sections is
+placed in one of them by hand. A section owns a variable prefix, and is named
+after it.
 
 **Theme**:
 A complete, flat set of variable values, written as `:root { … }`. It carries

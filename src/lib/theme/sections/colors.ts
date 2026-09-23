@@ -1,69 +1,130 @@
-import type { Control, Section } from '../schema.js';
-
 /**
- * Section — Colours. Global, and the only section that is not about one kind
- * of component.
+ * Section — Colours.
  *
- * The `--color-on-{semantic}` values are absent on purpose: they are derived
- * from their seed in CSS, and offering them would be offering a control that
- * undoes an automatic contrast check.
+ * The tokens every other section derives from. No components of its own.
  *
- * Text and hairline are here, because two of the four looks this replaces
- * genuinely need them: a kit drawn in ink wants a solid black edge, not a
- * ten-percent wash of it. Their defaults are the derived expressions, so
- * leaving them alone changes nothing and writes nothing.
+ * **A theme sets nine colours** — surface-1 and the eight semantics — instead
+ * of fifteen. Surfaces 2 to 4, the ink and the border ship in Derived mode,
+ * show the colour they resolve to, and are tiles you open to override rather
+ * than questions you must answer.
+ *
+ * `--color-on-<semantic>` stays derived and is **never a control**: nobody
+ * knows at authoring time what a theme's accent will be, and a control there
+ * would be a control that undoes an automatic contrast check.
+ *
+ * Spec: `docs/specs/theme-generator/01-colours.md`.
  */
 
-const seed = (id: string, label: string, def: string, help?: string): Control => ({
-	id,
-	label,
-	help,
-	type: 'color',
-	default: def,
-	vars: [id]
-});
+import type { Control, Section } from '../schema.js';
+import { box } from './shared.js';
+
+/**
+ * Light or dark. Two exclusive buttons, above every section — it is the first
+ * thing you answer and it is not a section of its own.
+ */
+export const scheme: Control = {
+	id: 'color-scheme',
+	label: 'Scheme',
+	type: 'choice',
+	default: 'light',
+	options: [
+		{ value: 'light', label: 'Light' },
+		{ value: 'dark', label: 'Dark' }
+	],
+	vars: ['color-scheme']
+};
+
+/** The eight meanings, with the seed each ships at. */
+const SEMANTICS: [name: string, seed: string][] = [
+	['primary', 'oklch(55% 0.21 264)'],
+	['secondary', 'oklch(60% 0.2 330)'],
+	['accent', 'oklch(65% 0.18 165)'],
+	['neutral', 'oklch(28% 0.01 285)'],
+	['info', 'oklch(70% 0.13 230)'],
+	['success', 'oklch(72% 0.16 145)'],
+	['warning', 'oklch(80% 0.15 85)'],
+	['error', 'oklch(63% 0.22 25)']
+];
 
 export const colors: Section = {
 	id: 'colors',
 	label: 'Colours',
 	prefixes: ['color'],
-	help: 'The seeds. Everything drawn on them is derived, so there are fewer of these than you expect.',
+	help: 'Set surface-1 and the eight semantics. Everything else derives, and shows what it derived to.',
+	internal: [
+		/* Derived in `_derived-content.scss` from the seeds above, and never a
+		   control: a control here would undo an automatic contrast check. */
+		...SEMANTICS.map(([c]) => `color-on-${c}`)
+	],
 	controls: [
+		scheme,
+
 		{
-			id: 'color-scheme',
-			label: 'Scheme',
-			help: 'Which way the browser paints what it still owns — scrollbars, the canvas behind the page, the controls we do not restyle.',
-			type: 'select',
-			default: 'light',
-			options: [
-				{ value: 'light', label: 'Light' },
-				{ value: 'dark', label: 'Dark' }
+			id: 'color-surfaces',
+			label: 'Surfaces',
+			layout: 'row',
+			help: 'surface-1 is the seed, so its box offers Custom only. The rest derive from it — a light seed darkens, a dark seed lightens, so the same numbers serve a theme and its dark twin.',
+			vars: [
+				'color-surface-1-color',
+				'color-surface-1-shade',
+				'color-surface-2-color',
+				'color-surface-2-shade',
+				'color-surface-3-color',
+				'color-surface-3-shade',
+				'color-surface-4-color',
+				'color-surface-4-shade',
+				'color-on-surface-color',
+				'color-on-surface-shade',
+				'color-border-color',
+				'color-border-shade'
 			],
-			vars: ['color-scheme']
+			controls: [
+				box('color-surface-1', 'Surface 1', {
+					sources: [],
+					source: 'oklch(100% 0 0)',
+					help: 'The seed. It has nothing to derive from, so this box is Custom only.'
+				}),
+				box('color-surface-2', 'Surface 2', {
+					sources: ['surface'],
+					source: 'color-surface-1',
+					shade: 0.04
+				}),
+				box('color-surface-3', 'Surface 3', {
+					sources: ['surface'],
+					source: 'color-surface-1',
+					shade: 0.08
+				}),
+				box('color-surface-4', 'Surface 4', {
+					sources: ['surface'],
+					source: 'color-surface-1',
+					shade: 0.12
+				}),
+				box('color-on-surface', 'Ink', {
+					sources: ['surface'],
+					source: 'color-surface-1',
+					help: 'Full contrast against the seed, not a shade of it: it snaps to near-black or near-white and keeps a whisper of the seed’s hue. The intensity trims that result; 0 leaves it alone.'
+				}),
+				box('color-border', 'Border', {
+					sources: ['text', 'surface'],
+					source: 'color-on-surface',
+					shade: 0.1,
+					help: 'A border is almost always a wash of the text colour over the surface.'
+				})
+			]
 		},
-		seed('color-surface-1', 'Surface 1', 'oklch(100% 0 0)', 'The ground: page background, and the inside of fields.'),
-		seed('color-surface-2', 'Surface 2', 'oklch(96% 0 0)', 'Objects resting on the ground: plain buttons, chips, skeletons.'),
-		seed('color-surface-3', 'Surface 3', 'oklch(92% 0 0)', 'Chrome pinned to the edge of the screen: dock, navbar.'),
-		seed('color-surface-4', 'Surface 4', 'oklch(88% 0 0)', 'A fourth ground, for looks that stack more levels.'),
-		seed('color-primary', 'Primary', 'oklch(55% 0.21 264)'),
-		seed('color-secondary', 'Secondary', 'oklch(60% 0.2 330)'),
-		seed('color-accent', 'Accent', 'oklch(65% 0.18 165)'),
-		seed('color-neutral', 'Neutral', 'oklch(28% 0.01 285)'),
-		seed('color-info', 'Info', 'oklch(70% 0.13 230)'),
-		seed('color-success', 'Success', 'oklch(72% 0.16 145)'),
-		seed('color-warning', 'Warning', 'oklch(80% 0.15 85)'),
-		seed('color-error', 'Error', 'oklch(63% 0.22 25)'),
-		seed(
-			'color-on-surface',
-			'Text',
-			'oklch(from var(--color-surface-1) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h)',
-			'Derived from Surface 1 by default: a light ground gets near-black text, a dark one near-white.'
-		),
-		seed(
-			'color-border',
-			'Hairline',
-			'color-mix(in oklab, var(--color-on-surface) 10%, #0000)',
-			'A wash of the text colour by default. A look that draws in ink sets it solid.'
-		)
+
+		{
+			id: 'color-semantics',
+			label: 'Semantics',
+			layout: 'row',
+			help: 'The eight meanings. What is written ON each of them is derived automatically and is never a control.',
+			vars: SEMANTICS.flatMap(([c]) => [`color-${c}-color`, `color-${c}-shade`]),
+			controls: SEMANTICS.map(([c, seed]) =>
+				box(`color-${c}`, c[0].toUpperCase() + c.slice(1), {
+					sources: ['surface', 'semantic'],
+					source: seed
+				})
+			)
+		}
 	]
 };

@@ -9,8 +9,9 @@
  *
  * So: every variable a control can write must be declared in
  * `_defaults.scss`, and every variable declared there under a section's
- * prefix must be reachable from some control. Both directions, because a
- * variable nobody can set is as much a bug as a control nobody reads.
+ * prefix must either be reachable from a control or named in that section's
+ * `internal` list. Both directions, because a variable nobody can set and
+ * nobody decided to hide is as much a bug as a control nobody reads.
  *
  * Only the prefixes of the sections that exist are audited, so the sections
  * still to be written cost nothing.
@@ -45,11 +46,12 @@ const audited = [...declared].filter((n) => sections.some((s) => under(s, n)));
 for (const section of sections) {
 	for (const name of audited) {
 		if (!under(section, name)) continue;
-		if (!reachable.has(name)) {
-			problems.push(
-				`_defaults.scss declares --${name}, no control in "${section.label}" can reach it`
-			);
-		}
+		if (reachable.has(name)) continue;
+		if ((section.internal ?? []).includes(name)) continue;
+		problems.push(
+			`_defaults.scss declares --${name}, and no control in "${section.label}" reaches it.` +
+				` Give it a control, or name it in that section's \`internal\` list.`
+		);
 	}
 }
 
@@ -59,4 +61,8 @@ if (problems.length) {
 	process.exit(1);
 }
 
-console.log(`theme vars: ok — ${reachable.size} reachable, ${audited.length} declared under audited prefixes`);
+const hidden = sections.reduce((n, s) => n + (s.internal ?? []).length, 0);
+console.log(
+	`theme vars: ok — ${audited.length} declared, ${reachable.size} reachable from a control,` +
+		` ${hidden} deliberately internal`
+);

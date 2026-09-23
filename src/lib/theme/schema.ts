@@ -7,25 +7,38 @@
  * control writes a variable `_defaults.scss` does not declare, or when a
  * variable is declared and no control can reach it.
  *
- * The three words, as `CONTEXT.md` defines them:
+ * The words, as `CONTEXT.md` defines them:
  *
  *   variable  a CSS custom property. What a theme writes.
  *   control   one field in this form. It may write several variables, and
  *             several controls may write one — `sides` and `offset` both
  *             feed the same pair of `box-shadow` layers.
- *   effect    a control that is off by default and reveals its own controls
- *             when turned on. Some are mutually exclusive: a corner is a
- *             radius or a wobble, never both.
+ *   group     a named, enclosed set of controls, optionally with a `type`:
+ *             its own exclusive setting, which decides how many controls
+ *             appear under it. This is what used to be called an `effect`.
+ *   shared    a group whose answer is the same in every section that has it.
+ *             In Basic it is shown once and writes every section at once; in
+ *             Advanced it is shown per section. See ADR 0011: there is no
+ *             global variable and no second level of cascade.
+ *   box       the one colour control: a fixed colour, or one derived from
+ *             another by an intensity. Always exactly two variables.
  *
  * A control never writes a formula that mentions a `--_` slot. Those resolve
  * on the element, and a `:root` rule that reads one freezes it at root. When a
  * look needs that kind of derivation, the recipe belongs in the component
- * stylesheet, gated by a scalar this form sets. That is what an effect is.
+ * stylesheet, gated by a scalar this form sets.
+ *
+ * Full specification: `docs/specs/theme-generator/`.
  */
 
-export type Draft = Record<string, unknown>;
-
-/** What a control produces: variable name (no `--`) → value. */
+/**
+ * The state of a theme: variable name (no `--`) → value.
+ *
+ * There is no record of "what each control was set to". A theme **is** its
+ * variables (`CONTEXT.md`), and a control is a view onto them: it reads a
+ * value out to show, and writes variables when it is moved. That is what
+ * makes the Basic / Advanced switch purely visual (ADR 0011).
+ */
 export type Vars = Record<string, string>;
 
 interface Base {
@@ -36,10 +49,67 @@ interface Base {
 	vars: string[];
 }
 
+/* ------------------------------------------------------------------ *
+ * The colour box
+ *
+ * One control for all ~34 colours in the form. It writes two variables,
+ * always: the source and the shade.
+ *
+ * The source doubles as the mode, because the mode is readable from it and a
+ * second field would be a second thing to keep in step:
+ *
+ *   'own'            derive from the element's own fill. The theme writes
+ *                    `initial` — guaranteed-invalid — so the component's
+ *                    `var(--x, var(--_slot))` falls back to the slot and it
+ *                    resolves on the element instead of freezing at root.
+ *   'color-primary'  derive from a token of the theme.
+ *   '#0b0b0b'        a fixed colour. Shade is forced to 0: it IS the colour.
+ *
+ * Direction is never a control. A light source darkens and a dark one
+ * lightens, which is why one answer serves a theme and its dark twin:
+ *
+ *   calc(l + clamp(-1, (0.66 - l) * 999, 1) * var(--x-shade))
+ * ------------------------------------------------------------------ */
+
+export interface ColorValue {
+	/** `own`, a `color-*` token name, or a literal colour. */
+	source: string;
+	/** Points of OKLCH lightness, 0 to 0.5. Ignored when the source is literal. */
+	shade: number;
+}
+
+/** Which sources a box offers. `own` only where a `--_` slot exists. */
+export type ColorSource = 'own' | 'text' | 'surface' | 'semantic';
+
 export interface ColorControl extends Base {
 	type: 'color';
-	default: string;
+	default: ColorValue;
+	sources: ColorSource[];
+	/** Exactly two: the source variable, then the shade variable. */
+	vars: [source: string, shade: string];
 }
+
+export const isOwn = (source: string) => source === 'own';
+export const isToken = (source: string) => source.startsWith('color-');
+export const isLiteral = (source: string) => !isOwn(source) && !isToken(source);
+
+/** A source as the theme writes it. */
+export function sourceToCss(source: string): string {
+	if (isOwn(source)) return 'initial';
+	if (isToken(source)) return `var(--${source})`;
+	return source;
+}
+
+/** And back, for reopening a theme. An absent variable means `own`. */
+export function sourceFromCss(raw: string | undefined): string {
+	if (raw === undefined || raw.trim() === 'initial') return 'own';
+	const m = raw.trim().match(/^var\(\s*--(color-[a-z0-9-]+)\s*\)$/);
+	return m ? m[1] : raw.trim();
+}
+
+/* ------------------------------------------------------------------ *
+ * The other controls
+ * ------------------------------------------------------------------ */
 
 export interface LengthControl extends Base {
 	type: 'length';
@@ -66,8 +136,15 @@ export interface PercentControl extends Base {
 	step: number;
 }
 
-export interface SelectControl extends Base {
-	type: 'select';
+/**
+ * A finite set of values, rendered as a row of exclusive buttons.
+ *
+ * There is no `select` in this form. A dropdown hides its own options, which
+ * is the wrong trade for three or four of them, and every choice here is three
+ * or four.
+ */
+export interface ChoiceControl extends Base {
+	type: 'choice';
 	default: string;
 	options: { value: string; label: string }[];
 }
@@ -78,6 +155,28 @@ export interface SidesControl extends Base {
 	default: Sides;
 }
 
+/**
+ * A width and the edges it is drawn on, as ONE control over ONE variable.
+ *
+ * `border-width: 1px 0 1px 0` already says both things: the parts at `0` ARE
+ * the edges that are off. So there is no second variable holding the edges
+ * and no sentinel — the shorthand is its own record, and the control reads
+ * itself straight back out of it.
+ */
+export interface EdgeWidthControl extends Base {
+	type: 'edge-width';
+	default: EdgeWidth;
+	min: number;
+	max: number;
+	step: number;
+	units: string[];
+}
+
+export interface EdgeWidth {
+	width: string;
+	sides: Sides;
+}
+
 export interface Sides {
 	top: boolean;
 	right: boolean;
@@ -85,22 +184,10 @@ export interface Sides {
 	left: boolean;
 }
 
-/**
- * A mode of an effect: one entry in its exclusive list, with the controls it
- * reveals and what it writes.
- */
-export interface Mode {
-	id: string;
-	label: string;
-	help?: string;
-	controls: Control[];
-}
-
-export interface EffectControl extends Base {
-	type: 'effect';
-	/** Modes are mutually exclusive by construction. `none` is the default. */
-	default: string;
-	modes: Mode[];
+/** An on/off group header. The group's controls appear only when it is on. */
+export interface ToggleControl extends Base {
+	type: 'toggle';
+	default: boolean;
 }
 
 export type Control =
@@ -108,9 +195,72 @@ export type Control =
 	| LengthControl
 	| NumberControl
 	| PercentControl
-	| SelectControl
+	| ChoiceControl
 	| SidesControl
-	| EffectControl;
+	| EdgeWidthControl
+	| ToggleControl;
+
+/* ------------------------------------------------------------------ *
+ * Groups
+ * ------------------------------------------------------------------ */
+
+export interface Mode {
+	id: string;
+	label: string;
+	help?: string;
+	controls: Control[];
+}
+
+export interface Group {
+	id: string;
+	label: string;
+	help?: string;
+	/**
+	 * The group's own exclusive setting, rendered as tabs above its controls.
+	 * Picking a mode reveals that mode's controls in addition to the group's
+	 * own. `none` is a mode like any other; it reveals nothing.
+	 */
+	type?: { default: string; modes: Mode[] };
+	/** Shown whatever the type. Empty when the type is the whole group. */
+	controls: Control[];
+	/**
+	 * The id of the shared group this one is an instance of — `border`,
+	 * `focus`, `handdrawn`. Every section that has it declares its own
+	 * instance, built by the same factory in `sections/shared.ts`, so the
+	 * instances differ only by prefix.
+	 *
+	 * In **Advanced** each instance is rendered inside its own section. In
+	 * **Basic** they are lifted out, merged into one widget in Common, and
+	 * moving that widget writes the matching control in every section at
+	 * once.
+	 *
+	 * So there is only ever one set of controls — the per-section one — and
+	 * the draft never changes shape. That is what makes the switch purely
+	 * visual, with nothing migrated and nothing bound in two directions
+	 * (ADR 0011). There is no global variable and no second level of cascade.
+	 */
+	shared?: string;
+	/**
+	 * What this section's value is, relative to the Basic widget's.
+	 *
+	 * Only Corners uses it. The radius differs across sections in 17 of 19
+	 * themes but at a **constant ratio** — every daisy theme is `0.25rem` for
+	 * controls and `0.5rem` for boxes, which is daisyUI's own `--radius-field`
+	 * and `--radius-box`. So one Basic widget holds the base and each section
+	 * multiplies. Themes with genuinely independent radii use Advanced.
+	 */
+	sharedFactor?: number;
+	/** `row` lays the controls side by side. Default: row when all are boxes. */
+	layout?: 'row' | 'stack';
+	/** Every variable this group can write, its modes included. */
+	vars: string[];
+}
+
+export type Entry = Control | Group;
+
+/* A control's `type` is a string and it has no `controls`; a group is the
+   other way round. One property tells them apart, so use that one. */
+export const isGroup = (e: Entry): e is Group => 'controls' in e;
 
 export interface Section {
 	id: string;
@@ -120,12 +270,22 @@ export interface Section {
 	 * The variable prefixes this section owns — `field` plus the component
 	 * names for Fields, because a two-level cascade puts `--textarea-corners`
 	 * in the same section as `--field-corners`. The drift check audits exactly
-	 * the variables under the prefixes of the sections that exist, so a
-	 * section still to be written costs no false alarm and joins the audit the
-	 * day it lands.
+	 * the variables under the prefixes of the sections that exist.
 	 */
 	prefixes: string[];
-	controls: Control[];
+	/**
+	 * Variables under those prefixes that DELIBERATELY have no control.
+	 *
+	 * Every geometric length is one: the form offers a section's scale, and
+	 * the formulas stay in `_defaults.scss` where nobody has to edit them.
+	 * The rest are details a form would only make heavier. They are still
+	 * variables, still declared once, still editable by hand in the file.
+	 *
+	 * Build this list by running `node scripts/check-theme-vars.mjs` and
+	 * pasting what it names. Never from memory.
+	 */
+	internal?: string[];
+	controls: Entry[];
 }
 
 /* ------------------------------------------------------------------ *
@@ -226,42 +386,61 @@ export function shadowVars(
 }
 
 /* ------------------------------------------------------------------ *
- * Expansion
+ * Walking
  * ------------------------------------------------------------------ */
+
+/** Every control in these entries: a group's own, and its modes'. */
+export function eachControl(entries: Entry[], fn: (c: Control) => void): void {
+	for (const e of entries) {
+		if (isGroup(e)) {
+			e.controls.forEach(fn);
+			e.type?.modes.forEach((m) => m.controls.forEach(fn));
+		} else {
+			fn(e);
+		}
+	}
+}
 
 /** Every variable any control in these sections can write. */
 export function declaredVars(sections: Section[]): Set<string> {
 	const out = new Set<string>();
-	const walk = (cs: Control[]) => {
-		for (const c of cs) {
-			c.vars.forEach((v) => out.add(v));
-			if (c.type === 'effect') c.modes.forEach((m) => walk(m.controls));
+	for (const s of sections) {
+		for (const e of s.controls) {
+			if (isGroup(e)) e.vars.forEach((v) => out.add(v));
+			eachControl([e], (c) => c.vars.forEach((v) => out.add(v)));
 		}
-	};
-	sections.forEach((s) => walk(s.controls));
+	}
 	return out;
 }
 
-/**
- * Whether a control's answer can be read back out of a theme file.
+/* ------------------------------------------------------------------ *
+ * Values
  *
- * True when one variable carries it verbatim — either one named after the
- * control, or the single variable it writes. False when the answer is folded
- * into something else: an amplitude that became an eight-value recipe, an
- * offset that became two shadow layers. Those get a sentinel instead.
- */
-function recoverable(c: Control): boolean {
-	return c.type !== 'effect' && (c.vars.includes(c.id) || c.vars.length === 1);
-}
+ * The state of a theme is its **variables**, not a record of what each
+ * control was set to. A control has no value of its own: it reads one out of
+ * the variables to show, and writes variables when it is moved.
+ *
+ * That is what makes Basic and Advanced purely visual (ADR 0011). In Basic
+ * one control writes `--a --b --c`; in Advanced three controls write one
+ * each. Switching shows different controls over the same variables, and
+ * nothing is written until something is moved — so setting the Basic control
+ * to 1, switching, and setting the middle one to 2 leaves `--a: 1, --b: 2,
+ * --c: 1`, and going back to Basic does not undo it.
+ * ------------------------------------------------------------------ */
 
 /**
  * A length split into its number and its unit, for the slider that edits it.
- * Anything that is not `<number><unit>` — `calc(2.5em * var(--scale))`, `auto`,
- * `normal` — comes back as [0, fallback] and the form shows a text field
- * instead, because those are legitimate answers that no slider can hold.
+ *
+ * A four-value shorthand — `1px 0 1px 0`, an edge set — reads back as its
+ * first non-zero part, which is exactly the number that was typed. Anything
+ * else that is not `<number><unit>` (`calc(2.5em * var(--scale))`, `auto`,
+ * `normal`) comes back as [0, fallback] and the form shows a text field
+ * instead, because those are legitimate answers no slider can hold.
  */
 export function splitLength(value: string, fallbackUnit = 'rem'): [number, string] {
-	const m = String(value).trim().match(/^(-?[\d.]+)\s*([a-z%]*)$/i);
+	const parts = String(value).trim().split(/\s+/);
+	const pick = parts.find((p) => p !== '0' && !/^0[a-z%]*$/i.test(p)) ?? parts[0] ?? '0';
+	const m = pick.match(/^(-?[\d.]+)\s*([a-z%]*)$/i);
 	if (!m) return [0, fallbackUnit];
 	return [parseFloat(m[1]) || 0, m[2] || fallbackUnit];
 }
@@ -277,103 +456,196 @@ function sidesFromCss(v: string): Sides | undefined {
 	return { top: p[0] === '1', right: p[1] === '1', bottom: p[2] === '1', left: p[3] === '1' };
 }
 
-/** A control's value as CSS text. The only place a value becomes a string. */
-function toCss(c: Control, v: unknown): string {
-	return c.type === 'sides' ? sidesToCss(v as Sides) : String(v);
+/**
+ * The variable a control reads itself back from.
+ *
+ * Its own name when it writes one — that is either a real variable or a
+ * sentinel no stylesheet reads — otherwise the first it writes.
+ */
+export function primaryVar(c: Control): string {
+	return c.vars.includes(c.id) ? c.id : c.vars[0];
 }
 
-/** The value of a control in a draft, falling back to its default. */
-function val(draft: Draft, c: Control): unknown {
-	return draft[c.id] ?? (c as { default?: unknown }).default;
+/** A width and its edges as one shorthand. All four on → just the length. */
+export function edgeWidthToCss(v: EdgeWidth): string {
+	const { width, sides } = v;
+	const e = (s: keyof Sides) => (sides[s] ? width : '0');
+	return sides.top && sides.right && sides.bottom && sides.left
+		? width
+		: `${e('top')} ${e('right')} ${e('bottom')} ${e('left')}`;
+}
+
+/** And back. A part at `0` is an edge that is off. */
+export function edgeWidthFromCss(raw: string, fallbackUnit = 'px'): EdgeWidth {
+	const p = raw.trim().split(/\s+/);
+	const zero = (x: string) => x === '0' || /^0[a-z%]*$/i.test(x);
+	if (p.length !== 4) {
+		const [n, u] = splitLength(raw, fallbackUnit);
+		const on = !zero(p[0] ?? '0');
+		return { width: `${n}${u}`, sides: { top: on, right: on, bottom: on, left: on } };
+	}
+	const [n, u] = splitLength(raw, fallbackUnit);
+	return {
+		width: `${n}${u}`,
+		sides: { top: !zero(p[0]), right: !zero(p[1]), bottom: !zero(p[2]), left: !zero(p[3]) }
+	};
+}
+
+/** A control's value as CSS text. The only place a value becomes a string. */
+function toCss(c: Control, v: unknown): string {
+	if (c.type === 'sides') return sidesToCss(v as Sides);
+	if (c.type === 'edge-width') return edgeWidthToCss(v as EdgeWidth);
+	if (c.type === 'toggle') return v ? '1' : '0';
+	return String(v);
+}
+
+/** What a box writes: its source, and its shade unless the source is literal. */
+export function colorVars(c: ColorControl, v: ColorValue): Vars {
+	const [src, shade] = c.vars;
+	return {
+		[src]: sourceToCss(v.source),
+		[shade]: String(isLiteral(v.source) ? 0 : v.shade)
+	};
+}
+
+/** What a control shows, given the variables. Its default when they say nothing. */
+export function readValue(c: Control, vars: Vars): unknown {
+	if (c.type === 'color') {
+		const [srcVar, shadeVar] = c.vars;
+		if (vars[srcVar] === undefined && vars[shadeVar] === undefined) return c.default;
+		return {
+			source: sourceFromCss(vars[srcVar]),
+			shade: Number(vars[shadeVar] ?? 0) || 0
+		} satisfies ColorValue;
+	}
+
+	const raw = vars[primaryVar(c)];
+	if (raw === undefined) return c.default;
+
+	switch (c.type) {
+		case 'sides':
+			return sidesFromCss(raw) ?? c.default;
+		case 'edge-width':
+			return edgeWidthFromCss(raw, c.units[0]);
+		case 'toggle':
+			return raw === '1';
+		case 'number':
+		case 'percent': {
+			const n = parseFloat(raw);
+			return Number.isFinite(n) ? n : c.default;
+		}
+		case 'length': {
+			const [n, u] = splitLength(raw, c.units[0]);
+			return /^-?[\d.]+\s*[a-z%]*$/i.test(raw.trim()) ? raw.trim() : `${n}${u}`;
+		}
+		default:
+			return raw;
+	}
 }
 
 /**
- * Turn a draft into variables.
+ * What a control writes.
  *
- * The draft only holds what someone changed, so the pass fills in each
- * control's default as it reaches it and hands writers that completed draft
- * rather than the sparse one. Filling in lazily matters: two modes of one
- * effect can offer the same control with different defaults - a rounded
- * corner starts at 0, a hand-drawn one at 0.75rem - and only the mode you
- * picked is walked.
+ * Its own variable verbatim first, so it can always read itself back, then
+ * whatever its writer makes of it — which may overwrite that variable with
+ * something folded, as Border width does when it swallows the edges into a
+ * shorthand. `vars` is the current set, for a writer that reads a sibling:
+ * the Push press travels exactly as far as the Shadow group's offset.
  */
-export function expand(sections: Section[], draft: Draft): Vars {
+export function writeValue(c: Control, value: unknown, vars: Vars, group?: Group): Vars {
 	const out: Vars = {};
-	const full: Draft = { ...draft };
+	if (c.type === 'color') {
+		Object.assign(out, colorVars(c, value as ColorValue));
+	} else {
+		out[primaryVar(c)] = toCss(c, value);
+	}
+	const w = writers[c.id];
+	if (w) Object.assign(out, w(value, { ...vars, ...out }));
 
-	const walk = (controls: Control[]) => {
-		for (const c of controls) {
-			if (full[c.id] === undefined) full[c.id] = (c as { default?: unknown }).default;
-			const v = full[c.id];
+	/* A control inside a group re-runs its group's writer, because that is
+	   the one that knows how to combine it with its siblings. Moving the
+	   Border edges has to rebuild the width shorthand; moving a wobble
+	   amplitude has to rebuild the eight-value corner recipe. Without this
+	   the slider moves and nothing happens, which is the failure mode this
+	   whole design is most prone to. */
+	if (group?.type) {
+		const mode = readMode(group, { ...vars, ...out });
+		const mw = writers[`${group.id}:${mode}`];
+		if (mw) Object.assign(out, mw(mode, { ...vars, ...out }));
+	}
+	return out;
+}
 
-			if (c.type === 'effect') {
-				const mode = c.modes.find((m) => m.id === v) ?? c.modes[0];
-				full[c.id] = mode.id;
-				/* The sentinel. No stylesheet reads it; the generator does, to
-				   reopen a theme it wrote. Without it an exported theme is a
-				   pile of numbers and "push" is unrecoverable (ADR 0010). */
-				out[c.id] = mode.id;
-				/* The revealed controls run FIRST and the mode's writer last,
-				   because the writer is the one that knows how to combine
-				   them. A wobble amplitude on its own is the number 1; what
-				   belongs in --field-corners is the recipe built out of it. */
-				walk(mode.controls);
-				Object.assign(out, writers[`${c.id}:${mode.id}`]?.(full) ?? {});
-				continue;
-			}
+/** Which mode of a group the variables are in. */
+export function readMode(g: Group, vars: Vars): string {
+	const v = vars[g.id];
+	const modes = g.type?.modes ?? [];
+	return modes.some((m) => m.id === v) ? v : (g.type?.default ?? modes[0]?.id ?? '');
+}
 
-			const w = writers[c.id];
-			if (w) Object.assign(out, w(full));
-			else if (c.vars.length === 1) out[c.vars[0]] = toCss(c, v);
+/**
+ * What picking a mode writes: the sentinel, then any of that mode's controls
+ * the variables have nothing to say about, then the mode's own writer.
+ *
+ * The revealed controls run FIRST and the writer last, because the writer is
+ * the one that knows how to combine them. A wobble amplitude on its own is
+ * the number 1; what belongs in `--action-corners` is the recipe built from it.
+ */
+export function writeMode(g: Group, modeId: string, vars: Vars): Vars {
+	const mode = g.type?.modes.find((m) => m.id === modeId) ?? g.type?.modes[0];
+	if (!mode) return {};
 
-			/* A control nothing carries verbatim writes itself as a sentinel,
-			   so reopening the file gives the answer back rather than the
-			   mode's default. No stylesheet reads one. */
-			if (!recoverable(c)) out[c.id] = toCss(c, v);
-		}
-	};
+	/* Changing mode resets that mode's controls to their defaults; staying in
+	   the same mode keeps what the variables say.
+	 *
+	 * Without this, picking Solid after None reads the width back as the `0`
+	 * that None wrote, and turning Hand-drawn on reads the strength back as
+	 * the `0` that Off wrote — so the mode changes and nothing happens. The
+	 * sentinel is what says which mode wrote the current numbers, which is a
+	 * second job it does for free. Editing a control inside a mode goes
+	 * through `writeValue`, not here, so nobody loses a value they typed. */
+	const changing = vars[g.id] !== mode.id;
 
-	sections.forEach((s) => walk(s.controls));
+	const out: Vars = { [g.id]: mode.id };
+	for (const c of mode.controls) {
+		const value = changing ? c.default : readValue(c, vars);
+		Object.assign(out, writeValue(c, value, { ...vars, ...out }));
+	}
+	const w = writers[`${g.id}:${mode.id}`];
+	if (w) Object.assign(out, w(mode.id, { ...vars, ...out }));
 	return out;
 }
 
 /**
- * Read a theme file back into a draft.
+ * Every variable at its default: the baseline a theme is a diff against.
  *
- * The sentinels carry the effect modes; every other variable maps back to the
- * control that owns it, which is why a control declares the variables it
- * writes rather than only writing them. A control that folds several answers
- * into one variable — edges and width into a shorthand — cannot be recovered
- * from the file and comes back at the mode's default. `build-themes.mjs`
- * checks that the round trip is exact for every shipped theme, so a control
- * that stops round-tripping fails the build rather than quietly losing an
- * answer.
+ * `serialise()` drops anything equal to it, which is how "default = absence"
+ * stays true without any variable being left undeclared.
  */
-export function parse(sections: Section[], css: string): Draft {
-	const found: Record<string, string> = {};
-	for (const [, name, value] of css.matchAll(/--([a-z0-9-]+)\s*:\s*([^;}]+)/g)) {
-		found[name] = value.trim();
-	}
-
-	const draft: Draft = {};
-	const walk = (controls: Control[]) => {
-		for (const c of controls) {
-			if (c.type === 'effect') {
-				const mode = found[c.id];
-				if (mode && c.modes.some((m) => m.id === mode)) draft[c.id] = mode;
-				c.modes.forEach((m) => walk(m.controls));
+export function neutralVars(sections: Section[]): Vars {
+	const out: Vars = {};
+	for (const s of sections) {
+		for (const e of s.controls) {
+			if (!isGroup(e)) {
+				Object.assign(out, writeValue(e, e.default, out));
 				continue;
 			}
-			/* Its own name first — that is either a variable named after the
-			   control or its sentinel — then the single variable it writes. */
-			const raw = found[c.id] ?? (c.vars.length === 1 ? found[c.vars[0]] : undefined);
-			if (raw === undefined) continue;
-			const parsed = c.type === 'sides' ? sidesFromCss(raw) : raw;
-			if (parsed !== undefined) draft[c.id] = parsed;
+			/* The group's own controls first — a mode's writer may read them,
+			   and the Radius a wobble builds on is one of them. */
+			for (const c of e.controls) Object.assign(out, writeValue(c, c.default, out, e));
+			if (e.type) Object.assign(out, writeMode(e, e.type.default, out));
 		}
-	};
-	sections.forEach((s) => walk(s.controls));
-	return draft;
+	}
+	return out;
+}
+
+/** Read a theme file. A theme *is* its variables, so this is all it takes. */
+export function parse(css: string): Vars {
+	const out: Vars = {};
+	for (const [, name, value] of css.matchAll(/--([a-z0-9-]+)\s*:\s*([^;}]+)/g)) {
+		out[name] = value.trim();
+	}
+	return out;
 }
 
 /** `:root { … }`, sentinels included, holding only what differs from neutral. */
@@ -388,7 +660,10 @@ export function serialise(vars: Vars, neutral: Vars): string {
  * Writers — the controls that are not one-to-one
  * ------------------------------------------------------------------ */
 
-const writers: Record<string, (d: Draft) => Vars> = {};
+/** `(value, vars) => Vars`. `vars` already holds what the control wrote. */
+export type Writer = (value: unknown, vars: Vars) => Vars;
+
+const writers: Record<string, Writer> = {};
 
 /**
  * A section registers the logic for its controls that are not one-to-one.
@@ -396,15 +671,24 @@ const writers: Record<string, (d: Draft) => Vars> = {};
  * It lives with the section rather than here because the arithmetic that
  * turns "push, a quarter em" into four variables is part of what that section
  * means, and a reader looking at Fields should not have to come here to find
- * out what its Focus effect does. Importing a section registers its writers,
- * which is why `expand()` is only ever called on sections that were imported.
+ * out what its Focus group does. Importing a section registers its writers,
+ * which is why the form is only ever built from sections that were imported.
+ *
+ * A key is a control id, or `<group id>:<mode id>` for a mode.
  */
-export function registerWriters(map: Record<string, (d: Draft) => Vars>) {
+export function registerWriters(map: Record<string, Writer>) {
 	Object.assign(writers, map);
 }
 
 /** Which edges a `sides` control is set to, or all four. */
-export function sidesOf(d: Draft, key: string): Sides {
-	return (d[key] as Sides) ?? { top: true, right: true, bottom: true, left: true };
+export function sidesOf(vars: Vars, key: string): Sides {
+	return sidesFromCss(vars[key] ?? '') ?? { top: true, right: true, bottom: true, left: true };
 }
 
+/** A box's value out of the variables, for a writer that needs to read one. */
+export function colorOf(vars: Vars, id: string): ColorValue {
+	return {
+		source: sourceFromCss(vars[`${id}-color`]),
+		shade: Number(vars[`${id}-shade`] ?? 0) || 0
+	};
+}

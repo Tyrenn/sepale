@@ -34,19 +34,20 @@
 
 .btn {
 	/* ── Private slots, with their neutral resolutions ──────────── */
-	--_btn-bg: var(--_btn-color, var(--action-bg));
-	--_btn-fg: var(--action-fg);
-	/* The border is an explicit colour with some of the element's own
-	   fill mixed in. A look that outlines in ink sets from-fill to 0;
-	   one whose border is "the fill, a touch darker" sets the colour
-	   to black and from-fill to 95%. It reads a slot, so it resolves
-	   here on the element and never in a theme. */
-	--_btn-border-base: color-mix(
-		in oklab,
-		var(--action-border-color),
-		var(--_btn-color, var(--action-bg)) var(--action-border-from-fill)
-	);
+	/* The seed: what a colour variant put here, or the theme's own fill.
+	   Everything below derives from it, which is what makes a .btn-primary
+	   carry a primary-tinted edge and hover while a plain button carries a
+	   grey one — without a single extra declaration per variant. */
+	--_btn-seed: var(--_btn-color, var(--action-bg-color, var(--color-surface-4)));
+	--_btn-bg: #{m.shaded('var(--_btn-seed)', '--action-bg-shade')};
+	--_btn-fg: #{m.shaded('var(--action-fg-color, var(--color-on-surface))', '--action-fg-shade')};
+	/* The border: a colour of its own, or — when the theme left the source
+	   `initial`, which is guaranteed-invalid — the element's own fill, a
+	   few points away. That fallback resolves HERE, on the element, which
+	   is why no theme ever writes a formula naming a `--_` slot. */
+	--_btn-border-base: #{m.shaded('var(--action-border-color, var(--_btn-seed))', '--action-border-shade')};
 	--_btn-border: var(--_btn-border-base);
+	--_btn-scale: 1;
 	--_btn-shadow-scale: 1;
 	--_btn-dir: 1;
 	--_btn-x: 0px;
@@ -113,12 +114,18 @@
 	/* ── Motion ─────────────────────────────────────────────────── */
 	translate: calc(var(--_btn-x) * var(--_btn-dir)) calc(var(--_btn-y) * var(--_btn-dir));
 	rotate: var(--_btn-rotate);
-	transition-property: color, background-color, border-color, box-shadow, translate, rotate;
-	transition-duration: var(--action-transition-duration);
-	transition-timing-function: var(--action-transition-easing);
+	scale: var(--_btn-scale);
+	transition-property:
+		color, background-color, border-color, box-shadow, translate, rotate, scale;
+	/* Releasing takes TWICE as long as pressing. The rule is not a control:
+	   an instant press that relaxes slowly is what reads well whatever the
+	   numbers, and the reverse feels broken. The :active rule below halves
+	   this back down. */
+	transition-duration: calc(var(--action-transition-duration) * 2);
+	transition-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
 
 	/* ── Focus ──────────────────────────────────────────────────── */
-	outline-color: var(--_btn-color, var(--color-on-surface));
+	outline-color: #{m.shaded('var(--action-focus-color, var(--_btn-seed))', '--action-focus-shade')};
 	outline-offset: var(--focus-offset);
 }
 
@@ -129,8 +136,14 @@
 /* Keyboard focus — one ring for the whole kit. */
 .btn:focus-visible,
 .btn:has(:focus-visible) {
-	outline-width: var(--focus-width);
-	outline-style: var(--focus-style);
+	outline-width: var(--action-focus-outline-width);
+	outline-style: solid;
+	/* Ring and Glow are the same shadow, one blurred and one not, laid over
+	   whatever the Shadow group already draws. */
+	box-shadow:
+		var(--_btn-shadow),
+		0 0 var(--action-focus-cast-blur) var(--action-focus-ring-width)
+			#{m.shaded('var(--action-focus-color, var(--_btn-seed))', '--action-focus-shade')};
 	isolation: isolate;
 }
 
@@ -154,16 +167,8 @@
 
 @media (hover: hover) {
 	.btn:not(:disabled, [disabled], .btn-disabled):hover {
-		--_btn-bg: color-mix(
-			in oklab,
-			var(--_btn-color, var(--action-bg)),
-			var(--action-hover-mix-color) var(--action-hover-mix)
-		);
-		--_btn-border: color-mix(
-			in oklab,
-			var(--_btn-border-base),
-			var(--action-hover-border-mix-color) var(--action-hover-border-mix)
-		);
+		--_btn-bg: #{m.shaded('var(--action-hover-color, var(--_btn-seed))', '--action-hover-shade')};
+		--_btn-border: #{m.shaded('var(--_btn-border-base)', '--action-hover-shade')};
 		--_btn-shadow-scale: var(--action-hover-shadow-scale);
 		--_btn-x: var(--action-hover-x);
 		--_btn-y: var(--action-hover-y);
@@ -173,20 +178,16 @@
 
 .btn:not(:disabled, [disabled], .btn-disabled):active,
 .btn-active:not(:disabled, [disabled], .btn-disabled) {
-	--_btn-bg: color-mix(
-		in oklab,
-		var(--_btn-color, var(--action-bg)),
-		var(--action-press-mix-color) var(--action-press-mix)
-	);
-	--_btn-border: color-mix(
-		in oklab,
-		var(--_btn-border-base),
-		var(--action-press-border-mix-color) var(--action-press-border-mix)
-	);
+	--_btn-bg: #{m.shaded('var(--action-press-color, var(--_btn-seed))', '--action-press-shade')};
+	--_btn-border: #{m.shaded('var(--_btn-border-base)', '--action-press-shade')};
 	--_btn-shadow-scale: var(--action-press-shadow-scale);
 	--_btn-x: var(--action-press-x);
 	--_btn-y: var(--action-press-y);
 	--_btn-rotate: var(--action-press-rotate);
+	--_btn-scale: var(--action-press-scale);
+	/* The other half of the two-to-one: pressing is instant, releasing
+	   takes the full duration. */
+	transition-duration: var(--action-transition-duration);
 	isolation: isolate;
 }
 
@@ -195,13 +196,21 @@
 .btn[disabled] {
 	pointer-events: none;
 	--_btn-border: #0000;
-	--_btn-fg: color-mix(in oklch, var(--color-on-surface) var(--action-disabled-fg-mix), #0000);
+	--_btn-fg: var(
+		--action-disabled-color,
+		color-mix(in oklch, var(--color-on-surface) var(--action-disabled-fg-mix), #0000)
+	);
 }
 
 .btn-disabled:not(.btn-link, .btn-ghost),
 .btn:disabled:not(.btn-link, .btn-ghost),
 .btn[disabled]:not(.btn-link, .btn-ghost) {
-	--_btn-bg: color-mix(in oklch, var(--color-on-surface) var(--action-disabled-mix), #0000);
+	/* Custom paints it; Computed fades it. The theme writes one or the
+	   other, and `initial` is what makes the fallback win. */
+	--_btn-bg: var(
+		--action-disabled-color,
+		color-mix(in oklch, var(--color-on-surface) var(--action-disabled-mix), #0000)
+	);
 	--_btn-shadow: none;
 }
 
