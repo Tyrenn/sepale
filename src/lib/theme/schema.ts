@@ -45,6 +45,16 @@ interface Base {
 	id: string;
 	label: string;
 	help?: string;
+	/**
+	 * `<group id>:<mode id>` — hide this control while that group is in that
+	 * mode, because another control has taken the question over.
+	 *
+	 * The one case: turning the hand-drawn look on moves the radius into its
+	 * group, where it is the base the wobble is built from. Two radius
+	 * sliders, one of which quietly feeds the other, is worse than one that
+	 * moves.
+	 */
+	hiddenWhen?: string;
 	/** Every variable this control can write. The drift check reads this. */
 	vars: string[];
 }
@@ -85,6 +95,32 @@ export interface ColorControl extends Base {
 	type: 'color';
 	default: ColorValue;
 	sources: ColorSource[];
+	/**
+	 * Which of the two recipes this colour is.
+	 *
+	 * `shade` — the colour sits BESIDE its source: a border, a hover, a
+	 * track. A few points of lightness away, direction automatic.
+	 *
+	 * `contrast` — the colour is written ON its source: a mark, an ink, a
+	 * placeholder. The lightness snaps to one end instead of stepping.
+	 *
+	 * The distinction is not cosmetic. A `contrast` box in **Custom** mode
+	 * means "this IS the ink", not "derive an ink from this" — so its value
+	 * is written through untouched, and only the derived modes run the
+	 * recipe. Getting that backwards paints white text on a white page, and
+	 * every shipped theme states its own ink.
+	 */
+	kind?: 'shade' | 'contrast';
+	/** What Derived follows, in words. Defaults to a reading of the source. */
+	follows?: string;
+	/**
+	 * The id of the box this one is the ink of.
+	 *
+	 * The two render as a single pair under a single label, and this tile
+	 * shows an `A` in its own colour on its partner's — which is the only way
+	 * to judge an ink, and the reason a contrast number is not enough.
+	 */
+	inkOf?: string;
 	/** Exactly two: the source variable, then the shade variable. */
 	vars: [source: string, shade: string];
 }
@@ -184,6 +220,89 @@ export interface Sides {
 	left: boolean;
 }
 
+/**
+ * A list of `box-shadow` layers, edited as a list.
+ *
+ * It writes ONE variable holding the whole `box-shadow` value, which is what
+ * `chip` and `menu` already read — so the twelve flat `--x-shadow-N-*`
+ * variables and the `shadowLayers` geometry that filled them both go. Modes
+ * (soft / hard / inset) go with them: they were four presets over a thing
+ * that is naturally a list, and a look that wants two shadows could not say
+ * so.
+ */
+export interface ShadowsControl extends Base {
+	type: 'shadows';
+	default: ShadowLayer[];
+}
+
+export interface ShadowLayer {
+	x: string;
+	y: string;
+	blur: string;
+	spread: string;
+	color: string;
+	inset: boolean;
+}
+
+/** The layers as CSS. An empty list is `none`, not an empty string. */
+export function shadowsToCss(layers: ShadowLayer[]): string {
+	if (!layers.length) return 'none';
+	return layers
+		.map((l) => `${l.inset ? 'inset ' : ''}${l.x} ${l.y} ${l.blur} ${l.spread} ${l.color}`)
+		.join(', ');
+}
+
+/**
+ * And back. Splits on the commas that separate layers — not the ones inside
+ * `color-mix(…)` or `oklch(… / …)`, which is why this counts parentheses
+ * instead of calling `split(',')`.
+ */
+export function shadowsFromCss(raw: string): ShadowLayer[] {
+	const v = raw.trim();
+	if (!v || v === 'none' || v === 'initial') return [];
+	const parts: string[] = [];
+	let depth = 0;
+	let start = 0;
+	for (let i = 0; i < v.length; i++) {
+		if (v[i] === '(') depth++;
+		else if (v[i] === ')') depth--;
+		else if (v[i] === ',' && depth === 0) {
+			parts.push(v.slice(start, i));
+			start = i + 1;
+		}
+	}
+	parts.push(v.slice(start));
+
+	return parts.map((p) => {
+		const t = p.trim();
+		const inset = /(^|\s)inset(\s|$)/.test(t);
+		const rest = t.replace(/(^|\s)inset(\s|$)/, ' ').trim();
+		/* Four lengths at most, then whatever is left is the colour. */
+		const tokens: string[] = [];
+		let d = 0;
+		let acc = '';
+		for (const ch of rest) {
+			if (ch === '(') d++;
+			if (ch === ')') d--;
+			if (/\s/.test(ch) && d === 0) {
+				if (acc) tokens.push(acc);
+				acc = '';
+			} else acc += ch;
+		}
+		if (acc) tokens.push(acc);
+		const lengths = tokens.filter((x) => /^-?[\d.]/.test(x) || x.startsWith('calc('));
+		const color = tokens.filter((x) => !lengths.includes(x)).join(' ') || 'currentColor';
+		return {
+			x: lengths[0] ?? '0px',
+			y: lengths[1] ?? '0px',
+			blur: lengths[2] ?? '0px',
+			spread: lengths[3] ?? '0px',
+			color,
+			inset
+		};
+	});
+}
+
 /** An on/off group header. The group's controls appear only when it is on. */
 export interface ToggleControl extends Base {
 	type: 'toggle';
@@ -198,6 +317,7 @@ export type Control =
 	| ChoiceControl
 	| SidesControl
 	| EdgeWidthControl
+	| ShadowsControl
 	| ToggleControl;
 
 /* ------------------------------------------------------------------ *
@@ -493,19 +613,31 @@ export function edgeWidthFromCss(raw: string, fallbackUnit = 'px'): EdgeWidth {
 
 /** A control's value as CSS text. The only place a value becomes a string. */
 function toCss(c: Control, v: unknown): string {
+	if (c.type === 'shadows') return shadowsToCss(v as ShadowLayer[]);
 	if (c.type === 'sides') return sidesToCss(v as Sides);
 	if (c.type === 'edge-width') return edgeWidthToCss(v as EdgeWidth);
 	if (c.type === 'toggle') return v ? '1' : '0';
 	return String(v);
 }
 
-/** What a box writes: its source, and its shade unless the source is literal. */
+/**
+ * What a box writes: its source, and its shade unless the source is literal.
+ *
+ * `own` writes `initial`, which is guaranteed-invalid — so the stylesheet's
+ * `var(--x-color, <recipe>)` takes its fallback and derives. That is how a
+ * `contrast` box tells a STATED ink ("this is the ink") from a derived one
+ * ("work one out"): the stated colour is written, the derived one is an
+ * absence. Resolving the derivation here instead produced a formula the
+ * parser could only read back as a fixed colour, and every ink box reopened
+ * in Custom.
+ */
 export function colorVars(c: ColorControl, v: ColorValue): Vars {
 	const [src, shade] = c.vars;
-	return {
+	const out: Vars = {
 		[src]: sourceToCss(v.source),
 		[shade]: String(isLiteral(v.source) ? 0 : v.shade)
 	};
+	return out;
 }
 
 /** What a control shows, given the variables. Its default when they say nothing. */
@@ -527,6 +659,8 @@ export function readValue(c: Control, vars: Vars): unknown {
 			return sidesFromCss(raw) ?? c.default;
 		case 'edge-width':
 			return edgeWidthFromCss(raw, c.units[0]);
+		case 'shadows':
+			return shadowsFromCss(raw);
 		case 'toggle':
 			return raw === '1';
 		case 'number':

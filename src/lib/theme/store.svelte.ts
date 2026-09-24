@@ -22,6 +22,8 @@ import {
 	type Vars
 } from './schema.js';
 
+import { parse } from './schema.js';
+import { PRESETS } from './presets.js';
 import { colors } from './sections/colors.js';
 import { action } from './sections/action.js';
 import { field } from './sections/field.js';
@@ -172,6 +174,30 @@ export function diverges(group: Group, peers: Group[]): boolean {
 /** The theme, as it would be downloaded: only what differs from neutral. */
 export function css(): string {
 	return serialise(generator.vars, NEUTRAL);
+}
+
+/**
+ * Every value as declarations, for the <style> the layout injects.
+ *
+ * ALL of them, not the diff `css()` writes. A downloaded theme lands on
+ * `:root` of a page with nothing under it, so stating only what differs is
+ * right there. The preview sits inside an app that has a theme of its own,
+ * and anything the draft left out would show through it — so the scope has
+ * to state the whole set, neutral values included.
+ */
+export function inlineStyle(): string {
+	return Object.entries({ ...NEUTRAL, ...generator.vars })
+		.map(([k, v]) => `--${k}:${v};`)
+		.join('');
+}
+
+/** Load a shipped theme by name. A theme is a file, so this is a fetch. */
+export async function selectPreset(name: string) {
+	if (!name) return reset();
+	const p = PRESETS.find((x) => x.name === name);
+	if (!p) return;
+	const res = await fetch(p.url);
+	load(parse(await res.text()), name);
 }
 
 export function reset() {

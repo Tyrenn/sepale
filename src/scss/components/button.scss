@@ -40,7 +40,7 @@
 	   grey one — without a single extra declaration per variant. */
 	--_btn-seed: var(--_btn-color, var(--action-bg-color, var(--color-surface-4)));
 	--_btn-bg: #{m.shaded('var(--_btn-seed)', '--action-bg-shade')};
-	--_btn-fg: #{m.shaded('var(--action-fg-color, var(--color-on-surface))', '--action-fg-shade')};
+	--_btn-fg: #{m.ink('--action-fg-color', 'var(--_btn-seed)', '--action-fg-shade')};
 	/* The border: a colour of its own, or — when the theme left the source
 	   `initial`, which is guaranteed-invalid — the element's own fill, a
 	   few points away. That fallback resolves HERE, on the element, which
@@ -48,7 +48,6 @@
 	--_btn-border-base: #{m.shaded('var(--action-border-color, var(--_btn-seed))', '--action-border-shade')};
 	--_btn-border: var(--_btn-border-base);
 	--_btn-scale: 1;
-	--_btn-shadow-scale: 1;
 	--_btn-dir: 1;
 	--_btn-x: 0px;
 	--_btn-y: 0px;
@@ -59,22 +58,13 @@
 	   value: it has to resolve on the element. At --action-depth 0
 	   every colour-mix lands on transparent and the layers cost
 	   nothing but three entries in the list. */
+	/* One value, written by the Shadow list. The relief keeps its own two
+	   layers because they tint with `--_btn-bg` and so must resolve here. */
 	--_btn-shadow:
-		var(--action-shadow-1-inset)
-			calc(var(--action-shadow-1-x) * var(--_btn-shadow-scale) * var(--_btn-dir))
-			calc(var(--action-shadow-1-y) * var(--_btn-shadow-scale) * var(--_btn-dir))
-			calc(var(--action-shadow-1-blur) * var(--_btn-shadow-scale))
-			var(--action-shadow-1-spread) var(--action-shadow-1-color),
-		var(--action-shadow-2-inset)
-			calc(var(--action-shadow-2-x) * var(--_btn-shadow-scale) * var(--_btn-dir))
-			calc(var(--action-shadow-2-y) * var(--_btn-shadow-scale) * var(--_btn-dir))
-			calc(var(--action-shadow-2-blur) * var(--_btn-shadow-scale))
-			var(--action-shadow-2-spread) var(--action-shadow-2-color),
+		var(--action-shadow),
 		0 0.5px 0 0.5px oklch(100% 0 0 / calc(var(--action-depth) * 6%)) inset,
-		0 calc(3px * var(--_btn-shadow-scale)) 2px -2px
-			color-mix(in oklab, var(--_btn-bg) calc(var(--action-depth) * 30%), #0000),
-		0 calc(4px * var(--_btn-shadow-scale)) 3px -2px
-			color-mix(in oklab, var(--_btn-bg) calc(var(--action-depth) * 30%), #0000);
+		0 3px 2px -2px color-mix(in oklab, var(--_btn-bg) calc(var(--action-depth) * 30%), #0000),
+		0 4px 3px -2px color-mix(in oklab, var(--_btn-bg) calc(var(--action-depth) * 30%), #0000);
 
 	/* ── Layout ─────────────────────────────────────────────────── */
 	display: inline-flex;
@@ -169,7 +159,6 @@
 	.btn:not(:disabled, [disabled], .btn-disabled):hover {
 		--_btn-bg: #{m.shaded('var(--action-hover-color, var(--_btn-seed))', '--action-hover-shade')};
 		--_btn-border: #{m.shaded('var(--_btn-border-base)', '--action-hover-shade')};
-		--_btn-shadow-scale: var(--action-hover-shadow-scale);
 		--_btn-x: var(--action-hover-x);
 		--_btn-y: var(--action-hover-y);
 		--_btn-rotate: var(--action-hover-rotate);
@@ -180,7 +169,8 @@
 .btn-active:not(:disabled, [disabled], .btn-disabled) {
 	--_btn-bg: #{m.shaded('var(--action-press-color, var(--_btn-seed))', '--action-press-shade')};
 	--_btn-border: #{m.shaded('var(--_btn-border-base)', '--action-press-shade')};
-	--_btn-shadow-scale: var(--action-press-shadow-scale);
+	/* A press absorbs its own shadow. */
+	--_btn-shadow: none;
 	--_btn-x: var(--action-press-x);
 	--_btn-y: var(--action-press-y);
 	--_btn-rotate: var(--action-press-rotate);
@@ -324,7 +314,6 @@
    costs nothing under a look with no shadow, since both classes
    only scale or mirror offsets that are already zero. */
 .btn-noshadow {
-	--_btn-shadow-scale: 0;
 	--_btn-x: 0px;
 	--_btn-y: 0px;
 }

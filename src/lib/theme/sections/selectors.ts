@@ -22,18 +22,81 @@
  */
 
 import type { Section } from '../schema.js';
-import { border, box, disabled, focus, handDrawn, radius, registerShared, scale, shadow } from './shared.js';
+import { border, box, disabled, focus, handDrawn, registerShared, scale, shadow } from './shared.js';
 
 const P = 'selector';
 
-registerShared(P, { border: true, focus: true, disabled: true, handdrawn: true, shadow: true });
+registerShared(P, { border: true, focus: true, disabled: true, handdrawn: true });
 
 export const selectors: Section = {
 	id: 'selectors',
 	label: 'Selectors',
 	prefixes: ['selector', 'checkbox', 'radio', 'toggle', 'range', 'swatch'],
 	help: 'The things you tick, drag and pick. Checked and unchecked are painted separately, because most looks change everything at once.',
-	internal: [],
+	internal: [
+		/* Declared, editable by hand in the file, and deliberately NOT a
+		   question this form asks. Most are geometry the section's Size
+		   moves together — nobody edits a calc() in a form — and the rest
+		   are the second level of the cascade, where a component restates
+		   its section's answer under its own name.
+
+		   Built by running `node scripts/check-theme-vars.mjs` and pasting
+		   what it named. Never from memory. */
+		'checkbox-mark-duration',
+		'radio-checked-bg',
+		'radio-checked-border-color',
+		'range-corners',
+		'range-fill',
+		'range-progress',
+		'range-rail',
+		'range-thumb-bg',
+		'range-thumb-border-color',
+		'range-thumb-border-width',
+		'range-thumb-corners',
+		'range-thumb-halo',
+		'range-thumb-shadow',
+		'range-thumb-size',
+		'range-track-bg',
+		'range-track-border-color',
+		'range-track-border-width',
+		'range-track-corners',
+		'selector-bg',
+		'selector-checked-bg',
+		'selector-checked-border-color',
+		'selector-checked-mark',
+		'selector-depth',
+		'selector-disabled-opacity',
+		'selector-focus-offset',
+		'selector-mark',
+		'selector-padding',
+		'selector-size',
+		'selector-transition-duration',
+		'selector-transition-easing',
+		'swatch-active-shadow',
+		'swatch-active-x',
+		'swatch-active-y',
+		'swatch-border-color',
+		'swatch-border-width',
+		'swatch-check-size',
+		'swatch-checks',
+		'swatch-corners',
+		'swatch-font-weight',
+		'swatch-rest-rotate',
+		'swatch-shadow',
+		'swatch-size',
+		'swatch-transition-duration',
+		'toggle-checked-thumb-bg',
+		'toggle-checked-track-bg',
+		'toggle-checked-track-border-color',
+		'toggle-corners',
+		'toggle-padding',
+		'toggle-size',
+		'toggle-thumb-bg',
+		'toggle-thumb-corners',
+		'toggle-thumb-shadow',
+		'toggle-track-bg',
+		'toggle-track-border-color'
+	],
 	controls: [
 		scale(
 			P,
@@ -51,8 +114,9 @@ export const selectors: Section = {
 				'selector-mark-shade'
 			],
 			controls: [
-				box('selector-bg', 'Background', { sources: ['surface'], source: 'color-surface-1' }),
-				box('selector-mark', 'Mark', { sources: ['own', 'text'], source: 'own' })
+				box('selector-bg', 'Background', { sources: [], source: 'color-surface-1' }),
+				box('selector-mark', 'Mark', {
+					kind: 'contrast', sources: [], source: 'own' })
 			]
 		},
 
@@ -69,14 +133,14 @@ export const selectors: Section = {
 			],
 			controls: [
 				box('selector-checked-bg', 'Background', {
-					sources: ['semantic', 'own', 'surface'],
+					sources: [],
 					source: 'color-primary'
 				}),
-				box('selector-checked-mark', 'Mark', { sources: ['own', 'text'], source: 'own' })
+				box('selector-checked-mark', 'Mark', {
+					kind: 'contrast', sources: [], source: 'own' })
 			]
 		},
 
-		radius(P),
 		border(P),
 		shadow(P),
 		focus(P),
@@ -104,8 +168,8 @@ export const selectors: Section = {
 					units: ['em', 'rem', 'px'],
 					vars: ['range-trail-height']
 				},
-				box('range-track', 'Track', { sources: ['own', 'text', 'surface'], source: 'own', shade: 0.1 }),
-				box('range-fill', 'Fill', { sources: ['own', 'semantic'], source: 'color-primary' })
+				box('range-track', 'Track', { sources: [], source: 'own', shade: 0.1 }),
+				box('range-fill', 'Fill', { sources: [], source: 'color-primary' })
 			]
 		},
 

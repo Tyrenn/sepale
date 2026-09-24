@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { SECTIONS, NEUTRAL, vars } from '$lib/theme/store.svelte.js';
-	import type { Control, Section } from '$lib/theme/schema.js';
+	import { SECTIONS, NEUTRAL, generator } from '$lib/theme/store.svelte.js';
+	import { isGroup, type Control, type Entry, type Group, type Section } from '$lib/theme/schema.js';
 
 	/**
 	 * The control → variable table: the documentation of the theme format.
@@ -14,30 +14,33 @@
 	 * writes, and what the neutral default is. Add a control and it appears.
 	 */
 
-	let live = $derived(vars());
+	let live = $derived(generator.vars);
 
 	/**
 	 * A control and everything nested under it, flattened for the table.
 	 *
 	 * Each row carries its own key: the same control appears under more than
-	 * one mode of an effect — a radius is offered by both Rounded and
-	 * Hand-drawn, with a different default each time — so the control's id is
-	 * not unique here and `mode` is what separates them.
+	 * one mode of a group — a width is offered by Solid, Dashed and Dotted —
+	 * so the control's id is not unique here and the mode is what separates
+	 * them.
 	 */
 	interface Row {
-		control: Control;
+		control: Control | Group;
 		depth: number;
 		key: string;
 	}
 
-	function rows(controls: Control[], depth = 0, prefix = ''): Row[] {
-		return controls.flatMap((c) =>
-			c.type === 'effect'
+	function rows(entries: Entry[], depth = 0, prefix = ''): Row[] {
+		return entries.flatMap((e) =>
+			isGroup(e)
 				? [
-						{ control: c, depth, key: prefix + c.id },
-						...c.modes.flatMap((m) => rows(m.controls, depth + 1, `${prefix}${c.id}:${m.id}/`))
+						{ control: e, depth, key: prefix + e.id },
+						...rows(e.controls, depth + 1, `${prefix}${e.id}/`),
+						...(e.type?.modes ?? []).flatMap((m) =>
+							rows(m.controls, depth + 1, `${prefix}${e.id}:${m.id}/`)
+						)
 					]
-				: [{ control: c, depth, key: prefix + c.id }]
+				: [{ control: e, depth, key: prefix + e.id }]
 		);
 	}
 
@@ -45,8 +48,12 @@
 		return new Set(rows(section.controls).flatMap((r) => r.control.vars)).size;
 	}
 
-	const kind = (c: Control) =>
-		c.type === 'effect' ? `effect (${c.modes.map((m) => m.id).join(' | ')})` : c.type;
+	const kind = (c: Control | Group) =>
+		isGroup(c)
+			? c.type
+				? `group (${c.type.modes.map((m) => m.id).join(' | ')})`
+				: 'group'
+			: c.type;
 </script>
 
 <main class="content">

@@ -18,43 +18,112 @@
  */
 
 import type { Section } from '../schema.js';
-import { border, box, disabled, handDrawn, radius, registerShared, scale, shadow } from './shared.js';
+import { border, box, disabled, handDrawn, registerShared, scale, shadow } from './shared.js';
 
 const P = 'container';
 
-registerShared(P, { border: true, disabled: true, handdrawn: true, shadow: true });
+registerShared(P, { border: true, disabled: true, handdrawn: true });
 
 export const container: Section = {
 	id: 'container',
 	label: 'Container',
 	prefixes: ['container', 'navbar', 'dock', 'menu', 'list'],
 	help: 'The boxes that hold things: bars, docks, menus and lists.',
-	internal: [],
+	internal: [
+		/* Declared, editable by hand in the file, and deliberately NOT a
+		   question this form asks. Most are geometry the section's Size
+		   moves together — nobody edits a calc() in a form — and the rest
+		   are the second level of the cascade, where a component restates
+		   its section's answer under its own name.
+
+		   Built by running `node scripts/check-theme-vars.mjs` and pasting
+		   what it named. Never from memory. */
+		'container-bg',
+		'container-fg',
+		'container-item-corners',
+		'dock-bg',
+		'dock-border-color',
+		'dock-border-width',
+		'dock-disabled-color',
+		'list-active-bg',
+		'list-active-fg',
+		'list-bg',
+		'list-divider-color',
+		'list-divider-width',
+		'list-hover-bg',
+		'list-suggestions-border-color',
+		'list-suggestions-shadow',
+		'menu-active-bg',
+		'menu-active-fg',
+		'menu-bg',
+		'menu-border',
+		'menu-border-width',
+		'menu-disabled-bg',
+		'menu-disabled-fg',
+		'menu-divider',
+		'menu-divider-gap',
+		'menu-divider-inset',
+		'menu-divider-size',
+		'menu-fg',
+		'menu-focus-offset',
+		'menu-focus-outline',
+		'menu-gap',
+		'menu-hover-bg',
+		'menu-hover-fg',
+		'menu-item-active-line',
+		'menu-item-active-weight',
+		'menu-item-bg',
+		'menu-item-fg',
+		'menu-item-gap',
+		'menu-item-hover-line',
+		'menu-item-line',
+		'menu-item-px',
+		'menu-item-py',
+		'menu-item-radius',
+		'menu-item-rotate',
+		'menu-item-rotate-alt',
+		'menu-item-transition',
+		'menu-item-weight',
+		'menu-p',
+		'menu-rest-rotate',
+		'menu-shadow',
+		'menu-sub-indent',
+		'menu-sub-transition',
+		'menu-title-fg',
+		'menu-title-px',
+		'menu-title-py',
+		'menu-title-size',
+		'menu-title-tracking',
+		'menu-title-transform',
+		'menu-title-weight',
+		'navbar-bg',
+		'navbar-border',
+		'navbar-border-width',
+		'navbar-fg',
+		'navbar-gap',
+		'navbar-h',
+		'navbar-px',
+		'navbar-py',
+		'navbar-shadow',
+		'navbar-sticky-top'
+	],
 	controls: [
 		scale(P, 'Grows the padding and the spacing of every box: menus, lists, the bars.'),
 
-		{
-			id: 'container-surface',
-			label: 'Surface',
-			layout: 'row',
-			help: 'A bar, a dock, a menu and a list are the same surface. A theme that wants a darker navbar sets `--navbar-bg` in the file; it is not a question worth asking four times.',
-			vars: [
-				'container-bg-color',
-				'container-bg-shade',
-				'container-fg-color',
-				'container-fg-shade'
-			],
-			controls: [
-				box('container-bg', 'Background', { sources: ['surface'], source: 'color-surface-1' }),
-				box('container-fg', 'Text', { sources: ['text', 'surface'], source: 'color-on-surface' })
-			]
-		},
+			box('container-bg', 'Box', { sources: [], source: 'color-surface-1' }),
+			box('container-fg', 'Box', {
+				kind: 'contrast',
+				inkOf: 'container-bg',
+				follows: 'the box’s own fill',
+				sources: [],
+				source: 'own'
+			}),
+
 
 		/* Boxes are twice the radius of the things inside them — daisyUI's own
 		   `--radius-box` against `--radius-field`, and true in all 13 daisy
 		   themes. That factor is what lets one Basic widget serve both. */
-		radius(P, 2, '0.5rem'),
-		border(P),
+		border(P, ['own', 'text', 'surface'], '0.5rem'),
 		shadow(P),
 
 		{
@@ -70,12 +139,12 @@ export const container: Section = {
 			],
 			controls: [
 				box('container-item-hover', 'Hover', {
-					sources: ['own', 'text'],
+					sources: [],
 					source: 'own',
 					shade: 0.07
 				}),
 				box('container-item-active', 'Active', {
-					sources: ['semantic', 'own'],
+					sources: [],
 					source: 'color-primary'
 				})
 			]
@@ -102,7 +171,7 @@ export const container: Section = {
 					vars: ['container-divider-width']
 				},
 				box('container-divider', 'Colour', {
-					sources: ['own', 'text', 'surface'],
+					sources: [],
 					source: 'own',
 					shade: 0.08
 				})

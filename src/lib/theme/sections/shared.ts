@@ -20,8 +20,6 @@
 
 import {
 	registerWriters,
-	shadowLayers,
-	shadowVars,
 	sidesOf,
 	splitLength,
 	type ColorControl,
@@ -54,6 +52,10 @@ export function box(
 		source?: string;
 		shade?: number;
 		help?: string;
+		/** `contrast` for anything written ON its source: an ink, a mark. */
+		kind?: 'shade' | 'contrast';
+		follows?: string;
+		inkOf?: string;
 	}
 ): ColorControl {
 	return {
@@ -61,6 +63,9 @@ export function box(
 		label,
 		type: 'color',
 		help: opts.help,
+		kind: opts.kind,
+		follows: opts.follows,
+		inkOf: opts.inkOf,
 		sources: opts.sources,
 		default: { source: opts.source ?? 'own', shade: opts.shade ?? 0 },
 		vars: [`${id}-color`, `${id}-shade`]
@@ -120,7 +125,24 @@ const borderColor = (p: string, sources: ColorSource[]): Control =>
 /** The three painted styles share their controls; only the style differs. */
 const painted = (p: string, sources: ColorSource[]) => [borderWidth(p), borderColor(p, sources)];
 
-export function border(p: string, sources: ColorSource[] = ['own', 'text', 'surface']): Group {
+const radiusControl = (p: string, dflt: string, id = `${p}-radius`, hidden?: string): Control => ({
+	id,
+	label: 'Radius',
+	type: 'length',
+	default: dflt,
+	min: 0,
+	max: 3,
+	step: 0.05,
+	units: ['rem', 'px', 'em'],
+	hiddenWhen: hidden,
+	vars: [`${p}-radius`]
+});
+
+export function border(
+	p: string,
+	sources: ColorSource[] = ['own', 'text', 'surface'],
+	radiusDefault = '0.25rem'
+): Group {
 	return {
 		id: `${p}-border`,
 		label: 'Border',
@@ -131,9 +153,14 @@ export function border(p: string, sources: ColorSource[] = ['own', 'text', 'surf
 			`${p}-border-style`,
 			`${p}-border-width`,
 			`${p}-border-color`,
-			`${p}-border-shade`
+			`${p}-border-shade`,
+			`${p}-radius`
 		],
-		controls: [],
+		/* The corner is part of the border, not a group of its own: it is the
+		   same edge, and asking about it twenty lines further down made two
+		   questions out of one. It stays visible whatever the style, because a
+		   borderless box still has corners. */
+		controls: [radiusControl(p, radiusDefault, `${p}-radius`, `${p}-handdrawn:on`)],
 		type: {
 			default: 'none',
 			modes: [
@@ -162,79 +189,6 @@ export function registerBorder(p: string) {
 	});
 }
 
-/* ------------------------------------------------------------------ *
- * Radius — shared, with a per-section factor
- * ------------------------------------------------------------------ */
-
-/**
- * `factor` is what lets one Basic widget serve sections that disagree by a
- * constant ratio. Measured: the radius differs across sections in 17 of 19
- * themes, but every daisy theme is `0.25rem` for controls and `0.5rem` for
- * boxes — daisyUI's own `--radius-field` and `--radius-box`. So the Basic
- * widget holds the base and each section multiplies.
- *
- * Themes with genuinely independent radii — dahlia has three — use Advanced.
- */
-export function radius(p: string, factor = 1, dflt = '0.25rem'): Group {
-	return {
-		id: `${p}-corners`,
-		label: 'Corners',
-		shared: 'corners',
-		sharedFactor: factor,
-		vars: [`${p}-radius`],
-		controls: [
-			{
-				id: `${p}-radius`,
-				label: 'Radius',
-				type: 'length',
-				default: dflt,
-				min: 0,
-				max: 3,
-				step: 0.05,
-				units: ['rem', 'px', 'em'],
-				vars: [`${p}-radius`]
-			}
-		]
-	};
-}
-
-/* ------------------------------------------------------------------ *
- * Typography — shared
- * ------------------------------------------------------------------ */
-
-export function typography(p: string): Group {
-	return {
-		id: `${p}-typography`,
-		label: 'Typography',
-		shared: 'typography',
-		layout: 'row',
-		vars: [`${p}-font-weight`, `${p}-text-transform`],
-		controls: [
-			{
-				id: `${p}-font-weight`,
-				label: 'Weight',
-				type: 'number',
-				default: 400,
-				min: 300,
-				max: 800,
-				step: 100,
-				vars: [`${p}-font-weight`]
-			},
-			{
-				id: `${p}-text-transform`,
-				label: 'Case',
-				type: 'choice',
-				default: 'none',
-				options: [
-					{ value: 'none', label: 'None' },
-					{ value: 'uppercase', label: 'Upper' },
-					{ value: 'capitalize', label: 'Title' }
-				],
-				vars: [`${p}-text-transform`]
-			}
-		]
-	};
-}
 
 /* ------------------------------------------------------------------ *
  * Focus — shared
@@ -253,7 +207,7 @@ const focusWidth = (p: string): Control => ({
 });
 
 const focusColor = (p: string): Control =>
-	box(`${p}-focus`, 'Colour', { sources: ['own', 'text', 'semantic'], source: 'own', shade: 0 });
+	box(`${p}-focus`, 'Colour', { sources: [], source: 'own', shade: 0 });
 
 export function focus(p: string): Group {
 	return {
@@ -406,7 +360,7 @@ export function handDrawn(p: string): Group {
 		label: 'Hand-drawn',
 		shared: 'handdrawn',
 		help: 'Off true, the way a drawn thing sits. Small numbers read as drawn; large ones read as broken.',
-		vars: [`${p}-handdrawn`, `${p}-corners`, `${p}-wobble`, `${p}-angle`],
+		vars: [`${p}-handdrawn`, `${p}-corners`, `${p}-wobble`, `${p}-angle`, `${p}-radius`],
 		controls: [],
 		type: {
 			default: 'off',
@@ -416,6 +370,10 @@ export function handDrawn(p: string): Group {
 					id: 'on',
 					label: 'On',
 					controls: [
+						/* The radius the wobble is built from. It is the same
+						   variable the Border group offers — which is why that
+						   one hides while this is on. */
+						radiusControl(p, '0.75rem', `${p}-handdrawn-radius`),
 						{
 							id: `${p}-handdrawn-strength`,
 							label: 'Strength',
@@ -469,137 +427,45 @@ export function registerHandDrawn(p: string) {
 
 /* ------------------------------------------------------------------ *
  * Shadow — per section, never shared
+ *
+ * One control holding a LIST. The four old modes — soft, hard, inset,
+ * relief — were presets over a thing that is naturally a list, and a look
+ * wanting two shadows could not say so at all. They are gone, and with them
+ * the twelve flat `--x-shadow-N-*` variables and the `shadowLayers`
+ * geometry that filled them: the control writes the whole `box-shadow`
+ * value, which is what `chip` and `menu` already read.
  * ------------------------------------------------------------------ */
 
-const shadowEdges = (p: string): Control => ({
-	id: `${p}-shadow-edges`,
-	label: 'Edges',
-	type: 'sides',
-	default: ALL,
-	vars: [`${p}-shadow-edges`]
-});
-
-const shadowOffset = (p: string, d: string): Control => ({
-	id: `${p}-shadow-offset`,
-	label: 'Offset',
-	type: 'length',
-	default: d,
-	min: 0,
-	max: 2,
-	step: 0.05,
-	units: ['px', 'em', 'rem'],
-	vars: [`${p}-shadow-offset`]
-});
-
-const shadowBlur = (p: string, d: string): Control => ({
-	id: `${p}-shadow-blur`,
-	label: 'Blur',
-	type: 'length',
-	default: d,
-	min: 0,
-	max: 3,
-	step: 0.5,
-	units: ['px', 'em', 'rem'],
-	vars: [`${p}-shadow-blur`]
-});
-
-const shadowColor = (p: string): Control =>
-	box(`${p}-shadow`, 'Colour', { sources: ['own', 'text'], source: 'own', shade: 0.25 });
-
-/** `relief` is a mode only Action has: a retro edge tinted with its own fill. */
 export function shadow(p: string, opts: { relief?: boolean } = {}): Group {
-	const modes = [
-		{ id: 'none', label: 'None', controls: [] as Control[] },
-		{
-			id: 'soft',
-			label: 'Soft',
-			controls: [shadowEdges(p), shadowOffset(p, '2px'), shadowBlur(p, '6px'), shadowColor(p)]
-		},
-		{
-			id: 'hard',
-			label: 'Hard',
-			help: 'No blur at all, so the colour is a flat block. Pair it with the Push press and the element moves into its own shadow.',
-			controls: [shadowEdges(p), shadowOffset(p, '0.25em'), shadowColor(p)]
-		},
-		{
-			id: 'inset',
-			label: 'Inside',
-			controls: [shadowEdges(p), shadowOffset(p, '2px'), shadowBlur(p, '4px'), shadowColor(p)]
-		}
-	];
-
-	if (opts.relief) {
-		modes.push({
-			id: 'relief',
-			label: 'Relief',
-			help: 'A retro edge tinted with the element’s own fill. It has to resolve on the element, so only its amount is here.',
-			controls: [
-				{
-					id: `${p}-depth`,
-					label: 'Amount',
-					type: 'number',
-					default: 1,
-					min: 0,
-					max: 1,
-					step: 0.05,
-					vars: [`${p}-depth`]
-				}
-			]
-		});
-	}
-
-	const layerVars = [1, 2].flatMap((n) =>
-		['inset', 'x', 'y', 'blur', 'spread', 'color'].map((k) => `${p}-shadow-${n}-${k}`)
-	);
-
 	return {
-		id: `${p}-shadow`,
+		id: `${p}-shadow-group`,
 		label: 'Shadow',
-		vars: [
-			`${p}-shadow`,
-			`${p}-shadow-edges`,
-			`${p}-shadow-offset`,
-			`${p}-shadow-blur`,
-			`${p}-shadow-color`,
-			`${p}-shadow-shade`,
-			...layerVars,
-			...(opts.relief ? [`${p}-depth`] : [])
-		],
-		controls: [],
-		type: { default: 'none', modes }
-	};
-}
-
-export function registerShadow(p: string, opts: { relief?: boolean } = {}) {
-	const paint = (vars: Vars, inset: boolean): Vars =>
-		shadowVars(
-			p,
-			shadowLayers(sidesOf(vars, `${p}-shadow-edges`), String(vars[`${p}-shadow-offset`])),
+		vars: [`${p}-shadow`, ...(opts.relief ? [`${p}-depth`] : [])],
+		controls: [
 			{
-				blur: String(vars[`${p}-shadow-blur`] ?? '0px'),
-				/* The layer colour is the box's source; its shade is applied by
-				   the component, which is the only place the element's own fill
-				   is in scope. */
-				color: `var(--${p}-shadow-color, currentColor)`,
-				inset
-			}
-		);
-	const none = (): Vars => shadowVars(p, [], { blur: '0px', color: '#0000', inset: false });
-
-	registerWriters({
-		[`${p}-shadow:none`]: () => (opts.relief ? { ...none(), [`${p}-depth`]: '0' } : none()),
-		[`${p}-shadow:soft`]: (_, vars) => paint(vars, false),
-		[`${p}-shadow:hard`]: (_, vars) => paint(vars, false),
-		[`${p}-shadow:inset`]: (_, vars) => paint(vars, true),
-		...(opts.relief
-			? {
-					[`${p}-shadow:relief`]: (_: unknown, vars: Vars) => ({
-						...none(),
-						[`${p}-depth`]: String(vars[`${p}-depth`] ?? 1)
-					})
-				}
-			: {})
-	});
+				id: `${p}-shadow`,
+				label: '',
+				type: 'shadows',
+				default: [],
+				vars: [`${p}-shadow`]
+			},
+			...(opts.relief
+				? [
+						{
+							id: `${p}-depth`,
+							label: 'Relief',
+							help: 'A retro edge tinted with the element’s own fill. It has to resolve on the element, so only its amount is here.',
+							type: 'number' as const,
+							default: 0,
+							min: 0,
+							max: 1,
+							step: 0.05,
+							vars: [`${p}-depth`]
+						}
+					]
+				: [])
+		]
+	};
 }
 
 /* ------------------------------------------------------------------ *
@@ -609,11 +475,10 @@ export function registerShadow(p: string, opts: { relief?: boolean } = {}) {
 /** Register every shared writer a section needs. Call once, at import. */
 export function registerShared(
 	p: string,
-	has: { border?: boolean; focus?: boolean; disabled?: boolean; handdrawn?: boolean; shadow?: boolean | { relief: boolean } }
+	has: { border?: boolean; focus?: boolean; disabled?: boolean; handdrawn?: boolean }
 ) {
 	if (has.border) registerBorder(p);
 	if (has.focus) registerFocus(p);
 	if (has.disabled) registerDisabled(p);
 	if (has.handdrawn) registerHandDrawn(p);
-	if (has.shadow) registerShadow(p, typeof has.shadow === 'object' ? has.shadow : {});
 }

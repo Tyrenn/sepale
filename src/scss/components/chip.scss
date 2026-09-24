@@ -39,7 +39,10 @@
 	--size: calc(1.6em * var(--scale));
 	font-size: var(--fontsize, var(--base, var(--default-base)));
 	gap: calc(0.5em * var(--scale));
-	border: var(--marker-border-width) solid var(--chip-color, var(--marker-border-color));
+	/* `--marker-border-color` is `initial` unless a theme fixes it, so the
+	   fallback derives the edge from the chip's own fill. */
+	border: var(--marker-border-width) var(--marker-border-style)
+		var(--chip-color, #{m.shaded('var(--marker-border-color, var(--marker-bg))', '--marker-border-shade')});
 	width: fit-content;
 	padding-inline: calc(var(--size) / 2 - var(--marker-border-width));
 }

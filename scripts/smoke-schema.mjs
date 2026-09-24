@@ -50,12 +50,16 @@ const set = (id, v, group) => {
 };
 
 const g = (id) => action.controls.find((e) => e.id === id);
-Object.assign(vars, schema.writeMode(g('action-shadow'), 'hard', vars));
+/* The shadow is a list now, not a mode. */
+const sc = g('action-shadow-group').controls.find((c) => c.type === 'shadows');
+Object.assign(vars, schema.writeValue(sc, [
+  { x: '2px', y: '2px', blur: '0px', spread: '0px', color: 'currentColor', inset: false }
+], vars, g('action-shadow-group')));
 Object.assign(vars, schema.writeMode(g('action-press'), 'push', vars));
 Object.assign(vars, schema.writeMode(g('action-handdrawn'), 'on', vars));
 Object.assign(vars, schema.writeMode(g('action-border'), 'solid', vars));
 
-console.log('shadow 1 y      :', vars['action-shadow-1-y']);
+console.log('shadow          :', vars['action-shadow']);
 console.log('press y (=offset):', vars['action-press-y']);
 console.log('corners         :', vars['action-corners'].slice(0, 60), '…');
 console.log('border width    :', vars['action-border-width']);

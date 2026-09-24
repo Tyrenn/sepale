@@ -39,7 +39,12 @@
 	width: var(--swatch-size);
 	height: var(--swatch-size);
 	padding: 0;
-	border: var(--swatch-border-width) solid var(--swatch-border-color);
+	/* `--swatch-border-color` is `initial` until a theme fixes one, and
+	   `solid initial` makes the whole shorthand invalid — no border at all,
+	   which leaves a white swatch invisible on a white page. The fallback
+	   derives the edge from the swatch's own colour. */
+	border: var(--swatch-border-width) solid
+		#{m.shaded('var(--swatch-border-color, var(--swatch-color))', '--selector-border-shade')};
 	border-radius: var(--swatch-corners);
 	box-shadow: var(--swatch-shadow);
 	color: var(--swatch-on-color);

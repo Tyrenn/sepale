@@ -1,0 +1,135 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   card.scss — .card, whole.
+
+   Section: Container.
+
+   A box with, optionally, a title, a body and a row of actions.
+   Every part is optional and none of them is structural: a card
+   with nothing but a body is a card, and that is the common case.
+
+   It owns its namespace and draws its own parts, so `card-title`,
+   `card-body` and `card-actions` are PARTS, not sub-components
+   (ADR 0009).
+
+   It takes the Container section's border, corners and shadow, and
+   sits on `--color-surface-2` — one step off the page. That is the
+   one colour it does not take from the section: a card whose fill
+   equalled the page behind it would need its border to exist at all,
+   and daisyUI's card is base-100 over a base-200 page for the same
+   reason. Everything else is the section's answer.
+   ============================================================ */
+
+/* ── Structure ────────────────────────────────────── */
+
+.card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--color-surface-2);
+	color: var(--color-on-surface);
+	border-radius: var(--container-corners);
+	border-width: var(--container-border-width);
+	border-style: var(--container-border-style);
+	border-color: var(--menu-border);
+	box-shadow: var(--container-shadow);
+	rotate: var(--container-angle);
+	/* Its own corners clip whatever it holds — an image at the top
+	   edge has to follow the box, and `overflow` is the only thing
+	   that makes a child respect a radius it does not know about. */
+	overflow: hidden;
+}
+
+.card-body {
+	display: flex;
+	flex: auto;
+	flex-direction: column;
+	gap: calc(0.5em * var(--container-scale));
+	padding: calc(1.25em * var(--container-scale));
+}
+
+.card-title {
+	display: flex;
+	align-items: center;
+	gap: calc(0.5em * var(--container-scale));
+	font-size: 1.125em;
+	font-weight: 600;
+}
+
+/* The actions sit at the end of the cross axis, so a row of buttons
+   lines up on the right in a left-to-right document without anyone
+   naming a direction. */
+.card-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: calc(0.5em * var(--container-scale));
+}
+
+/* A figure spans the card and is cropped by it. */
+.card figure {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+}
+.card figure > img {
+	display: block;
+	width: 100%;
+	object-fit: cover;
+}
+
+/* ── Axis: size ───────────────────────────────────── */
+@include m.size-variants('card', c.$sizes-field);
+
+/* ── Flag: border ─────────────────────────────────── */
+
+/* The section draws no border by default, so a card that wants one
+   says so — which is the same bargain `.btn-outline` makes. */
+.card-border {
+	border-width: max(var(--container-border-width), 1px);
+	border-style: solid;
+}
+.card-dash {
+	border-width: max(var(--container-border-width), 1px);
+	border-style: dashed;
+}
+
+/* ── Flag: side ───────────────────────────────────── */
+
+/* The figure goes beside the body instead of above it. */
+.card-side {
+	flex-direction: row;
+	align-items: stretch;
+}
+.card-side figure > img {
+	height: 100%;
+	max-width: 100%;
+}
+
+/* ── Flag: image-full ─────────────────────────────── */
+
+/* The figure fills the card and the body sits on top of it. The
+   overlay is the card's own surface at a low alpha rather than a
+   fixed black, so a light theme and a dark one both stay legible. */
+.card-image-full {
+	display: grid;
+}
+.card-image-full > figure,
+.card-image-full > .card-body {
+	grid-column-start: 1;
+	grid-row-start: 1;
+}
+.card-image-full > figure {
+	height: 100%;
+}
+.card-image-full > figure > img {
+	height: 100%;
+}
+.card-image-full > .card-body {
+	position: relative;
+	background-color: color-mix(in oklab, var(--color-surface-2) 65%, #0000);
+	backdrop-filter: blur(2px);
+}

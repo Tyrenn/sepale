@@ -26,11 +26,9 @@ import {
 	disabled,
 	focus,
 	handDrawn,
-	radius,
 	registerShared,
 	scale,
 	shadow,
-	typography
 } from './shared.js';
 
 const P = 'action';
@@ -39,8 +37,7 @@ registerShared(P, {
 	border: true,
 	focus: true,
 	disabled: true,
-	handdrawn: true,
-	shadow: { relief: true }
+	handdrawn: true
 });
 
 /* ------------------------------------------------------------------ *
@@ -67,7 +64,7 @@ const hover: Group = {
 	],
 	controls: [
 		box('action-hover', 'Hover', {
-			sources: ['own', 'text', 'semantic'],
+			sources: [],
 			source: 'own',
 			shade: 0.07
 		})
@@ -101,10 +98,8 @@ const press: Group = {
 		'action-press-y',
 		'action-press-rotate',
 		'action-press-scale',
-		'action-press-shadow-scale',
 		'action-hover-x',
 		'action-hover-y',
-		'action-hover-shadow-scale',
 		'action-press-amount',
 		'action-transition-duration'
 	],
@@ -171,35 +166,43 @@ const press: Group = {
 	}
 };
 
-/** Every press shape is these five numbers, differently filled. */
-function pressVars(x: string, y: string, rotate: string, scaleTo: string, shadowScale: string): Vars {
+/**
+ * Every press shape is these four numbers, differently filled.
+ *
+ * The shadow multiplier is gone with the flat layer variables: a shadow is
+ * one value now, so a press that absorbs it sets it to `none` in
+ * `button.scss` rather than scaling four offsets.
+ */
+function pressVars(x: string, y: string, rotate: string, scaleTo: string): Vars {
 	return {
 		'action-press-x': x,
 		'action-press-y': y,
 		'action-press-rotate': rotate,
-		'action-press-scale': scaleTo,
-		'action-press-shadow-scale': shadowScale
+		'action-press-scale': scaleTo
 	};
 }
 
 registerWriters({
-	'action-press:none': () => pressVars('0px', '0px', '0deg', '1', '1'),
+	'action-press:none': () => pressVars('0px', '0px', '0deg', '1'),
 	'action-press:sink': (_, vars) =>
-		pressVars('0px', String(vars['action-press-amount'] ?? '0.5px'), '0deg', '1', '0'),
+		pressVars('0px', String(vars['action-press-amount'] ?? '0.5px'), '0deg', '1'),
 	'action-press:push': (_, vars) => {
-		/* It travels exactly as far as its shadow sits. Reading the Shadow
-		   group is what lets this mode have no control at all. */
-		const o = String(vars['action-shadow-offset'] ?? '0.25em');
-		const [n, u] = splitLength(o, 'em');
+		/* It travels exactly as far as its shadow sits — the y offset of the
+		   first layer — which is what lets this mode have no control at all. */
+		const [n, u] = splitLength(
+			(String(vars['action-shadow'] ?? '').match(/(-?[\d.]+[a-z%]*)\s+(-?[\d.]+[a-z%]*)/) ?? [])[2] ??
+				'0.25em',
+			'em'
+		);
+		const o = `${n}${u}`;
 		return {
-			...pressVars(o, o, '0deg', '1', '0'),
+			...pressVars(o, o, '0deg', '1'),
 			'action-hover-x': `${n / 2}${u}`,
 			'action-hover-y': `${n / 2}${u}`,
-			'action-hover-shadow-scale': '0.5'
 		};
 	},
 	'action-press:scale': (_, vars) =>
-		pressVars('0px', '0px', '0deg', String(vars['action-press-scale'] ?? 0.97), '1')
+		pressVars('0px', '0px', '0deg', String(vars['action-press-scale'] ?? 0.97))
 });
 
 /* ------------------------------------------------------------------ *
@@ -218,7 +221,7 @@ const link: Group = {
 		'link-weight'
 	],
 	controls: [
-		box('link', 'Colour', { sources: ['text', 'semantic'], source: 'color-primary' }),
+		box('link', 'Colour', { sources: [], source: 'color-primary' }),
 		{
 			id: 'link-underline',
 			label: 'Underline',
@@ -256,18 +259,6 @@ registerWriters({
 	}
 });
 
-const tabs: Group = {
-	id: 'tabs',
-	label: 'Tabs',
-	layout: 'row',
-	help: 'Only two colours. Everything else a tab draws — its corners, its border, its weight, its motion — it takes from the button above.',
-	vars: ['tabs-idle-color', 'tabs-idle-shade', 'tabs-active-color', 'tabs-active-shade'],
-	controls: [
-		box('tabs-idle', 'Idle', { sources: ['text', 'surface'], source: 'own', shade: 0.25 }),
-		box('tabs-active', 'Active', { sources: ['own', 'semantic', 'text'], source: 'own' })
-	]
-};
-
 /* ------------------------------------------------------------------ *
  * The section
  * ------------------------------------------------------------------ */
@@ -278,8 +269,62 @@ export const action: Section = {
 	prefixes: ['action', 'link', 'tabs'],
 	help: 'Everything you click: buttons, links, tabs, breadcrumbs.',
 	internal: [
-		/* Run `node scripts/check-theme-vars.mjs` and paste what it names.
-		   Never write this list from memory. */
+		/* Tabs states no colour of its own. A tab is a surface with an
+		   accent on the active one, and both already exist — asking again
+		   here only let a theme contradict itself. */
+		'tabs-active-color',
+		'tabs-active-shade',
+		'tabs-idle-color',
+		'tabs-idle-shade',
+		/* The weight and the case of a component's text are set by its size
+		   classes (`.btn-lg` and friends), not by the theme. Offering them
+		   here was a control that fought the one place already deciding. */
+		'action-font-weight',
+		'action-text-transform',
+		'tabs-active-color-resolved',
+		'tabs-idle-color-resolved',
+		'link-color-resolved',
+		/* Declared, editable by hand in the file, and deliberately NOT a
+		   question this form asks. Most are geometry the section's Size
+		   moves together — nobody edits a calc() in a form — and the rest
+		   are the second level of the cascade, where a component restates
+		   its section's answer under its own name.
+
+		   Built by running `node scripts/check-theme-vars.mjs` and pasting
+		   what it named. Never from memory. */
+		'action-gap',
+		'action-height',
+		'action-hover-rotate',
+		'action-letter-spacing',
+		'action-padding-x',
+		'action-rest-rotate',
+		'action-soft-mix',
+		'action-tint',
+		'action-variant-border-width',
+		'link-focus-color',
+		'link-focus-offset',
+		'link-focus-width',
+		'link-hover-mix',
+		'link-hover-mix-color',
+		'link-underline-offset',
+		'link-underline-width',
+		'tabs-active-bg',
+		'tabs-border-color',
+		'tabs-border-width',
+		'tabs-box-bg',
+		'tabs-box-corners',
+		'tabs-corners',
+		'tabs-depth',
+		'tabs-disabled-opacity',
+		'tabs-focus-color',
+		'tabs-focus-offset',
+		'tabs-font-size',
+		'tabs-height-item',
+		'tabs-padding-x',
+		'tabs-rest-rotate',
+		'tabs-shadow-color',
+		'tabs-transition-duration',
+		'tabs-transition-easing'
 	],
 	controls: [
 		scale(
@@ -287,31 +332,22 @@ export const action: Section = {
 			'Grows every frame a button has — its height, its padding, its icon gap — and never its text. One number, because they are one decision.'
 		),
 
-		{
-			id: 'action-fill',
-			label: 'Fill',
-			layout: 'row',
-			vars: ['action-bg-color', 'action-bg-shade', 'action-fg-color', 'action-fg-shade'],
-			controls: [
-				box('action-bg', 'Background', {
-					sources: ['surface', 'semantic'],
-					source: 'color-surface-4'
-				}),
-				box('action-fg', 'Text', {
-					sources: ['text', 'surface'],
-					source: 'color-on-surface',
-					help: 'The ink a plain button is written in. A colour variant overrides it with its own contrast colour, so this is the unvarianted case.'
-				})
-			]
-		} satisfies Group,
+		/* The fill and its ink, bare: two swatches read as a palette, and a
+		   group box around two tiles was a frame with nothing to frame. */
+		box('action-bg', 'Button', { sources: [], source: 'color-surface-4' }),
+		box('action-fg', 'Button', {
+			kind: 'contrast',
+			inkOf: 'action-bg',
+			follows: 'the button’s own fill',
+			sources: [],
+			source: 'own',
+			help: 'The ink a button is written in. A colour variant overrides it with its own contrast colour, so this is the unvarianted case.'
+		}),
 
-		radius(P),
 		border(P),
-		typography(P),
 		shadow(P, { relief: true }),
 		hover,
 		link,
-		tabs,
 		focus(P),
 		disabled(P),
 		press,

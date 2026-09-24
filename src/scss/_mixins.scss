@@ -22,6 +22,40 @@ $flip: 'clamp(-1, (0.66 - l) * 999, 1)';
 	@return #{'oklch(from ' + $src + ' calc(l + ' + $flip + ' * var(' + $shade + ')) c h)'};
 }
 
+// `contrasting(var(--x-color, var(--_slot)), --x-shade)`
+//
+// The OTHER recipe. A mark, a label, any ink: "derived from own" cannot mean
+// "a few points away from the thing I am written on" — it has to mean legible
+// against it. So the lightness SNAPS to one end rather than stepping, keeping
+// a whisper of the source's hue, exactly as `_derived-content.scss` derives
+// `--color-on-*`.
+//
+// The shade pulls the result back towards the source: 0 is maximum contrast,
+// higher is softer. That is what makes one control serve both a mark and a
+// placeholder.
+$snap: 'clamp(0.145, (0.66 - l) * 999, 0.97)';
+
+// `ink(--x-color, var(--_slot), --x-shade)`
+//
+// The ORDER matters, and getting it wrong paints white text on a white page.
+//
+//   ink   : var(--x-color, contrasting(slot))   the stated colour wins whole
+//   shade : shaded(var(--x-color, slot))        the recipe always runs
+//
+// A `contrast` box in Custom mode means "this IS the ink", not "derive an ink
+// from this" — and every shipped theme states its own ink. So the stated
+// value is written through untouched and only the fallback derives. The
+// derived-from-a-token case is resolved by the form itself (see
+// `colorVars` in schema.ts), which is the only place that knows which mode
+// the box is in.
+@function ink($var, $slot, $shade) {
+	@return #{'var(' + $var + ', ' + contrasting($slot, $shade) + ')'};
+}
+
+@function contrasting($src, $shade) {
+	@return #{'oklch(from ' + $src + ' calc(' + $snap + ' - ' + $flip + ' * var(' + $shade + ')) min(c, 0.06) h)'};
+}
+
 // Size variants — each class only sets --fontsize; intrinsic sizing does the rest.
 @mixin size-variants($prefix, $sizes: c.$sizes-field) {
 	@each $size in $sizes {
@@ -75,18 +109,36 @@ $flip: 'clamp(-1, (0.66 - l) * 999, 1)';
 	--range-halo: var(--range-thumb-halo, 0.125em);
 	--rail-top: calc((var(--range-thumb-size) - var(--range-trail-height, var(--rail))) / 2);
 	--rail-bottom: calc((var(--range-thumb-size) + var(--range-trail-height, var(--rail))) / 2);
+	/* The window around the thumb is the thumb's own BOX, and the thumb is a
+	   CIRCLE — so anything the window lets through past the circle shows at
+	   the four corners as a square of trail colour. Inset it by the halo
+	   instead of expanding by it: the circle then covers every pixel the
+	   window admits, and the trail still meets the thumb because the
+	   horizontal edges stay outside it. */
+	/* The INSCRIBED square of the thumb, not its bounding box.
+	 *
+	 * The window has square corners and the thumb is a circle, so anything the
+	 * window admits beyond the circle shows as a block of trail colour above
+	 * and below the knob. Half the side of the inscribed square is r/√2, so
+	 * the inset from the bounding box is r(1 − 1/√2) ≈ 0.1465 × the diameter.
+	 * At that inset the circle covers every pixel the window lets through.
+	 *
+	 * Nothing overhangs horizontally either: the trail reaches the thumb
+	 * through the rail band, which spans the whole control, and that band is
+	 * the height a trail should be. */
+	--rail-in: calc(var(--range-thumb-size) * 0.1465);
 	clip-path: polygon(
 		-100vw var(--rail-top),
-		calc(0px - var(--range-halo)) var(--rail-top),
-		calc(0px - var(--range-halo)) calc(0px - var(--range-halo)),
-		calc(100% + var(--range-halo)) calc(0px - var(--range-halo)),
-		calc(100% + var(--range-halo)) var(--rail-top),
+		var(--rail-in) var(--rail-top),
+		var(--rail-in) var(--rail-in),
+		calc(100% - var(--rail-in)) var(--rail-in),
+		calc(100% - var(--rail-in)) var(--rail-top),
 		100vw var(--rail-top),
 		100vw var(--rail-bottom),
-		calc(100% + var(--range-halo)) var(--rail-bottom),
-		calc(100% + var(--range-halo)) calc(100% + var(--range-halo)),
-		calc(0px - var(--range-halo)) calc(100% + var(--range-halo)),
-		calc(0px - var(--range-halo)) var(--rail-bottom),
+		calc(100% - var(--rail-in)) var(--rail-bottom),
+		calc(100% - var(--rail-in)) calc(100% - var(--rail-in)),
+		var(--rail-in) calc(100% - var(--rail-in)),
+		var(--rail-in) var(--rail-bottom),
 		-100vw var(--rail-bottom)
 	);
 }
@@ -171,14 +223,17 @@ $flip: 'clamp(-1, (0.66 - l) * 999, 1)';
 	--_fld-seed: var(--_fld-accent);
 	--_fld-border-width: var(--#{$ns}-border-width, var(--field-border-width));
 	--_fld-border-style: var(--#{$ns}-border-style, var(--field-border-style));
-	--_fld-border-color: var(--#{$ns}-border-color, var(--field-border-color));
-	--_fld-border-from-fill: var(--#{$ns}-border-from-fill, var(--field-border-from-fill));
+	/* `--field-border-color` is `initial` when the theme derives from the
+	   field's own fill — guaranteed-invalid, so this `var()` takes its
+	   fallback and the mix resolves HERE, on the element, which is why no
+	   :root rule ever has to name `--_fld-bg`. */
+	--_fld-border-color: #{shaded('var(--#{$ns}-border-color, var(--field-border-color, var(--_fld-bg)))', '--field-border-shade')};
 	--_fld-corners: var(--#{$ns}-corners, var(--field-corners));
 	--_fld-height: var(--#{$ns}-height, var(--field-height));
 	--_fld-padding-x: var(--#{$ns}-padding-x, var(--field-padding-x));
 	--_fld-gap: var(--#{$ns}-gap, var(--field-gap));
 	--_fld-depth: var(--#{$ns}-depth, var(--field-depth));
-	--_fld-placeholder-mix: var(--#{$ns}-placeholder-mix, var(--field-placeholder-mix));
+	--_fld-placeholder: #{ink('--field-placeholder-color', 'var(--_fld-bg)', '--field-placeholder-shade')};
 	--_fld-disabled-mix: var(--#{$ns}-disabled-mix, var(--field-disabled-mix));
 	--_fld-disabled-fg-mix: var(--#{$ns}-disabled-fg-mix, var(--field-disabled-fg-mix));
 	--_fld-duration: var(--#{$ns}-transition-duration, var(--field-transition-duration));
@@ -206,29 +261,19 @@ $flip: 'clamp(-1, (0.66 - l) * 999, 1)';
 		--_fld-cast-x: 0px;
 		--_fld-cast-y: 0px;
 		--_fld-cast-color: #0000;
-		--_fld-shadow-scale: 1;
 
 		/* The border is an explicit colour with some of the fill blended in,
 		   exactly as a button's is — so a look whose edge is "the ground, a
 		   shade darker" says it with a number instead of a colour. */
-		--_fld-border: color-mix(in oklab, var(--_fld-border-color), var(--_fld-bg) var(--_fld-border-from-fill));
+		/* The mix is gone: the slot above already IS the fill a few points
+		   away, decided by the fill's own lightness rather than by a second
+		   percentage nobody could read. */
+		--_fld-border: var(--_fld-border-color);
 
 		/* Ring, then the focus cast, then the two configurable layers, then
 		   the relief. The relief tints with the seed, so it resolves here on
 		   the element and can never be a theme value. */
-		--_fld-shadow:
-			0 0 0 var(--_fld-ring-width) var(--_fld-ring-color),
-			var(--_fld-cast-x) var(--_fld-cast-y) 0 0 var(--_fld-cast-color),
-			var(--_fld-s1-inset) calc(var(--_fld-s1-x) * var(--_fld-shadow-scale))
-				calc(var(--_fld-s1-y) * var(--_fld-shadow-scale))
-				calc(var(--_fld-s1-blur) * var(--_fld-shadow-scale))
-				var(--_fld-s1-spread) var(--_fld-s1-color),
-			var(--_fld-s2-inset) calc(var(--_fld-s2-x) * var(--_fld-shadow-scale))
-				calc(var(--_fld-s2-y) * var(--_fld-shadow-scale))
-				calc(var(--_fld-s2-blur) * var(--_fld-shadow-scale))
-				var(--_fld-s2-spread) var(--_fld-s2-color),
-			0 1px color-mix(in oklab, var(--_fld-seed) calc(var(--_fld-depth) * 10%), #0000) inset,
-			0 -1px oklch(100% 0 0 / calc(var(--_fld-depth) * 0.1)) inset;
+		--_fld-shadow: var(--field-shadow);
 
 		background-color: var(--_fld-bg);
 		color: var(--_fld-fg);
@@ -246,7 +291,7 @@ $flip: 'clamp(-1, (0.66 - l) * 999, 1)';
 
 	#{$sel}::placeholder,
 	#{$sel} :where(input, textarea)::placeholder {
-		color: color-mix(in oklch, var(--_fld-fg) var(--_fld-placeholder-mix), #0000);
+		color: var(--_fld-placeholder);
 	}
 
 	/* One focus treatment for the three of them. Which of the four shapes it
@@ -261,7 +306,6 @@ $flip: 'clamp(-1, (0.66 - l) * 999, 1)';
 		--_fld-cast-x: var(--field-focus-cast-x);
 		--_fld-cast-y: var(--field-focus-cast-y);
 		--_fld-cast-color: var(--field-focus-cast-color);
-		--_fld-shadow-scale: var(--field-focus-shadow-scale);
 		translate: var(--field-focus-x) var(--field-focus-y);
 		/* The line style is the kit's, not this section's: one focus ring for
 		   everything is an accessibility decision, not a look. */
@@ -323,22 +367,23 @@ $flip: 'clamp(-1, (0.66 - l) * 999, 1)';
 	--_sel-bg: var(--#{$ns}-bg, var(--selector-bg));
 	--_sel-border-width: var(--#{$ns}-border-width, var(--selector-border-width));
 	--_sel-border-style: var(--#{$ns}-border-style, var(--selector-border-style));
-	--_sel-border-color: var(--#{$ns}-border-color, var(--selector-border-color));
+	--_sel-border-color: #{shaded('var(--#{$ns}-border-color, var(--selector-border-color, var(--_sel-bg)))', '--selector-border-shade')};
 	--_sel-corners: var(--#{$ns}-corners, var(--selector-corners));
-	--_sel-mark: var(--#{$ns}-mark, var(--selector-mark));
+	--_sel-mark: #{ink('--selector-mark-color', 'var(--_sel-bg)', '--selector-mark-shade')};
 	--_sel-checked-bg: var(--#{$ns}-checked-bg, var(--selector-checked-bg));
 	--_sel-checked-border-color: var(
 		--#{$ns}-checked-border-color,
 		var(--selector-checked-border-color)
 	);
-	--_sel-checked-mark: var(--#{$ns}-checked-mark, var(--selector-checked-mark));
+	--_sel-checked-mark: #{ink('--selector-checked-mark-color', 'var(--_sel-checked-bg)', '--selector-checked-mark-shade')};
 	--_sel-depth: var(--#{$ns}-depth, var(--selector-depth));
 	--_sel-disabled-opacity: var(--#{$ns}-disabled-opacity, var(--selector-disabled-opacity));
 	--_sel-duration: var(--#{$ns}-transition-duration, var(--selector-transition-duration));
 	--_sel-easing: var(--#{$ns}-transition-easing, var(--selector-transition-easing));
-	--_sel-focus-width: var(--#{$ns}-focus-width, var(--selector-focus-width));
+	--_sel-focus-width: var(--selector-focus-ring-width);
+	--_sel-rest-rotate: var(--#{$ns}-rest-rotate, var(--selector-angle));
 	--_sel-focus-offset: var(--#{$ns}-focus-offset, var(--selector-focus-offset));
-	--_sel-focus-color: var(--#{$ns}-focus-color, var(--selector-focus-color));
+	--_sel-focus-color: #{shaded('var(--selector-focus-color, var(--_sel-checked-bg))', '--selector-focus-shade')};
 }
 
 @mixin selector-frame($ns, $sel) {
@@ -353,6 +398,7 @@ $flip: 'clamp(-1, (0.66 - l) * 999, 1)';
 		vertical-align: middle;
 		width: var(--_sel-size);
 		height: var(--_sel-size);
+		rotate: var(--_sel-rest-rotate);
 		padding: var(--_sel-padding);
 		font-size: var(--fontsize, var(--base, var(--default-base)));
 		color: var(--_sel-mark);

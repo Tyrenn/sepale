@@ -24,12 +24,12 @@ const require = createRequire(import.meta.url);
 const ENTRIES = [
 	'src/lib/theme/schema.ts',
 	'src/lib/theme/presets.ts',
+	'src/lib/theme/sections/shared.ts',
 	'src/lib/theme/sections/colors.ts',
-	'src/lib/theme/sections/actions.ts',
-	'src/lib/theme/sections/actions-writers.ts',
-	'src/lib/theme/sections/fields.ts',
+	'src/lib/theme/sections/action.ts',
+	'src/lib/theme/sections/field.ts',
 	'src/lib/theme/sections/selectors.ts',
-	'src/lib/theme/sections/containers.ts',
+	'src/lib/theme/sections/container.ts',
 	'src/lib/theme/sections/rest.ts'
 ];
 
@@ -56,14 +56,14 @@ export async function loadSchema() {
 		const schema = await at('theme/schema.js');
 		const { PRESETS } = await at('theme/presets.js');
 		const { colors } = await at('theme/sections/colors.js');
-		const { actions } = await at('theme/sections/actions.js');
-		const { fields } = await at('theme/sections/fields.js');
+		const { action } = await at('theme/sections/action.js');
+		const { field } = await at('theme/sections/field.js');
 		const { selectors } = await at('theme/sections/selectors.js');
-		const { containers } = await at('theme/sections/containers.js');
-		const { markers, feedback, textSection } = await at('theme/sections/rest.js');
+		const { container } = await at('theme/sections/container.js');
+		const { markers, feedback } = await at('theme/sections/rest.js');
 		return {
 			schema,
-			sections: [colors, actions, fields, selectors, containers, markers, feedback, textSection],
+			sections: [colors, action, field, selectors, container, markers, feedback],
 			presets: PRESETS
 		};
 	} finally {

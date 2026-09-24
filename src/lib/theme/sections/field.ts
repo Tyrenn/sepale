@@ -16,11 +16,11 @@
  */
 
 import type { Section } from '../schema.js';
-import { border, box, disabled, focus, handDrawn, radius, registerShared, scale, shadow } from './shared.js';
+import { border, box, disabled, focus, handDrawn, registerShared, scale, shadow } from './shared.js';
 
 const P = 'field';
 
-registerShared(P, { border: true, focus: true, disabled: true, handdrawn: true, shadow: true });
+registerShared(P, { border: true, focus: true, disabled: true, handdrawn: true });
 
 export const field: Section = {
 	id: 'field',
@@ -37,41 +37,86 @@ export const field: Section = {
 		'validator'
 	],
 	help: 'Everything you type into, and the labels around it.',
-	internal: [],
+	internal: [
+		/* Declared, editable by hand in the file, and deliberately NOT a
+		   question this form asks. Most are geometry the section's Size
+		   moves together — nobody edits a calc() in a form — and the rest
+		   are the second level of the cascade, where a component restates
+		   its section's answer under its own name.
+
+		   Built by running `node scripts/check-theme-vars.mjs` and pasting
+		   what it named. Never from memory. */
+		'field-accent-color',
+		'field-bg',
+		'field-depth',
+		'field-fg',
+		'field-focus-accent-color',
+		'field-focus-border-color',
+		'field-focus-cast-color',
+		'field-focus-cast-x',
+		'field-focus-cast-y',
+		'field-focus-outline-color',
+		'field-focus-outline-offset',
+		'field-focus-shadow-scale',
+		'field-focus-x',
+		'field-focus-y',
+		'field-gap',
+		'field-height',
+		'field-padding-x',
+		'field-picker-radius',
+		'field-rest-rotate',
+		'field-transition-duration',
+		'field-transition-easing',
+		'fieldset-label-fg',
+		'fieldset-legend-fg',
+		'file-input-button-gap',
+		'file-input-button-padding-x',
+		'file-input-button-size',
+		'floating-label-bg',
+		'floating-label-duration',
+		'floating-label-padding-x',
+		'floating-label-radius',
+		'floating-label-rest-top',
+		'floating-label-scale',
+		'floating-label-size',
+		'label-divider-mix',
+		'label-divider-width',
+		'label-gap',
+		'label-inset',
+		'label-mix',
+		'select-chevron-inset',
+		'select-chevron-size',
+		'textarea-corners',
+		'textarea-min-height',
+		'textarea-padding-y',
+		'validator-hint-gap'
+	],
 	controls: [
 		scale(
 			P,
 			'Grows every frame a field has — its height, its padding, its inner gap — and never its text.'
 		),
 
-		{
-			id: 'field-fill',
-			label: 'Fill',
-			layout: 'row',
-			vars: [
-				'field-bg-color',
-				'field-bg-shade',
-				'field-fg-color',
-				'field-fg-shade',
-				'field-placeholder-color',
-				'field-placeholder-shade'
-			],
-			controls: [
-				box('field-bg', 'Background', {
-					sources: ['surface'],
-					source: 'color-surface-1'
-				}),
-				box('field-fg', 'Text', { sources: ['text', 'surface'], source: 'color-on-surface' }),
-				box('field-placeholder', 'Placeholder', {
-					sources: ['own', 'text'],
-					source: 'own',
-					shade: 0.35,
-					help: 'Derived from Own, it fades the field’s own text rather than picking a grey that stops working on a dark theme.'
-				})
-			]
-		},
+			box('field-bg', 'Field', {
+				sources: [],
+				source: 'color-surface-1'
+			}),
+			box('field-fg', 'Field', {
+				kind: 'contrast',
+				inkOf: 'field-bg',
+				follows: 'the field’s own fill',
+				sources: [],
+				source: 'own'
+			}),
+			box('field-placeholder', 'Placeholder', {
+				kind: 'contrast',
+				sources: [],
+				source: 'own',
+				shade: 0.35,
+				help: 'Derived from Own, it fades the field’s own text rather than picking a grey that stops working on a dark theme.'
+			}),
 
-		radius(P),
+
 		border(P),
 		shadow(P),
 		focus(P),
@@ -84,7 +129,7 @@ export const field: Section = {
 			vars: ['floating-label-bg-color', 'floating-label-bg-shade'],
 			controls: [
 				box('floating-label-bg', 'Floating background', {
-					sources: ['own', 'surface'],
+					sources: [],
 					source: 'own'
 				})
 			]

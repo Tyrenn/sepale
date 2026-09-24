@@ -17,11 +17,24 @@
 	 */
 	let { children }: { children: Snippet } = $props();
 
-	/* Built in the script rather than the markup: the braces of a CSS block
-	   inside a template literal read as the end of the expression. */
-	let styleTag = $derived(
-		`<style>${generator.paintApp ? ':root' : '.preview, .gallery'}{${inlineStyle()}}</style>`
-	);
+	/**
+	 * The draft paints the PREVIEW, not the app.
+	 *
+	 * It used to be the other way round for one reason: every
+	 * `calc(Nem * var(--<section>-scale))` was declared on `:root`, where the
+	 * `var()` resolved once and the frozen result inherited down — so a theme
+	 * scoped anywhere else could not move a single size. Those thirty-five
+	 * lengths are declared on `:where(*)` now, and each element substitutes
+	 * for itself, so scoping works and the Size sliders do too.
+	 *
+	 * The app keeps a fixed theme of its own, because editing a look while it
+	 * repaints the form you are editing it in makes a bad draft impossible to
+	 * climb back out of.
+	 *
+	 * Built in the script rather than the markup: the braces of a CSS block
+	 * inside a template literal read as the end of the expression.
+	 */
+	let styleTag = $derived(`<style>.preview,.gallery{${inlineStyle()}}</style>`);
 </script>
 
 <svelte:head>
@@ -29,6 +42,8 @@
 	     loads it the way a consumer would. -->
 	<link rel="stylesheet" href="/reset.css" />
 	<link rel="stylesheet" href="/kit.css" />
+	<!-- The app's own look, fixed. The draft never touches it. -->
+	<link rel="stylesheet" href="/themes/daisy-light.css" />
 	{@html styleTag}
 </svelte:head>
 
@@ -44,10 +59,6 @@
 				>
 					{#each PRESETS as p (p.name)}<option value={p.name}>{p.label}</option>{/each}
 				</select>
-			</label>
-			<label class="side-paint">
-				<input type="checkbox" class="checkbox checkbox-xs" bind:checked={generator.paintApp} />
-				<span>Paint this page</span>
 			</label>
 		</div>
 
@@ -81,11 +92,4 @@
 </div>
 
 <style>
-	.side-paint {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		font-size: 0.7rem;
-		opacity: 0.75;
-	}
 </style>

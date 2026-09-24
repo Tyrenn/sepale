@@ -1,0 +1,64 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   dropdown.scss — .dropdown, whole.
+
+   Section: Container.
+
+   A panel that hangs off something. It is a CONTAINER and nothing
+   else: it does not decide what is inside it. A menu, a list of
+   suggestions under an input, a colour picker — all of them are
+   this box with different contents, which is why the kit needs it
+   once rather than three times.
+
+   Two problems it exists to solve, and both are the reason not to
+   write `position: absolute` by hand each time:
+
+   1. A scrolling column is a containing block. A panel positioned
+      inside one is clipped by it, and no `z-index` gets out —
+      which is why `.dropdown-panel` is `fixed` and placed by the
+      caller from the anchor's own rectangle.
+   2. The panel must sit above everything, including a preview
+      column that paints later in the document.
+
+   It takes the Container section's surface, border and corners.
+   ============================================================ */
+
+.dropdown {
+	position: relative;
+	display: inline-flex;
+}
+
+.dropdown-panel {
+	/* Fixed, not absolute: see (1) above. The caller sets `top` and
+	   `left`; everything else is the box. */
+	position: fixed;
+	z-index: var(--dropdown-z);
+	min-width: var(--dropdown-min-width);
+	max-width: var(--dropdown-max-width);
+	max-height: var(--dropdown-max-height);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: var(--dropdown-padding);
+	background-color: var(--container-bg);
+	color: var(--container-fg);
+	border-radius: var(--container-corners);
+	border-width: var(--container-border-width);
+	border-style: var(--container-border-style);
+	border-color: var(--menu-border);
+	box-shadow: var(--dropdown-shadow);
+}
+
+/* Anchored under the thing it belongs to, when the caller does not
+   place it itself — which is the common case for a suggestion list
+   that is as wide as its input. */
+.dropdown-below {
+	position: absolute;
+	inset-inline-start: 0;
+	top: calc(100% + var(--dropdown-gap));
+	min-width: 100%;
+}
+
+/* ── Axis: size ───────────────────────────────────── */
+@include m.size-variants('dropdown', c.$sizes-field);

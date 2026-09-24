@@ -20,11 +20,9 @@ import {
 	border,
 	box,
 	handDrawn,
-	radius,
 	registerShared,
 	scale,
 	shadow,
-	typography
 } from './shared.js';
 
 /* ------------------------------------------------------------------ *
@@ -32,37 +30,59 @@ import {
  * ------------------------------------------------------------------ */
 
 const M = 'marker';
-registerShared(M, { border: true, handdrawn: true, shadow: true });
+registerShared(M, { border: true, handdrawn: true });
 
 export const markers: Section = {
 	id: 'markers',
 	label: 'Markers',
 	prefixes: ['marker', 'badge', 'chip'],
 	help: 'The small labels you pin to something else.',
-	internal: [],
+	internal: [
+		/* The weight and the case of a component's text are set by its size
+		   classes (`.btn-lg` and friends), not by the theme. Offering them
+		   here was a control that fought the one place already deciding. */
+		'marker-font-weight',
+		'marker-text-transform',
+		/* A chip is a pill, so Markers has no Corners control — but the
+		   hand-drawn recipe still builds on a and this is the one a
+		   pill has. */
+		'marker-radius',
+		/* Declared, editable by hand in the file, and deliberately NOT a
+		   question this form asks. Most are geometry the section's Size
+		   moves together — nobody edits a calc() in a form — and the rest
+		   are the second level of the cascade, where a component restates
+		   its section's answer under its own name.
+
+		   Built by running `node scripts/check-theme-vars.mjs` and pasting
+		   what it named. Never from memory. */
+		'marker-bg',
+		'marker-fg',
+		'marker-muted-bg',
+		'marker-rest-rotate',
+		'marker-soft-border-mix',
+		'marker-soft-mix'
+	],
 	controls: [
 		scale(M, 'Grows a chip and a badge.'),
 
-		{
-			id: 'marker-fill',
-			label: 'Fill',
-			layout: 'row',
-			vars: ['marker-bg-color', 'marker-bg-shade', 'marker-fg-color', 'marker-fg-shade'],
-			controls: [
-				box('marker-bg', 'Background', {
-					sources: ['semantic', 'surface'],
-					source: 'color-surface-3'
-				}),
-				box('marker-fg', 'Text', { sources: ['own', 'text'], source: 'own' })
-			]
-		},
+			box('marker-bg', 'Chip', {
+				sources: [],
+				source: 'color-surface-3'
+			}),
+			box('marker-fg', 'Chip', {
+				kind: 'contrast',
+				inkOf: 'marker-bg',
+				follows: 'the chip’s own fill',
+				sources: [],
+				source: 'own'
+			}),
+
 
 		/* No Corners group. `--marker-corners` is 999px: a chip is a pill,
 		   always, and Common's Radius does not multiply it. If a look ever
 		   wants square chips, that is a class. */
 		border(M),
 		shadow(M),
-		typography(M),
 		handDrawn(M)
 	]
 };
@@ -79,7 +99,22 @@ export const feedback: Section = {
 	label: 'Feedback',
 	prefixes: ['feedback', 'progress', 'radial-progress', 'loading', 'skeleton'],
 	help: 'Bars, rings, spinners and placeholders — what tells you something is happening.',
-	internal: [],
+	internal: [
+		'feedback-track-resolved',
+		/* Declared, editable by hand in the file, and deliberately NOT a
+		   question this form asks. Most are geometry the section's Size
+		   moves together — nobody edits a calc() in a form — and the rest
+		   are the second level of the cascade, where a component restates
+		   its section's answer under its own name.
+
+		   Built by running `node scripts/check-theme-vars.mjs` and pasting
+		   what it named. Never from memory. */
+		'feedback-corners',
+		'feedback-dot-bg',
+		'feedback-fill',
+		'feedback-shadow',
+		'skeleton-bg'
+	],
 	controls: [
 		scale(
 			F,
@@ -98,19 +133,18 @@ export const feedback: Section = {
 			],
 			controls: [
 				box('feedback-fill', 'Fill', {
-					sources: ['semantic', 'text'],
+					sources: [],
 					source: 'color-primary'
 				}),
 				box('feedback-track', 'Track', {
-					sources: ['own', 'text', 'surface'],
+					sources: [],
 					source: 'own',
 					shade: 0.1
 				})
 			]
 		},
 
-		radius(F, 2, '0.5rem'),
-		border(F),
+		border(F, ['own', 'text', 'surface'], '0.5rem'),
 
 		{
 			id: 'skeleton',
