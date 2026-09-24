@@ -28,6 +28,19 @@ export type Values<A> =
  */
 export type AxisProps<T extends Record<string, Axis>> = {
 	[K in keyof T as [Values<T[K]>] extends [never] ? never : K]?: Values<T[K]>;
+} & {
+	/**
+	 * A one-off fill, BY VALUE — `background="#efb"`, not a token name.
+	 *
+	 * It writes `--<prefix>-bg` inline, the public slot every component that
+	 * paints a fill declares. It deliberately does NOT take a semantic:
+	 * `color` is already the axis for that, and two ways to say "primary" is
+	 * exactly what the theme rework just finished removing.
+	 *
+	 * Resolved in `applyAxes`, so no component declares this prop and not one
+	 * of them had to be edited to gain it.
+	 */
+	background?: string;
 };
 
 /** Join truthy class fragments into a single class string. */
@@ -55,6 +68,18 @@ export function applyAxes(
 ): { classes: string; rest: Record<string, unknown> } {
 	const out: string[] = [];
 	const rest: Record<string, unknown> = { ...props };
+
+	/* `background` is not an axis — it writes a value, not a class — but it
+	   belongs here because `rest` is what every component spreads onto its
+	   element. Folding it into `style` gives all of them the prop with no
+	   per-component change, and a caller's own `style` still wins by being
+	   written last. */
+	const bg = rest.background;
+	delete rest.background;
+	if (typeof bg === 'string' && bg) {
+		const own = typeof rest.style === 'string' ? rest.style : '';
+		rest.style = `--${prefix}-bg: ${bg};` + (own ? ` ${own}` : '');
+	}
 	for (const name of Object.keys(axes)) {
 		const value = rest[name];
 		delete rest[name];

@@ -16,7 +16,7 @@
  *   node scripts/make-themes.mjs
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadSchema, root } from './_schema.mjs';
 
@@ -56,6 +56,7 @@ function build(recipe) {
 
 const col = (source, shade = 0) => ({ source, shade });
 const P = ['action', 'field', 'selector', 'container', 'marker'];
+const ALL = { top: true, right: true, bottom: true, left: true };
 
 /** daisy — a plain flat look: a hairline edge and a fill that darkens. */
 const daisy = [
@@ -75,7 +76,7 @@ const dahlia = [
 	['selector-border', 'solid'],
 	['selector-scale', 0.67],
 	['container-scale', 0.9],
-	['action-hover', col('color-on-surface', 0.08)],
+	['action-hover', col('color-on-background', 0.08)],
 	['action-radius', '0.375rem'],
 	['container-radius', '0.625rem'],
 	['field-radius', '0.25rem'],
@@ -89,6 +90,10 @@ const dahlia = [
 const sunflower = [
 	...P.map((p) => [`${p}-border`, 'solid']),
 	['selector-scale', 0.67],
+	/* sunflower tints the PAGE with its primary and leaves the fields white.
+	   That is the whole reason `--color-field` exists: one look in four needs
+	   a field that is not the page. */
+	['color-field', col('color-card')],
 	['action-shadow', [{ x: '0px', y: '4px', blur: '0px', spread: '0px', color: 'currentColor', inset: false }]],
 	['action-press', 'push'],
 	['action-hover', col('own', 0)],
@@ -115,40 +120,124 @@ const FAMILIES = {
 	cosmos: ['paper', 'slate'],
 	sunflower: ['light', 'mint']
 };
+/* ── The palettes and the GEOMETRY, read out of the old files ──────────
+   Two sources, because the conversion has two halves:
 
-/* ── The palettes, read out of the files being replaced ── */
+     static/themes/<family>-<name>.css   the merged palette. It already
+       carries the family's defaults with the theme's overrides on top,
+       and it is what this script last wrote, so reading it keeps the run
+       idempotent.
+
+     static/themes/<family>/<name>.css   the ORIGINAL theme, still on
+       disk. The only place the PER-THEME geometry survives, and the
+       first pass never looked at it — which is how coffee lost its
+       0.1rem fields, retro its radii, daisy its depth and cosmos half
+       its pen. A missing variable renders as neutral and no check can
+       see it, so this is the read that had to be added.
+   ------------------------------------------------------------------ */
+
+const num = (css, name) => {
+	const m = css.match(new RegExp('--' + name + ':\s*([^;]+);'));
+	return m ? m[1].trim() : null;
+};
+
 function palette(file) {
 	const css = readFileSync(file, 'utf8');
 	const out = [];
 	for (const [, name, value] of css.matchAll(/--(color-[a-z0-9-]+):\s*([^;]+);/g)) {
-		/* The files being read may already be in the new shape, where a colour
-		   is the PAIR `--x-color` / `--x-shade`. Take the source and drop the
-		   shade: the control id is the stem either way, so a re-run is
-		   idempotent instead of failing on names it wrote itself. */
+		/* `--color-scheme` is not a colour. It matched this pattern, became a
+		   `{source, shade}` pair and stringified over the correct entry — which
+		   is where `[object Object]` in seven shipped files came from. */
+		if (name === 'color-scheme') continue;
+		/* The file may already be in the new shape, where a colour is the PAIR
+		   `--x-color` / `--x-shade`. Take the source, drop the shade: the
+		   control id is the stem either way, so a re-run is idempotent instead
+		   of failing on names it wrote itself. */
 		if (name.endsWith('-shade')) continue;
 		const id = name.endsWith('-color') ? name.slice(0, -'-color'.length) : name;
-		if (value.trim() === 'initial') continue;
-		out.push([id, value.trim()]);
+		let v = value.trim();
+		if (v === 'initial') continue;
+		/* One palette shipped broken: `var(--color-mix(in oklab, …))`, a
+		   `--color-` glued onto `mix()` during the family migration. Not CSS,
+		   so both sunflower themes fell back to plain white. */
+		if (v.startsWith('var(--color-mix(')) v = v.slice('var(--'.length, -1);
+		out.push([id, v]);
 	}
-	const m = css.match(/color-scheme:\s*(\w+)/);
+	const m = css.match(/(?:^|[^-])color-scheme:\s*(\w+)/m);
 	return { colors: out, scheme: m ? m[1] : 'light' };
+}
+
+/** What a theme said about its own geometry, in the controls that carry it. */
+function geometry(file) {
+	if (!existsSync(file)) return [];
+	const css = readFileSync(file, 'utf8');
+	const out = [];
+
+	/* The three old radii, and who each served: `--radius-field` drew buttons
+	   AND fields, `--radius-box` the containers, `--radius-selector` the
+	   checkboxes, toggles and tabs. */
+	const rf = num(css, 'radius-field');
+	if (rf) out.push(['action-radius', rf], ['field-radius', rf]);
+	const rb = num(css, 'radius-box');
+	if (rb) out.push(['container-radius', rb]);
+	const rs = num(css, 'radius-selector');
+	if (rs) out.push(['selector-radius', rs]);
+
+	/* One pen for the whole kit became one width per section. */
+	const b = num(css, 'border');
+	if (b) for (const p of P) out.push([p + '-border-width', { width: b, sides: ALL }]);
+
+	/* daisy's retro 3D liseré. Only Action carries it now. */
+	const d = num(css, 'depth');
+	if (d) out.push(['action-depth', parseFloat(d)]);
+
+	/* One global --scale became one per section. Written only when the theme
+	   MOVED it: a 1 would overwrite the per-section ratios the look sets. */
+	const sc = num(css, 'scale');
+	if (sc && parseFloat(sc) !== 1) {
+		for (const p of [...P, 'feedback']) out.push([p + '-scale', parseFloat(sc)]);
+	}
+
+	/* cosmos split its wobble three ways, by the kind of thing being drawn. */
+	const wf = num(css, 'cosmos-wobble-field');
+	if (wf) {
+		out.push(['action-handdrawn-strength', parseFloat(wf)]);
+		out.push(['field-handdrawn-strength', parseFloat(wf)]);
+	}
+	const wb = num(css, 'cosmos-wobble-box');
+	if (wb) out.push(['container-handdrawn-strength', parseFloat(wb)]);
+	const ws = num(css, 'cosmos-wobble-selector');
+	if (ws) {
+		out.push(['selector-handdrawn-strength', parseFloat(ws)]);
+		out.push(['marker-handdrawn-strength', parseFloat(ws)]);
+	}
+	const tilt = num(css, 'cosmos-tilt');
+	if (tilt) for (const p of P) out.push([p + '-handdrawn-tilt', parseFloat(tilt) + 'deg']);
+
+	return out;
 }
 
 let n = 0;
 for (const [family, names] of Object.entries(FAMILIES)) {
 	for (const name of names) {
-		const file = join(root, `static/themes/${family}-${name}.css`);
+		const file = join(root, 'static/themes/' + family + '-' + name + '.css');
+		const origin = join(root, 'static/themes/' + family + '/' + name + '.css');
 		const { colors, scheme } = palette(file);
 		/* A palette entry is a Custom box: the theme states the colour. */
 		const recipe = [
 			['color-scheme', scheme],
 			...colors.map(([k, v]) => [k, col(v)]),
-			...LOOK[family]
+			...LOOK[family],
+			/* LAST, so a theme's own geometry beats its family's — and so a
+			   border WIDTH is written after the border MODE that resets it. */
+			...geometry(origin)
 		];
 		const vars = build(recipe);
-		const css = `/* ${family} ${name} — generated by scripts/make-themes.mjs */\n${schema.serialise(vars, NEUTRAL)}`;
-		writeFileSync(file, css);
+		const out =
+			'/* ' + family + ' ' + name + ' — generated by scripts/make-themes.mjs */\n' +
+			schema.serialise(vars, NEUTRAL);
+		writeFileSync(file, out);
 		n++;
 	}
 }
-console.log(`${n} themes rewritten`);
+console.log(n + ' themes rewritten');

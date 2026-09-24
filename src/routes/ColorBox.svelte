@@ -84,7 +84,7 @@
 	   the page. */
 	let ratio = $derived(
 		hex && control.kind === 'contrast'
-			? contrastRatio(hex, colorToHex(over || 'var(--color-surface-1)'))
+			? contrastRatio(hex, colorToHex(over || 'var(--color-background)'))
 			: 0
 	);
 	let grade = $derived(ratio >= 7 ? 'AAA' : ratio >= 4.5 ? 'AA' : ratio >= 3 ? 'AA large' : 'fail');
@@ -265,7 +265,7 @@
 		width: 20rem;
 		padding: 0.75rem;
 		border-radius: 0.6rem;
-		background: var(--color-surface-1);
+		background: var(--color-background);
 		border: 1px solid var(--color-border);
 		box-shadow:
 			0 1px 2px color-mix(in oklab, currentColor 8%, #0000),

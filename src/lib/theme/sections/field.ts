@@ -48,6 +48,7 @@ export const field: Section = {
 		   what it named. Never from memory. */
 		'field-accent-color',
 		'field-bg',
+		'field-corners',
 		'field-depth',
 		'field-fg',
 		'field-focus-accent-color',
@@ -99,7 +100,7 @@ export const field: Section = {
 
 			box('field-bg', 'Field', {
 				sources: [],
-				source: 'color-surface-1'
+				source: 'color-background'
 			}),
 			box('field-fg', 'Field', {
 				kind: 'contrast',

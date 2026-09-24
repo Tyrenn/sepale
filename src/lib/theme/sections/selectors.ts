@@ -64,6 +64,7 @@ export const selectors: Section = {
 		'selector-checked-bg',
 		'selector-checked-border-color',
 		'selector-checked-mark',
+		'selector-corners',
 		'selector-depth',
 		'selector-disabled-opacity',
 		'selector-focus-offset',
@@ -114,7 +115,7 @@ export const selectors: Section = {
 				'selector-mark-shade'
 			],
 			controls: [
-				box('selector-bg', 'Background', { sources: [], source: 'color-surface-1' }),
+				box('selector-bg', 'Background', { sources: [], source: 'color-background' }),
 				box('selector-mark', 'Mark', {
 					kind: 'contrast', sources: [], source: 'own' })
 			]
@@ -141,7 +142,11 @@ export const selectors: Section = {
 			]
 		},
 
-		border(P),
+		/* 0.5rem, not the shared 0.25rem: a selector is daisyUI's
+		   --radius-selector, and all nineteen themes were measured against
+		   that. The form said 0.25 while the stylesheet drew 0.5, so retro
+		   asked for 0.25 and got nothing written. */
+		border(P, undefined, '0.5rem'),
 		shadow(P),
 		focus(P),
 

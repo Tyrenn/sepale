@@ -38,8 +38,8 @@
 	user-select: none;
 	/* The button inside a file input is a button: it reads Action's own
 	   colours rather than keeping a pair of its own. */
-	color: var(--action-fg-color, var(--color-on-surface));
-	background-color: var(--action-bg-color, var(--color-surface-4));
+	color: var(--action-fg-color, var(--color-on-background));
+	background-color: var(--action-bg-color, var(--color-action));
 	border-width: var(--action-variant-border-width);
 	border-style: var(--action-border-style);
 	border-color: var(--action-border-color);
@@ -58,8 +58,8 @@
 
 .file-input:has(> input[disabled])::file-selector-button,
 .file-input:is(:disabled, [disabled])::file-selector-button {
-	color: color-mix(in oklch, var(--color-on-surface) var(--_fld-disabled-fg-mix), #0000);
-	background-color: color-mix(in oklch, var(--color-on-surface) var(--_fld-disabled-mix), var(--color-surface-1));
+	color: color-mix(in oklch, var(--color-on-background) var(--_fld-disabled-fg-mix), #0000);
+	background-color: color-mix(in oklch, var(--color-on-background) var(--_fld-disabled-mix), var(--color-background));
 	border-color: #0000;
 	cursor: not-allowed;
 }

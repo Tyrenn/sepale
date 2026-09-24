@@ -81,7 +81,7 @@
 	>
 		<List
 			rows={[firstRow, secondRow]}
-			style="width:24rem; border:1px solid var(--color-surface-2);"
+			style="width:24rem; border:1px solid var(--color-card);"
 		/>
 	</Section>
 
@@ -126,7 +126,7 @@
 			{ name: 'Rollback', when: 'yesterday', state: 'failed' }
 		]}
 		row={deployRow}
-		style="width:22rem; border:1px solid var(--color-surface-2);"
+		style="width:22rem; border:1px solid var(--color-card);"
 	/>
 </Section>
 

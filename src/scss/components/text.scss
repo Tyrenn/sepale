@@ -1,130 +1,104 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
 /* ============================================================
-   text.scss — .text, whole.
+   text.scss — .text, .title, .subtitle.
 
    Section: Text.
 
    Three components in one file — `text`, `title`, `subtitle` —
    because separating them would buy nothing (CONTEXT.md). All
    text-natured: they draw no frame, so `--scale` leaves them alone.
+
+   ── Two axes, not one combination ──────────────────────────
+
+   These used to ship as `.text-s2-b3`: twelve classes for four
+   sizes times three weights. But the two never interacted —
+   `s` carried font-size AND line-height, `b` carried font-weight
+   and nothing else — so the product was twelve ways of saying
+   seven things. Split, and the two axes are what the Svelte
+   wrapper's two props already wanted to be.
+
+   ── Colour ─────────────────────────────────────────────────
+
+   The one thing these three could NOT do before: every other
+   component in the kit has a `color` axis and text did not, so a
+   coloured heading was the single look you could not reach.
+
+   A semantic colour here is the RAW token, not a contrast-checked
+   reading of it: `.text-primary` must show primary, and an author
+   who puts it on a dark panel wants to see that it fails rather
+   than get a silently different blue. It is the same bargain
+   `.link-primary` makes.
+
+   Colour is orthogonal to size and weight, so each prefix gets
+   its own eight — `.title-primary` rather than borrowing
+   `.text-primary` — because a class has to be an axis of its own
+   component for `gen:classes` to classify it (ADR 0009).
    ============================================================ */
 
 /* ── Structure ────────────────────────────────── */
 
-
 .title {
 	font-size: var(--xxl, var(--default-xxl));
-}
-.subtitle-s1 {
-	font-size: var(--xl, var(--default-xl));
-}
-.subtitle-s2 {
-	font-size: var(--lg, var(--default-lg));
-}
-/* Text — s1 (--md) */
-.text-s1-b1 {
-	font-size: var(--md, var(--default-md));
-}
-.text-s1-b2 {
-	font-size: var(--md, var(--default-md));
-}
-.text-s1-b3 {
-	font-size: var(--md, var(--default-md));
-}
-/* Text — s2 (--base) */
-.text-s2-b1 {
-	font-size: var(--base, var(--default-base));
-}
-.text-s2-b2 {
-	font-size: var(--base, var(--default-base));
-}
-.text-s2-b3 {
-	font-size: var(--base, var(--default-base));
-}
-/* Text — s3 (--sm) */
-.text-s3-b1 {
-	font-size: var(--sm, var(--default-sm));
-}
-.text-s3-b2 {
-	font-size: var(--sm, var(--default-sm));
-}
-.text-s3-b3 {
-	font-size: var(--sm, var(--default-sm));
-}
-/* Text — s4 (--xs) */
-.text-s4-b1 {
-	font-size: var(--xs, var(--default-xs));
-}
-.text-s4-b2 {
-	font-size: var(--xs, var(--default-xs));
-}
-.text-s4-b3 {
-	font-size: var(--xs, var(--default-xs));
-}
-
-/* ── Paint ────────────────────────────────────── */
-
-
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
-.title {
 	font-weight: 800;
 	line-height: 1.15;
 	letter-spacing: -0.02em;
 }
+
 .subtitle-s1 {
+	font-size: var(--xl, var(--default-xl));
 	font-weight: 700;
 	line-height: 1.25;
 	letter-spacing: -0.01em;
 }
 .subtitle-s2 {
+	font-size: var(--lg, var(--default-lg));
 	font-weight: 600;
 	line-height: 1.35;
 }
-.text-s1-b1 {
-	font-weight: 600;
+
+/* ── Axis: s — size, and the leading that goes with it ── */
+
+.text-s1 {
+	font-size: var(--md, var(--default-md));
 	line-height: 1.6;
 }
-.text-s1-b2 {
-	font-weight: 500;
+.text-s2 {
+	font-size: var(--base, var(--default-base));
 	line-height: 1.6;
 }
-.text-s1-b3 {
-	font-weight: 400;
-	line-height: 1.6;
-}
-.text-s2-b1 {
-	font-weight: 600;
-	line-height: 1.6;
-}
-.text-s2-b2 {
-	font-weight: 500;
-	line-height: 1.6;
-}
-.text-s2-b3 {
-	font-weight: 400;
-	line-height: 1.6;
-}
-.text-s3-b1 {
-	font-weight: 600;
+.text-s3 {
+	font-size: var(--sm, var(--default-sm));
 	line-height: 1.55;
 }
-.text-s3-b2 {
-	font-weight: 500;
-	line-height: 1.55;
+.text-s4 {
+	font-size: var(--xs, var(--default-xs));
+	line-height: 1.5;
 }
-.text-s3-b3 {
-	font-weight: 400;
-	line-height: 1.55;
-}
-.text-s4-b1 {
+
+/* ── Axis: b — weight ─────────────────────────── */
+
+.text-b1 {
 	font-weight: 600;
-	line-height: 1.5;
 }
-.text-s4-b2 {
+.text-b2 {
 	font-weight: 500;
-	line-height: 1.5;
 }
-.text-s4-b3 {
+.text-b3 {
 	font-weight: 400;
-	line-height: 1.5;
+}
+
+/* ── Axis: color ──────────────────────────────── */
+
+@each $name in c.$color-list {
+	.text-#{$name} {
+		color: var(--color-#{$name});
+	}
+	.title-#{$name} {
+		color: var(--color-#{$name});
+	}
+	.subtitle-#{$name} {
+		color: var(--color-#{$name});
+	}
 }

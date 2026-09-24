@@ -4,7 +4,7 @@
 `floating-label`, `fieldset`, `validator`.
 **Prefixes** — `field`, `input`, `textarea`, `select`, `file-input`, `label`,
 `floating-label`, `fieldset`, `validator`.
-**Controls** — **10 in Basic**, 24 in Advanced.
+**Controls** — **6 of its own**, plus 18 it shares with the other sections. The shared ones are answered in **Common** and repeated at the end of this list behind a tick; see [`02-common.md`](./02-common.md).
 
 From 26 top-level controls and 58 `--field-*` variables. The two-level cascade
 — `var(--input-x, var(--field-x))` — stays in the CSS and **leaves the form**:
@@ -35,7 +35,7 @@ never its text. Never shared.
 
 | Control | Sources | Default |
 |---|---|---|
-| `field-bg` | `surface`, custom | Derived from `surface-1` |
+| `field-bg` | `surface`, custom | Derived from `--color-field` |
 | `field-fg` | `own`, `text`, custom | Derived from Own, contrast |
 | `field-placeholder` | `own`, `text` | Derived from Own, `0.35` |
 

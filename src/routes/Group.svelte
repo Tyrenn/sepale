@@ -13,7 +13,7 @@
 	import { slide } from 'svelte/transition';
 	import type { Group } from '$lib/theme/schema.js';
 	import { readMode } from '$lib/theme/schema.js';
-	import { diverges, generator, setMode } from '$lib/theme/store.svelte.js';
+	import { diverges, generator, isDetached, setDetached, setMode } from '$lib/theme/store.svelte.js';
 	import Control from './Control.svelte';
 	import Palette from './Palette.svelte';
 
@@ -23,8 +23,22 @@
 		/* Colours names its tiles UNDER them, because a row of swatches reads
 		   as a palette. Everywhere else a colour is one control among sliders,
 		   and its name belongs on the left with all the others. */
-		under = false
-	}: { group: Group; peers?: Group[]; under?: boolean } = $props();
+		under = false,
+		/* Set on a SECTION's copy of a shared group — the one behind a tick.
+		   Absent on Common's copy and on anything not shared. */
+		override = undefined
+	}: {
+		group: Group;
+		peers?: Group[];
+		under?: boolean;
+		override?: { shared: string; section: string };
+	} = $props();
+
+	/* Whether this section has left Common. Read off the values, not stored —
+	   so a theme whose sections already disagree opens with them marked. */
+	let detached = $derived(
+		override ? isDetached(override.section, override.shared) : false
+	);
 
 	let mode = $derived(readMode(group, generator.vars));
 	let shown = $derived(group.type?.modes.find((m) => m.id === mode));
@@ -41,15 +55,25 @@
 	);
 </script>
 
-<section class="grp">
+<section class="grp" class:grp-shared={override} class:grp-off={override && !detached}>
 	<header>
 		<h4 title={group.help ?? ''}>
 			{group.label}
-			{#if diverges(group, peers)}
-				<span class="ne" title="Sections disagree. Touching this realigns them.">≠</span>
+			{#if !override && diverges(group, peers)}
+				<span class="ne" title="Some sections have left Common. Touching this realigns the ones that have not.">≠</span>
 			{/if}
 		</h4>
 
+		{#if override}
+			<input
+				type="checkbox"
+				class="toggle toggle-xs"
+				title="Take this over for this section alone. Untick and it follows Common again."
+				checked={detached}
+				onchange={(e) => setDetached(override.section, override.shared, e.currentTarget.checked)}
+			/>
+		{/if}
+		{#if !override || detached}
 		{#if group.type && onOff}
 			<input
 				type="checkbox"
@@ -75,8 +99,10 @@
 				{/each}
 			</div>
 		{/if}
+		{/if}
 	</header>
 
+	{#if !override || detached}
 	{#if group.help && !onOff}<p class="help">{group.help}</p>{/if}
 
 	<div class="body" class:row>
@@ -97,6 +123,11 @@
 			</div>
 		{/if}
 	</div>
+	{:else}
+		<!-- A folded override is not empty, it is a statement: this section takes
+		     Common's answer. Saying so beats an unexplained gap. -->
+		<p class="follows">Follows Common</p>
+	{/if}
 </section>
 
 <style>
@@ -111,6 +142,21 @@
 		padding-inline: 0.45rem;
 		font-size: 0.7rem;
 	}
+	/* A shared group appears twice: once in Common, once at the end of each
+	   section that has it. The second copy is quieter — it is an exception you
+	   may not need. */
+	.grp-shared {
+		border-style: dashed;
+	}
+	.grp-off {
+		opacity: 0.62;
+	}
+	.follows {
+		margin: 0.15rem 0 0;
+		font-size: 0.68rem;
+		opacity: 0.7;
+	}
+
 	.grp {
 		border: 1px solid color-mix(in oklab, currentColor 12%, #0000);
 		border-radius: 0.45rem;

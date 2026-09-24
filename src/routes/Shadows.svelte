@@ -180,7 +180,7 @@
 		width: 1.1rem;
 		height: 1.1rem;
 		border-radius: 0.25rem;
-		background: var(--color-surface-1);
+		background: var(--color-background);
 		outline: 1px solid color-mix(in oklab, currentColor 20%, #0000);
 		flex: none;
 	}

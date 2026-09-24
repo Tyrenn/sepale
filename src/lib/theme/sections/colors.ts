@@ -50,12 +50,19 @@ export const colors: Section = {
 	id: 'colors',
 	label: 'Colours',
 	prefixes: ['color'],
-	help: 'Set surface-1 and the eight semantics. Everything else derives, and shows what it derived to.',
+	help: 'Five fills named for what they paint, one ink, and the eight semantics. Everything else derives, and shows what it derived to.',
 	internal: [
 
-		/* Derived in `_derived-content.scss` from the seeds above, and never a
-		   control: a control here would undo an automatic contrast check. */
+		/* Derived from the fill each is written ON, and never a control: a
+		   control there would undo an automatic contrast check. The eight
+		   semantics resolve in `_derived-content.scss`, the four other fills
+		   in `_defaults.scss` — sharing the page ink's shade, so that "how
+		   soft is the text" stays ONE answer. */
 		...SEMANTICS.map(([c]) => `color-on-${c}`),
+		'color-on-card',
+		'color-on-panel',
+		'color-on-action',
+		'color-on-field',
 		/* Declared, editable by hand in the file, and deliberately NOT a
 		   question this form asks. Most are geometry the section's Size
 		   moves together — nobody edits a calc() in a form — and the rest
@@ -65,76 +72,88 @@ export const colors: Section = {
 		   Built by running `node scripts/check-theme-vars.mjs` and pasting
 		   what it named. Never from memory. */
 		'color-accent',
+		'color-action',
+		'color-background',
 		'color-border',
+		'color-card',
 		'color-error',
+		'color-field',
 		'color-info',
 		'color-neutral',
-		'color-on-surface',
+		'color-on-background',
+		'color-panel',
 		'color-primary',
 		'color-secondary',
 		'color-success',
-		'color-surface-1',
-		'color-surface-2',
-		'color-surface-3',
-		'color-surface-4',
 		'color-warning'
 	],
 	controls: [
 		scheme,
 
 		{
-			id: 'color-surfaces',
-			label: 'Surfaces',
+			id: 'color-fills',
+			label: 'Fills',
 			layout: 'row',
-			help: 'surface-1 is the seed, so its box offers Custom only. The rest derive from it — a light seed darkens, a dark seed lightens, so the same numbers serve a theme and its dark twin.',
+			help: 'Five fills named for what they paint, not numbered. Background is the seed; the other four step away from it, and the direction is automatic — a light page darkens, a dark page lightens, so the same numbers serve a theme and its dark twin.',
 			vars: [
-				'color-surface-1-color',
-				'color-surface-1-shade',
-				'color-surface-2-color',
-				'color-surface-2-shade',
-				'color-surface-3-color',
-				'color-surface-3-shade',
-				'color-surface-4-color',
-				'color-surface-4-shade',
-				'color-on-surface-color',
-				'color-on-surface-shade',
+				'color-background-color',
+				'color-background-shade',
+				'color-card-color',
+				'color-card-shade',
+				'color-panel-color',
+				'color-panel-shade',
+				'color-action-color',
+				'color-action-shade',
+				'color-field-color',
+				'color-field-shade',
+				'color-on-background-color',
+				'color-on-background-shade',
 				'color-border-color',
 				'color-border-shade'
 			],
 			controls: [
-				box('color-surface-1', 'Surface 1', {
+				box('color-background', 'Background', {
 					sources: [],
 					source: 'oklch(100% 0 0)',
-					help: 'The seed. It has nothing to derive from, so this box is Custom only.'
+					help: 'The page. The seed every other fill steps away from, so this box is Custom only — it has nothing to follow.'
 				}),
-				box('color-on-surface', 'Surface 1', {
-					inkOf: 'color-surface-1',
+				box('color-on-background', 'Background', {
+					inkOf: 'color-background',
 					kind: 'contrast',
 					sources: [],
 					source: 'own',
-					follows: 'surface 1',
-					help: 'Full contrast against the seed, not a shade of it: it snaps to near-black or near-white and keeps a whisper of the seed’s hue. The intensity trims that result; 0 leaves it alone.'
+					follows: 'the page',
+					help: 'The ONE ink of the kit. Full contrast against the page, not a shade of it: it snaps to near-black or near-white and keeps a whisper of the page’s hue. Its intensity trims that result, and the other four fills reuse it, so how soft the text is stays one answer. A coloured text is a class — .text-primary — not a theme value.'
 				}),
-				box('color-surface-2', 'Surface 2', {
+				box('color-card', 'Card', {
 					sources: [],
-					source: 'color-surface-1',
-					shade: 0.04
+					source: 'color-background',
+					shade: 0.04,
+					help: 'A card, a dropdown, a list, a menu — anything resting ON the page and counted.'
 				}),
-				box('color-surface-3', 'Surface 3', {
+				box('color-panel', 'Panel', {
 					sources: [],
-					source: 'color-surface-1',
-					shade: 0.08
+					source: 'color-background',
+					shade: 0.08,
+					help: 'Chrome pinned to an edge of the screen: a navbar, a dock.'
 				}),
-				box('color-surface-4', 'Surface 4', {
+				box('color-action', 'Action', {
 					sources: [],
-					source: 'color-surface-1',
-					shade: 0.12
+					source: 'color-background',
+					shade: 0.12,
+					help: 'What you press or pick: a plain button, a tab, a chip.'
+				}),
+				box('color-field', 'Field', {
+					sources: [],
+					source: 'color-background',
+					shade: 0,
+					help: 'The inside of an input, a select, a textarea. Equal to the page in most themes — but sunflower tints the page and leaves the fields white, which is why it has a name.'
 				}),
 				box('color-border', 'Border', {
 					sources: [],
-					source: 'color-surface-1',
+					source: 'color-background',
 					shade: 0.1,
-					help: 'A hairline is the surface a few points away. Deriving it from the ink instead gives a dark grey rule, which is almost never what a border is.'
+					help: 'A hairline is the page a few points away. Deriving it from the ink instead gives a dark grey rule, which is almost never what a border is.'
 				})
 			]
 		},

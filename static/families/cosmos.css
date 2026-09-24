@@ -1,0 +1,5992 @@
+@charset "UTF-8";
+/* ============================================================
+   _params.scss — a family declares the variables it exposes.
+
+   Every family owns its own set of parameters. Sharing a name
+   with another family is a convenience, never an obligation:
+   a family may expose five surfaces, or none, or knobs nobody
+   else has.
+
+   A family writes one map and includes `params.emit($params)`,
+   which does two things:
+
+     1. emits the defaults on `:where(:root)` (specificity 0, so
+        any theme wins in any load order);
+     2. emits the map as one machine-readable comment, which the
+        build reads back to feed the configurator and the
+        Families page. One source of truth: this map.
+
+   Shape of an entry:
+
+     'radius-field': (
+       label: 'Field radius', group: 'Shape', type: length,
+       default: 0.375rem, min: 0, max: 2, step: 0.05,
+       unit: rem, units: (px rem em ch),
+       help: 'Corner radius of buttons, inputs and selects.',
+     )
+
+   `type` is color | length | number. `min`/`max`/`step` turn the
+   control into a slider; `units` adds a unit picker.
+   ============================================================ */
+/* Serialise the map to JSON on a single line, so the build can
+   pull it out of the compiled CSS with one regex. */
+/* Defaults + the machine-readable declaration. */
+/* ------------------------------------------------------------
+   colors() — metadata for the colour names families tend to
+   share. Convenience only: a family passes the values it wants,
+   under whatever names it wants, and gets labels and help text
+   for the ones this table knows. Unknown names still work, they
+   just get their raw name as a label.
+   ------------------------------------------------------------ */
+/* ============================================================
+   base/_index.scss — the page layer, then every component base.
+
+   base owns the MECHANISM: structure, states, intrinsic sizing,
+   accessibility, and the named slots a family fills. It writes
+   `height: var(--size)`; it never writes `--size:`. Nothing here
+   carries a value, so base cannot be used without a family
+   (ADR 0008).
+   ============================================================ */
+/* The component bases. Mixin-only: nothing is emitted until a
+   family includes them. */
+/* ============================================================
+   badge.scss — .badge mixin library (badge overlay wrapper)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   Internal variables (position control):
+	--badge-t    top offset (default: 0)
+	--badge-b    bottom offset (default: auto)
+	--badge-s    inset-inline-start offset (default: auto)
+	--badge-e    inset-inline-end offset (default: 0)
+	--badge-x    horizontal translate (default: 50%)
+	--badge-y    vertical translate (default: -50%)
+
+   Usage: combine the .badge wrapper with .badge-{position}
+   modifiers; the inner .chip is the positioned badge itself.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — wrapper + positioned inner chip.
+   ------------------------------------------------------------ */
+/* ============================================================
+   breadcrumbs.scss — .breadcrumbs mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — scrollable list of items with chevron separators.
+   ------------------------------------------------------------ */
+/* ============================================================
+   button.scss — .btn mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s the pieces it wants. `base` carries the
+   structure every family shares (layout, intrinsic sizing, state
+   plumbing); every look decision (borders, elevation, hover/press
+   feedback, style variants) is an opt-in mixin. A family is just a
+   selection of these mixins plus its own extra rules.
+
+   Plumbing contract — custom properties painted by `base`, assigned
+   by skins/variants (and overridable per family):
+	--btn-color    color seed — set by `color-variants`, drives bg/outline
+	--btn-bg       resolved background color
+	--btn-fg       resolved text color
+	--btn-border   resolved border color        (base default: transparent)
+	--btn-shadow   box-shadow value             (base default: var(--shadow-light))
+	--btn-p        inline padding
+	--size         button height
+	--fontsize     font size (set by `size-variants` classes)
+
+   External variables (theme / family):
+	--color-surface-2          default button background
+	--color-on-surface      default text color
+	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
+	--radius-field            corner radius
+	--border                  border width (px value)
+	--shadow-light            family shadow system (see base/default.scss)
+
+   Join integration (set by join.scss when inside .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure shared by all families.
+   Layout, intrinsic sizing, typography plumbing, paint plumbing
+   (background/border/shadow read the --btn-* variables), keyboard
+   focus, checkbox/radio-as-button behavior, disabled state.
+   No look decision: border/shadow resolve to transparent/family
+   shadow until a skin assigns them.
+   ------------------------------------------------------------ */
+/* ============================================================
+   checkbox.scss — .checkbox mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   border + checked fill color (set by color-variants)
+	--size          box dimensions (1.5em × 1.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-on-surface       default checkmark color
+	--color-{variant} / --color-on-{variant}  fill / mark colors (color-variants)
+	--border / --radius-selector
+	--shadow-light             family shadow system
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: box, animated clip-path checkmark, focus ring,
+   checked/indeterminate states, forced-colors/print fallbacks,
+   disabled.
+   ------------------------------------------------------------ */
+/* ============================================================
+   chip.scss — .chip mixin library (small inline label)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--chip-color  seed color (set by color-variants)
+	--chip-bg     resolved background color
+	--chip-fg     resolved text color
+	--size        chip height (1.6em, scales with font); padding derived
+	--fontsize    font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-{variant} / --color-on-{variant}  seed / text colors (color-variants)
+	--border / --radius-selector
+	--shadow-light          family shadow system
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure and paint plumbing (bg/fg/border from --chip-*).
+   ------------------------------------------------------------ */
+/* ============================================================
+   dock.scss — .dock mixin library (fixed bottom navigation bar)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   External variables (theme / family):
+	--color-surface-3  dock background (the most raised surface)
+	--color-on-surface  disabled item text color mix
+	--radius-box          item corner radius
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — fixed bar, items, active indicator, disabled.
+   ------------------------------------------------------------ */
+/* ============================================================
+   fieldset.scss — .fieldset mixin library (form field group)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   External variables (theme / family):
+	--color-on-surface   legend and label text color
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — grid container + legend (+ deprecated .fieldset-label).
+   ------------------------------------------------------------ */
+/* ============================================================
+   floating-label.scss — .floating-label mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s the pieces it wants.
+
+   A container that WRAPS a field, unlike `.label`, which is inline
+   and lives inside one. Two roles, two components (ADR 0009).
+
+   base owns the stacking and the state plumbing; where the text
+   sits, how big it is and what it is painted on are the family's
+   (ADR 0008).
+
+   External variables (theme / family):
+	--color-surface-1   the span's ground, so it can hide the field border
+	--size-field        vertical centre of the floated text
+   ============================================================ */
+/* ============================================================
+   file-input.scss — .file-input mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   field border/accent color (same as input.scss)
+	--btn-color     seed color for the file button (color-variants)
+	--btn-bg        resolved button background   (painted by base)
+	--btn-fg        resolved button text color   (painted by base)
+	--btn-border    resolved button border color (base default: transparent)
+	--btn-shadow    button drop shadow           (skin-flat)
+	--size          field height (2.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-{variant} / --color-on-{variant}  semantic colors (color-variants)
+	--border / --radius-field
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-es   start-side radius overrides
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: field layout + the ::file-selector-button
+   pseudo-button plumbing (paints from --btn-*), focus ring,
+   disabled state.
+   ------------------------------------------------------------ */
+/* ============================================================
+   input.scss — .input mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   resolved border/accent color — base defaults it to a
+	                faint on-surface mix, color-variants override it,
+	                focus resets it to on-surface
+	--size          field height (2.5em × --scale, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        field background
+	--color-surface-2        disabled background and border
+	--color-on-surface    default text color
+	--color-{variant}       semantic accent (set by color-variants)
+	--border                border width
+	--radius-field          field corner radius
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure shared by all families: layout, intrinsic
+   sizing, border/outline plumbing, inner <input> handling, focus
+   ring, disabled state. Box-shadow defaults to the family shadow;
+   skins provide the actual surface recipe.
+   ------------------------------------------------------------ */
+/* ============================================================
+   join.scss — .join mixin library (group adjacent form elements)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   Exported variables (injected into child .join-item elements,
+   consumed by input, select, button, … via
+   var(--join-ss, var(--radius-field))):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+
+   External variables (theme / family):
+	--border        used for negative margin to merge borders
+	--radius-field  default corner radius applied to first/last items
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — horizontal grouping: corner radius distribution, border
+   merging, button height stretch.
+   ------------------------------------------------------------ */
+/* ============================================================
+   label.scss — .label / .floating-label mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   External variables (theme / family):
+	--color-surface-1   floating label background (hides the field border)
+	--border           inline divider width inside .input / .select
+	--size-field       floating label vertical center position
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — inline label + prefix/suffix label inside fields.
+   ------------------------------------------------------------ */
+/* ============================================================
+   link.scss — .link mixin library (styled hyperlink)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Inherits font size and color from context.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — underlined link + .link-hover variant + focus.
+   ------------------------------------------------------------ */
+/* ============================================================
+   list.scss — .list mixin library (rows + suggestion dropdown)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--list-grid-cols   auto-computed grid columns (.list-col-grow index)
+	--fontsize         font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-primary         selected suggestion highlight
+	--border / --radius-box / --radius-field
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — list container + data rows with growing columns.
+   ------------------------------------------------------------ */
+/* ============================================================
+   loading.scss — .loading mixin library (animated indicator)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Fill uses currentColor; size scales with --fontsize.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — masked square, defaults to the spinner animation.
+   ------------------------------------------------------------ */
+/* ============================================================
+   menu.scss — .menu mixin library (navigation list)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   A menu is navigation: links, one active, optional section titles
+   and optional nested sub-menus. It owns its frame — unlike `dock`
+   and `navbar`, which are placement only. `list` holds rows of data;
+   `tabs` chooses which panel is visible; `menu` goes somewhere.
+
+   Markup: a <ul> of <li>. An item is either marked `.menu-item` or
+   simply the interactive child of an <li> — both are styled, so
+   plain markup works and the explicit class is there when the
+   structure is unusual.
+
+	<ul class="menu">
+	  <li class="menu-title">Form</li>
+	  <li><a class="menu-active" href="#">Button</a></li>
+	  <li>
+	    <button class="menu-toggle">Display</button>
+	    <ul class="menu-sub menu-sub-closed"> … </ul>
+	  </li>
+	  <li></li>                      <!-- empty item = separator -->
+	</ul>
+
+   The sub-menu is open by default: a family that ships it closed
+   without JS would make it unreachable. `.menu-sub-closed` collapses
+   it, `.menu-sub-open` says so explicitly; a script (or, later, the
+   Svelte wrapper) only swaps the class — the animation is here.
+
+   To turn the toggle's marker when the sub-menu opens, a family
+   writes the value on:
+	.menu li:has(> .menu-sub-closed) > .menu-toggle::after
+
+   Plumbing contract:
+	--menu-bg / --menu-fg / --menu-border / --menu-border-width
+	--menu-shadow
+	--menu-p              padding around the whole block
+	--menu-gap            space between items
+	--menu-item-py/-px    item padding
+	--menu-item-gap       space between an item's icon, label and badge
+	--menu-item-bg/-fg    item paint, idle
+	--menu-item-radius    item corner radius
+	--menu-item-transition
+	--menu-hover-bg/-fg   item paint on hover
+	--menu-active-bg/-fg  item paint when .menu-active
+	--menu-disabled-bg/-fg
+	--menu-focus-outline / --menu-focus-offset
+	--menu-title-*        section title paint, padding and type
+	--menu-divider        color of an empty <li>
+	--menu-divider-size / -gap / -inset
+	--menu-sub-indent     how far a sub-menu is pushed in
+	--menu-sub-transition the open/close timing
+	--fontsize            font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — the block, its items, their states, section titles,
+   separators, and the collapsible sub-menu.
+   ------------------------------------------------------------ */
+/* ============================================================
+   navbar.scss — .navbar mixin library (a bar across the top)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). base owns the MECHANISM and no values at all: it
+   writes `background-color: var(--navbar-bg)` and never
+   `--navbar-bg:` (ADR 0008).
+
+   Markup:
+
+	<nav class="navbar">
+	  <div class="navbar-start">…</div>
+	  <div class="navbar-center">…</div>
+	  <div class="navbar-end">…</div>
+	</nav>
+
+   The three zones are optional. With none of them the children
+   simply lay out in a row; with them, start and end share the
+   leftover space and center keeps its own width, which is what
+   lets a centred logo stay centred while the two sides grow.
+
+   navbar is PLACEMENT, not navigation — it says "across the top",
+   it does not say what goes in it. A set of links inside one is a
+   `menu`; a row of actions is a row of buttons. Compare `dock`,
+   which is the same idea pinned to the bottom of the viewport.
+
+   Plumbing contract — a family fills these:
+	--navbar-bg / --navbar-fg     the bar's ground and ink
+	--navbar-border               divider colour
+	--navbar-border-width         divider thickness (0 to remove it)
+	--navbar-shadow               cast shadow, if the family has any
+	--navbar-h                    minimum height; content may exceed it
+	--navbar-px / --navbar-py     padding
+	--navbar-gap                  space between zones and between children
+	--navbar-sticky-top           where a sticky bar comes to rest
+	--fontsize                    set by the size variants
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — the bar, its three zones, and the sticky flag.
+   ------------------------------------------------------------ */
+/* ============================================================
+   progress.scss — .progress mixin library (linear progress bar)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   External variables (theme / family):
+	--color-on-surface  default track/fill color
+	--color-{variant}     fill color (color-variants)
+	--radius-box          bar corner radius
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — track + fill (WebKit/Firefox), indeterminate animation.
+   Color driven by currentColor; height fixed at 0.5rem.
+   ------------------------------------------------------------ */
+/* ============================================================
+   radial-progress.scss — .radial-progress mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Ring uses currentColor.
+
+   User-set variables (provided in HTML style or CSS):
+	--value       progress value 0–100 (required)
+	--size        ring diameter (default: 5em, scales with font)
+	--thickness   ring stroke width (default: --size / 10)
+
+   Internal variables:
+	--radialprogress   computed from --value (animated CSS property)
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — conic ring + rounded cap.
+   ------------------------------------------------------------ */
+/* ============================================================
+   radio.scss — .radio mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Note: .radio does not consume --shadow-light — families that need
+   a shadow skin it directly.
+
+   Plumbing contract:
+	--input-color   border + dot color (set by color-variants)
+	--size          circle dimensions (1.5em × 1.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        background when checked
+	--color-{variant}       accent color (color-variants)
+	--border
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: circle, inner dot, focus ring, checked state,
+   forced-colors/print fallbacks, disabled, check animation.
+   ------------------------------------------------------------ */
+/* ============================================================
+   range.scss — .range mixin library (slider input)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Note: the thumb box-shadow recipe stays in `base` — it implements
+   the track-fill trick (a 100cqw shadow cast from the thumb) and
+   cannot be split from the look. Its depth-gated lines are inert
+   when the family sets --depth: 0.
+
+   Plumbing contract:
+	--range-thumb         thumb background color
+	--range-thumb-size    thumb diameter (1.5em, scales with font)
+	--range-progress      track fill color (currentColor by default)
+	--range-fill          1 = fill track before thumb, 0 = no fill
+	--range-p             thumb border / padding (0.25em)
+	--range-bg            empty track color
+	--range-dir           RTL direction multiplier (-1 when [dir="rtl"])
+	--radius-selector-max workaround for PostCSS/Nuxt calc(min(calc())) error
+	--fontsize            font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        default thumb background
+	--color-{variant} / --color-on-{variant}  track / thumb colors (color-variants)
+	--radius-selector       thumb and track corner radius
+	--depth                 shadow intensity multiplier
+	--shadow-light          family shadow system
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — the whole slider: track, thumb (with the fill-shadow
+   trick), focus, disabled.
+   ------------------------------------------------------------ */
+/* ============================================================
+   select.scss — .select mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   resolved border/accent color (same as input.scss)
+	--size          field height (2.5em × --scale, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        field background
+	--color-surface-2        disabled background and border
+	--color-on-surface    default text color
+	--color-neutral / --color-on-neutral   active option highlight
+	--color-{variant}       semantic accent (set by color-variants)
+	--border                border width
+	--radius-field          field corner radius
+	--radius-box            picker dropdown corner radius
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: layout, chevron, native <select> nesting,
+   picker dropdown (base-select), options, focus ring, disabled.
+   ------------------------------------------------------------ */
+/* ============================================================
+   skeleton.scss — .skeleton mixin library (loading placeholder)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   External variables (theme / family):
+	--color-surface-1      shimmer highlight color
+	--color-surface-2      skeleton base background
+	--color-on-surface  .skeleton-text shimmer
+	--radius-box          corner radius
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — shimmering placeholder block + text variant.
+   ------------------------------------------------------------ */
+/* ============================================================
+   swatch.scss — .swatch mixin library (a sample of one colour)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   A swatch shows a colour, and optionally a letter or a short label
+   drawn on it. The colour is DATA, not a theme value: the author
+   passes it at the call site, the family never writes it.
+
+	<span class="swatch" style="--swatch-color:#1677ff">A</span>
+	<button class="swatch swatch-active" style="--swatch-color:#0000"></button>
+
+   A transparent colour must read as transparent, so the sample is
+   painted as a flat layer over a checkerboard the family supplies in
+   `--swatch-checks`.
+
+   What is written on it is an on-color: a family derives
+   `--swatch-on-color` from `--swatch-color` the same way
+   `--color-on-*` is derived from a surface, so a letter stays legible
+   on a colour nobody knew at authoring time.
+
+   Plumbing contract:
+	--swatch-color        the sample itself (author-set, required)
+	--swatch-on-color     what is drawn on it (family-derived)
+	--swatch-size         width and height
+	--swatch-radius       corner radius
+	--swatch-border / --swatch-border-width
+	--swatch-shadow
+	--swatch-checks       the transparency checkerboard behind the colour —
+	                      the family writes the image AND its background-size,
+	                      since one layer of it is one value
+	--fontsize            font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — the sample, its label, and the interactive states.
+   ------------------------------------------------------------ */
+/* ============================================================
+   tabs.scss — .tabs / .tabs-item mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Internal variables (set on .tabs / .tabs-item, consumed by children):
+	--tabs-height         container height (auto or fixed)
+	--tabs-direction      flex direction (row)
+	--tab-height          individual tab height (2.5em, scales with font)
+	--tab-p               tab inline padding (0.75em, scales with font)
+	--tab-bg              active tab background color
+	--tab-border-color    tab border color
+	--tab-order           tab order in flex container
+	--tab-radius-min      minimum inner radius
+	--tab-radius-limit    clamped radius = min(--radius-field, --tab-radius-min)
+	--tab-radius-grad     radial gradient for lifted corner decoration
+	--tab-radius-ss/se/es/ee   per-corner radius values
+	--tab-border / --tab-border-colors   active tab border sides
+	--tab-paddings        active tab padding adjustment
+	--tab-inset / --radius-start / --radius-end   lifted corner positioning
+	--tabs-box-radius     box variant rounding
+	--tabcontent-order / --tabcontent-margin / --tabcontent-radius-*  content panel
+
+   External variables (theme / family):
+	--color-surface-1/200/300 / --color-neutral / --color-on-surface
+	--border / --radius-field / --radius-box
+	--depth               shadow intensity (variant-box active shadow)
+	--fontsize            tab font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: flex container, tab element (radio/label
+   support), active-content display logic, focus, disabled,
+   .tabs-item-content panel plumbing.
+   ------------------------------------------------------------ */
+/* ============================================================
+   text.scss — typography mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   Naming: .{type}-s{size}-b{weight}
+	s = size index, 1 = largest
+	b = weight index, 1 = heaviest (600), 2 = medium (500), 3 = regular (400)
+   Subtitles have a fixed weight — no b index. Title is unique.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — .title, .subtitle-s{1,2}, .text-s{1-4}-b{1-3}.
+   ------------------------------------------------------------ */
+/* ============================================================
+   textarea.scss — .textarea mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   resolved border/accent color (same as input.scss)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-{variant}       semantic accent (set by color-variants)
+	--border / --radius-field
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: sizing, inner <textarea> handling, focus ring,
+   disabled state.
+   ------------------------------------------------------------ */
+/* ============================================================
+   toggle.scss — .toggle mixin library (checkbox-based switch)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Plumbing contract:
+	--input-color   track/thumb color (color-variants set it on :checked)
+	--size          toggle height (1.5em, scales with font); width derived
+	--toggle-p      inner padding between track border and thumb
+	--fontsize      font size (set by size-variants classes)
+	--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) error
+
+   External variables (theme / family):
+	--color-surface-1        track background when checked
+	--color-on-surface    thumb color when checked
+	--color-{variant}       checked color (color-variants)
+	--border                border width — MUST carry a unit (0px, not 0):
+	                        it is summed with lengths in the width calc()
+	--radius-selector       thumb and track corner radius
+	--shadow-light          family shadow system
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — structure: grid track, sliding thumb, optional icons,
+   checked/indeterminate states, focus ring, disabled.
+   ------------------------------------------------------------ */
+/* ============================================================
+   validator.scss — .validator mixin library (validation states)
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern). Pure structure — no look mixins.
+
+   Exported variable (injected into sibling field components):
+	--input-color   overrides the field border/focus color;
+	                consumed by .input, .select, .textarea, .checkbox, …
+
+   Usage: add .validator to a field component; .validator-hint is
+   the sibling element shown on error.
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — valid/invalid color driving + error hint.
+   ------------------------------------------------------------ */
+/* ── The page layer: what every family needs before any component. ── */
+/* ── properties ── */
+/* properties.css */
+@property --radialprogress {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 0%;
+}
+/* ── svg ── */
+/* ============================================================
+   svg.scss â€” inline SVG sizing.
+
+   Icons inside components scale with the surrounding font size,
+   which is what makes intrinsic (em-based) sizing work for buttons,
+   chips, tabs and the like.
+   ============================================================ */
+svg {
+  height: 1em;
+}
+
+/* ── rootcolor ── */
+/* ============================================================
+   DaisyUI â€” rootcolor.css
+   Couleur et fond de base pour :root et les thÃ¨mes [data-theme]
+   ============================================================ */
+:root,
+[data-theme] {
+  background: var(--page-scroll-bg, var(--root-bg));
+  color: var(--color-on-surface);
+}
+
+:where(:root, [data-theme]) {
+  --root-bg: var(--color-surface-1);
+}
+
+/* ── rootscroll ── */
+/* ============================================================
+   DaisyUI â€” rootscroll.css
+   Gestion du scroll gutter et du scroll lock (utilisÃ© par modal)
+   ============================================================ */
+/* Scroll gutter â€” assombrit le fond quand un backdrop est actif */
+:root {
+  background: var(--page-scroll-bg, var(--root-bg));
+  --page-scroll-bg-on: linear-gradient(var(--root-bg, #0000), var(--root-bg, #0000))
+  	color-mix(in srgb, var(--root-bg, #0000), oklch(0% 0 0) calc(var(--page-has-backdrop, 0) * 40%));
+  --page-scroll-transition-on: background-color 0.3s ease-out;
+  transition: var(--page-scroll-transition);
+  /* Fallback sans @supports */
+  scrollbar-gutter: var(--page-scroll-gutter, unset);
+  /* Avec support CSS if() */
+  scrollbar-gutter: if(style(--page-has-scroll: 1): var(--page-scroll-gutter, unset); else: unset);
+}
+
+@keyframes set-page-has-scroll {
+  0%, to {
+    --page-has-scroll: 1;
+  }
+}
+/* Scroll lock â€” bloque le scroll quand une modale est ouverte */
+:root:not(span) {
+  overflow: var(--page-overflow);
+}
+
+/* ── scrollbar ── */
+/* ============================================================
+   DaisyUI â€” scrollbar.css
+   Couleur de scrollbar adaptÃ©e au thÃ¨me
+   ============================================================ */
+:root {
+  scrollbar-color: color-mix(in oklch, currentColor 35%, rgba(0, 0, 0, 0)) rgba(0, 0, 0, 0);
+}
+
+/* ── default ── */
+:root {
+  /* â”€â”€ Light shadow system â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+     Alternative to --depth. Set --light-intensity > 0 and --depth: 0
+     for flat/modern directional shadows instead of retro depth.
+     --light-intensity   opacity multiplier  (0 = off)
+     --light-depth       distance/blur scale (1 = sm, 2 = md, 3 = lg)
+     --light-color       shadow hue, default pure black
+     â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  --light-intensity: 0;
+  --light-depth: 1;
+  --light-color: oklch(0% 0 0);
+  /* â”€â”€ Type scale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+     A fixed modular scale (ratio 1.125, base 1rem). Deliberately NOT
+     fluid: component sizes are intrinsic (em), so a viewport-driven
+     base would silently resize every component â€” two competing size
+     systems. Size is chosen, through --scale below. */
+  --default-xxs: 0.7023rem;
+  --default-xs: 0.7901rem;
+  --default-sm: 0.8889rem;
+  --default-base: 1rem;
+  --default-md: 1.125rem;
+  --default-lg: 1.2656rem;
+  --default-xl: 1.4238rem;
+  --default-xxl: 1.6018rem;
+  --default-xxxl: 1.802rem;
+}
+
+/* â”€â”€ Element size coefficient â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   --scale grows or shrinks the FRAME of every component â€” heights,
+   paddings, gaps, internal offsets â€” and never the text.
+
+   That is why it is not applied to font-size, and why base.css does not
+   set a root font-size either: a kit that resizes the host page's text
+   when you install it is a kit you uninstall. Each geometric length is
+   written `calc(Nem * var(--scale))` at its own site, so it stays
+   intrinsic (resolved against the element's own font-size, so size
+   variants stay proportioned) while the text is left alone.
+
+   What does NOT scale: text, icons (svg { height: 1em } â€” they sit on
+   the text baseline), the radii (their own parameters), hairlines in px,
+   and the text-natured components that draw no frame (text, link,
+   breadcrumbs, validator).
+
+   On :where(:root) (specificity 0) so any theme wins, in any load order. */
+:where(:root) {
+  --scale: 1;
+}
+
+/* The recipe is declared on every element (zero specificity via :where) â€”
+   NOT on :root only. A custom property resolves its var() references where
+   it is declared, so a :root-only --shadow-light would freeze --light-depth
+   forever and per-component overrides (e.g. a button raising its elevation
+   on hover) would do nothing. Declared per element, changing any --light-*
+   on a component recomputes its shadow there. */
+:where(*) {
+  --shadow-light:
+  	0 calc(var(--light-depth, 1) * 1px) calc(var(--light-depth, 1) * 3px)
+  		color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 15%), #0000),
+  	0 calc(var(--light-depth, 1) * 3px) calc(var(--light-depth, 1) * 8px)
+  		color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 8%), #0000);
+}
+
+/* Every component base, emitted by the family that @uses this file. */
+/* ============================================================
+   _derived-content.scss — automatic `--color-on-*` colors, plus the
+   default border color.
+
+   A theme sets surfaces and semantic colors; what is written *on*
+   them is derived from the seed with the relative color syntax. The lightness flips around a threshold — a light
+   seed gets near-black text, a dark seed gets near-white — while
+   keeping a whisper of the seed's hue.
+
+     clamp(0.145, (0.66 - l) * 999, 0.97)
+		l > 0.66  →  negative  →  clamps to 0.145 (dark text)
+		l < 0.66  →  huge      →  clamps to 0.97  (light text)
+
+   Declared on :where(:root) (zero specificity) so a theme's :root
+   can still override any of them explicitly if it wants to.
+   ============================================================ */
+:where(:root) {
+  --color-on-surface: oklch(from var(--color-surface-1) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
+  /* Borders are almost always a wash of the text color over the surface.
+     Derived so a theme has only three surfaces to supply — but a theme
+     (or a family like wireframe) can still set --color-border outright. */
+  --color-border: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+  --color-on-primary: oklch(
+  	from var(--color-primary) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-secondary: oklch(
+  	from var(--color-secondary) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-accent: oklch(
+  	from var(--color-accent) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-neutral: oklch(
+  	from var(--color-neutral) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-info: oklch(
+  	from var(--color-info) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-success: oklch(
+  	from var(--color-success) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-warning: oklch(
+  	from var(--color-warning) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-error: oklch(
+  	from var(--color-error) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+}
+
+/* cosmos — badge.
+   Variants inherited from the shared set when families still
+   shared one. They belong to this family now: edit them here,
+   or delete the ones this look has no use for (ADR 0008). */
+/* cosmos — breadcrumbs.
+   Variants inherited from the shared set when families still
+   shared one. They belong to this family now: edit them here,
+   or delete the ones this look has no use for (ADR 0008). */
+/* cosmos — button.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — checkbox.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — chip.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — dock.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — fieldset. */
+/* cosmos — floating-label.
+   Everything cosmos decides about this component: its look and
+   its variants. Split out of label.scss — a container that wraps a
+   field is not a setting of the inline label (ADR 0009). */
+/* cosmos — file-input.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — input.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — label.
+   Variants inherited from the shared set when families still
+   shared one. They belong to this family now: edit them here,
+   or delete the ones this look has no use for (ADR 0008). */
+/* cosmos — link.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — list.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — loading.
+   Variants inherited from the shared set when families still
+   shared one. They belong to this family now: edit them here,
+   or delete the ones this look has no use for (ADR 0008). */
+/* cosmos — menu.
+   PaperCSS has no menu, so this one is drawn with the same pen as
+   everything else: the block takes a hand-drawn border and one of
+   the six corner recipes, rows alternate between two others so no
+   two neighbours wobble alike, and the current row is filled in the
+   accent. The block is tall, so it turns its amplitude down like the
+   textarea does. */
+/* cosmos — navbar.
+   Drawn with the same pen as everything else. A bar is a wide box,
+   so it takes the box wobble rather than the control's, and it sits
+   a hair off true like the rest of the family. */
+/* cosmos — progress.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — radial-progress.
+   Variants inherited from the shared set when families still
+   shared one. They belong to this family now: edit them here,
+   or delete the ones this look has no use for (ADR 0008). */
+/* cosmos — radio.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — range.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — select.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — skeleton.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — swatch.
+   Drawn, not printed: the pen border and one of the six corner
+   recipes, a hair off true like every other control. The selected
+   one is circled a second time, the way you would ring a colour on
+   paper. */
+/* cosmos — tab.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — text. */
+/* cosmos — textarea.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — toggle.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+/* cosmos — validator. */
+/* ============================================================
+   STYLE FAMILY — « cosmos »  (after PaperCSS, hand-drawn)
+
+   Cosmos flowers look like they were cut from tissue paper —
+   thin, papery petals that never sit symmetrically. Which is
+   what this family does to every corner it draws.
+
+   The look: nothing is a rectangle. Every frame uses six
+   different elliptical radii so no two corners match, the border
+   is a thick marker line, and elements sit at a fraction of a
+   degree off true. It should look drawn, not rendered.
+
+   Changes made to fit our contract:
+     - PaperCSS imports Patrick Hand from Google Fonts. We do not
+       ship or fetch fonts, so cosmos names a handwriting stack
+       and degrades to the system face. Point
+       --default-font-family at a real hand face and it snaps into
+       character.
+     - The asymmetric radius is a fixed six-value recipe, not a
+       single number, so `--radius-field` cannot express it, and
+       cosmos does not expose the three radii at all. It exposes a
+       `wobble` instead — three of them, one per kind of thing, the
+       way the radii used to be split — mixing between a plain
+       radius and the full hand-drawn recipe. At 0 it is an
+       ordinary rounded family; at 1 it is PaperCSS.
+     - PaperCSS has no dark theme. Ours adds one — a chalk-on-slate
+       reading of the same idea, which is an invention, not a port.
+
+   Build: static/families/cosmos.css via `npm run build:css`.
+   ============================================================ */
+:where(:root) {
+  --color-surface-1: #fdfdf6;
+  --color-surface-2: #f5f3e8;
+  --color-surface-3: #eae7d6;
+  --color-border: #41403e;
+  --color-on-surface: #41403e;
+  --color-primary: #41403e;
+  --color-secondary: #7f8c8d;
+  --color-accent: #f6c667;
+  --color-neutral: #41403e;
+  --color-info: #6ca9d6;
+  --color-success: #86b98a;
+  --color-warning: #f6c667;
+  --color-error: #d97b6c;
+  --default-font-family: Patrick Hand, Comic Sans MS, Segoe Print, cursive;
+  --border: 2px;
+  --scale: 1;
+  --cosmos-wobble-field: 1;
+  --cosmos-wobble-box: 0.2;
+  --cosmos-wobble-selector: 0.7;
+  --cosmos-tilt: 0.4;
+}
+
+/*! uu-params [{"name":"color-surface-1","label":"Surface 1","group":"Colors","type":"color","value":"#fdfdf6","description":"The ground: page background, and the inside of fields."},{"name":"color-surface-2","label":"Surface 2","group":"Colors","type":"color","value":"#f5f3e8","description":"Objects resting on the ground: plain buttons, chips, skeletons."},{"name":"color-surface-3","label":"Surface 3","group":"Colors","type":"color","value":"#eae7d6","description":"Chrome pinned to the edge of the screen: dock, navbar."},{"name":"color-border","label":"Border","group":"Colors","type":"color","value":"#41403e","description":"Hairlines, field outlines, dividers."},{"name":"color-on-surface","label":"Text","group":"Colors","type":"color","value":"#41403e","description":"Text and icons drawn on the surfaces."},{"name":"color-primary","label":"Primary","group":"Colors","type":"color","value":"#41403e","description":"Main brand and action colour."},{"name":"color-secondary","label":"Secondary","group":"Colors","type":"color","value":"#7f8c8d","description":"Secondary brand colour."},{"name":"color-accent","label":"Accent","group":"Colors","type":"color","value":"#f6c667","description":"Accent and highlight colour."},{"name":"color-neutral","label":"Neutral","group":"Colors","type":"color","value":"#41403e","description":"Strong neutral tone for filled, unbranded elements."},{"name":"color-info","label":"Info","group":"Colors","type":"color","value":"#6ca9d6","description":"Informational state."},{"name":"color-success","label":"Success","group":"Colors","type":"color","value":"#86b98a","description":"Success state."},{"name":"color-warning","label":"Warning","group":"Colors","type":"color","value":"#f6c667","description":"Warning state."},{"name":"color-error","label":"Error","group":"Colors","type":"color","value":"#d97b6c","description":"Error and danger state."},{"name":"default-font-family","label":"Typeface","group":"Typography","type":"text","value":"Patrick Hand, Comic Sans MS, Segoe Print, cursive","description":"cosmos is drawn by hand. Without a hand face it reads as a wonky sans — install or link one and it comes alive."},{"name":"border","label":"Pen width","group":"Shape","type":"length","value":"2px","description":"Thickness of the marker line. This is a drawing, so the line matters more than the fill.","min":1,"max":5,"step":0.5,"unit":"px","units":["px","em"]},{"name":"scale","label":"Element size","group":"Size","type":"number","value":"1","description":"Grows every frame — paddings, heights, spacing. Text is unaffected.","min":0.75,"max":2,"step":0.05},{"name":"cosmos-wobble-field","label":"Wobble — controls","group":"Effects","type":"number","value":"1","description":"How far the corners drift on a button, an input, a chip. 0 is an ordinary rounded family; 1 is fully hand-drawn.","min":0,"max":1,"step":0.05},{"name":"cosmos-wobble-box","label":"Wobble — boxes","group":"Effects","type":"number","value":"0.2","description":"Same, for a list, a textarea, a menu. The recipe is in pixels, so a tall box takes the full drift while a button clamps it — which is why boxes need their own, smaller, number.","min":0,"max":1,"step":0.05},{"name":"cosmos-wobble-selector","label":"Wobble — selectors","group":"Effects","type":"number","value":"0.7","description":"Same, for the small drawn things: tabs, bars, sliders, samples.","min":0,"max":1,"step":0.05},{"name":"cosmos-tilt","label":"Tilt","group":"Effects","type":"number","value":"0.4","description":"Degrees a control sits off true. Small numbers read as drawn; large ones read as broken.","min":0,"max":3,"step":0.1}] */
+/* Family-owned: ink on paper. No cast light.
+
+   The three radii are NOT parameters here. A single number cannot say
+   anything about a corner this family draws — the corner is a six-value
+   recipe — so exposing one would only let a theme flatten the mechanism
+   without ever describing it. They stay as fixed values because the
+   shared mechanism (join, tabs, toggle, slider) still measures against
+   them. What cosmos exposes instead is the wobble, once per kind of
+   thing: see --cosmos-wobble-field / -box / -selector. */
+:root {
+  --depth: 0;
+  --light-intensity: 0;
+  --root-bg: var(--color-surface-1);
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+  --radius-selector: 0.5rem;
+}
+
+/* The shared mechanism: structure, states, intrinsic sizing, slots. */
+.badge {
+  position: relative;
+  display: inline-flex;
+}
+
+.badge :where(.chip) {
+  z-index: 1;
+  position: absolute;
+  white-space: nowrap;
+  top: var(--badge-t, 0);
+  bottom: var(--badge-b, auto);
+  left: var(--badge-s, auto);
+  right: var(--badge-e, 0);
+  translate: var(--badge-x, 50%) var(--badge-y, -50%);
+}
+
+.breadcrumbs {
+  overflow-x: auto;
+}
+
+.breadcrumbs > menu,
+.breadcrumbs > ul,
+.breadcrumbs > ol {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.breadcrumbs > menu > li,
+.breadcrumbs > ul > li,
+.breadcrumbs > ol > li {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumbs > menu > li > *,
+.breadcrumbs > ul > li > *,
+.breadcrumbs > ol > li > * {
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+}
+
+/* Item separator */
+.breadcrumbs > menu > li + *::before,
+.breadcrumbs > ul > li + *::before,
+.breadcrumbs > ol > li + *::before {
+  content: "";
+  display: block;
+}
+
+/* Width reset in some contexts (e.g. join) */
+/* btn links inside prose: no underline */
+.btn {
+  /* Internal variables — neutral defaults, skins re-assign */
+  --btn-bg: var(--btn-color, var(--color-surface-2));
+  --btn-fg: var(--color-on-surface);
+  /* daisyUI ships 1rem — half of this was an outlier */
+  --btn-shadow: var(--shadow-light, );
+  /* Layout */
+  display: inline-flex;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  touch-action: manipulation;
+  /* Dimensions */
+  height: var(--size);
+  padding-inline: var(--btn-p);
+  /* Typography */
+  color: var(--btn-fg);
+  /* Paint plumbing */
+  background-color: var(--btn-bg);
+  border-width: var(--border);
+  border-color: var(--btn-border);
+  box-shadow: var(--btn-shadow);
+  /* Corner radius (join-compatible) */
+  border-start-start-radius: var(--join-ss, var(--radius-field));
+  border-start-end-radius: var(--join-se, var(--radius-field));
+  border-end-start-radius: var(--join-es, var(--radius-field));
+  border-end-end-radius: var(--join-ee, var(--radius-field));
+  /* Outline */
+  outline-color: var(--btn-color, var(--color-on-surface));
+  /* Transition */
+  /* Other */
+  cursor: pointer;
+}
+
+/* Keyboard focus */
+.btn:focus-visible,
+.btn:has(:focus-visible) {
+  isolation: isolate;
+}
+
+/* Checkbox / radio styled as button */
+.btn:is(input[type=checkbox], input[type=radio]) {
+  appearance: none;
+}
+
+.btn:is(input[type=checkbox], input[type=radio])[aria-label]::after {
+  content: attr(aria-label);
+}
+
+/* Checked checkbox/radio: seed the primary color */
+.btn:where(input:checked) {
+  --btn-color: var(--color-primary);
+  --btn-fg: var(--color-on-primary);
+  isolation: isolate;
+}
+
+/* Disabled */
+.btn-disabled,
+.btn:disabled,
+.btn[disabled] {
+  pointer-events: none;
+}
+
+.checkbox {
+  color: var(--color-on-surface);
+  border-radius: var(--radius-selector);
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  cursor: pointer;
+  appearance: none;
+  vertical-align: middle;
+  width: var(--size);
+  height: var(--size);
+  box-shadow: var(--shadow-light, );
+}
+
+.checkbox::before {
+  --checkbox-mark: "";
+  content: var(--checkbox-mark);
+  display: block;
+  clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 70% 80%, 70% 100%);
+}
+
+.checkbox:checked,
+.checkbox[aria-checked=true] {
+  background-color: var(--input-color, rgba(0, 0, 0, 0));
+}
+
+.checkbox:checked::before,
+.checkbox[aria-checked=true]::before {
+  clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 0%, 70% 0%, 70% 100%);
+}
+
+@media (forced-colors: active) {
+  .checkbox:checked::before,
+  .checkbox[aria-checked=true]::before {
+    --checkbox-mark: "✔︎";
+    clip-path: none;
+  }
+}
+@media print {
+  .checkbox:checked::before,
+  .checkbox[aria-checked=true]::before {
+    --checkbox-mark: "✔︎";
+    clip-path: none;
+  }
+}
+.checkbox:indeterminate::before {
+  clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 80% 80%, 80% 100%);
+}
+
+.checkbox:disabled {
+  cursor: not-allowed;
+}
+
+.chip {
+  --chip-bg: var(--chip-color, var(--color-surface-1));
+  --chip-fg: var(--color-on-surface);
+  border-radius: var(--radius-selector);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  color: var(--chip-fg);
+  background-color: var(--chip-bg);
+  height: var(--size);
+  box-shadow: var(--shadow-light, );
+}
+
+.dock {
+  background-color: var(--color-surface-3);
+  position: fixed;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.dock > * {
+  border-radius: var(--radius-box);
+  position: relative;
+  /* mb-2 */
+  display: flex;
+  /* max-w-32 */
+  flex-shrink: 1;
+  flex-basis: 100%;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dock > *[aria-disabled=true],
+.dock > *[disabled] {
+  pointer-events: none;
+}
+
+.dock > *[aria-disabled=true]:hover,
+.dock > *[disabled]:hover {
+  pointer-events: none;
+}
+
+.dock > *::after {
+  content: "";
+  position: absolute;
+}
+
+/* Active state */
+.fieldset {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: max-content;
+}
+
+.fieldset-legend {
+  color: var(--color-on-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Deprecated — replaced by .label, kept to avoid breaking changes */
+.fieldset-label {
+  display: flex;
+  align-items: center;
+}
+
+.fieldset-label:has(input) {
+  cursor: pointer;
+}
+
+.floating-label {
+  position: relative;
+  display: block;
+}
+
+.floating-label input {
+  display: block;
+}
+
+.floating-label > span {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.floating-label:focus-within > span,
+.floating-label:not(:has(input:placeholder-shown, textarea:placeholder-shown)) > span {
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.file-input {
+  --btn-bg: var(--btn-color, var(--color-surface-2));
+  --btn-fg: var(--color-on-surface);
+  cursor: pointer;
+  background-color: var(--color-surface-1);
+  display: inline-flex;
+  appearance: none;
+  align-items: center;
+  vertical-align: middle;
+  user-select: none;
+  height: var(--size);
+  border-start-start-radius: var(--join-ss, var(--radius-field));
+  border-start-end-radius: var(--join-se, var(--radius-field));
+  border-end-start-radius: var(--join-es, var(--radius-field));
+  border-end-end-radius: var(--join-ee, var(--radius-field));
+  border-color: var(--input-color);
+  box-shadow: var(--shadow-light, );
+}
+
+.file-input::file-selector-button {
+  cursor: pointer;
+  user-select: none;
+  color: var(--btn-fg);
+  border-width: var(--border);
+  border-color: var(--btn-border);
+  background-color: var(--btn-bg);
+}
+
+.file-input:focus {
+  --input-color: var(--color-on-surface);
+  isolation: isolate;
+}
+
+.file-input:has(> input[disabled]),
+.file-input:is(:disabled, [disabled]) {
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
+  cursor: not-allowed;
+}
+
+.file-input:has(> input[disabled])::file-selector-button,
+.file-input:is(:disabled, [disabled])::file-selector-button {
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
+  cursor: not-allowed;
+}
+
+.input {
+  cursor: text;
+  display: inline-flex;
+  flex-shrink: 1;
+  appearance: none;
+  align-items: center;
+  vertical-align: middle;
+  white-space: nowrap;
+  position: relative;
+  background-color: var(--color-surface-1);
+  height: var(--size);
+  touch-action: manipulation;
+  border-start-start-radius: var(--join-ss, var(--radius-field));
+  border-start-end-radius: var(--join-se, var(--radius-field));
+  border-end-start-radius: var(--join-es, var(--radius-field));
+  border-end-end-radius: var(--join-ee, var(--radius-field));
+  border-color: var(--input-color);
+  box-shadow: var(--shadow-light, );
+}
+
+.input:where(input) {
+  display: inline-flex;
+}
+
+.input :where(input) {
+  display: inline-flex;
+  appearance: none;
+}
+
+.input :where(input[type=url]),
+.input :where(input[type=email]) {
+  direction: ltr;
+}
+
+.input :where(input[type=date]) {
+  display: inline-flex;
+}
+
+.input:focus,
+.input:focus-within {
+  --input-color: var(--color-on-surface);
+  isolation: isolate;
+}
+
+/* Increase font size on iOS to prevent auto-zoom on focus */
+.input:has(> input[disabled]),
+.input:is(:disabled, [disabled]),
+fieldset:disabled .input {
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
+  cursor: not-allowed;
+}
+
+.input:has(> input[disabled]) > input[disabled] {
+  cursor: not-allowed;
+}
+
+.input::-webkit-date-and-time-value {
+  text-align: inherit;
+}
+
+.input::-webkit-calendar-picker-indicator {
+  position: absolute;
+}
+
+.input:has(> input[type=date]) :where(input[type=date]) {
+  display: inline-flex;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input:has(> input[type=date]) input[type=date]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  cursor: pointer;
+}
+
+.join {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.join :where(.join-item) {
+  border-start-start-radius: var(--join-ss, 0);
+  border-start-end-radius: var(--join-se, 0);
+  border-end-start-radius: var(--join-es, 0);
+  border-end-end-radius: var(--join-ee, 0);
+}
+
+.join :where(.join-item) * {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+/* First direct child */
+.join > .join-item:where(:first-child) {
+  --join-ss: var(--radius-field);
+  --join-es: var(--radius-field);
+}
+
+.join :first-child:not(:last-child) :where(.join-item) {
+  --join-ss: var(--radius-field);
+  --join-es: var(--radius-field);
+}
+
+/* Last direct child */
+.join > .join-item:where(:last-child) {
+  --join-se: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join :last-child:not(:first-child) :where(.join-item) {
+  --join-se: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+/* Only child */
+.join > .join-item:where(:only-child) {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join :only-child :where(.join-item) {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+/* Focus */
+.join > :where(:focus, :has(:focus)) {
+  z-index: 1;
+}
+
+@media (hover: hover) {
+  .join > :where(.btn:hover, :has(.btn:hover)) {
+    isolation: isolate;
+  }
+}
+/* join-item height fix.
+	   Buttons use a compact em-based height (--size) while field elements
+	   (input, select) use a taller one. Override height → auto so the button
+	   can stretch to match its siblings via align-items: stretch on .join.
+	   min-height keeps it from collapsing below its natural size. */
+/* Border merging */
+/* ── Was one identical file per family until 2026-09-22 ──────────────
+   Seven copies, 125 rules, byte for byte the same. Nothing below is a
+   family's decision: it says which corner of which child is square and
+   how adjacent borders merge. ADR 0008 keeps values out of base, and
+   these are not values — no family would ever write a different one.
+   ------------------------------------------------------------------ */
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.join {
+  --join-ss: 0;
+  --join-se: 0;
+  --join-es: 0;
+  --join-ee: 0;
+}
+
+.join > .join-item:where(:first-child) {
+  --join-se: 0;
+  --join-ee: 0;
+}
+
+.join :first-child:not(:last-child) :where(.join-item) {
+  --join-se: 0;
+  --join-ee: 0;
+}
+
+.join > .join-item:where(:last-child) {
+  --join-ss: 0;
+  --join-es: 0;
+}
+
+.join :last-child:not(:first-child) :where(.join-item) {
+  --join-ss: 0;
+  --join-es: 0;
+}
+
+.join > .join-item:where(.btn) {
+  height: unset;
+  min-height: var(--size, calc(2.5em * var(--scale)));
+}
+
+.join-item:where(*:not(:first-child, :disabled, [disabled], .btn-disabled)) {
+  margin-inline-start: calc(var(--border, 1px) * -1);
+  margin-block-start: 0;
+}
+
+.join-item:where(*:is(:disabled, [disabled], .btn-disabled)) {
+  border-width: var(--border, 1px) 0 var(--border, 1px) var(--border, 1px);
+}
+
+/* variant vertical */
+.join-vertical {
+  flex-direction: column;
+}
+
+.join-vertical > .join-item:first-child {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: 0;
+}
+
+.join-vertical :first-child:not(:last-child) .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: 0;
+}
+
+.join-vertical > .join-item:last-child {
+  --join-ss: 0;
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical :last-child:not(:first-child) .join-item {
+  --join-ss: 0;
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical > .join-item:only-child {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical :only-child .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-vertical .join-item:where(*:not(:first-child)) {
+  margin-inline-start: 0;
+  margin-block-start: calc(var(--border, 1px) * -1);
+}
+
+/* variant horizontal */
+.join-horizontal {
+  flex-direction: row;
+}
+
+.join-horizontal > .join-item:first-child {
+  --join-ss: var(--radius-field);
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: 0;
+}
+
+.join-horizontal :first-child:not(:last-child) .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: 0;
+  --join-es: var(--radius-field);
+  --join-ee: 0;
+}
+
+.join-horizontal > .join-item:last-child {
+  --join-ss: 0;
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal :last-child:not(:first-child) .join-item {
+  --join-ss: 0;
+  --join-se: var(--radius-field);
+  --join-es: 0;
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal > .join-item:only-child {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal :only-child .join-item {
+  --join-ss: var(--radius-field);
+  --join-se: var(--radius-field);
+  --join-es: var(--radius-field);
+  --join-ee: var(--radius-field);
+}
+
+.join-horizontal .join-item:where(*:not(:first-child)) {
+  margin-inline-start: calc(var(--border, 1px) * -1);
+  margin-block-start: 0;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.label:has(input) {
+  cursor: pointer;
+}
+
+/* Label inside .input or .select (prefix/suffix icon or text) */
+.input > .label,
+.select > .label {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.link {
+  cursor: pointer;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface-1);
+  border-start-start-radius: var(--join-ss, var(--radius-box));
+  border-start-end-radius: var(--join-se, var(--radius-box));
+  border-end-start-radius: var(--join-es, var(--radius-box));
+  border-end-end-radius: var(--join-ee, var(--radius-box));
+}
+
+.list-row {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: var(--list-grid-cols);
+  word-break: break-word;
+}
+
+/* Separator line between rows (all except last) */
+.list > .list-row:not(:last-child)::after,
+.list > :not(:last-child) .list-row::after {
+  content: "";
+  position: absolute;
+}
+
+/* Grid column layout — grows at the Nth .list-col-grow child */
+.list-row > * {
+  grid-row-start: 1;
+}
+
+/* Wrapping column — placed on row 2 (spans full width below the grid) */
+.list-col-wrap {
+  grid-row-start: 2;
+  grid-column: 1/-1;
+}
+
+.loading {
+  pointer-events: none;
+  display: inline-block;
+  vertical-align: middle;
+  mask-repeat: no-repeat;
+  mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='black' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform-origin='center'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='2s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dasharray' values='0,150;42,150;42,150' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dashoffset' values='0;-16;-59' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--menu-gap);
+  padding: var(--menu-p);
+  background-color: var(--menu-bg);
+  color: var(--menu-fg);
+  border: var(--menu-border-width) solid var(--menu-border);
+  border-radius: var(--radius-box);
+  box-shadow: var(--menu-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  list-style: none;
+}
+
+.menu-horizontal {
+  flex-direction: row;
+  align-items: center;
+}
+
+/* An <li> is layout only: it never paints, so an item can be a link, a
+   button or a span without the row moving. */
+.menu li {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+/* The item. Three columns — leading icon, label, trailing badge — so an
+   icon and a counter line up down the whole menu. */
+.menu .menu-item,
+.menu li > :is(a, button, span):not(.menu-title) {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content auto max-content;
+  align-items: center;
+  gap: var(--menu-item-gap);
+  width: 100%;
+  padding-block: var(--menu-item-py);
+  padding-inline: var(--menu-item-px);
+  border-radius: var(--menu-item-radius);
+  background-color: var(--menu-item-bg);
+  color: var(--menu-item-fg);
+  text-align: start;
+  text-decoration: none;
+  user-select: none;
+  transition: var(--menu-item-transition);
+}
+
+.menu li > :is(a, button) {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .menu li > :is(a, button):not(.menu-active, .menu-disabled, :disabled, [disabled]):hover {
+    background-color: var(--menu-hover-bg);
+    color: var(--menu-hover-fg);
+  }
+}
+.menu li > :is(a, button):focus-visible {
+  outline: var(--menu-focus-outline);
+  outline-offset: var(--menu-focus-offset);
+}
+
+/* The item selector is deliberately structural, which makes it specific;
+   a state has to be written in the same shape or it loses the cascade. */
+.menu .menu-active,
+.menu li > :is(a, button, span).menu-active {
+  background-color: var(--menu-active-bg);
+  color: var(--menu-active-fg);
+}
+
+.menu .menu-disabled,
+.menu li > :is(a, button, span):is(.menu-disabled, :disabled, [disabled]) {
+  pointer-events: none;
+  background-color: var(--menu-disabled-bg);
+  color: var(--menu-disabled-fg);
+}
+
+/* A section title. Not interactive, so it is not an item. */
+.menu .menu-title {
+  padding-block: var(--menu-title-py);
+  padding-inline: var(--menu-title-px);
+  color: var(--menu-title-fg);
+  font-size: var(--menu-title-size);
+  font-weight: var(--menu-title-weight);
+  text-transform: var(--menu-title-transform);
+  letter-spacing: var(--menu-title-tracking);
+}
+
+/* An empty <li> is a separator — no class to remember, and it cannot be
+   mistaken for an item because there is nothing to click. */
+.menu li:empty {
+  height: var(--menu-divider-size);
+  margin-block: var(--menu-divider-gap);
+  margin-inline: var(--menu-divider-inset);
+  background-color: var(--menu-divider);
+}
+
+/* Sub-menu. The row count is animated on the <li>, so the <ul> needs no
+   wrapper and no measured height: auto → 0fr collapses it. :has() lets the
+   state class stay on the sub-menu it describes. */
+.menu li:has(> .menu-sub) {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  transition: grid-template-rows var(--menu-sub-transition);
+}
+
+.menu li:has(> .menu-sub-closed) {
+  grid-template-rows: auto 0fr;
+}
+
+.menu .menu-sub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--menu-gap);
+  min-height: 0;
+  overflow: hidden;
+  margin-inline-start: var(--menu-sub-indent);
+  list-style: none;
+}
+
+/* The toggle carries whatever the author puts in it; the family draws the
+   marker and turns it when the sub-menu is open. */
+.menu .menu-toggle::after {
+  content: "";
+  justify-self: flex-end;
+}
+
+.navbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--navbar-gap);
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--navbar-h);
+  padding-block: var(--navbar-py);
+  padding-inline: var(--navbar-px);
+  background-color: var(--navbar-bg);
+  color: var(--navbar-fg);
+  border-block-end: var(--navbar-border-width) solid var(--navbar-border);
+  box-shadow: var(--navbar-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+/* The zones. start and end absorb the slack so that center — which
+   keeps its intrinsic width — stays put when either side grows. */
+.navbar-start,
+.navbar-center,
+.navbar-end {
+  display: flex;
+  align-items: center;
+  gap: var(--navbar-gap);
+  min-width: 0;
+}
+
+.navbar-start {
+  flex: 1 1 0;
+  justify-content: flex-start;
+}
+
+.navbar-center {
+  flex: 0 0 auto;
+  justify-content: center;
+}
+
+.navbar-end {
+  flex: 1 1 0;
+  justify-content: flex-end;
+}
+
+/* A bar that follows the page. Absolute, because it answers to the
+   viewport rather than to its content (see CLAUDE.md). */
+.navbar-sticky {
+  position: sticky;
+  top: var(--navbar-sticky-top, 0);
+  z-index: 1;
+}
+
+.progress {
+  border-radius: var(--radius-box);
+  color: var(--color-on-surface);
+  position: relative;
+  appearance: none;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .progress:indeterminate {
+    animation: progress 5s ease-in-out infinite;
+  }
+}
+@supports (-moz-appearance: none) {
+  @media (prefers-reduced-motion: no-preference) {
+    .progress:indeterminate::-moz-progress-bar {
+      animation: progress 5s ease-in-out infinite;
+    }
+  }
+  .progress::-moz-progress-bar {
+    border-radius: var(--radius-box);
+  }
+}
+@supports (-webkit-appearance: none) {
+  .progress::-webkit-progress-bar {
+    border-radius: var(--radius-box);
+  }
+  .progress::-webkit-progress-value {
+    border-radius: var(--radius-box);
+  }
+}
+.radial-progress {
+  position: relative;
+  display: inline-grid;
+  height: var(--size);
+  width: var(--size);
+  place-content: center;
+  vertical-align: middle;
+  box-sizing: content-box;
+}
+
+.radial-progress::before {
+  content: "";
+  position: absolute;
+  -webkit-mask: radial-gradient(farthest-side, rgba(0, 0, 0, 0) calc(100% - var(--thickness)), #000 calc(100% + 0.5px - var(--thickness)));
+  mask: radial-gradient(farthest-side, rgba(0, 0, 0, 0) calc(100% - var(--thickness)), #000 calc(100% + 0.5px - var(--thickness)));
+}
+
+.radial-progress::after {
+  content: "";
+  position: absolute;
+  transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
+}
+
+.radio {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  cursor: pointer;
+  appearance: none;
+  vertical-align: middle;
+  width: var(--size);
+  height: var(--size);
+  color: var(--input-color, currentColor);
+}
+
+.radio::before {
+  --radio-mark: "";
+  content: var(--radio-mark);
+  display: block;
+  /* rounded-full */
+}
+
+.radio:checked,
+.radio[aria-checked=true] {
+  background-color: var(--color-surface-1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .radio:checked,
+  .radio[aria-checked=true] {
+    animation: radio 0.2s ease-out;
+  }
+}
+.radio:disabled {
+  cursor: not-allowed;
+}
+
+.range {
+  --range-thumb: var(--color-surface-1);
+  /* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  overflow: hidden;
+  vertical-align: middle;
+  height: var(--range-thumb-size);
+}
+
+/* Track — WebKit */
+.range::-webkit-slider-runnable-track {
+  background-color: var(--range-bg);
+  border-radius: var(--radius-selector);
+}
+
+/* Thumb — WebKit */
+.range::-webkit-slider-thumb {
+  position: relative;
+  box-sizing: border-box;
+  background-color: var(--range-thumb);
+  height: var(--range-thumb-size);
+  width: var(--range-thumb-size);
+  appearance: none;
+  -webkit-appearance: none;
+  color: var(--range-progress);
+  transform: translateY(-50%);
+}
+
+/* Track — Firefox */
+.range::-moz-range-track {
+  background-color: var(--range-bg);
+  border-radius: var(--radius-selector);
+}
+
+/* Thumb — Firefox */
+.range::-moz-range-thumb {
+  position: relative;
+  box-sizing: border-box;
+  height: var(--range-thumb-size);
+  width: var(--range-thumb-size);
+  color: var(--range-progress);
+}
+
+.range:disabled {
+  cursor: not-allowed;
+}
+
+.select {
+  background-color: var(--color-surface-1);
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 1;
+  appearance: none;
+  align-items: center;
+  vertical-align: middle;
+  height: var(--size);
+  touch-action: manipulation;
+  border-start-start-radius: var(--join-ss, var(--radius-field));
+  border-start-end-radius: var(--join-se, var(--radius-field));
+  border-end-start-radius: var(--join-es, var(--radius-field));
+  border-end-end-radius: var(--join-ee, var(--radius-field));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-color: var(--input-color);
+  box-shadow: var(--shadow-light, );
+}
+
+.select[multiple] {
+  overflow: auto;
+}
+
+/* Native <select> nested inside the .select wrapper */
+.select select {
+  appearance: none;
+  align-items: center;
+}
+
+.select:focus,
+.select:focus-within {
+  --input-color: var(--color-on-surface);
+  isolation: isolate;
+}
+
+.select:has(> select[disabled]),
+.select:is(:disabled, [disabled]),
+fieldset:disabled .select {
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
+  cursor: not-allowed;
+}
+
+.select:has(> select[disabled]) > select[disabled] {
+  cursor: not-allowed;
+}
+
+/* base-select appearance support (modern browsers) */
+@supports (appearance: base-select) {
+  .select,
+  .select select {
+    appearance: base-select;
+  }
+}
+
+.select::picker(select),
+.select select::picker(select) {
+  border-radius: var(--radius-box);
+}
+
+@supports (appearance: base-select) {
+  .select::picker(select),
+  .select select::picker(select) {
+    appearance: base-select;
+  }
+}
+.select::picker-icon,
+.select select::picker-icon {
+  display: none;
+}
+
+.select option,
+.select select option {
+  border-radius: var(--radius-field);
+  white-space: normal;
+}
+
+.select option:not(:disabled):hover,
+.select option:not(:disabled):focus-visible,
+.select select option:not(:disabled):hover,
+.select select option:not(:disabled):focus-visible {
+  cursor: pointer;
+}
+
+.select option:not(:disabled):active,
+.select select option:not(:disabled):active {
+  background-color: var(--color-neutral);
+  color: var(--color-on-neutral);
+}
+
+.skeleton {
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-box);
+  will-change: background-position;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton {
+    animation: skeleton 1.8s ease-in-out infinite;
+  }
+}
+.skeleton-text {
+  -webkit-background-clip: text;
+}
+
+.swatch {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--swatch-size);
+  height: var(--swatch-size);
+  padding: 0;
+  border: var(--swatch-border-width) solid var(--swatch-border);
+  border-radius: var(--swatch-radius);
+  box-shadow: var(--swatch-shadow);
+  color: var(--swatch-on-color);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  line-height: 1;
+  vertical-align: middle;
+  user-select: none;
+  overflow: hidden;
+  /* The colour is a flat layer of its own so the checkerboard below it
+     shows through exactly as much as the colour is transparent. */
+  background-color: transparent;
+  background-image: linear-gradient(var(--swatch-color), var(--swatch-color)), var(--swatch-checks);
+  transition: var(--swatch-transition);
+}
+
+:is(a, button, label).swatch,
+.swatch:is([role=button], [tabindex]) {
+  cursor: pointer;
+}
+
+.swatch:focus-visible {
+  outline: var(--swatch-focus-outline);
+  outline-offset: var(--swatch-focus-offset);
+}
+
+.swatch:is(:disabled, [disabled], .swatch-disabled) {
+  pointer-events: none;
+  opacity: var(--swatch-disabled-opacity);
+}
+
+/* An <input type="color"> can be a swatch too: its own chrome is removed
+   so the element paints from the slots like any other. */
+input[type=color].swatch {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type=color].swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type=color].swatch::-webkit-color-swatch {
+  border: none;
+  border-radius: inherit;
+}
+
+input[type=color].swatch::-moz-color-swatch {
+  border: none;
+  border-radius: inherit;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  height: var(--tabs-height);
+  flex-direction: var(--tabs-direction);
+}
+
+.tabs-item {
+  --tab-bg: var(--color-surface-1);
+  --tab-border-color: var(--color-border);
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+  appearance: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  user-select: none;
+  order: var(--tab-order);
+  height: var(--tab-height);
+  padding-inline: var(--tab-p);
+}
+
+.tabs-item:hover {
+  color: var(--color-on-surface);
+}
+
+.tabs-item:is(input[type=radio])::after {
+  content: attr(aria-label);
+}
+
+.tabs-item:is(label) {
+  position: relative;
+}
+
+.tabs-item:is(label) input {
+  position: absolute;
+  cursor: pointer;
+  appearance: none;
+}
+
+/* Show active tab content */
+.tabs-item:checked + .tabs-item-content,
+.tabs-item:is(label:has(:checked)) + .tabs-item-content,
+.tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]) + .tabs-item-content {
+  display: block;
+}
+
+/* Inactive tab */
+.tabs-item:not(input):empty {
+  flex-grow: 1;
+  cursor: default;
+}
+
+.tabs-item[disabled] {
+  pointer-events: none;
+}
+
+.tabs-item-content {
+  order: 1;
+  display: none;
+  --tabcontent-radius-ss: var(--radius-box);
+  --tabcontent-radius-se: var(--radius-box);
+  --tabcontent-radius-es: var(--radius-box);
+  --tabcontent-radius-ee: var(--radius-box);
+  margin: var(--tabcontent-margin);
+  order: var(--tabcontent-order);
+  border-width: var(--border);
+  border-start-start-radius: var(--tabcontent-radius-ss);
+  border-start-end-radius: var(--tabcontent-radius-se);
+  border-end-start-radius: var(--tabcontent-radius-es);
+  border-end-end-radius: var(--tabcontent-radius-ee);
+}
+
+.tabs-item-disabled {
+  pointer-events: none;
+}
+
+.title {
+  font-size: var(--xxl, var(--default-xxl));
+}
+
+.subtitle-s1 {
+  font-size: var(--xl, var(--default-xl));
+}
+
+.subtitle-s2 {
+  font-size: var(--lg, var(--default-lg));
+}
+
+/* Text — s1 (--md) */
+.text-s1-b1 {
+  font-size: var(--md, var(--default-md));
+}
+
+.text-s1-b2 {
+  font-size: var(--md, var(--default-md));
+}
+
+.text-s1-b3 {
+  font-size: var(--md, var(--default-md));
+}
+
+/* Text — s2 (--base) */
+.text-s2-b1 {
+  font-size: var(--base, var(--default-base));
+}
+
+.text-s2-b2 {
+  font-size: var(--base, var(--default-base));
+}
+
+.text-s2-b3 {
+  font-size: var(--base, var(--default-base));
+}
+
+/* Text — s3 (--sm) */
+.text-s3-b1 {
+  font-size: var(--sm, var(--default-sm));
+}
+
+.text-s3-b2 {
+  font-size: var(--sm, var(--default-sm));
+}
+
+.text-s3-b3 {
+  font-size: var(--sm, var(--default-sm));
+}
+
+/* Text — s4 (--xs) */
+.text-s4-b1 {
+  font-size: var(--xs, var(--default-xs));
+}
+
+.text-s4-b2 {
+  font-size: var(--xs, var(--default-xs));
+}
+
+.text-s4-b3 {
+  font-size: var(--xs, var(--default-xs));
+}
+
+.textarea {
+  background-color: var(--color-surface-1);
+  border-radius: var(--radius-field);
+  flex-shrink: 1;
+  appearance: none;
+  vertical-align: middle;
+  touch-action: manipulation;
+  border-color: var(--input-color);
+  box-shadow: var(--shadow-light, );
+}
+
+.textarea textarea {
+  appearance: none;
+}
+
+.textarea:focus,
+.textarea:focus-within {
+  --input-color: var(--color-on-surface);
+  isolation: isolate;
+}
+
+/* Increase font size on iOS to prevent auto-zoom on focus */
+.textarea:has(> textarea[disabled]),
+.textarea:is(:disabled, [disabled]) {
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
+  cursor: not-allowed;
+}
+
+.textarea:has(> textarea[disabled]) > textarea[disabled] {
+  cursor: not-allowed;
+}
+
+.toggle {
+  /* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
+  color: var(--input-color);
+  position: relative;
+  display: inline-grid;
+  flex-shrink: 0;
+  cursor: pointer;
+  appearance: none;
+  place-content: center;
+  vertical-align: middle;
+  user-select: none;
+  grid-template-columns: 0fr 1fr 1fr;
+  padding: var(--toggle-p);
+  box-shadow: var(--shadow-light, );
+  height: var(--size);
+}
+
+/* Optional icons inside the toggle */
+.toggle > * {
+  z-index: 1;
+  grid-column: span 1;
+  grid-column-start: 2;
+  grid-row-start: 1;
+  cursor: pointer;
+  appearance: none;
+}
+
+.toggle > *:nth-child(2) {
+  color: var(--color-surface-1);
+}
+
+.toggle > *:nth-child(3) {
+  color: var(--color-surface-1);
+}
+
+/* Toggle thumb */
+.toggle::before {
+  --toggle-mark: "";
+  content: var(--toggle-mark);
+  border-radius: var(--radius-selector);
+  position: relative;
+  grid-column-start: 2;
+  grid-row-start: 1;
+}
+
+.toggle:checked,
+.toggle[aria-checked=true],
+.toggle:has(> input:checked) {
+  grid-template-columns: 1fr 1fr 0fr;
+  background-color: var(--color-surface-1);
+  --input-color: var(--color-on-surface);
+}
+
+.toggle:indeterminate {
+  grid-template-columns: 0.5fr 1fr 0.5fr;
+}
+
+.toggle:disabled {
+  cursor: not-allowed;
+}
+
+/* Valid */
+.validator:user-valid,
+.validator:has(:user-valid) {
+  --input-color: var(--color-success);
+}
+
+.validator:user-valid:focus,
+.validator:has(:user-valid):focus,
+.validator:user-valid:focus-within,
+.validator:has(:user-valid):focus-within,
+.validator:user-valid:checked,
+.validator:has(:user-valid):checked,
+.validator:user-valid[aria-checked=true],
+.validator:has(:user-valid)[aria-checked=true] {
+  --input-color: var(--color-success);
+}
+
+/* Invalid */
+.validator:user-invalid,
+.validator:has(:user-invalid),
+.validator[aria-invalid]:not([aria-invalid=false]),
+.validator:has([aria-invalid]:not([aria-invalid=false])) {
+  --input-color: var(--color-error);
+}
+
+.validator:user-invalid:focus,
+.validator:has(:user-invalid):focus,
+.validator[aria-invalid]:not([aria-invalid=false]):focus,
+.validator:has([aria-invalid]:not([aria-invalid=false])):focus,
+.validator:user-invalid:focus-within,
+.validator:has(:user-invalid):focus-within,
+.validator[aria-invalid]:not([aria-invalid=false]):focus-within,
+.validator:has([aria-invalid]:not([aria-invalid=false])):focus-within {
+  --input-color: var(--color-error);
+}
+
+/* Show error hint */
+.validator:user-invalid ~ .validator-hint,
+.validator:has(:user-invalid) ~ .validator-hint,
+.validator[aria-invalid]:not([aria-invalid=false]) ~ .validator-hint,
+.validator:has([aria-invalid]:not([aria-invalid=false])) ~ .validator-hint {
+  color: var(--color-error);
+  visibility: visible;
+  display: revert-layer;
+}
+
+.validator-hint {
+  visibility: hidden;
+  font-size: var(--xs, var(--default-xs));
+}
+
+/* Family-wide: recipes and rules that belong to no single component. */
+:where(*) {
+  /* The recipe is in px, so a browser scales it down to fit a small box
+     (a button ends up near-symmetric) but leaves a tall one — a textarea,
+     a list — with the full 240px drift, which reads as a different family
+     rather than the same pen. So the amplitude is not one number: each
+     component points --cw at the knob for its kind, and a box asks for
+     less drift than a button does. */
+  --cw: var(--cosmos-wobble-field, 1);
+  /* PaperCSS ships SIX corner recipes and rotates them across siblings
+     (.border-1 … .border-6 via .child-borders nth-child(6n+N)) — that
+     rotation is what stops two neighbours trembling alike. Values are
+     its own, in px: a pen wobble is the same width on a big box and a
+     small one, so it answers to the page, not to the content. Wobble
+     interpolates from a plain 15px radius (0) to the full recipe (1). */
+  --c1: calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 240px)
+        calc(15px + var(--cw) * 210px) calc(15px + var(--cw) * 0px)
+      / calc(15px + var(--cw) * 240px) calc(15px + var(--cw) * 0px)
+        calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 210px);
+  --c2: calc(15px + var(--cw) * 170px) calc(15px + var(--cw) * 10px)
+        calc(15px + var(--cw) * 5px) calc(15px + var(--cw) * 190px)
+      / calc(15px + var(--cw) * 10px) calc(15px + var(--cw) * 190px)
+        calc(15px + var(--cw) * 110px) calc(15px + var(--cw) * 10px);
+  --c3: calc(15px + var(--cw) * 210px) calc(15px + var(--cw) * 0px)
+        calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 240px)
+      / calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 240px)
+        calc(15px + var(--cw) * 210px) calc(15px + var(--cw) * 0px);
+  --c4: calc(15px + var(--cw) * 10px) calc(15px + var(--cw) * 140px)
+        calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 210px)
+      / calc(15px + var(--cw) * 100px) calc(15px + var(--cw) * 10px)
+        calc(15px + var(--cw) * 135px) calc(15px + var(--cw) * 10px);
+  --c5: calc(15px + var(--cw) * 5px) calc(15px + var(--cw) * 0px)
+        calc(15px + var(--cw) * 235px) calc(15px + var(--cw) * 10px)
+      / calc(15px + var(--cw) * 100px) calc(15px + var(--cw) * 90px)
+        calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 65px);
+  --c6: calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 5px)
+        calc(15px + var(--cw) * 13px) calc(15px + var(--cw) * 85px)
+      / calc(15px + var(--cw) * 210px) calc(15px + var(--cw) * 190px)
+        calc(15px + var(--cw) * 110px) calc(15px + var(--cw) * 15px);
+  --cosmos-corners: var(--c1);
+}
+
+/* What cosmos decides, one file per component. */
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.badge {
+  width: max-content;
+}
+
+/* position variants */
+.badge-start {
+  --badge-s: 0;
+  --badge-e: auto;
+  --badge-x: -50%;
+}
+
+[dir=rtl] .badge-start {
+  --badge-s: auto;
+  --badge-e: 0;
+  --badge-x: 50%;
+}
+
+.badge-center {
+  --badge-s: 50%;
+  --badge-e: 50%;
+  --badge-x: -50%;
+}
+
+[dir=rtl] .badge-center {
+  --badge-x: 50%;
+}
+
+.badge-end {
+  --badge-s: auto;
+  --badge-e: 0;
+  --badge-x: 50%;
+}
+
+[dir=rtl] .badge-end {
+  --badge-s: 0;
+  --badge-e: auto;
+  --badge-x: -50%;
+}
+
+.badge-top {
+  --badge-t: 0;
+  --badge-b: auto;
+  --badge-y: -50%;
+}
+
+.badge-middle {
+  --badge-t: 50%;
+  --badge-b: 50%;
+  --badge-y: -50%;
+}
+
+.badge-bottom {
+  --badge-t: auto;
+  --badge-b: 0;
+  --badge-y: 50%;
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.breadcrumbs {
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  max-width: 100%;
+  padding-block: 0.5em;
+}
+
+.breadcrumbs > menu,
+.breadcrumbs > ul,
+.breadcrumbs > ol {
+  min-height: min-content;
+}
+
+.breadcrumbs > menu > li > *,
+.breadcrumbs > ul > li > *,
+.breadcrumbs > ol > li > * {
+  gap: 0.5em;
+}
+
+.breadcrumbs > menu > li > *:hover,
+.breadcrumbs > ul > li > *:hover,
+.breadcrumbs > ol > li > *:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbs > menu > li > *:focus,
+.breadcrumbs > ul > li > *:focus,
+.breadcrumbs > ol > li > *:focus {
+  outline: none;
+}
+
+.breadcrumbs > menu > li > *:focus-visible,
+.breadcrumbs > ul > li > *:focus-visible,
+.breadcrumbs > ol > li > *:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.breadcrumbs > menu > li + *::before,
+.breadcrumbs > ul > li + *::before,
+.breadcrumbs > ol > li + *::before {
+  margin-inline-end: 0.75em;
+  margin-inline-start: 0.5em;
+  height: 0.375em;
+  width: 0.375em;
+  opacity: 0.4;
+  rotate: 45deg;
+  border-top: 1px solid;
+  border-right: 1px solid;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+[dir=rtl] .breadcrumbs > menu > li + *::before,
+[dir=rtl] .breadcrumbs > ul > li + *::before,
+[dir=rtl] .breadcrumbs > ol > li + *::before {
+  rotate: -135deg;
+}
+
+/* size variants */
+.breadcrumbs-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.breadcrumbs-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.breadcrumbs-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.breadcrumbs-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.breadcrumbs-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+:where(.btn) {
+  width: unset;
+}
+
+.btn {
+  --size: calc(2.5em * var(--scale));
+  --btn-p: calc(1em * var(--scale));
+  --btn-border: transparent;
+  gap: calc(0.375em * var(--scale));
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  font-weight: 600;
+  border-style: solid;
+  outline-offset: 2px;
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  transition-duration: 0.2s;
+}
+
+.btn svg {
+  height: 1em;
+}
+
+.btn:focus-visible,
+.btn:has(:focus-visible) {
+  outline-width: 2px;
+  outline-style: solid;
+}
+
+.btn-disabled,
+.btn:disabled,
+.btn[disabled] {
+  --btn-border: #0000;
+  --btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+}
+
+.btn-disabled:not(.btn-link, .btn-ghost),
+.btn:disabled:not(.btn-link, .btn-ghost),
+.btn[disabled]:not(.btn-link, .btn-ghost) {
+  background-color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
+  box-shadow: none;
+}
+
+/* color variants */
+.btn-primary {
+  --btn-color: var(--color-primary);
+  --btn-fg: var(--color-on-primary);
+}
+
+.btn-secondary {
+  --btn-color: var(--color-secondary);
+  --btn-fg: var(--color-on-secondary);
+}
+
+.btn-accent {
+  --btn-color: var(--color-accent);
+  --btn-fg: var(--color-on-accent);
+}
+
+.btn-neutral {
+  --btn-color: var(--color-neutral);
+  --btn-fg: var(--color-on-neutral);
+}
+
+.btn-info {
+  --btn-color: var(--color-info);
+  --btn-fg: var(--color-on-info);
+}
+
+.btn-success {
+  --btn-color: var(--color-success);
+  --btn-fg: var(--color-on-success);
+}
+
+.btn-warning {
+  --btn-color: var(--color-warning);
+  --btn-fg: var(--color-on-warning);
+}
+
+.btn-error {
+  --btn-color: var(--color-error);
+  --btn-fg: var(--color-on-error);
+}
+
+/* variant ghost */
+.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked) {
+  --btn-shadow: ;
+  --btn-bg: #0000;
+  --btn-border: #0000;
+}
+
+.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked):not(:disabled, [disabled], .btn-disabled) {
+  outline-color: currentColor;
+  --btn-fg: var(--btn-color, currentColor);
+}
+
+/* Ghost on touch screens */
+@media (hover: none) {
+  .btn-ghost:not(.btn-active, :active, :focus-visible, input:checked):hover {
+    outline-color: currentColor;
+    --btn-shadow: ;
+    --btn-bg: #0000;
+    --btn-fg: var(--btn-color, currentColor);
+    --btn-border: #0000;
+  }
+}
+/* variant link */
+.btn-link {
+  text-decoration: underline;
+  outline-color: currentColor;
+  --btn-border: #0000;
+  --btn-bg: #0000;
+  --btn-shadow: ;
+}
+
+.btn-link:not(.btn-disabled, .btn:disabled, .btn[disabled]) {
+  --btn-fg: var(--btn-color, var(--color-primary));
+}
+
+.btn-link:is(.btn-active, :hover, :active:focus, :focus-visible) {
+  --btn-border: #0000;
+  --btn-bg: #0000;
+}
+
+/* variant outline */
+.btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
+  --btn-shadow: ;
+  --btn-bg: #0000;
+  --btn-fg: var(--btn-color, var(--color-on-surface));
+  --btn-border: var(--btn-color, var(--color-on-surface));
+}
+
+@media (hover: none) {
+  .btn-outline:not(.btn-active, :active, :focus-visible, input:checked):hover {
+    --btn-shadow: ;
+    --btn-bg: #0000;
+    --btn-fg: var(--btn-color, var(--color-on-surface));
+    --btn-border: var(--btn-color, var(--color-on-surface));
+  }
+}
+/* variant dash */
+.btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
+  --btn-shadow: ;
+  --btn-bg: #0000;
+  --btn-fg: var(--btn-color, var(--color-on-surface));
+  --btn-border: var(--btn-color, var(--color-on-surface));
+}
+
+.btn-dash {
+  border-style: dashed;
+}
+
+@media (hover: none) {
+  .btn-dash:not(.btn-active, :active, :focus-visible, input:checked):hover {
+    --btn-shadow: ;
+    --btn-bg: #0000;
+    --btn-fg: var(--btn-color, var(--color-on-surface));
+    --btn-border: var(--btn-color, var(--color-on-surface));
+  }
+}
+/* variant soft */
+.btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
+  --btn-shadow: ;
+  --btn-fg: var(--btn-color, var(--color-on-surface));
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+}
+
+@media (hover: none) {
+  .btn-soft:not(.btn-active, :active, :focus-visible, input:checked):hover {
+    --btn-shadow: ;
+    --btn-fg: var(--btn-color, var(--color-on-surface));
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+    --btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+  }
+}
+/* size variants */
+.btn-xxs {
+  --fontsize: var(--xxs, var(--default-xxs));
+}
+
+.btn-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.btn-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.btn-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.btn-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.btn-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.btn-xxl {
+  --fontsize: var(--xxl, var(--default-xxl));
+}
+
+.btn-xxxl {
+  --fontsize: var(--xxxl, var(--default-xxxl));
+}
+
+/* shape variants */
+.btn-square {
+  padding-inline: 0;
+  width: var(--size);
+  height: var(--size);
+}
+
+.btn-circle {
+  padding-inline: 0;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 9999px;
+}
+
+.btn-wide {
+  width: 100%;
+  max-width: 16rem;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ripple */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple-wave {
+  position: absolute;
+  left: var(--ripple-x, 50%);
+  top: var(--ripple-y, 50%);
+  width: var(--ripple-size, 100%);
+  height: var(--ripple-size, 100%);
+  margin-left: calc(var(--ripple-size, 100%) / -2);
+  margin-top: calc(var(--ripple-size, 100%) / -2);
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.3;
+  transform: scale(0);
+  pointer-events: none;
+  animation: btn-ripple 0.55s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+}
+
+@keyframes btn-ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-ripple-wave {
+    display: none;
+  }
+}
+.btn {
+  border: var(--border) solid var(--color-border);
+  border-radius: var(--c1);
+  rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+.btn {
+  --btn-bg: var(--btn-color, var(--color-surface-1));
+  --btn-fg: var(--color-on-surface);
+  --btn-border: var(--color-border);
+  --btn-shadow: none;
+  transition: rotate 0.1s ease-out, background-color 0.1s;
+}
+
+.btn:is(.btn-primary, .btn-secondary, .btn-accent, .btn-neutral, .btn-info, .btn-success, .btn-warning, .btn-error) {
+  --btn-fg: var(--color-on-primary);
+}
+
+@media (hover: hover) {
+  .btn:not(:disabled, [disabled], .btn-disabled):hover {
+    rotate: 0deg;
+  }
+}
+.btn:active:not(.btn-active) {
+  rotate: calc(var(--cosmos-tilt, 0.4) * 1deg);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.checkbox {
+  --size: calc(1.5em * var(--scale));
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  border: var(--border) solid var(--input-color, color-mix(in oklab, var(--color-on-surface) 20%, rgba(0, 0, 0, 0)));
+  padding: calc(0.15em * var(--scale));
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.checkbox::before {
+  width: 100%;
+  height: 100%;
+  rotate: 45deg;
+  background-color: currentColor;
+  opacity: 0;
+  transition: clip-path 0.3s, opacity 0.1s, rotate 0.3s, translate 0.3s;
+  transition-delay: 0.1s;
+  box-shadow: 0px 3px 0 0px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset;
+  font-size: 1rem;
+  line-height: 0.75;
+}
+
+.checkbox:focus-visible {
+  outline: 2px solid var(--input-color, currentColor);
+  outline-offset: 2px;
+}
+
+.checkbox:checked::before,
+.checkbox[aria-checked=true]::before {
+  opacity: 1;
+}
+
+@media (forced-colors: active) {
+  .checkbox:checked::before,
+  .checkbox[aria-checked=true]::before {
+    rotate: 0deg;
+    background-color: transparent;
+  }
+}
+@media print {
+  .checkbox:checked::before,
+  .checkbox[aria-checked=true]::before {
+    rotate: 0deg;
+    background-color: transparent;
+  }
+}
+.checkbox:indeterminate {
+  background-color: var(--input-color, color-mix(in oklab, var(--color-on-surface) 20%, rgba(0, 0, 0, 0)));
+}
+
+.checkbox:indeterminate::before {
+  rotate: 0deg;
+  opacity: 1;
+  translate: 0 -35%;
+}
+
+.checkbox:disabled {
+  opacity: 0.2;
+}
+
+/* variant outline */
+.checkbox-outline:checked,
+.checkbox-outline[aria-checked=true] {
+  background-color: rgba(0, 0, 0, 0);
+  color: var(--input-color, var(--color-on-surface));
+  box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 0 rgba(0, 0, 0, 0) inset, var(--shadow-light, );
+}
+
+/* variant square */
+.checkbox-square {
+  border-radius: 0;
+}
+
+/* color variants */
+.checkbox-primary {
+  color: var(--color-on-primary);
+  --input-color: var(--color-primary);
+}
+
+.checkbox-secondary {
+  color: var(--color-on-secondary);
+  --input-color: var(--color-secondary);
+}
+
+.checkbox-accent {
+  color: var(--color-on-accent);
+  --input-color: var(--color-accent);
+}
+
+.checkbox-neutral {
+  color: var(--color-on-neutral);
+  --input-color: var(--color-neutral);
+}
+
+.checkbox-info {
+  color: var(--color-on-info);
+  --input-color: var(--color-info);
+}
+
+.checkbox-success {
+  color: var(--color-on-success);
+  --input-color: var(--color-success);
+}
+
+.checkbox-warning {
+  color: var(--color-on-warning);
+  --input-color: var(--color-warning);
+}
+
+.checkbox-error {
+  color: var(--color-on-error);
+  --input-color: var(--color-error);
+}
+
+/* size variants */
+.checkbox-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.checkbox-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.checkbox-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.checkbox-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.checkbox-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.checkbox {
+  --input-color: var(--color-border);
+  border-width: var(--border);
+}
+
+.checkbox:checked,
+.checkbox[aria-checked=true] {
+  --input-color: var(--color-accent);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.chip {
+  --size: calc(1.6em * var(--scale));
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  gap: calc(0.5em * var(--scale));
+  border: var(--border) solid var(--chip-color, var(--color-surface-2));
+  width: fit-content;
+  padding-inline: calc(var(--size) / 2 - var(--border));
+}
+
+.chip svg {
+  height: 1em;
+}
+
+/* variant outline */
+.chip-outline {
+  color: var(--chip-color);
+  --chip-bg: #0000;
+  background-image: none;
+  border-color: currentColor;
+}
+
+/* variant dash */
+.chip-dash {
+  color: var(--chip-color);
+  --chip-bg: #0000;
+  background-image: none;
+  border-color: currentColor;
+  border-style: dashed;
+}
+
+/* variant soft */
+.chip-soft {
+  color: var(--chip-color, var(--color-on-surface));
+  background-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+  border-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+  background-image: none;
+}
+
+/* variant ghost */
+.chip-ghost {
+  border-color: var(--color-surface-2);
+  background-color: var(--color-surface-2);
+  color: var(--color-on-surface);
+  background-image: none;
+}
+
+/* color variants */
+.chip-primary {
+  --chip-color: var(--color-primary);
+  --chip-fg: var(--color-on-primary);
+}
+
+.chip-secondary {
+  --chip-color: var(--color-secondary);
+  --chip-fg: var(--color-on-secondary);
+}
+
+.chip-accent {
+  --chip-color: var(--color-accent);
+  --chip-fg: var(--color-on-accent);
+}
+
+.chip-neutral {
+  --chip-color: var(--color-neutral);
+  --chip-fg: var(--color-on-neutral);
+}
+
+.chip-info {
+  --chip-color: var(--color-info);
+  --chip-fg: var(--color-on-info);
+}
+
+.chip-success {
+  --chip-color: var(--color-success);
+  --chip-fg: var(--color-on-success);
+}
+
+.chip-warning {
+  --chip-color: var(--color-warning);
+  --chip-fg: var(--color-on-warning);
+}
+
+.chip-error {
+  --chip-color: var(--color-error);
+  --chip-fg: var(--color-on-error);
+}
+
+/* size variants */
+.chip-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.chip-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.chip-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.chip-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.chip-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.chip {
+  border: var(--border) solid var(--color-border);
+  border-radius: var(--c2);
+  rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+.chip {
+  background-color: var(--chip-color, var(--color-surface-1));
+  border-radius: var(--c2);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.dock {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 0.5rem;
+  color: currentColor;
+  border-top: 0.5px solid color-mix(in oklab, var(--color-on-surface) 5%, rgba(0, 0, 0, 0));
+  height: 4rem;
+  height: calc(4rem + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.dock > * {
+  margin-bottom: 0.5rem;
+  height: 100%;
+  max-width: 8rem;
+  gap: 1px;
+  background-color: transparent;
+  transition: opacity 0.2s ease-out;
+}
+
+@media (hover: hover) {
+  .dock > *:hover {
+    opacity: 0.8;
+  }
+}
+.dock > *[aria-disabled=true],
+.dock > *[disabled] {
+  color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
+  opacity: 1;
+}
+
+.dock > *[aria-disabled=true]:hover,
+.dock > *[disabled]:hover {
+  color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
+  opacity: 1;
+}
+
+.dock-label {
+  font-size: 0.6875rem;
+}
+
+.dock > *::after {
+  height: 0.25rem;
+  width: 1.5rem;
+  border-radius: 9999px;
+  background-color: transparent;
+  bottom: 0.2rem;
+  border-top: 3px solid transparent;
+  transition: background-color 0.1s ease-out, color 0.1s ease-out, width 0.1s ease-out;
+}
+
+.dock-active::after {
+  width: 2.5rem;
+  background-color: currentColor;
+  color: currentColor;
+}
+
+/* size variants */
+.dock-xs {
+  height: 3rem;
+  height: calc(3rem + env(safe-area-inset-bottom));
+}
+
+.dock-xs .dock-active::after {
+  bottom: -0.1rem;
+}
+
+.dock-xs .dock-label {
+  font-size: 0.625rem;
+}
+
+.dock-sm {
+  height: 3.5rem;
+  height: calc(3.5rem + env(safe-area-inset-bottom));
+}
+
+.dock-sm .dock-active::after {
+  bottom: -0.1rem;
+}
+
+.dock-sm .dock-label {
+  font-size: 0.625rem;
+}
+
+.dock-md {
+  height: 4rem;
+  height: calc(4rem + env(safe-area-inset-bottom));
+}
+
+.dock-md .dock-label {
+  font-size: 0.6875rem;
+}
+
+.dock-lg {
+  height: 4.5rem;
+  height: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+.dock-lg .dock-active::after {
+  bottom: 0.4rem;
+}
+
+.dock-lg .dock-label {
+  font-size: 0.6875rem;
+}
+
+.dock-xl {
+  height: 5rem;
+  height: calc(5rem + env(safe-area-inset-bottom));
+}
+
+.dock-xl .dock-active::after {
+  bottom: 0.4rem;
+}
+
+.dock-xl .dock-label {
+  font-size: 0.75rem;
+}
+
+.dock {
+  background-color: var(--color-surface-1);
+  border: var(--border) solid var(--color-border);
+  /* A tall box drifts less than a button: same pen, fewer pixels. */
+  --cw: var(--cosmos-wobble-box, 0.2);
+  border-radius: var(--c6);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.fieldset {
+  gap: calc(0.375em * var(--scale));
+  padding-block: calc(0.25em * var(--scale));
+  font-size: 0.75rem;
+}
+
+.fieldset-legend {
+  margin-bottom: calc(-0.25em * var(--scale));
+  gap: calc(0.5em * var(--scale));
+  padding-block: calc(0.5em * var(--scale));
+  font-weight: 600;
+}
+
+.fieldset-label {
+  color: color-mix(in oklch, var(--color-on-surface) 60%, rgba(0, 0, 0, 0));
+  gap: calc(0.375em * var(--scale));
+}
+
+.floating-label input::placeholder,
+.floating-label textarea::placeholder {
+  transition: top 0.1s ease-out, translate 0.1s ease-out, scale 0.1s ease-out, opacity 0.1s ease-out;
+}
+
+.floating-label > span {
+  background-color: var(--color-surface-1);
+  inset-inline-start: calc(0.75em * var(--scale));
+  padding-inline: calc(0.25em * var(--scale));
+  opacity: 0;
+  font-size: 0.875rem;
+  top: calc(1.25em * var(--scale));
+  line-height: 1;
+  border-radius: 2px;
+  translate: 0 -50%;
+  transition: top 0.1s ease-out, translate 0.1s ease-out, scale 0.1s ease-out, opacity 0.1s ease-out;
+}
+
+.floating-label:focus-within ::placeholder,
+.floating-label:not(:has(input:placeholder-shown, textarea:placeholder-shown)) ::placeholder {
+  opacity: 0;
+  top: 0;
+  translate: -12.5% calc(-50% - 0.125em);
+  scale: 0.75;
+  pointer-events: auto;
+}
+
+.floating-label:focus-within > span,
+.floating-label:not(:has(input:placeholder-shown, textarea:placeholder-shown)) > span {
+  opacity: 1;
+  top: 0;
+  translate: -12.5% calc(-50% - 0.125em);
+  scale: 0.75;
+}
+
+.floating-label:has(:disabled, [disabled]) > span {
+  opacity: 0;
+}
+
+/* Per-field-size adjustments */
+.floating-label:has(.input-xs, .select-xs, .textarea-xs) span {
+  font-size: 0.6875rem;
+  top: calc(0.75em * var(--scale));
+}
+
+.floating-label:has(.input-sm, .select-sm, .textarea-sm) span {
+  font-size: 0.75rem;
+  top: calc(var(--size-field, 0.25rem) * 8 / 2);
+}
+
+.floating-label:has(.input-md, .select-md, .textarea-md) span {
+  font-size: 0.875rem;
+  top: calc(var(--size-field, 0.25rem) * 10 / 2);
+}
+
+.floating-label:has(.input-lg, .select-lg, .textarea-lg) span {
+  font-size: 1.125rem;
+  top: calc(var(--size-field, 0.25rem) * 12 / 2);
+}
+
+.floating-label:has(.input-xl, .select-xl, .textarea-xl) span {
+  font-size: 1.375rem;
+  top: calc(var(--size-field, 0.25rem) * 14 / 2);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.file-input {
+  --size: calc(2.5em * var(--scale));
+  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+  --btn-border: transparent;
+  border: var(--border) solid rgba(0, 0, 0, 0);
+  width: clamp(3rem, 20rem, 100%);
+  padding-inline-end: calc(0.75em * var(--scale));
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  line-height: 2;
+}
+
+.file-input::file-selector-button {
+  margin-inline-end: calc(1em * var(--scale));
+  padding-inline: calc(1em * var(--scale));
+  height: calc(100% + var(--border) * 2);
+  margin-block: calc(var(--border) * -1);
+  margin-inline-start: calc(var(--border) * -1);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-style: solid;
+  border-start-start-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
+  border-end-start-radius: calc(var(--join-es, var(--radius-field)) - var(--border));
+}
+
+.file-input:focus {
+  outline: 2px solid var(--input-color);
+  outline-offset: 2px;
+}
+
+.file-input:has(> input[disabled]),
+.file-input:is(:disabled, [disabled]) {
+  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
+  box-shadow: none;
+}
+
+.file-input:has(> input[disabled])::file-selector-button,
+.file-input:is(:disabled, [disabled])::file-selector-button {
+  --btn-border: #0000;
+  --btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+}
+
+/* variant ghost */
+.file-input-ghost {
+  background-color: transparent;
+  transition: background-color 0.2s;
+  box-shadow: none;
+  border-color: rgba(0, 0, 0, 0);
+}
+
+.file-input-ghost::file-selector-button {
+  margin-inline-start: 0; /* ms-0 */
+  margin-inline-end: calc(1em * var(--scale));
+  height: 100%;
+  cursor: pointer;
+  padding-inline: calc(1em * var(--scale));
+  user-select: none;
+  margin-block: 0;
+  border-start-end-radius: calc(var(--join-ss, var(--radius-field)) - var(--border));
+  border-end-end-radius: calc(var(--join-es, var(--radius-field)) - var(--border));
+}
+
+.file-input-ghost:focus,
+.file-input-ghost:focus-within {
+  color: var(--color-on-surface);
+  background-color: var(--color-surface-1);
+  border-color: rgba(0, 0, 0, 0);
+  box-shadow: none;
+}
+
+/* color variants */
+.file-input-primary {
+  --btn-color: var(--color-primary);
+}
+
+.file-input-primary::file-selector-button {
+  color: var(--color-on-primary);
+}
+
+.file-input-primary,
+.file-input-primary:focus,
+.file-input-primary:focus-within {
+  --input-color: var(--color-primary);
+}
+
+.file-input-secondary {
+  --btn-color: var(--color-secondary);
+}
+
+.file-input-secondary::file-selector-button {
+  color: var(--color-on-secondary);
+}
+
+.file-input-secondary,
+.file-input-secondary:focus,
+.file-input-secondary:focus-within {
+  --input-color: var(--color-secondary);
+}
+
+.file-input-accent {
+  --btn-color: var(--color-accent);
+}
+
+.file-input-accent::file-selector-button {
+  color: var(--color-on-accent);
+}
+
+.file-input-accent,
+.file-input-accent:focus,
+.file-input-accent:focus-within {
+  --input-color: var(--color-accent);
+}
+
+.file-input-neutral {
+  --btn-color: var(--color-neutral);
+}
+
+.file-input-neutral::file-selector-button {
+  color: var(--color-on-neutral);
+}
+
+.file-input-neutral,
+.file-input-neutral:focus,
+.file-input-neutral:focus-within {
+  --input-color: var(--color-neutral);
+}
+
+.file-input-info {
+  --btn-color: var(--color-info);
+}
+
+.file-input-info::file-selector-button {
+  color: var(--color-on-info);
+}
+
+.file-input-info,
+.file-input-info:focus,
+.file-input-info:focus-within {
+  --input-color: var(--color-info);
+}
+
+.file-input-success {
+  --btn-color: var(--color-success);
+}
+
+.file-input-success::file-selector-button {
+  color: var(--color-on-success);
+}
+
+.file-input-success,
+.file-input-success:focus,
+.file-input-success:focus-within {
+  --input-color: var(--color-success);
+}
+
+.file-input-warning {
+  --btn-color: var(--color-warning);
+}
+
+.file-input-warning::file-selector-button {
+  color: var(--color-on-warning);
+}
+
+.file-input-warning,
+.file-input-warning:focus,
+.file-input-warning:focus-within {
+  --input-color: var(--color-warning);
+}
+
+.file-input-error {
+  --btn-color: var(--color-error);
+}
+
+.file-input-error::file-selector-button {
+  color: var(--color-on-error);
+}
+
+.file-input-error,
+.file-input-error:focus,
+.file-input-error:focus-within {
+  --input-color: var(--color-error);
+}
+
+/* size variants */
+.file-input-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.file-input-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.file-input-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.file-input-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.file-input-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.file-input-xl {
+  padding-inline-end: calc(1.5em * var(--scale));
+}
+
+.file-input {
+  border: var(--border) solid var(--color-border);
+  border-radius: var(--c3);
+  rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+.file-input {
+  --input-color: var(--color-border);
+  background-color: var(--color-surface-1);
+}
+
+.file-input:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 var(--border) var(--color-border);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+:where(.input) {
+  width: unset;
+}
+
+.input {
+  --size: calc(2.5em * var(--scale));
+  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+  gap: calc(0.5em * var(--scale));
+  padding-inline: calc(0.75em * var(--scale));
+  width: clamp(3rem, 20rem, 100%);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  border: var(--border) solid rgba(0, 0, 0, 0);
+}
+
+.input :where(input) {
+  height: 100%;
+  width: 100%;
+  background-color: transparent;
+  border: none;
+}
+
+.input :where(input):focus,
+.input :where(input):focus-within {
+  outline: none;
+}
+
+.input:focus,
+.input:focus-within {
+  outline: 2px solid var(--input-color);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  @supports (-webkit-touch-callout: none) {
+    .input:focus,
+    .input:focus-within {
+      font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+    }
+  }
+}
+.input:has(> input[disabled]),
+.input:is(:disabled, [disabled]),
+fieldset:disabled .input {
+  color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
+  box-shadow: none;
+}
+
+.input:has(> input[disabled]) input::placeholder,
+.input:is(:disabled, [disabled]) input::placeholder,
+fieldset:disabled .input input::placeholder,
+.input:has(> input[disabled])::placeholder,
+.input:is(:disabled, [disabled])::placeholder,
+fieldset:disabled .input::placeholder {
+  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
+}
+
+.input[type=number]::-webkit-inner-spin-button {
+  margin-block: calc(-0.75em * var(--scale));
+  margin-inline-end: calc(-0.75em * var(--scale));
+}
+
+.input::-webkit-calendar-picker-indicator {
+  inset-inline-end: calc(0.75em * var(--scale));
+}
+
+.input:has(> input[type=date]) input[type=date]::-webkit-calendar-picker-indicator {
+  inset-inline-end: calc(0.75em * var(--scale));
+  width: 1em;
+  height: 1em;
+}
+
+/* variant ghost */
+.input-ghost {
+  background-color: transparent;
+  box-shadow: none;
+  border-color: rgba(0, 0, 0, 0);
+}
+
+.input-ghost:focus,
+.input-ghost:focus-within {
+  color: var(--color-on-surface);
+  background-color: var(--color-surface-1);
+  border-color: rgba(0, 0, 0, 0);
+  box-shadow: none;
+}
+
+/* color variants */
+.input-primary,
+.input-primary:focus,
+.input-primary:focus-within {
+  --input-color: var(--color-primary);
+}
+
+.input-secondary,
+.input-secondary:focus,
+.input-secondary:focus-within {
+  --input-color: var(--color-secondary);
+}
+
+.input-accent,
+.input-accent:focus,
+.input-accent:focus-within {
+  --input-color: var(--color-accent);
+}
+
+.input-neutral,
+.input-neutral:focus,
+.input-neutral:focus-within {
+  --input-color: var(--color-neutral);
+}
+
+.input-info,
+.input-info:focus,
+.input-info:focus-within {
+  --input-color: var(--color-info);
+}
+
+.input-success,
+.input-success:focus,
+.input-success:focus-within {
+  --input-color: var(--color-success);
+}
+
+.input-warning,
+.input-warning:focus,
+.input-warning:focus-within {
+  --input-color: var(--color-warning);
+}
+
+.input-error,
+.input-error:focus,
+.input-error:focus-within {
+  --input-color: var(--color-error);
+}
+
+/* size variants */
+.input-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.input-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.input-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.input-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.input-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.input {
+  border: var(--border) solid var(--color-border);
+  border-radius: var(--c3);
+  rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+.input {
+  --input-color: var(--color-border);
+  background-color: var(--color-surface-1);
+}
+
+.input:focus,
+.input:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 var(--border) var(--color-border);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.label {
+  gap: calc(0.375em * var(--scale));
+  color: color-mix(in oklch, currentColor 60%, rgba(0, 0, 0, 0));
+}
+
+.input > .label,
+.select > .label {
+  height: calc(100% - 0.5em * var(--scale));
+  padding-inline: calc(0.75em * var(--scale));
+  font-size: inherit;
+}
+
+.input > .label:first-child,
+.select > .label:first-child {
+  margin-inline-start: calc(-0.75em * var(--scale));
+  margin-inline-end: calc(0.75em * var(--scale));
+  border-inline-end: var(--border) solid color-mix(in oklab, currentColor 10%, rgba(0, 0, 0, 0));
+}
+
+.input > .label:last-child,
+.select > .label:last-child {
+  margin-inline-start: calc(0.75em * var(--scale));
+  margin-inline-end: calc(-0.75em * var(--scale));
+  border-inline-start: var(--border) solid color-mix(in oklab, currentColor 10%, rgba(0, 0, 0, 0));
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.link {
+  text-decoration: underline;
+}
+
+.link:focus {
+  outline: none;
+}
+
+.link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.link-hover {
+  text-decoration: none;
+}
+
+.link-hover:hover {
+  text-decoration: underline;
+}
+
+/* color variants */
+.link-primary {
+  color: var(--color-primary);
+}
+
+.link-secondary {
+  color: var(--color-secondary);
+}
+
+.link-accent {
+  color: var(--color-accent);
+}
+
+.link-neutral {
+  color: var(--color-neutral);
+}
+
+.link-info {
+  color: var(--color-info);
+}
+
+.link-success {
+  color: var(--color-success);
+}
+
+.link-warning {
+  color: var(--color-warning);
+}
+
+.link-error {
+  color: var(--color-error);
+}
+
+@media (hover: hover) {
+  .link-primary:hover {
+    color: color-mix(in oklab, var(--color-primary) 80%, #000);
+  }
+  .link-secondary:hover {
+    color: color-mix(in oklab, var(--color-secondary) 80%, #000);
+  }
+  .link-accent:hover {
+    color: color-mix(in oklab, var(--color-accent) 80%, #000);
+  }
+  .link-neutral:hover {
+    color: color-mix(in oklab, var(--color-neutral) 80%, #000);
+  }
+  .link-info:hover {
+    color: color-mix(in oklab, var(--color-info) 80%, #000);
+  }
+  .link-success:hover {
+    color: color-mix(in oklab, var(--color-success) 80%, #000);
+  }
+  .link-warning:hover {
+    color: color-mix(in oklab, var(--color-warning) 80%, #000);
+  }
+  .link-error:hover {
+    color: color-mix(in oklab, var(--color-error) 80%, #000);
+  }
+}
+.link {
+  text-decoration-thickness: var(--border);
+  text-underline-offset: 0.2em;
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.list {
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.list-row {
+  --list-grid-cols: minmax(0, auto) 1fr;
+  gap: calc(1em * var(--scale));
+  padding: calc(1em * var(--scale));
+}
+
+.list > .list-row:not(:last-child)::after,
+.list > :not(:last-child) .list-row::after {
+  bottom: 0;
+  inset-inline: calc(1em * var(--scale));
+  border-bottom: var(--border) solid color-mix(in oklab, var(--color-on-surface) 5%, rgba(0, 0, 0, 0));
+}
+
+.list-row:has(.list-col-grow:nth-child(1)) {
+  --list-grid-cols: 1fr;
+}
+
+.list-row:has(.list-col-grow:nth-child(2)) {
+  --list-grid-cols: minmax(0, auto) 1fr;
+}
+
+.list-row:has(.list-col-grow:nth-child(3)) {
+  --list-grid-cols: minmax(0, auto) minmax(0, auto) 1fr;
+}
+
+.list-row:has(.list-col-grow:nth-child(4)) {
+  --list-grid-cols: minmax(0, auto) minmax(0, auto) minmax(0, auto) 1fr;
+}
+
+.list-row:has(.list-col-grow:nth-child(5)) {
+  --list-grid-cols: minmax(0, auto) minmax(0, auto) minmax(0, auto) minmax(0, auto) 1fr;
+}
+
+/* variant suggestions */
+.list-suggestions {
+  padding: calc(0.25em * var(--scale));
+  border: var(--border) solid var(--color-surface-2);
+  box-shadow: 0 8px 16px -4px color-mix(in oklab, var(--color-on-surface) 10%, rgba(0, 0, 0, 0)), var(--shadow-light, );
+  overflow-y: auto;
+  max-height: min(16rem, 60dvh);
+}
+
+.list-suggestions > .list-row {
+  display: flex;
+  align-items: center;
+  gap: calc(0.5em * var(--scale));
+  padding: calc(0.4em * var(--scale)) calc(0.75em * var(--scale));
+  border-radius: var(--radius-field);
+  cursor: pointer;
+  transition: background-color 0.1s;
+  user-select: none;
+}
+
+/* A dropdown draws no line between its options. */
+.list-suggestions > .list-row:not(:last-child)::after {
+  content: none;
+}
+
+@media (hover: hover) {
+  .list-suggestions > .list-row:hover {
+    background-color: color-mix(in oklab, var(--color-on-surface) 7%, rgba(0, 0, 0, 0));
+  }
+}
+/* Keyboard-navigated active item */
+.list-suggestions > .list-row[aria-selected=true] {
+  background-color: color-mix(in oklab, var(--color-primary) 12%, rgba(0, 0, 0, 0));
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* size variants */
+.list-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.list-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.list-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.list-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.list-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.list {
+  background-color: var(--color-surface-1);
+  border: var(--border) solid var(--color-border);
+  /* A tall box drifts less than a button: same pen, fewer pixels. */
+  --cw: var(--cosmos-wobble-box, 0.2);
+  border-radius: var(--c4);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.loading {
+  aspect-ratio: 1/1;
+  background-color: currentColor;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  width: calc(1.5em * var(--scale));
+  mask-size: 100%;
+  mask-position: center;
+}
+
+/* style variants */
+.loading-spinner {
+  mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='black' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform-origin='center'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='2s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dasharray' values='0,150;42,150;42,150' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dashoffset' values='0;-16;-59' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
+}
+
+.loading-dots {
+  mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='4' cy='12' r='3'%3E%3Canimate attributeName='cy' values='12;6;12;12' keyTimes='0;0.286;0.571;1' dur='1.05s' repeatCount='indefinite' keySplines='.33,0,.66,.33;.33,.66,.66,1'/%3E%3C/circle%3E%3Ccircle cx='12' cy='12' r='3'%3E%3Canimate attributeName='cy' values='12;6;12;12' keyTimes='0;0.286;0.571;1' dur='1.05s' repeatCount='indefinite' keySplines='.33,0,.66,.33;.33,.66,.66,1' begin='0.1s'/%3E%3C/circle%3E%3Ccircle cx='20' cy='12' r='3'%3E%3Canimate attributeName='cy' values='12;6;12;12' keyTimes='0;0.286;0.571;1' dur='1.05s' repeatCount='indefinite' keySplines='.33,0,.66,.33;.33,.66,.66,1' begin='0.2s'/%3E%3C/circle%3E%3C/svg%3E");
+}
+
+.loading-ring {
+  mask-image: url("data:image/svg+xml,%3Csvg width='44' height='44' viewBox='0 0 44 44' xmlns='http://www.w3.org/2000/svg' stroke='white'%3E%3Cg fill='none' fill-rule='evenodd' stroke-width='2'%3E%3Ccircle cx='22' cy='22' r='1'%3E%3Canimate attributeName='r' begin='0s' dur='1.8s' values='1;20' calcMode='spline' keyTimes='0;1' keySplines='0.165,0.84,0.44,1' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-opacity' begin='0s' dur='1.8s' values='1;0' calcMode='spline' keyTimes='0;1' keySplines='0.3,0.61,0.355,1' repeatCount='indefinite'/%3E%3C/circle%3E%3Ccircle cx='22' cy='22' r='1'%3E%3Canimate attributeName='r' begin='-0.9s' dur='1.8s' values='1;20' calcMode='spline' keyTimes='0;1' keySplines='0.165,0.84,0.44,1' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-opacity' begin='-0.9s' dur='1.8s' values='1;0' calcMode='spline' keyTimes='0;1' keySplines='0.3,0.61,0.355,1' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
+}
+
+.loading-ball {
+  mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='12' cy='5' rx='4' ry='4'%3E%3Canimate attributeName='cy' values='5;20;20.5;20;5' keyTimes='0;0.469;0.5;0.531;1' dur='.8s' repeatCount='indefinite' keySplines='.33,0,.66,.33;.33,.66,.66,1'/%3E%3Canimate attributeName='rx' values='4;4;4.8;4;4' keyTimes='0;0.469;0.5;0.531;1' dur='.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='ry' values='4;4;3;4;4' keyTimes='0;0.469;0.5;0.531;1' dur='.8s' repeatCount='indefinite'/%3E%3C/ellipse%3E%3C/svg%3E");
+}
+
+.loading-bars {
+  mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='1' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3C/rect%3E%3Crect x='9' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3C/rect%3E%3Crect x='17' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3C/rect%3E%3C/svg%3E");
+}
+
+.loading-infinity {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' style='shape-rendering:auto;' width='200px' height='200px' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid'%3E%3Cpath fill='none' stroke='black' stroke-width='10' stroke-dasharray='205.271 51.318' d='M24.3 30C11.4 30 5 43.3 5 50s6.4 20 19.3 20c19.3 0 32.1-40 51.4-40C88.6 30 95 43.3 95 50s-6.4 20-19.3 20C56.4 70 43.6 30 24.3 30z' stroke-linecap='round' style='transform:scale(0.8);transform-origin:50px 50px'%3E%3Canimate attributeName='stroke-dashoffset' repeatCount='indefinite' dur='2s' keyTimes='0;1' values='0;256.589'/%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* size variants */
+.loading-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.loading-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.loading-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.loading-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.loading-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* Loaders are the progress fill in motion, so they take its colour. */
+.loading {
+  color: var(--color-accent);
+}
+
+/* Dots: three xsmall, perfectly round, empty buttons. */
+.loading-dots {
+  --dot: calc(0.6em * var(--scale));
+  --dot-bg: var(--color-surface-1);
+  --dot-border-color: var(--color-border);
+  --dot-border-width: var(--border, 1px);
+  aspect-ratio: auto;
+  width: calc(var(--dot) * 3.4);
+  height: calc(var(--dot) * 1.9);
+  mask-image: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: var(--dot) var(--dot);
+  background-image: radial-gradient(circle closest-side, var(--dot-bg) calc(100% - var(--dot-border-width)), var(--dot-border-color) calc(100% - var(--dot-border-width)) 100%, rgba(0, 0, 0, 0) 100%), radial-gradient(circle closest-side, var(--dot-bg) calc(100% - var(--dot-border-width)), var(--dot-border-color) calc(100% - var(--dot-border-width)) 100%, rgba(0, 0, 0, 0) 100%), radial-gradient(circle closest-side, var(--dot-bg) calc(100% - var(--dot-border-width)), var(--dot-border-color) calc(100% - var(--dot-border-width)) 100%, rgba(0, 0, 0, 0) 100%);
+  animation: loading-dots 1.05s infinite;
+  --dot-bg: var(--color-surface-1);
+  --dot-border-width: var(--border);
+}
+
+@keyframes loading-dots {
+  0%, 80%, 100% {
+    background-position: 0 100%, 50% 100%, 100% 100%;
+  }
+  20% {
+    background-position: 0 0, 50% 100%, 100% 100%;
+  }
+  40% {
+    background-position: 0 100%, 50% 0, 100% 100%;
+  }
+  60% {
+    background-position: 0 100%, 50% 100%, 100% 0;
+  }
+}
+.menu {
+  --menu-bg: var(--color-surface-1);
+  --menu-fg: var(--color-on-surface);
+  --menu-border: var(--color-border);
+  --menu-border-width: var(--border);
+  --menu-shadow: none;
+  --menu-p: calc(0.5em * var(--scale));
+  --menu-gap: calc(0.25em * var(--scale));
+  --menu-item-py: calc(0.375em * var(--scale));
+  --menu-item-px: calc(0.75em * var(--scale));
+  --menu-item-gap: calc(0.5em * var(--scale));
+  --menu-item-bg: #0000;
+  --menu-item-fg: inherit;
+  --menu-item-transition: background-color 0.1s, rotate 0.1s ease-out;
+  --menu-hover-bg: var(--color-surface-2);
+  --menu-hover-fg: var(--color-on-surface);
+  --menu-active-bg: var(--color-accent);
+  --menu-active-fg: var(--color-on-accent);
+  --menu-disabled-bg: #0000;
+  --menu-disabled-fg: color-mix(in oklab, var(--color-on-surface) 35%, #0000);
+  --menu-focus-outline: var(--border) solid var(--color-border);
+  --menu-focus-offset: 2px;
+  --menu-title-py: calc(0.375em * var(--scale));
+  --menu-title-px: calc(0.75em * var(--scale));
+  --menu-title-fg: color-mix(in oklab, var(--color-on-surface) 60%, #0000);
+  --menu-title-size: 0.875em;
+  --menu-title-weight: 700;
+  --menu-title-transform: none;
+  --menu-title-tracking: normal;
+  --menu-divider: var(--color-border);
+  --menu-divider-size: var(--border);
+  --menu-divider-gap: calc(0.375em * var(--scale));
+  --menu-divider-inset: calc(0.5em * var(--scale));
+  --menu-sub-indent: calc(1em * var(--scale));
+  --menu-sub-transition: 0.2s ease-out;
+  /* A tall box drifts less than a button: same pen, fewer pixels. */
+  --cw: var(--cosmos-wobble-box, 0.2);
+  border-radius: var(--c2);
+  rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+/* A row is control-sized, so it takes the control's wobble even though
+   it sits in a box that takes less. Each row also sits a hair off true,
+   the other way from the block. */
+.menu .menu-item,
+.menu li > :is(a, button, span):not(.menu-title) {
+  --cw: var(--cosmos-wobble-field, 1);
+  --menu-item-radius: var(--c3);
+  rotate: calc(var(--cosmos-tilt, 0.4) * 0.5deg);
+}
+
+.menu li:nth-child(2n) > :is(a, button, span):not(.menu-title) {
+  --menu-item-radius: var(--c5);
+  rotate: calc(var(--cosmos-tilt, 0.4) * -0.5deg);
+}
+
+.menu .menu-toggle::after {
+  width: calc(0.375em * var(--scale));
+  height: calc(0.375em * var(--scale));
+  box-shadow: var(--border) var(--border) inset;
+  rotate: 45deg;
+  transition: rotate 0.2s;
+}
+
+.menu li:has(> .menu-sub-closed) > .menu-toggle::after {
+  rotate: -135deg;
+}
+
+/* size variants */
+.menu-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.menu-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.menu-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.menu-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.menu-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.navbar {
+  --navbar-bg: var(--color-surface-1);
+  --navbar-fg: var(--color-on-surface);
+  --navbar-border: var(--color-border);
+  --navbar-border-width: var(--border);
+  --navbar-shadow: none;
+  --navbar-h: calc(4em * var(--scale));
+  --navbar-px: calc(1em * var(--scale));
+  --navbar-py: calc(0.5em * var(--scale));
+  --navbar-gap: calc(0.75em * var(--scale));
+  /* A wide box drifts less than a button: same pen, fewer pixels. */
+  --cw: var(--cosmos-wobble-box, 0.2);
+  border: var(--border) solid var(--color-border);
+  border-radius: var(--cosmos-corners);
+  rotate: calc(var(--cosmos-tilt, 0.4) * -0.25deg);
+}
+
+/* size variants */
+.navbar-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.navbar-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.navbar-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.navbar-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.navbar-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.progress {
+  height: calc(0.5em * var(--scale));
+  width: 100%;
+  background-color: color-mix(in oklch, currentColor 20%, rgba(0, 0, 0, 0));
+}
+
+.progress:indeterminate {
+  background-image: repeating-linear-gradient(90deg, currentColor -1%, currentColor 10%, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 0) 90%);
+  background-size: 200%;
+  background-position-x: 15%;
+}
+
+@supports (-moz-appearance: none) {
+  .progress:indeterminate::-moz-progress-bar {
+    background-color: transparent;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .progress:indeterminate::-moz-progress-bar {
+      background-image: repeating-linear-gradient(90deg, currentColor -1%, currentColor 10%, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 0) 90%);
+      background-size: 200%;
+      background-position-x: 15%;
+    }
+  }
+  .progress::-moz-progress-bar {
+    background-color: currentColor;
+  }
+}
+@supports (-webkit-appearance: none) {
+  .progress::-webkit-progress-bar {
+    background-color: transparent;
+  }
+  .progress::-webkit-progress-value {
+    background-color: currentColor;
+  }
+}
+@keyframes progress {
+  50% {
+    background-position-x: -115%;
+  }
+}
+/* color variants */
+.progress-primary {
+  color: var(--color-primary);
+}
+
+.progress-secondary {
+  color: var(--color-secondary);
+}
+
+.progress-accent {
+  color: var(--color-accent);
+}
+
+.progress-neutral {
+  color: var(--color-neutral);
+}
+
+.progress-info {
+  color: var(--color-info);
+}
+
+.progress-success {
+  color: var(--color-success);
+}
+
+.progress-warning {
+  color: var(--color-warning);
+}
+
+.progress-error {
+  color: var(--color-error);
+}
+
+.progress {
+  border: var(--border) solid var(--color-border);
+  --cw: var(--cosmos-wobble-selector, 0.7);
+  border-radius: var(--c5);
+  height: calc(1.1em * var(--scale));
+  background-color: var(--color-surface-1);
+  color: var(--color-accent);
+  overflow: hidden;
+  rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+.progress::-webkit-progress-bar {
+  background-color: var(--color-surface-1);
+}
+
+.progress::-webkit-progress-value {
+  background-color: var(--color-accent);
+  border-radius: 0;
+}
+
+.progress::-moz-progress-bar {
+  background-color: var(--color-accent);
+  border-radius: 0;
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.radial-progress {
+  --value: 0;
+  --size: calc(5em * var(--scale));
+  --thickness: calc(var(--size) / 10);
+  --radialprogress: calc(var(--value) * 1%);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  border-radius: 9999px;
+  background-color: transparent;
+  transition: --radialprogress 0.3s linear;
+}
+
+.radial-progress::before {
+  inset: 0;
+  border-radius: 9999px;
+  background: radial-gradient(farthest-side, currentColor 98%, rgba(0, 0, 0, 0)) top/var(--thickness) var(--thickness) no-repeat, conic-gradient(var(--ring) var(--radialprogress), rgba(0, 0, 0, 0) 0);
+}
+
+.radial-progress::after {
+  border-radius: 9999px;
+  background-color: currentColor;
+  inset: calc(50% - var(--thickness) / 2);
+  transition: transform 0.3s linear;
+}
+
+/* size variants */
+.radial-progress-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.radial-progress-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.radial-progress-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.radial-progress-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.radial-progress-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* The ring is this family's progress bar bent into a circle: same track,
+   same fill, same thickness (progress.scss holds the flat version). */
+.radial-progress {
+  --thickness: calc(1.1em * var(--scale));
+  /* The ring is painted from --ring so the label keeps a readable
+     colour of its own. */
+  --ring: var(--color-accent);
+  color: var(--color-on-surface);
+  border: var(--border) solid var(--color-border);
+  border-radius: 999px;
+}
+
+.radial-progress::before {
+  background: radial-gradient(farthest-side, var(--ring) 98%, rgba(0, 0, 0, 0)) top/var(--thickness) var(--thickness) no-repeat, conic-gradient(var(--ring) var(--radialprogress), var(--color-surface-1) 0);
+}
+
+.radial-progress::after {
+  background-color: var(--ring);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.radio {
+  --size: calc(1.5em * var(--scale));
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  border-radius: 9999px;
+  padding: calc(0.15em * var(--scale));
+  border: var(--border) solid var(--input-color, color-mix(in srgb, currentColor 20%, rgba(0, 0, 0, 0)));
+}
+
+.radio::before {
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.radio:focus-visible {
+  outline: 2px solid currentColor;
+}
+
+.radio:checked,
+.radio[aria-checked=true] {
+  border-color: currentColor;
+}
+
+.radio:checked::before,
+.radio[aria-checked=true]::before {
+  background-color: currentColor;
+}
+
+@media (forced-colors: active) {
+  .radio:checked::before,
+  .radio[aria-checked=true]::before {
+    outline-style: solid;
+    outline-offset: -0.25rem;
+  }
+}
+@media print {
+  .radio:checked::before,
+  .radio[aria-checked=true]::before {
+    outline: 0.25rem solid;
+    outline-offset: -1rem;
+  }
+}
+.radio:disabled {
+  opacity: 0.2;
+}
+
+@keyframes radio {
+  0% {
+    padding: 5px;
+  }
+  50% {
+    padding: 3px;
+  }
+}
+/* variant square */
+.radio-square {
+  border-radius: 0;
+}
+
+.radio-square::before {
+  border-radius: 0;
+}
+
+/* color variants */
+.radio-primary {
+  --input-color: var(--color-primary);
+}
+
+.radio-secondary {
+  --input-color: var(--color-secondary);
+}
+
+.radio-accent {
+  --input-color: var(--color-accent);
+}
+
+.radio-neutral {
+  --input-color: var(--color-neutral);
+}
+
+.radio-info {
+  --input-color: var(--color-info);
+}
+
+.radio-success {
+  --input-color: var(--color-success);
+}
+
+.radio-warning {
+  --input-color: var(--color-warning);
+}
+
+.radio-error {
+  --input-color: var(--color-error);
+}
+
+/* size variants */
+.radio-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.radio-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.radio-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.radio-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.radio-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.radio-xl:is([type=radio]) {
+  --size: calc(2em * var(--scale));
+}
+
+.radio {
+  --input-color: var(--color-border);
+  border-width: var(--border);
+}
+
+.radio:checked,
+.radio[aria-checked=true] {
+  --input-color: var(--color-accent);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.range {
+  --range-thumb-size: calc(1.5em * var(--scale));
+  --range-progress: currentColor;
+  --range-fill: 1;
+  --range-p: calc(0.25em * var(--scale));
+  --range-bg: color-mix(in oklab, currentColor 10%, #0000);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  --radius-selector-max: calc(
+  		var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
+  	);
+  background-color: transparent;
+  width: clamp(3rem, 20rem, 100%);
+  border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+  border: none;
+}
+
+[dir=rtl] .range {
+  --range-dir: -1;
+}
+
+.range:focus {
+  outline: none;
+}
+
+.range:focus-visible {
+  outline: 2px solid;
+  outline-offset: 2px;
+}
+
+.range::-webkit-slider-runnable-track {
+  width: 100%;
+  height: calc(var(--range-thumb-size) * 0.5);
+}
+
+@media (forced-colors: active) {
+  .range::-webkit-slider-runnable-track {
+    border: 1px solid;
+  }
+}
+.range::-webkit-slider-thumb {
+  border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+  border: var(--range-p) solid;
+  top: 50%;
+  box-shadow: 0 -1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), rgba(0, 0, 0, 0)), 0 0 0 2rem var(--range-thumb) inset, calc(var(--range-dir, 1) * -100cqw - var(--range-dir, 1) * (var(--range-thumb-size) + var(--range-halo, 0px))) 0 0 calc(100cqw * var(--range-fill)), var(--shadow-light, );
+}
+
+.range::-moz-range-track {
+  width: 100%;
+  height: calc(var(--range-thumb-size) * 0.5);
+}
+
+@media (forced-colors: active) {
+  .range::-moz-range-track {
+    border: 1px solid;
+  }
+}
+.range::-moz-range-thumb {
+  border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+  background-color: currentColor;
+  border: var(--range-p) solid;
+  top: 50%;
+  box-shadow: 0 -1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), rgba(0, 0, 0, 0)), 0 0 0 2rem var(--range-thumb) inset, calc(var(--range-dir, 1) * -100cqw - var(--range-dir, 1) * (var(--range-thumb-size) + var(--range-halo, 0px))) 0 0 calc(100cqw * var(--range-fill)), var(--shadow-light, );
+}
+
+.range:disabled {
+  opacity: 0.3;
+}
+
+/* color variants */
+.range-primary {
+  color: var(--color-primary);
+  --range-thumb: var(--color-on-primary);
+}
+
+.range-secondary {
+  color: var(--color-secondary);
+  --range-thumb: var(--color-on-secondary);
+}
+
+.range-accent {
+  color: var(--color-accent);
+  --range-thumb: var(--color-on-accent);
+}
+
+.range-neutral {
+  color: var(--color-neutral);
+  --range-thumb: var(--color-on-neutral);
+}
+
+.range-info {
+  color: var(--color-info);
+  --range-thumb: var(--color-on-info);
+}
+
+.range-success {
+  color: var(--color-success);
+  --range-thumb: var(--color-on-success);
+}
+
+.range-warning {
+  color: var(--color-warning);
+  --range-thumb: var(--color-on-warning);
+}
+
+.range-error {
+  color: var(--color-error);
+  --range-thumb: var(--color-on-error);
+}
+
+/* size variants */
+.range-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.range-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.range-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.range-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.range-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.range {
+  --cw: var(--cosmos-wobble-selector, 0.7);
+  --rail: calc(0.55em * var(--scale));
+  --range-thumb-size: calc(1.1em * var(--scale));
+  --range-fill: 1;
+  --range-p: 0px;
+  --range-thumb: var(--color-surface-1);
+  --range-bg: var(--color-surface-2);
+  --range-progress: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.range::-webkit-slider-runnable-track {
+  height: var(--rail);
+  border: var(--border) solid var(--color-border);
+  border-radius: var(--c5);
+}
+
+.range::-moz-range-track {
+  height: var(--rail);
+  border: var(--border) solid var(--color-border);
+  border-radius: var(--c5);
+}
+
+.range::-webkit-slider-thumb {
+  --range-halo: 0.125em;
+  --rail-top: calc((var(--range-thumb-size) - var(--rail)) / 2);
+  --rail-bottom: calc((var(--range-thumb-size) + var(--rail)) / 2);
+  clip-path: polygon(-100vw var(--rail-top), calc(0px - var(--range-halo)) var(--rail-top), calc(0px - var(--range-halo)) calc(0px - var(--range-halo)), calc(100% + var(--range-halo)) calc(0px - var(--range-halo)), calc(100% + var(--range-halo)) var(--rail-top), 100vw var(--rail-top), 100vw var(--rail-bottom), calc(100% + var(--range-halo)) var(--rail-bottom), calc(100% + var(--range-halo)) calc(100% + var(--range-halo)), calc(0px - var(--range-halo)) calc(100% + var(--range-halo)), calc(0px - var(--range-halo)) var(--rail-bottom), -100vw var(--rail-bottom));
+  border: var(--border) solid var(--color-border);
+  border-radius: 999px;
+}
+
+.range::-moz-range-thumb {
+  --range-halo: 0.125em;
+  --rail-top: calc((var(--range-thumb-size) - var(--rail)) / 2);
+  --rail-bottom: calc((var(--range-thumb-size) + var(--rail)) / 2);
+  clip-path: polygon(-100vw var(--rail-top), calc(0px - var(--range-halo)) var(--rail-top), calc(0px - var(--range-halo)) calc(0px - var(--range-halo)), calc(100% + var(--range-halo)) calc(0px - var(--range-halo)), calc(100% + var(--range-halo)) var(--rail-top), 100vw var(--rail-top), 100vw var(--rail-bottom), calc(100% + var(--range-halo)) var(--rail-bottom), calc(100% + var(--range-halo)) calc(100% + var(--range-halo)), calc(0px - var(--range-halo)) calc(100% + var(--range-halo)), calc(0px - var(--range-halo)) var(--rail-bottom), -100vw var(--rail-bottom));
+  border: var(--border) solid var(--color-border);
+  border-radius: 999px;
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+:where(.select) {
+  width: unset;
+}
+
+.select {
+  --size: calc(2.5em * var(--scale));
+  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+  border: var(--border) solid rgba(0, 0, 0, 0);
+  gap: calc(0.375em * var(--scale));
+  padding-inline-start: calc(0.75em * var(--scale));
+  padding-inline-end: calc(1.75em * var(--scale));
+  width: clamp(3rem, 20rem, 100%);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  background-image: linear-gradient(45deg, rgba(0, 0, 0, 0) 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, rgba(0, 0, 0, 0) 50%);
+  background-position: calc(100% - 20px) calc(1px + 50%), calc(100% - 16.1px) calc(1px + 50%);
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+}
+
+[dir=rtl] .select {
+  background-position: calc(0% + 12px) calc(1px + 50%), calc(0% + 16px) calc(1px + 50%);
+}
+
+.select[multiple] {
+  height: auto;
+  padding-block: calc(0.75em * var(--scale));
+  padding-inline-end: calc(0.75em * var(--scale));
+  background-image: none;
+}
+
+.select select {
+  margin-inline-start: calc(-0.75em * var(--scale));
+  margin-inline-end: calc(-1.75em * var(--scale));
+  width: calc(100% + 2.5em * var(--scale));
+  padding-inline-start: calc(0.75em * var(--scale));
+  padding-inline-end: calc(1.75em * var(--scale));
+  height: calc(100% - var(--border) * 2);
+  background: inherit;
+  border-radius: inherit;
+  border-style: none;
+}
+
+.select select:focus,
+.select select:focus-within {
+  outline: none;
+}
+
+.select select:not(:last-child) {
+  margin-inline-end: calc(-1.375em * var(--scale));
+  background-image: none;
+}
+
+.select:focus,
+.select:focus-within {
+  outline: 2px solid var(--input-color);
+  outline-offset: 2px;
+}
+
+.select:has(> select[disabled]),
+.select:is(:disabled, [disabled]),
+fieldset:disabled .select {
+  color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
+}
+
+.select:has(> select[disabled]) select::placeholder,
+.select:is(:disabled, [disabled]) select::placeholder {
+  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
+}
+
+.select::picker(select),
+.select select::picker(select) {
+  color: inherit;
+  max-height: min(24rem, 70dvh);
+  margin-inline: calc(0.5em * var(--scale));
+  translate: calc(-0.5em * var(--scale)) 0;
+  border: var(--border) solid var(--color-surface-2);
+  margin-block: calc(0.5em * var(--scale));
+  padding: calc(0.5em * var(--scale));
+  background-color: inherit;
+  box-shadow: 0 20px 25px -5px rgb(0, 0, 0, calc(var(--depth) * 0.1)), 0 8px 10px -6px rgb(0, 0, 0, calc(var(--depth) * 0.1));
+}
+
+[dir=rtl] .select::picker(select),
+[dir=rtl] .select select::picker(select) {
+  translate: calc(0.5em * var(--scale)) 0;
+}
+
+.select optgroup,
+.select select optgroup {
+  padding-top: calc(0.5em * var(--scale));
+}
+
+.select optgroup option:nth-child(1),
+.select select optgroup option:nth-child(1) {
+  margin-top: calc(0.5em * var(--scale));
+}
+
+.select option,
+.select select option {
+  padding-inline: calc(0.75em * var(--scale));
+  padding-block: calc(0.375em * var(--scale));
+  transition-property: color, background-color;
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+
+.select option:not(:disabled):hover,
+.select option:not(:disabled):focus-visible,
+.select select option:not(:disabled):hover,
+.select select option:not(:disabled):focus-visible {
+  background-color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
+  outline: none;
+}
+
+.select option:not(:disabled):active,
+.select select option:not(:disabled):active {
+  box-shadow: 0 2px calc(var(--depth) * 3px) -2px var(--color-neutral);
+}
+
+/* variant ghost */
+.select-ghost {
+  background-color: transparent;
+  transition: background-color 0.2s;
+  box-shadow: none;
+  border-color: rgba(0, 0, 0, 0);
+}
+
+.select-ghost:focus,
+.select-ghost:focus-within {
+  color: var(--color-on-surface);
+  background-color: var(--color-surface-1);
+  border-color: rgba(0, 0, 0, 0);
+  box-shadow: none;
+}
+
+/* color variants */
+.select-primary,
+.select-primary:focus,
+.select-primary:focus-within {
+  --input-color: var(--color-primary);
+}
+
+.select-secondary,
+.select-secondary:focus,
+.select-secondary:focus-within {
+  --input-color: var(--color-secondary);
+}
+
+.select-accent,
+.select-accent:focus,
+.select-accent:focus-within {
+  --input-color: var(--color-accent);
+}
+
+.select-neutral,
+.select-neutral:focus,
+.select-neutral:focus-within {
+  --input-color: var(--color-neutral);
+}
+
+.select-info,
+.select-info:focus,
+.select-info:focus-within {
+  --input-color: var(--color-info);
+}
+
+.select-success,
+.select-success:focus,
+.select-success:focus-within {
+  --input-color: var(--color-success);
+}
+
+.select-warning,
+.select-warning:focus,
+.select-warning:focus-within {
+  --input-color: var(--color-warning);
+}
+
+.select-error,
+.select-error:focus,
+.select-error:focus-within {
+  --input-color: var(--color-error);
+}
+
+/* size variants */
+.select-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.select-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.select-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.select-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.select-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.select-xl option,
+.select-xl select option {
+  padding-inline: calc(1.25em * var(--scale));
+  padding-block: calc(0.375em * var(--scale));
+}
+
+.select {
+  border: var(--border) solid var(--color-border);
+  border-radius: var(--c3);
+  rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+.select {
+  --input-color: var(--color-border);
+  background-color: var(--color-surface-1);
+}
+
+.select:focus,
+.select:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 var(--border) var(--color-border);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.skeleton {
+  background-image: linear-gradient(105deg, rgba(0, 0, 0, 0) 0% 40%, var(--color-surface-1) 50%, rgba(0, 0, 0, 0) 60% 100%);
+  background-size: 200% auto;
+  background-position-x: -50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    transition-duration: 15s;
+  }
+}
+.skeleton-text {
+  background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(105deg, color-mix(in oklab, var(--color-on-surface) 20%, transparent) 0% 40%, var(--color-on-surface) 50%, color-mix(in oklab, var(--color-on-surface) 20%, transparent) 60% 100%);
+}
+
+@keyframes skeleton {
+  0% {
+    background-position: 150%;
+  }
+  100% {
+    background-position: -50%;
+  }
+}
+.skeleton {
+  background-color: var(--color-surface-2);
+  border: var(--border) solid var(--color-border);
+  /* A tall box drifts less than a button: same pen, fewer pixels. */
+  --cw: var(--cosmos-wobble-box, 0.2);
+  border-radius: var(--c4);
+}
+
+.swatch {
+  --swatch-color: var(--color-surface-1);
+  --swatch-size: calc(2em * var(--scale));
+  --swatch-disabled-opacity: 0.4;
+  --swatch-focus-outline: 2px solid currentColor;
+  --swatch-focus-offset: 2px;
+  /* Same flip as --color-on-*: a light sample gets near-black, a dark one
+     near-white, keeping a whisper of the sample's own hue. */
+  --swatch-on-color: oklch(
+  	from var(--swatch-color) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h
+  );
+  /* Two crossed quarters make the checkerboard; the colour layer sits on
+     top, so a semi-transparent sample lets it through. */
+  --swatch-checks: conic-gradient(
+  	from 90deg,
+  	var(--color-surface-3) 25%,
+  	var(--color-surface-2) 0 50%,
+  	var(--color-surface-3) 0 75%,
+  	var(--color-surface-2) 0
+  );
+  background-size: auto, calc(0.5em * var(--scale)) calc(0.5em * var(--scale));
+  font-weight: 600;
+  /* A sample has no content to clamp the recipe against, and callers
+     stretch it, so it drifts like a box rather than like a selector. */
+  --cw: var(--cosmos-wobble-box, 0.2);
+  --swatch-radius: var(--c6);
+  --swatch-border-width: var(--border);
+  --swatch-border: var(--color-border);
+  --swatch-shadow: none;
+  --swatch-transition: box-shadow 0.1s, rotate 0.1s ease-out;
+  rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+.swatch-active {
+  --swatch-shadow: 0 0 0 2px var(--color-surface-1), 0 0 0 calc(2px + var(--border))
+  	var(--color-border);
+}
+
+.swatch-circle {
+  --swatch-radius: 999px;
+}
+
+.swatch-primary {
+  --swatch-color: var(--color-primary);
+}
+
+.swatch-secondary {
+  --swatch-color: var(--color-secondary);
+}
+
+.swatch-accent {
+  --swatch-color: var(--color-accent);
+}
+
+.swatch-neutral {
+  --swatch-color: var(--color-neutral);
+}
+
+.swatch-info {
+  --swatch-color: var(--color-info);
+}
+
+.swatch-success {
+  --swatch-color: var(--color-success);
+}
+
+.swatch-warning {
+  --swatch-color: var(--color-warning);
+}
+
+.swatch-error {
+  --swatch-color: var(--color-error);
+}
+
+/* size variants */
+.swatch-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.swatch-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.swatch-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.swatch-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.swatch-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.tabs {
+  --tabs-height: auto;
+  --tabs-direction: row;
+  --tab-height: calc(2.5em * var(--scale));
+}
+
+.tabs-item {
+  --tab-p: calc(0.75em * var(--scale));
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  --tab-radius-ss: 0;
+  --tab-radius-se: 0;
+  --tab-radius-es: 0;
+  --tab-radius-ee: 0;
+  --tab-order: 0;
+  --tab-radius-min: calc(0.75rem - var(--border));
+  --tab-radius-limit: min(var(--radius-field), var(--tab-radius-min));
+  --tab-radius-grad: #0000 calc(69% - var(--border)),
+  		var(--tab-border-color) calc(69% - var(--border) + 0.25px),
+  		var(--tab-border-color) 69%,
+  		var(--tab-bg) calc(69% + 0.25px);
+  border-color: rgba(0, 0, 0, 0);
+  font-size: 0.875rem;
+}
+
+.tabs-item:is(input[type=radio]) {
+  min-width: fit-content;
+}
+
+.tabs-item:is(label) input {
+  inset: 0;
+  opacity: 0;
+}
+
+.tabs-item:not(:checked,
+label:has(:checked),
+:hover,
+.tabs-item-active,
+[aria-selected=true],
+[aria-current=true],
+[aria-current=page]) {
+  color: color-mix(in oklch, var(--color-on-surface) 50%, rgba(0, 0, 0, 0));
+}
+
+.tabs-item:focus {
+  outline: none;
+}
+
+.tabs-item:focus-visible,
+.tabs-item:is(label:has(:checked:focus-visible)) {
+  outline: 2px solid currentColor;
+  outline-offset: -5px;
+}
+
+.tabs-item[disabled] {
+  opacity: 0.4;
+}
+
+.tabs-item-content {
+  border-color: transparent;
+  --tabcontent-order: 1;
+  width: 100%;
+  height: calc(100% - var(--tab-height) + var(--border));
+}
+
+.tabs-item-disabled {
+  opacity: 0.4;
+}
+
+/* variant border */
+.tabs-border > .tabs-item {
+  --tab-border-color: #0000 #0000 var(--tab-border-color) #0000;
+  position: relative;
+  border-radius: var(--radius-field);
+}
+
+.tabs-border > .tabs-item::before {
+  content: "";
+  background-color: var(--tab-border-color);
+  transition: background-color 0.2s ease;
+  width: 80%;
+  height: 3px;
+  border-radius: var(--radius-field);
+  bottom: 0;
+  left: 10%;
+  position: absolute;
+}
+
+.tabs-border > .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled])::before,
+.tabs-border > .tabs-item:is(input:checked)::before,
+.tabs-border > .tabs-item:is(label:has(:checked))::before {
+  --tab-border-color: currentColor;
+  border-top: 3px solid;
+}
+
+/* variant lift */
+.tabs-lift {
+  --tabs-height: auto;
+  --tabs-direction: row;
+}
+
+.tabs-lift > .tabs-item {
+  --tab-border: 0 0 var(--border) 0;
+  --tab-radius-ss: var(--tab-radius-limit);
+  --tab-radius-se: var(--tab-radius-limit);
+  --tab-radius-es: 0;
+  --tab-radius-ee: 0;
+  --tab-paddings: var(--border) var(--tab-p) 0 var(--tab-p);
+  --tab-border-colors: #0000 #0000 var(--tab-border-color) #0000;
+  --tab-corner-width: calc(100% + var(--tab-radius-limit) * 2);
+  --tab-corner-height: var(--tab-radius-limit);
+  --tab-corner-position: top left, top right;
+  border-width: var(--tab-border);
+  border-start-start-radius: var(--tab-radius-ss);
+  border-start-end-radius: var(--tab-radius-se);
+  border-end-start-radius: var(--tab-radius-es);
+  border-end-end-radius: var(--tab-radius-ee);
+  padding: var(--tab-paddings);
+  border-color: var(--tab-border-colors);
+}
+
+.tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]),
+.tabs-lift > .tabs-item:is(input:checked, label:has(:checked)) {
+  --tab-border: var(--border) var(--border) 0 var(--border);
+  --tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+  --tab-paddings: 0 calc(var(--tab-p) - var(--border)) var(--border) calc(var(--tab-p) - var(--border));
+  --tab-inset: auto auto 0 auto;
+  --radius-start: radial-gradient(circle at top left, var(--tab-radius-grad));
+  --radius-end: radial-gradient(circle at top right, var(--tab-radius-grad));
+  background-color: var(--tab-bg);
+}
+
+.tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled])::before,
+.tabs-lift > .tabs-item:is(input:checked, label:has(:checked))::before {
+  z-index: 1;
+  content: "";
+  display: block;
+  position: absolute;
+  width: var(--tab-corner-width);
+  height: var(--tab-corner-height);
+  background-position: var(--tab-corner-position);
+  background-image: var(--radius-start), var(--radius-end);
+  background-size: var(--tab-radius-limit) var(--tab-radius-limit);
+  background-repeat: no-repeat;
+  inset: var(--tab-inset);
+}
+
+.tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]):first-child::before,
+.tabs-lift > .tabs-item:is(input:checked, label:has(:checked)):first-child::before {
+  --radius-start: none;
+}
+
+[dir=rtl] .tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]):first-child::before,
+[dir=rtl] .tabs-lift > .tabs-item:is(input:checked, label:has(:checked)):first-child::before {
+  transform: rotateY(180deg);
+}
+
+.tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]):last-child::before,
+.tabs-lift > .tabs-item:is(input:checked, label:has(:checked)):last-child::before {
+  --radius-end: none;
+}
+
+[dir=rtl] .tabs-lift > .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]):last-child::before,
+[dir=rtl] .tabs-lift > .tabs-item:is(input:checked, label:has(:checked)):last-child::before {
+  transform: rotateY(180deg);
+}
+
+.tabs-lift:has(> .tabs-item-content) > .tabs-item:first-child:not(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]) {
+  --tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+}
+
+.tabs-lift > .tabs-item-content {
+  --tabcontent-margin: calc(-1 * var(--border)) 0 0 0;
+  --tabcontent-radius-ss: 0;
+  --tabcontent-radius-se: var(--radius-box);
+  --tabcontent-radius-es: var(--radius-box);
+  --tabcontent-radius-ee: var(--radius-box);
+}
+
+.tabs-lift :checked + .tabs-item-content:nth-child(1),
+.tabs-lift :checked + .tabs-item-content:nth-child(n+3),
+.tabs-lift label:has(:checked) + .tabs-item-content:nth-child(1),
+.tabs-lift label:has(:checked) + .tabs-item-content:nth-child(n+3),
+.tabs-lift :is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]) + .tabs-item-content:nth-child(1),
+.tabs-lift :is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]) + .tabs-item-content:nth-child(n+3) {
+  --tabcontent-radius-ss: var(--radius-box);
+}
+
+/* variant top bottom */
+.tabs-top {
+  --tabs-height: auto;
+  --tabs-direction: row;
+}
+
+.tabs-top > .tabs-item {
+  --tab-order: 0;
+  --tab-border: 0 0 var(--border) 0;
+  --tab-radius-ss: var(--tab-radius-limit);
+  --tab-radius-se: var(--tab-radius-limit);
+  --tab-radius-es: 0;
+  --tab-radius-ee: 0;
+  --tab-paddings: var(--border) var(--tab-p) 0 var(--tab-p);
+  --tab-border-colors: #0000 #0000 var(--tab-border-color) #0000;
+  --tab-corner-width: calc(100% + var(--tab-radius-limit) * 2);
+  --tab-corner-height: var(--tab-radius-limit);
+  --tab-corner-position: top left, top right;
+}
+
+.tabs-top > .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]),
+.tabs-top > .tabs-item:is(input:checked),
+.tabs-top > .tabs-item:is(label:has(:checked)) {
+  --tab-border: var(--border) var(--border) 0 var(--border);
+  --tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+  --tab-paddings: 0 calc(var(--tab-p) - var(--border)) var(--border) calc(var(--tab-p) - var(--border));
+  --tab-inset: auto auto 0 auto;
+  --radius-start: radial-gradient(circle at top left, var(--tab-radius-grad));
+  --radius-end: radial-gradient(circle at top right, var(--tab-radius-grad));
+}
+
+.tabs-top:has(> .tabs-item-content) > .tabs-item:first-child:not(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]) {
+  --tab-border-colors: var(--tab-border-color) var(--tab-border-color) #0000 var(--tab-border-color);
+}
+
+.tabs-top > .tabs-item-content {
+  --tabcontent-order: 1;
+  --tabcontent-margin: calc(-1 * var(--border)) 0 0 0;
+  --tabcontent-radius-ss: 0;
+  --tabcontent-radius-se: var(--radius-box);
+  --tabcontent-radius-es: var(--radius-box);
+  --tabcontent-radius-ee: var(--radius-box);
+}
+
+.tabs-bottom {
+  --tabs-height: auto;
+  --tabs-direction: row;
+}
+
+.tabs-bottom > .tabs-item {
+  --tab-order: 1;
+  --tab-border: var(--border) 0 0 0;
+  --tab-radius-ss: 0;
+  --tab-radius-se: 0;
+  --tab-radius-es: var(--tab-radius-limit);
+  --tab-radius-ee: var(--tab-radius-limit);
+  --tab-border-colors: var(--tab-border-color) #0000 #0000 #0000;
+  --tab-paddings: 0 var(--tab-p) var(--border) var(--tab-p);
+  --tab-corner-width: calc(100% + var(--tab-radius-limit) * 2);
+  --tab-corner-height: var(--tab-radius-limit);
+  --tab-corner-position: top left, top right;
+}
+
+.tabs-bottom > .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]),
+.tabs-bottom > .tabs-item:is(input:checked),
+.tabs-bottom > .tabs-item:is(label:has(:checked)) {
+  --tab-border: 0 var(--border) var(--border) var(--border);
+  --tab-border-colors: #0000 var(--tab-border-color) var(--tab-border-color) var(--tab-border-color);
+  --tab-paddings: var(--border) calc(var(--tab-p) - var(--border)) 0 calc(var(--tab-p) - var(--border));
+  --tab-inset: 0 auto auto auto;
+  --radius-start: radial-gradient(circle at bottom left, var(--tab-radius-grad));
+  --radius-end: radial-gradient(circle at bottom right, var(--tab-radius-grad));
+}
+
+.tabs-bottom:has(> .tabs-item-content) > .tabs-item:first-child:not(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]) {
+  --tab-border-colors: #0000 var(--tab-border-color) var(--tab-border-color) var(--tab-border-color);
+}
+
+.tabs-bottom > .tabs-item-content {
+  --tabcontent-order: 0;
+  --tabcontent-margin: 0 0 calc(-1 * var(--border)) 0;
+  --tabcontent-radius-ss: var(--radius-box);
+  --tabcontent-radius-se: var(--radius-box);
+  --tabcontent-radius-es: 0;
+  --tabcontent-radius-ee: var(--radius-box);
+}
+
+.tabs-bottom > :checked + .tabs-item-content:not(:nth-child(2)),
+.tabs-bottom > :is(label:has(:checked)) + .tabs-item-content:not(:nth-child(2)),
+.tabs-bottom > :is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]) + .tabs-item-content:not(:nth-child(2)) {
+  --tabcontent-radius-es: var(--radius-box);
+}
+
+/* variant box */
+.tabs-box {
+  --tabs-box-radius: calc(3 * var(--radius-field));
+  background-color: var(--color-surface-2);
+  padding: calc(0.25em * var(--scale));
+  border-radius: calc(min(var(--tab-height) / 2, var(--radius-field)) + min(0.25rem, var(--tabs-box-radius)));
+  box-shadow: 0 -0.5px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 0.5px oklch(0% 0 0/calc(var(--depth) * 0.05)) inset;
+}
+
+.tabs-box > .tabs-item {
+  border-radius: var(--radius-field);
+  border-style: none;
+}
+
+.tabs-box > .tabs-item:focus-visible,
+.tabs-box > .tabs-item:is(label:has(:checked:focus-visible)) {
+  outline-offset: 2px;
+}
+
+.tabs-box > .tabs-item:focus-visible {
+  z-index: 1;
+}
+
+.tabs-box > :is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]),
+.tabs-box > :is(input:checked),
+.tabs-box > :is(label:has(:checked)) {
+  background-color: var(--tab-bg, var(--color-surface-1));
+  box-shadow: 0 1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px 1px -1px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 50%), rgba(0, 0, 0, 0)), 0 1px 6px -4px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 100%), rgba(0, 0, 0, 0));
+}
+
+@media (forced-colors: active) {
+  .tabs-box > :is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]),
+  .tabs-box > :is(input:checked),
+  .tabs-box > :is(label:has(:checked)) {
+    border: 1px solid;
+  }
+}
+.tabs-box > .tabs-item-content {
+  margin-top: calc(0.25em * var(--scale));
+  height: calc(100% - var(--tab-height) + var(--border) - 0.5em * var(--scale));
+  border-radius: calc(min(var(--tab-height) / 2, var(--radius-field)) + min(0.25rem, var(--tabs-box-radius)) - var(--border));
+}
+
+/* size variants */
+.tabs-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.tabs-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.tabs-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.tabs-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.tabs-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.tabs-item {
+  --tab-border-color: var(--color-border);
+}
+
+.tabs-item {
+  --tab-border-color: var(--color-border);
+  border: var(--border) solid var(--color-border);
+  --cw: var(--cosmos-wobble-selector, 0.7);
+  border-radius: var(--c6);
+  rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+  transition: rotate 0.1s ease-out, background-color 0.1s;
+}
+
+.tabs-item-active {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  rotate: 0deg;
+}
+
+@media (hover: hover) {
+  .tabs-item:not(.tabs-item-active, :disabled):hover {
+    rotate: 0deg;
+  }
+}
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.title {
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.subtitle-s1 {
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.subtitle-s2 {
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.text-s1-b1 {
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.text-s1-b2 {
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.text-s1-b3 {
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.text-s2-b1 {
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.text-s2-b2 {
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.text-s2-b3 {
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.text-s3-b1 {
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.text-s3-b2 {
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.text-s3-b3 {
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.text-s4-b1 {
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.text-s4-b2 {
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.text-s4-b3 {
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.textarea {
+  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+  border: var(--border) solid rgba(0, 0, 0, 0);
+  min-height: calc(5em * var(--scale));
+  padding-block: calc(0.5em * var(--scale));
+  padding-inline-start: calc(0.75em * var(--scale));
+  padding-inline-end: calc(0.75em * var(--scale));
+  width: clamp(3rem, 20rem, 100%);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.textarea textarea {
+  background-color: transparent;
+  border: none;
+}
+
+.textarea textarea:focus,
+.textarea textarea:focus-within {
+  outline: none;
+}
+
+.textarea:focus,
+.textarea:focus-within {
+  outline: 2px solid var(--input-color);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  @supports (-webkit-touch-callout: none) {
+    .textarea:focus,
+    .textarea:focus-within {
+      font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+    }
+  }
+}
+.textarea:has(> textarea[disabled]),
+.textarea:is(:disabled, [disabled]) {
+  color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
+  box-shadow: none;
+}
+
+.textarea:has(> textarea[disabled]) textarea::placeholder,
+.textarea:is(:disabled, [disabled]) textarea::placeholder,
+.textarea:has(> textarea[disabled])::placeholder,
+.textarea:is(:disabled, [disabled])::placeholder {
+  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
+}
+
+/* variant ghost */
+.textarea-ghost {
+  background-color: transparent;
+  box-shadow: none;
+  border-color: rgba(0, 0, 0, 0);
+}
+
+.textarea-ghost:focus,
+.textarea-ghost:focus-within {
+  color: var(--color-on-surface);
+  background-color: var(--color-surface-1);
+  border-color: rgba(0, 0, 0, 0);
+  box-shadow: none;
+}
+
+/* color variants */
+.textarea-primary,
+.textarea-primary:focus,
+.textarea-primary:focus-within {
+  --input-color: var(--color-primary);
+}
+
+.textarea-secondary,
+.textarea-secondary:focus,
+.textarea-secondary:focus-within {
+  --input-color: var(--color-secondary);
+}
+
+.textarea-accent,
+.textarea-accent:focus,
+.textarea-accent:focus-within {
+  --input-color: var(--color-accent);
+}
+
+.textarea-neutral,
+.textarea-neutral:focus,
+.textarea-neutral:focus-within {
+  --input-color: var(--color-neutral);
+}
+
+.textarea-info,
+.textarea-info:focus,
+.textarea-info:focus-within {
+  --input-color: var(--color-info);
+}
+
+.textarea-success,
+.textarea-success:focus,
+.textarea-success:focus-within {
+  --input-color: var(--color-success);
+}
+
+.textarea-warning,
+.textarea-warning:focus,
+.textarea-warning:focus-within {
+  --input-color: var(--color-warning);
+}
+
+.textarea-error,
+.textarea-error:focus,
+.textarea-error:focus-within {
+  --input-color: var(--color-error);
+}
+
+/* size variants */
+.textarea-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.textarea-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.textarea-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.textarea-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.textarea-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.textarea {
+  border: var(--border) solid var(--color-border);
+  /* A tall box drifts less than a button: same pen, fewer pixels. */
+  --cw: var(--cosmos-wobble-box, 0.2);
+  border-radius: var(--c4);
+  rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+}
+
+.textarea {
+  --input-color: var(--color-border);
+  background-color: var(--color-surface-1);
+}
+
+.textarea:focus,
+.textarea:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 var(--border) var(--color-border);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.toggle {
+  --input-color: color-mix(in oklab, var(--color-on-surface) 50%, #0000);
+  --size: calc(1.5em * var(--scale));
+  --toggle-p: calc(var(--size) * 0.125);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  --radius-selector-max: calc(
+  		var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
+  	);
+  border: var(--border) solid currentColor;
+  border-radius: calc(var(--radius-selector) + min(var(--toggle-p), var(--radius-selector-max)) + min(var(--border), var(--radius-selector-max)));
+  width: calc(var(--size) * 2 - (var(--border) + var(--toggle-p)) * 2);
+  transition: color 0.3s, grid-template-columns 0.2s;
+}
+
+.toggle > * {
+  height: 100%;
+  background-color: transparent;
+  padding: calc(0.125em * var(--scale));
+  transition: opacity 0.2s, rotate 0.4s;
+  border: none;
+}
+
+.toggle > *:focus {
+  outline: none;
+}
+
+.toggle > *:nth-child(2) {
+  rotate: 0deg;
+}
+
+.toggle > *:nth-child(3) {
+  opacity: 0;
+  rotate: -15deg;
+}
+
+.toggle:has(:checked) > :nth-child(2) {
+  opacity: 0;
+  rotate: 15deg;
+}
+
+.toggle:has(:checked) > :nth-child(3) {
+  opacity: 1;
+  rotate: 0deg;
+}
+
+.toggle::before {
+  inset-inline-start: 0;
+  aspect-ratio: 1/1;
+  height: 100%;
+  width: 100%;
+  background-color: currentColor;
+  translate: 0;
+  transition: background-color 0.1s, translate 0.2s, inset-inline-start 0.2s;
+}
+
+@media (forced-colors: active) {
+  .toggle::before {
+    outline-style: solid;
+    outline-offset: -0.25rem;
+  }
+}
+@media print {
+  .toggle::before {
+    outline: 0.25rem solid;
+    outline-offset: -1rem;
+  }
+}
+.toggle:focus-visible,
+.toggle:has(:focus-visible) {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.toggle:checked::before,
+.toggle[aria-checked=true]::before,
+.toggle:has(> input:checked)::before {
+  background-color: currentColor;
+}
+
+@starting-style {
+  .toggle:checked::before,
+  .toggle[aria-checked=true]::before,
+  .toggle:has(> input:checked)::before {
+    opacity: 0;
+  }
+}
+.toggle:disabled {
+  opacity: 0.3;
+}
+
+.toggle:disabled::before {
+  background-color: transparent;
+  border: var(--border) solid currentColor;
+}
+
+/* variant track */
+.toggle-track:checked,
+.toggle-track[aria-checked=true],
+.toggle-track:has(> input:checked) {
+  background-color: var(--input-color, var(--color-on-surface));
+  background-clip: content-box; /* track stays inside padding = inset/thinner effect */
+}
+
+.toggle-track:checked::before,
+.toggle-track[aria-checked=true]::before,
+.toggle-track:has(> input:checked)::before {
+  background-color: var(--color-on-surface);
+  box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-surface-1);
+}
+
+/* color variants */
+.toggle-primary:checked,
+.toggle-primary[aria-checked=true] {
+  --input-color: var(--color-primary);
+}
+
+.toggle-secondary:checked,
+.toggle-secondary[aria-checked=true] {
+  --input-color: var(--color-secondary);
+}
+
+.toggle-accent:checked,
+.toggle-accent[aria-checked=true] {
+  --input-color: var(--color-accent);
+}
+
+.toggle-neutral:checked,
+.toggle-neutral[aria-checked=true] {
+  --input-color: var(--color-neutral);
+}
+
+.toggle-info:checked,
+.toggle-info[aria-checked=true] {
+  --input-color: var(--color-info);
+}
+
+.toggle-success:checked,
+.toggle-success[aria-checked=true] {
+  --input-color: var(--color-success);
+}
+
+.toggle-warning:checked,
+.toggle-warning[aria-checked=true] {
+  --input-color: var(--color-warning);
+}
+
+.toggle-error:checked,
+.toggle-error[aria-checked=true] {
+  --input-color: var(--color-error);
+}
+
+/* size variants */
+.toggle-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.toggle-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.toggle-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.toggle-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.toggle-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.toggle {
+  --input-color: var(--color-border);
+  border-width: var(--border);
+}
+
+/* Values that used to sit in base. They belong to this family now:
+   change them here and nobody else moves (ADR 0008). */
+.validator-hint {
+  margin-top: 0.5em;
+}

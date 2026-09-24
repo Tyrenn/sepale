@@ -159,7 +159,7 @@ $snap: 'clamp(0.145, (0.66 - l) * 999, 0.97)';
 	);
 
 	--dot: calc(0.6em * var(--scale));
-	--dot-bg: var(--color-surface-1);
+	--dot-bg: var(--color-background);
 	--dot-border-color: var(--color-border);
 	--dot-border-width: var(--border, 1px);
 	aspect-ratio: auto;
@@ -327,8 +327,8 @@ $snap: 'clamp(0.145, (0.66 - l) * 999, 0.97)';
 		/* Mixed from the OPAQUE ink, not from --_fld-fg: that variable is
 		   redefined two lines down to a translucent grey, and mixing with a
 		   translucent colour tints the result. */
-		--_fld-bg: color-mix(in oklch, var(--color-on-surface) var(--_fld-disabled-mix), var(--color-surface-1));
-		--_fld-fg: color-mix(in oklch, var(--color-on-surface) var(--_fld-disabled-fg-mix), #0000);
+		--_fld-bg: color-mix(in oklch, var(--color-on-background) var(--_fld-disabled-mix), var(--color-background));
+		--_fld-fg: color-mix(in oklch, var(--color-on-background) var(--_fld-disabled-fg-mix), #0000);
 		--_fld-shadow: none;
 		cursor: not-allowed;
 	}

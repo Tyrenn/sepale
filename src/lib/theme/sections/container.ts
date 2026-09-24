@@ -39,17 +39,26 @@ export const container: Section = {
 		   Built by running `node scripts/check-theme-vars.mjs` and pasting
 		   what it named. Never from memory. */
 		'container-bg',
+		'container-border-line',
+		'container-box-bg',
+		'container-box-fg',
+		'container-corners',
 		'container-fg',
 		'container-item-corners',
+		'container-panel-bg',
+		'container-panel-fg',
+		'container-title-fg',
 		'dock-bg',
 		'dock-border-color',
 		'dock-border-width',
 		'dock-disabled-color',
+		'dock-fg',
 		'list-active-bg',
 		'list-active-fg',
 		'list-bg',
 		'list-divider-color',
 		'list-divider-width',
+		'list-fg',
 		'list-hover-bg',
 		'list-suggestions-border-color',
 		'list-suggestions-shadow',
@@ -110,7 +119,7 @@ export const container: Section = {
 	controls: [
 		scale(P, 'Grows the padding and the spacing of every box: menus, lists, the bars.'),
 
-			box('container-bg', 'Box', { sources: [], source: 'color-surface-1' }),
+			box('container-bg', 'Box', { sources: [], source: 'color-background' }),
 			box('container-fg', 'Box', {
 				kind: 'contrast',
 				inkOf: 'container-bg',
@@ -119,11 +128,32 @@ export const container: Section = {
 				source: 'own'
 			}),
 
+			/* The ink of a box's TITLE — `.card-title`, `.menu-title`. It earns a
+			   control on the measurement: the three old families all softened it
+			   and they disagreed on how much (40%, 55%, 60% of the ink), while
+			   they were unanimous on a fieldset legend, which therefore stays
+			   internal. Set the source to a semantic and the shade to 0 and you
+			   get a look whose titles ARE the accent — a real theme, and one the
+			   old variable set could not express at all: a card title had no
+			   colour of its own to name. */
+			box('container-title', 'Title', {
+				sources: ['own', 'text'],
+				source: 'own',
+				shade: 0.4,
+				follows: 'the box’s own ink',
+				help: 'Derived it is the box’s ink, faded — the grey of a menu heading. Custom states a colour, and 0 intensity keeps it whole: that is how a theme paints its titles in the accent.'
+			}),
+
 
 		/* Boxes are twice the radius of the things inside them — daisyUI's own
-		   `--radius-box` against `--radius-field`, and true in all 13 daisy
-		   themes. That factor is what lets one Basic widget serve both. */
-		border(P, ['own', 'text', 'surface'], '0.5rem'),
+		   `--radius-box` against `--radius-field`. Measured rather than assumed:
+		   it holds in 10 of the 13 daisy themes, not all of them, and in 10 of
+		   19 overall. A comment here used to claim all 13.
+		
+		   10 of 19 still earns its place in Common: the nine that disagree open
+		   with their override already marked, which is cheaper than nineteen
+		   themes stating the radius twice. */
+		border(P, ['own', 'text', 'surface'], '0.5rem', 2),
 		shadow(P),
 
 		{

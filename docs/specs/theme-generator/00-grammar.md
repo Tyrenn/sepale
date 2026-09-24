@@ -11,12 +11,12 @@ checks.
 
 ## What this replaces
 
-Today `src/lib/theme/sections/*.ts` holds **208 top-level controls** in flat
-lists, and the only grouping that exists is `effect`. The target is **95
-controls in Basic mode, 143 in Advanced**, in ~35 groups.
+`src/lib/theme/sections/*.ts` held **208 top-level controls** in flat lists,
+and the only grouping was `effect`. It now holds **69 a section owns and 83
+shared**, in ~30 groups.
 
-The count is not the point. A closed section today shows 67 rows; after this
-it shows six.
+The count is not the point. A closed section used to show 67 rows; it now shows
+three to seven groups.
 
 ## The three words, unchanged
 
@@ -43,8 +43,14 @@ export interface Group {
 	};
 	/** Shown whatever the type. Empty when the type is the whole group. */
 	controls: Control[];
-	/** See "Basic and Advanced". */
-	shared?: boolean;
+	/** The NAME of the shared answer — `border`, `focus`, `disabled`,
+	    `handdrawn`. Every group carrying the same name is an instance of one
+	    answer. See "Common and the tick". */
+	shared?: string;
+	/** How many times this section's length is the shared one. Container is the
+	    only 2: a box is twice the radius of what sits inside it, so 0.5rem and
+	    0.25rem are the SAME answer said at two scales. */
+	sharedFactor?: number;
 	/** See "Layout". */
 	layout?: 'row' | 'stack';
 	/** Every variable the group can write, its type's modes included. */
@@ -161,40 +167,51 @@ A row of colour boxes is what makes a group read as **one** setting rather than
 three. Each tile carries its name small underneath; the value appears when you
 open it. That is the space this buys.
 
-## Basic and Advanced
+## Common and the tick
 
-A checkbox at the top of the form, beside the `[ Light │ Dark ]` switch.
+There is ONE grain. A group marked with a `shared` name is rendered:
 
-- **Basic** — groups marked `shared: true` are hidden from every section and
-  rendered once in the **Common** section. Each of their controls writes **the
-  variables of every section at once**.
-- **Advanced** — the Common section disappears, and each shared group is
-  rendered inside every section that has it, writing only that section's.
-
-**The switch is visual. Nothing is migrated, nothing is bound in both
-directions, and the impact happens only when a control is moved.** Moving a
-Basic control overwrites all N sections. Moving an Advanced control writes one.
+- once in the **Common** section, where each of its controls writes **the
+  variables of every section that still follows Common**;
+- again at the END of each section that has it, behind a tick, where moving it
+  writes that section alone.
 
 This works because **the state of a theme is its variables**, not a record of
 what each control was set to. A control has no value of its own: it reads one
 out of the variables to show, and writes variables when it is moved.
 
 ```
-Basic    move A1 → --a: 1  --b: 1  --c: 1
-         switch to Advanced — nothing is written
-Advanced move B  → --a: 1  --b: 2  --c: 1
-         switch back to Basic — nothing is written, --b is still 2
+Common   move A → --a: 1  --b: 1  --c: 1
+section  move B → --a: 1  --b: 2  --c: 1     (b has left Common)
+Common   move A → --a: 3  --b: 2  --c: 3     (and stays out of it)
 ```
 
-When sections disagree, the Basic control shows the first section's value and
-is marked `≠`; touching it realigns them. There is **no global variable and no
-second level of cascade** — a shared control is an ordinary control with a
-longer `vars` array, which this schema has always allowed.
+### Whether a section still follows Common is DERIVED
 
-The cost is that a control folding several answers into one variable must read
-its answer back out of it. Border width recovers itself as the shorthand's
-first non-zero part. Where that is impossible, the answer goes to a
-**sentinel**: a variable no stylesheet reads, which the generator does.
+Not stored. Bucket the sections by the answer they hold; the biggest bucket IS
+Common's answer, and every other section has drifted from it. Two agreeing are
+enough to set the reference; all disagreeing means each is an override and
+Common has nothing to say.
+
+Compare after dividing by `sharedFactor`, or Container reads as detached in
+every theme — it is the same arithmetic the fan-out does in the other
+direction.
+
+There is **no global variable, no second level of cascade and no sentinel for
+this** — a shared control is an ordinary control with a longer `vars` array,
+which this schema has always allowed. And a theme written by hand opens with
+its overrides already marked, because there is no state to be out of date.
+
+The user's own tick lives in `generator.detached`: TypeScript, never a
+variable, cleared when a theme loads. It covers the one moment the values
+cannot speak — between ticking a section and moving its control, when the two
+still agree. Unticking copies Common's answer in, which is what makes it
+reversible.
+
+The remaining cost is that a control folding several answers into one variable
+must read its answer back out of it. Border width recovers itself as the
+shorthand's first non-zero part. Where that is impossible, the answer goes to
+a **sentinel**: a variable no stylesheet reads, which the generator does.
 
 See ADR 0011.
 
@@ -210,11 +227,12 @@ What is shared, measured over the 19 shipped themes rather than assumed:
 | Shadow | 15 / 19 | **no** — a button and a panel want different shadows |
 | Size (scale) | 0 / 19 | **no** — never |
 
-Radius is shared as a base value, each section multiplying it by a factor fixed
-in `_defaults.scss` (`Container ×2`, everything else ×1) — exactly how
-`--<section>-scale` already works for geometry. Every daisy theme is clean in
-Basic; dahlia and cosmos need Advanced, as they already do for border and
-shadow.
+Radius is shared as a base value, each section multiplying it by its
+`sharedFactor` (`Container ×2`, everything else ×1). Measured per control:
+Action and Field agree in 19 of 19, Container once divided in 10 of 19, and
+Selectors, Markers and Feedback in 0 of 19 — each has a radius of its own, and
+a chip is a pill. So Common's Radius writes the first three, and the other
+three arrive detached without needing a flag to say so.
 
 ## Motion
 
@@ -237,10 +255,24 @@ control or named in the section's `internal` list — never silently neither.
 reaches. Paste that list into the section. That is the procedure, and it is
 the reason the check exists.
 
-## The three checks still gate the build
+## The five checks gate the build
 
-`gen:classes`, `check:theme`, `gen:themes`, all three in `npm run build:css`.
-A section that does not pass them is not done.
+`gen:classes`, `check:theme`, `gen:themes`, `check:defaults`, `check:scope` —
+all five in `npm run build:css`. A section that does not pass them is not done.
+
+The last two were added after the first three passed green over a repo in
+which one theme shipped the wrong selector radius, seven carried
+`--color-scheme: [object Object]`, thirteen had lost their radii, and 88
+declarations were frozen at the root. **This design's failure mode is
+silence**: nothing throws, nothing looks broken, the theme simply stops having
+an effect — or has it everywhere except where you scoped it.
+
+- `check:defaults` — the form's neutral and `_defaults.scss` must agree on
+  every literal. A theme carries only what DIFFERS from the neutral, so a
+  disagreement means a theme that wants X writes nothing and renders as Y.
+- `check:scope` — a variable is an **input** the form writes (`:root`, a
+  literal) or a **resolution** reading others (`:where(*)`, substituted per
+  element). Never both. See ADR 0012.
 
 ## Verification
 

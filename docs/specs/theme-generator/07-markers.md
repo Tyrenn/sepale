@@ -2,7 +2,7 @@
 
 **Components** — `badge`, `chip`.
 **Prefix** — `marker`.
-**Controls** — **8 in Basic**, 14 in Advanced.
+**Controls** — **4 of its own**, plus 10 it shares with the other sections. The shared ones are answered in **Common** and repeated at the end of this list behind a tick; see [`02-common.md`](./02-common.md).
 
 `badge` wants zero controls and earns them: it positions a chip and paints
 nothing. Everything here is `chip`.
@@ -28,7 +28,7 @@ Grows a chip and a badge.
 
 | Control | Sources | Default |
 |---|---|---|
-| `marker-bg` | `semantic`, `surface`, custom | Derived from `surface-3` |
+| `marker-bg` | `semantic`, `surface`, custom | Derived from `--color-action` — a chip takes the same fill as a button |
 | `marker-fg` | `own`, `text`, custom | Derived from Own, contrast |
 
 `--marker-muted-bg`, `--marker-soft-mix` and `--marker-soft-border-mix` derive

@@ -1,28 +1,69 @@
 # 02 — Common
 
-**Visible in Basic mode only.** In Advanced this section disappears and each
-group below is rendered inside every section listed in its *Spreads to* row,
-writing only that section's variables.
+Answered once for every section. Each group below is ALSO rendered at the end
+of every section listed in its *Spreads to* row, behind a tick — and moving it
+there writes that section alone.
 
 **Components** — none of its own.
 **Prefixes** — none. Every control here writes into the other sections'
 namespaces.
-**Controls** — 14.
+**Controls** — 14, over four groups.
 
 Help text, shown under the section title:
 
-> These settings are written into every section at once. Tick Advanced to set
-> them section by section.
+> Answered once for every section. Each section can take any of these over at
+> the end of its own list — and a theme that already disagrees arrives with
+> those marked.
 
 ## How a shared control writes
 
 A shared control is an ordinary control with a longer `vars` array. There is no
-global variable and no second level of cascade. `Border width` in Basic writes
-five variables; the same control inside Action in Advanced writes one.
+global variable and no second level of cascade. `Border width` in Common writes
+six variables; the same control inside Action writes one.
 
-When the sections disagree — because the theme was edited in Advanced — the
-Basic control shows the **first** section's value and renders a `≠` marker.
-Moving it overwrites all of them. Nothing is migrated on the mode switch itself.
+## How Common knows which sections still follow it
+
+It is **not stored**. Bucket the sections by the answer they hold, and the
+biggest bucket IS Common's answer — every other section has drifted from it.
+Two sections agreeing are enough to set the reference; all of them disagreeing
+means each is an override and Common has nothing to say.
+
+So Common shows the majority answer, moving it writes only the sections that
+hold it, and a theme written by hand — by someone who never opened the form —
+opens with its overrides already marked. There is no state to be out of date
+(ADR 0011).
+
+A section's tick can also be set by hand, for the one moment the values cannot
+speak: between ticking it and moving its control, the two still agree. That
+tick lives in `generator.detached`, TypeScript beside `generator.open` — not a
+variable, not exported, cleared when a theme loads. Unticking copies Common's
+answer back in, which is what makes it reversible.
+
+### What the nineteen shipped themes say
+
+Per control, do the sections agree?
+
+```
+Muted / Fade             19 / 19
+Muted / Colour           19 / 19
+Hand-drawn / Strength    19 / 19
+Hand-drawn / Tilt        19 / 19
+Focus / Width            45 / 45
+Focus / Colour           45 / 45
+Border / Radius           0 / 19
+```
+
+Every shared control is genuinely shared **except the radius**:
+
+```
+action + field                        19 / 19
++ container, divided by its ×2 factor  10 / 19
++ selectors, markers, feedback          0 / 19
+```
+
+So Common's Radius writes Action, Field and Container. Selectors, Markers and
+Feedback keep their own — and need no flag saying so: their answers differ, so
+they arrive detached. A chip is a pill (999px) in eighteen of nineteen themes.
 
 ## Entries
 
@@ -66,10 +107,15 @@ Writes one base value. Each section multiplies it by a **factor fixed in
 --feedback-corners: calc(var(--radius) * 2);
 ```
 
-Measured: the radius diverges across sections in 17 of 19 themes, but **at a
-constant ratio** — every daisy theme is `0.25rem` for controls and `0.5rem` for
-boxes, which is daisyUI's own `--radius-field` / `--radius-box`. dahlia and
-cosmos carry three independent radii and need Advanced.
+Measured again, per control rather than per group: Action and Field agree on
+the radius in **19 of 19**; Container agrees once its ×2 is divided out in 10
+of 19 — daisyUI's own `--radius-field` against `--radius-box`; Selectors,
+Markers and Feedback agree in **0 of 19**, because each has a radius of its
+own. A chip is a pill.
+
+So the factor is real and it is set — `sharedFactor: 2` on Container's Border.
+It had been declared in the schema and set by nobody, and a comment claimed it
+held in all thirteen daisy themes where it holds in ten.
 
 ### ▸ Typography — `shared` · `layout: 'row'`
 

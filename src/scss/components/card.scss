@@ -15,7 +15,7 @@
    (ADR 0009).
 
    It takes the Container section's border, corners and shadow, and
-   sits on `--color-surface-2` — one step off the page. That is the
+   sits on `--color-card` — one step off the page. That is the
    one colour it does not take from the section: a card whose fill
    equalled the page behind it would need its border to exist at all,
    and daisyUI's card is base-100 over a base-200 page for the same
@@ -28,12 +28,12 @@
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	background-color: var(--color-surface-2);
-	color: var(--color-on-surface);
+	background-color: var(--card-bg);
+	color: var(--card-fg);
 	border-radius: var(--container-corners);
 	border-width: var(--container-border-width);
 	border-style: var(--container-border-style);
-	border-color: var(--menu-border);
+	border-color: var(--container-border-line);
 	box-shadow: var(--container-shadow);
 	rotate: var(--container-angle);
 	/* Its own corners clip whatever it holds — an image at the top
@@ -50,7 +50,13 @@
 	padding: calc(1.25em * var(--container-scale));
 }
 
+/* The title takes the section's title ink, not the card's body ink: a
+   look whose titles are the accent is a real theme, and it needs a name
+   to set. Derived it is the body ink faded, which is the grey every
+   family drew. A coloured title in ONE place is `.title-primary`, a
+   class — not this. */
 .card-title {
+	color: var(--container-title-fg);
 	display: flex;
 	align-items: center;
 	gap: calc(0.5em * var(--container-scale));
@@ -130,6 +136,6 @@
 }
 .card-image-full > .card-body {
 	position: relative;
-	background-color: color-mix(in oklab, var(--color-surface-2) 65%, #0000);
+	background-color: color-mix(in oklab, var(--card-bg) 65%, #0000);
 	backdrop-filter: blur(2px);
 }

@@ -18,6 +18,38 @@ variable for.
 _Avoid_: token, parameter (it named this back when each opinionated direction
 owned its own set), knob
 
+**Input** / **Resolution**:
+The two kinds a variable can be, and it is never both.
+
+An **input** is one the generator writes. It is declared on `:root` with a
+LITERAL value, so a theme scoped to anything — a preview, a `[data-theme]`
+block, one panel of a page — can set it and have it inherit.
+
+A **resolution** reads other variables. It is declared on `:where(*)`, so
+each element substitutes it for itself. A custom property is substituted
+WHERE IT IS DECLARED, so a resolution on `:root` resolves against the root
+and the frozen result inherits: the scope moves the inputs and nothing
+follows. And an input on `:where(*)` is re-made on every element, which
+blocks inheritance: the scope sets it and each descendant overrides it back.
+
+A variable that is both cannot be declared correctly anywhere, which is a
+design fault rather than a placement one. `check:scope` holds all three
+cases.
+_Avoid_: computed (says nothing about where it is declared)
+
+**Fill**:
+One of the five colours a component can sit on, named for what it paints:
+`--color-background` the page, `--color-card` a card or a dropdown or a list
+or a menu, `--color-panel` a navbar or a dock, `--color-action` a button or a
+tab or a chip, `--color-field` the inside of an input. The page is the seed
+and the other four step away from it.
+
+Each has an automatic ink, `--color-on-<fill>`, derived by contrast and never
+a control. There is ONE ink a person sets, `--color-on-background`; a
+coloured text is a class, `.text-primary`, not a theme value.
+_Avoid_: surface (they were numbered `--color-surface-1..4` until 2026-09-24;
+a number answers no question)
+
 **Control**:
 One field in the theme generator. A control is not a variable. It may write
 several — "press animation: push" writes an offset, two translations and a
@@ -37,14 +69,27 @@ _Avoid_: effect (it left on 2026-09-23; it was a group with a type), panel,
 fieldset (a fieldset is a component here)
 
 **Shared**:
-Said of a group whose answer is the same in every section that has it — Focus,
-Disabled, Border, Radius, the hand-drawn look. In **Basic** mode a shared
-group is shown once and each of its controls writes the variables of every
-section at once; in **Advanced** it is shown inside each section and writes
-only that one's. There is no global variable and no second level of cascade: a
-shared control is an ordinary control with a longer list of variables. The
-switch between the two modes is visual; nothing is written until a control is
-moved.
+Said of a group whose answer is the same in every section that has it —
+Border, Focus, Muted, the hand-drawn look. It is shown once in **Common**,
+where moving it writes every section at once, and again at the end of each
+section that has it, where moving it writes that section alone.
+
+There is no global variable and no second level of cascade: a shared control
+is an ordinary control with a longer list of variables.
+
+_Avoid_: Basic, Advanced (there was a mode switch until 2026-09-24; there is
+one grain now)
+
+**Detached**:
+Said of a section that has left Common for one shared group. It is never
+stored: bucket the sections by the answer they hold, and the biggest bucket
+IS Common's answer — every other section has drifted from it. Two sections
+agreeing are enough to set the reference; all of them disagreeing means each
+is an override and Common has nothing to say.
+
+Which is why a theme written by hand opens with its overrides already
+marked, and why a theme is still exactly its variables (ADR 0011).
+_Avoid_: override mode, sentinel, `--common-*`
 
 **Box**:
 The one colour control. It offers a fixed colour or a colour **derived** from
@@ -67,6 +112,10 @@ A complete, flat set of variable values, written as `:root { … }`. It carries
 everything — colours, shapes, shadows, states, motion — and it shares nothing
 with any other theme. Two themes that look alike are two files saying the same
 thing, which is the price of being able to read one on its own.
+
+A theme only ever writes scalars, colours and lengths — never a formula. A
+formula reads other variables, which makes it a **resolution**, and a
+resolution written into a `:root` block freezes wherever it lands.
 _Avoid_: palette (a theme is not only colours), skin, preset, scheme
 
 ### A component
@@ -131,8 +180,9 @@ one. Generated, never written by hand, and the build FAILS on a class no
 component accounts for — so a documentation page cannot describe a class that
 does not exist, and no class exists that no page can describe.
 
-The themes are not in it. They are drafts in `src/lib/theme/presets.ts`,
-serialised by the same code the download button uses.
+The themes are not in it. A theme is a FILE — `static/themes/*.css` — and
+`presets.ts` holds names and URLs, not values: the form loads one by fetching
+it and parsing it, so the file it reads is the file you download.
 
 ### Distribution
 

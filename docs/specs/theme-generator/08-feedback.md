@@ -2,7 +2,7 @@
 
 **Components** — `progress`, `radial-progress`, `loading`, `skeleton`.
 **Prefixes** — `feedback`, `skeleton`.
-**Controls** — **6 in Basic**, 10 in Advanced.
+**Controls** — **5 of its own**, plus 7 it shares with the other sections. The shared ones are answered in **Common** and repeated at the end of this list behind a tick; see [`02-common.md`](./02-common.md).
 
 `validator` has moved to Field, where it belongs: it drives a field's accent.
 

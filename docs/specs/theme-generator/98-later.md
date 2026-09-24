@@ -2,6 +2,13 @@
 
 Decisions deliberately postponed. Nothing here blocks the rework; each was
 raised, understood and parked.
+**Two of these have landed since.** `card` exists, and so does `dropdown`;
+the OKLCH picker is built (`src/routes/ColorBox.svelte`). Typography is still
+parked, and it is the one with real consequences: **there is no font variable
+anywhere in the kit**, which is why cosmos lost Patrick Hand in the merge and
+currently reads as a wonky sans — exactly what its own family file warned
+about.
+
 
 ## Typography
 

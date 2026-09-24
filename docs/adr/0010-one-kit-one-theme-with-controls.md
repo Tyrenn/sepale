@@ -48,7 +48,7 @@ Two things that were already true, and one that was not.
 
 - **The paint slots are the default look.** `base` writes
   `background-color: var(--btn-bg)`, and `--btn-bg: var(--btn-color,
-  var(--color-primary))` *is* neo-brutalism while `var(--color-surface-2)` is
+  var(--color-primary))` *is* neo-brutalism while `var(--color-card)` is
   daisyUI. The "default variant" — the one thing that looked like it could only
   be decided by a stylesheet — is a value.
 - **The big departures are already variants.** `tabs` is 98% shared across

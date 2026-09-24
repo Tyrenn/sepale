@@ -61,7 +61,11 @@ Object.assign(vars, schema.writeMode(g('action-border'), 'solid', vars));
 
 console.log('shadow          :', vars['action-shadow']);
 console.log('press y (=offset):', vars['action-press-y']);
-console.log('corners         :', vars['action-corners'].slice(0, 60), '…');
+/* The form writes the wobble, not the corner. The recipe it feeds lives in
+   _defaults.scss: a theme writes scalars, colours and lengths, never a
+   formula (CLAUDE.md). */
+console.log('wobble          :', vars['action-wobble']);
+console.log('corners written  :', 'action-corners' in vars ? 'YES — a theme should not carry a formula' : 'no, resolved in CSS');
 console.log('border width    :', vars['action-border-width']);
 
 /* Turn off two edges: one control, one variable, and the shorthand IS the

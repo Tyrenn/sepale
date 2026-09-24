@@ -2,7 +2,7 @@
 
 **Components** — `button`, `link`, `join`, `tabs`, `breadcrumbs`.
 **Prefixes** — `action`, `link`, `tabs`.
-**Controls** — **17 in Basic**, 31 in Advanced.
+**Controls** — **12 of its own**, plus 18 it shares with the other sections. The shared ones are answered in **Common** and repeated at the end of this list behind a tick; see [`02-common.md`](./02-common.md).
 
 Renamed from "Buttons": the section is everything you click. `join` is
 deliberately unthemed — it is geometry that reads its neighbours' corners.
@@ -25,8 +25,8 @@ Size
 ▸ Hand-drawn        …                            ← shared, in Common, LAST
 ```
 
-*Press animation* is second to last and *Hand-drawn* last, in Basic and in
-Advanced alike.
+*Press animation* is second to last and *Hand-drawn* last — in Common and in
+the section alike.
 
 ### `action-scale` — Size
 
@@ -41,10 +41,10 @@ sections in every theme measured.
 
 | Control | Sources | Default |
 |---|---|---|
-| `action-bg` | `surface`, `semantic`, custom | Derived from `surface-4` |
+| `action-bg` | `surface`, `semantic`, custom | Derived from `--color-action` |
 | `action-fg` | `own`, `text`, custom | Derived from Own, contrast |
 
-A plain button is surface‑4 with ink that contrasts against it. Deriving the
+A plain button is `--color-action` with ink that contrasts against it. Deriving the
 text from *Own* means the fill can move without anyone re-checking the text.
 
 ### ▸ Shadow — type · **not shared**

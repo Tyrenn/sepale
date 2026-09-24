@@ -21,8 +21,10 @@
 	 * which is why the preview is instant and why what you download is what
 	 * you saw.
 	 *
-	 * The form shows two grains of the same variables (ADR 0011). Ticking
-	 * Advanced changes which controls are on screen and writes nothing.
+	 * There is ONE grain. A setting every section shares is answered once in
+	 * Common and can be taken over per section; whether it HAS been is read
+	 * off the values rather than stored, so a hand-written theme opens with
+	 * its overrides already marked (ADR 0011).
 	 */
 
 	let sections = $derived(view());
@@ -68,16 +70,13 @@
 			<!-- The first thing you answer, and the one that is not a section. -->
 			<div class="top">
 				<Control control={scheme} />
-				<label class="adv">
-					<input type="checkbox" class="toggle toggle-xs" bind:checked={generator.advanced} />
-					Advanced
-				</label>
 				<button class="btn btn-xs btn-ghost" onclick={copy}>{copied ? 'copied' : 'copy CSS'}</button>
 			</div>
 			<p class="note">
-				Advanced splits the settings every section shares — border, corners, focus, disabled, the
-				hand-drawn look — back into the sections they belong to. It changes what is on screen and
-				nothing else: nothing is written until you move something.
+				Every section shares its border, corners, focus, muted state and
+				hand-drawn look, so they are answered once in Common. A section can
+				take any of them over at the end of its own list — and a theme that
+				already disagrees opens with those marked, read off its values.
 			</p>
 
 		</header>
@@ -112,7 +111,7 @@
 							{:else}
 								{#each run.entries as entry (entry.entry.id)}
 									{#if isGroup(entry.entry)}
-										<Group group={entry.entry} peers={entry.peers} under={section.id === 'colors'} />
+										<Group group={entry.entry} peers={entry.peers} override={entry.override} under={section.id === 'colors'} />
 									{:else if entry.entry.id !== 'color-scheme'}
 										<Control control={entry.entry} />
 									{/if}

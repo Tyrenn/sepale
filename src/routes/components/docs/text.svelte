@@ -54,13 +54,13 @@
 
 	<Section
 		title="Body"
-		html={`<p class="text-s2-b1">Base, semibold</p>
-<p class="text-s2-b2">Base, medium</p>
-<p class="text-s2-b3">Base, regular</p>`}
+		html={`<p class="text-s2 text-b1">Base, semibold</p>
+<p class="text-s2 text-b2">Base, medium</p>
+<p class="text-s2 text-b3">Base, regular</p>`}
 	>
 		<div style="text-align:center;">
-			<p class="text-s2-b1">Base, semibold</p>
-			<p class="text-s2-b2">Base, medium</p>
-			<p class="text-s2-b3">Base, regular</p>
+			<p class="text-s2 text-b1">Base, semibold</p>
+			<p class="text-s2 text-b2">Base, medium</p>
+			<p class="text-s2 text-b3">Base, regular</p>
 		</div>
 	</Section>

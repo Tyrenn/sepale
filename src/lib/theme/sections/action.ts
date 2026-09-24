@@ -226,7 +226,9 @@ const link: Group = {
 			id: 'link-underline',
 			label: 'Underline',
 			type: 'choice',
-			default: 'hover',
+			/* A link is underlined at rest — the stylesheet's own neutral, and
+			   daisyUI's. `hover` here made the form and the kit disagree. */
+			default: 'always',
 			options: [
 				{ value: 'none', label: 'None' },
 				{ value: 'always', label: 'Always' },
@@ -251,7 +253,7 @@ const link: Group = {
 
 registerWriters({
 	'link-underline': (value) => {
-		const v = String(value ?? 'hover');
+		const v = String(value ?? 'always');
 		return {
 			'link-decoration': v === 'always' ? 'underline' : 'none',
 			'link-hover-decoration': v === 'none' ? 'none' : 'underline'
@@ -272,6 +274,7 @@ export const action: Section = {
 		/* Tabs states no colour of its own. A tab is a surface with an
 		   accent on the active one, and both already exist — asking again
 		   here only let a theme contradict itself. */
+		'action-corners',
 		'tabs-active-color',
 		'tabs-active-shade',
 		'tabs-idle-color',
@@ -334,7 +337,7 @@ export const action: Section = {
 
 		/* The fill and its ink, bare: two swatches read as a palette, and a
 		   group box around two tiles was a frame with nothing to frame. */
-		box('action-bg', 'Button', { sources: [], source: 'color-surface-4' }),
+		box('action-bg', 'Button', { sources: [], source: 'color-action' }),
 		box('action-fg', 'Button', {
 			kind: 'contrast',
 			inkOf: 'action-bg',

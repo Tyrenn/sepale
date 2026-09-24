@@ -126,7 +126,11 @@ export interface ColorControl extends Base {
 }
 
 export const isOwn = (source: string) => source === 'own';
-export const isToken = (source: string) => source.startsWith('color-');
+/* A token is a bare IDENTIFIER. `startsWith('color-')` also matched
+   `color-mix(in oklab, …)`, so a theme whose colour was a mix came back out
+   as `var(--color-mix(in oklab, …))` — not CSS, and both sunflower themes
+   shipped with a white page instead of a tinted one because of it. */
+export const isToken = (source: string) => /^color-[a-z0-9-]+$/.test(source);
 export const isLiteral = (source: string) => !isOwn(source) && !isToken(source);
 
 /** A source as the theme writes it. */
@@ -768,6 +772,27 @@ export function neutralVars(sections: Section[]): Vars {
 			   and the Radius a wobble builds on is one of them. */
 			for (const c of e.controls) Object.assign(out, writeValue(c, c.default, out, e));
 			if (e.type) Object.assign(out, writeMode(e, e.type.default, out));
+		}
+	}
+	/* A pair whose default source is a TOKEN must come out as an ABSENCE.
+	
+	   The stylesheet already names that token as the recipe's fallback —
+	   `shaded(var(--color-card-color, var(--color-background)))` — so writing
+	   `var(--color-background)` into the source states what absence already
+	   means. And a stated source WINS: it beats the fallback, which is how a
+	   card came out the colour of the page in the scoped preview, where the
+	   whole neutral set is injected. `_defaults.scss` declares `initial` for
+	   every one of these, and this is what makes the two agree.
+	
+	   Only the neutral. A theme that CHOSE to derive one colour from another
+	   writes the token, because there the choice is the information. */
+	for (const s of sections) {
+		for (const e of s.controls) {
+			eachControl([e], (c) => {
+				if (c.type !== 'color') return;
+				const src = c.default.source;
+				if (isToken(src)) out[c.vars[0]] = 'initial';
+			});
 		}
 	}
 	return out;

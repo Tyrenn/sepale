@@ -56,12 +56,6 @@
 	   grow together — a button's height, its padding and its icon gap are one
 	   decision, not three — so the form offers the number and keeps the
 	   formulas here where nobody has to edit them. */
-	--action-scale: var(--scale);
-	--field-scale: var(--scale);
-	--selector-scale: var(--scale);
-	--container-scale: var(--scale);
-	--marker-scale: var(--scale);
-	--feedback-scale: var(--scale);
 
 	/* ── Colours ─────────────────────────────────────────────────
 	   Not absent: a kit with no colours does not render neutrally,
@@ -116,7 +110,7 @@
 	--action-disabled: computed;
 	--action-press: none;
 	--action-handdrawn: off;
-	--link-underline: hover;
+	--link-underline: always;
 
 	/* Size. One number per section; there is no global scale. Each
 	   geometric length below multiplies by it, and none of them is a
@@ -149,9 +143,9 @@
 	/* Hover, and the press that derives from it at 1.6. A press
 	   identical to its hover reads as nothing having happened. */
 	--action-hover-color: initial;
-	--action-hover-shade: 0;
+	--action-hover-shade: 0.07;
 	--action-press-color: initial;
-	--action-press-shade: 0;
+	--action-press-shade: 0.112;
 
 	/* Border. The width is a SHORTHAND, which is how edges are chosen:
 	   `2px` is all four, `0 0 2px 0` is the bottom only. The `-edges`
@@ -169,7 +163,6 @@
 	   the hand-drawn group can replace it with an eight-value asymmetric
 	   recipe. Plain themes leave it pointing at the single radius. */
 	--action-radius: 0.25rem;
-	--action-corners: var(--action-radius);
 
 	/* Hand-drawn. `--action-wobble` holds the strength verbatim — which is
 	   how the slider reads itself back, since `--action-corners` holds the
@@ -217,11 +210,8 @@
 	--action-press-x: 0px;
 	--action-press-y: 0px;
 	--action-press-scale: 1;
-	--action-rest-rotate: var(--action-angle);
-	--action-press-rotate: var(--action-rest-rotate);
 	--action-hover-x: 0px;
 	--action-hover-y: 0px;
-	--action-hover-rotate: var(--action-rest-rotate);
 
 	/* Variant tuning. `--action-soft-mix` is how much colour bleeds into
 	   `.btn-soft`; `--action-tint` does the same for the two Radix
@@ -243,6 +233,53 @@
 	   button, and `tabs-lift` would die. */
 	--tabs-idle-shade: 0.25;
 	--tabs-active-shade: 0;
+
+	/* ── Inputs that had drifted onto `:where(*)` ─────────────────
+	   The form writes every one of these, so they have to INHERIT: a
+	   `:where(*)` declaration is re-made on every element, which means a
+	   theme scoped to `.preview` was overridden on each descendant. A
+	   scoped `--selector-scale: 2` moved nothing, and the eight semantic
+	   ink pairs could not be set in a scope at all.
+
+	   `check:scope` now holds both halves of the rule: an input is a
+	   literal on `:root`, a resolution reads others on `:where(*)`, and no
+	   variable is allowed to be both. */
+	--field-wobble: 0;
+	--field-angle: 0deg;
+	--selector-wobble: 0;
+	--selector-angle: 0deg;
+	--container-wobble: 0;
+	--container-angle: 0deg;
+	--marker-wobble: 0;
+	--marker-angle: 0deg;
+	--color-on-primary-color: initial;
+	--color-on-primary-shade: 0;
+	--color-on-secondary-color: initial;
+	--color-on-secondary-shade: 0;
+	--color-on-accent-color: initial;
+	--color-on-accent-shade: 0;
+	--color-on-neutral-color: initial;
+	--color-on-neutral-shade: 0;
+	--color-on-info-color: initial;
+	--color-on-info-shade: 0;
+	--color-on-success-color: initial;
+	--color-on-success-shade: 0;
+	--color-on-warning-color: initial;
+	--color-on-warning-shade: 0;
+	--color-on-error-color: initial;
+	--color-on-error-shade: 0;
+	--action-scale: var(--scale);
+	--field-scale: var(--scale);
+	--selector-scale: var(--scale);
+	--container-scale: var(--scale);
+	--marker-scale: var(--scale);
+	--feedback-scale: var(--scale);
+	--action-press-rotate: var(--action-rest-rotate);
+	--selector-focus-width: var(--focus-width);
+	--range-trail-height: var(--range-rail);
+	--skeleton-shimmer: var(--color-background);
+	--skeleton-mask-edge: color-mix(in oklab, var(--color-on-background) 20%, transparent);
+	--skeleton-mask-peak: var(--color-on-background);
 }
 
 
@@ -260,11 +297,9 @@
 
 	/* Sentinels — the generator reads them, no stylesheet does. */
 	--field-shadow: none;
-	--field-focus: none;
+	--field-focus: ring;
 
 	/* Fill and text. */
-	--field-bg: var(--color-surface-1);
-	--field-fg: var(--color-on-surface);
 	/* The accent a colour variant replaces. It is not the border: a look
 	   can draw no border at all and still tint its relief from this. */
 	--field-accent-color: initial;
@@ -283,8 +318,6 @@
 	   less drift than a control does — which is why the textarea has an
 	   override of its own rather than sharing the number. */
 	--field-radius: 0.25rem;
-	--field-corners: var(--field-radius);
-	--textarea-corners: var(--field-corners);
 
 	/* Shadow: two layers, then the relief. */
 	--field-depth: 0;
@@ -293,7 +326,7 @@
 	   four are these numbers. */
 	--field-focus-accent-color: initial;
 	--field-focus-border-color: initial;
-	--field-focus-ring-width: 0px;
+	--field-focus-ring-width: 2px;
 	--field-focus-ring-color: #0000;
 	--field-focus-cast-x: 0px;
 	--field-focus-cast-y: 0px;
@@ -301,7 +334,6 @@
 	--field-focus-x: 0px;
 	--field-focus-y: 0px;
 	--field-focus-outline-width: 0px;
-	--field-focus-outline-offset: var(--focus-offset);
 	--field-focus-outline-color: initial;
 
 	/* Geometry. */
@@ -309,10 +341,7 @@
 	   rotates. A menu leans one way and gives every other row the
 	   opposite half-lean, so a column of them reads as written rather
 	   than printed. */
-	--field-rest-rotate: var(--field-angle);
-	--field-transition-duration: var(--transition-duration);
-	--field-transition-easing: var(--transition-easing);
-	--field-disabled-mix: 10%;
+	--field-disabled-mix: 20%;
 	--field-disabled-fg-mix: 40%;
 
 	/* What belongs to one component only. */
@@ -330,7 +359,6 @@
 
 	/* The container that floats a field's name into its edge. Its ground has
 	   to match what the field is drawn on, or the trick shows. */
-	--floating-label-bg: var(--color-surface-1);
 	--floating-label-size: 0.875rem;
 	--floating-label-radius: 2px;
 	--floating-label-scale: 0.75;
@@ -358,11 +386,10 @@
 
 	/* The box. */
 	--selector-bg: #0000;
-	--selector-border-width: 1px;
+	--selector-border-width: 0;
 	--selector-border-style: solid;
 	--selector-border-color: initial;
 	--selector-radius: 0.5rem;
-	--selector-corners: var(--selector-radius);
 	--selector-mark: initial;
 
 	/* The checked paint. */
@@ -372,18 +399,13 @@
 
 	--selector-depth: 0;
 	--selector-disabled-opacity: 0.2;
-	--selector-focus-width: var(--focus-width);
-	--selector-focus-offset: var(--focus-offset);
 	--selector-focus-color: initial;
-	--selector-transition-duration: var(--transition-duration);
-	--selector-transition-easing: var(--transition-easing);
 
 	/* A radio keeps its ground when checked: the accent is the disc
 	   inside it, not the fill behind it. All four looks agreed.
 	   Its roundness is NOT here — a square radio is a checkbox with
 	   the wrong behaviour, so radio.scss pins it and `.radio-square`
 	   exists for the one case where someone really means it. */
-	--radio-checked-bg: var(--color-surface-1);
 	/* Its ring and its disc are one colour and it is not the checkbox's
 	   fill: a radio shows its accent as a dot, not as a block. */
 	--radio-checked-border-color: initial;
@@ -397,17 +419,9 @@
 	/* A toggle is not the same size as a checkbox even in looks that shrink
 	   their boxes: it has to be wide enough for the thumb to travel. Both
 	   dahlia and sunflower use the split. */
-	--toggle-size: var(--selector-size);
-	--toggle-padding: var(--selector-padding);
-	--toggle-corners: var(--selector-corners);
-	--toggle-track-bg: var(--selector-bg);
 	--toggle-track-border-color: initial;
-	--toggle-thumb-bg: var(--selector-mark);
-	--toggle-thumb-corners: var(--selector-corners);
 	--toggle-thumb-shadow: none;
-	--toggle-checked-track-bg: var(--selector-checked-bg);
 	--toggle-checked-track-border-color: initial;
-	--toggle-checked-thumb-bg: var(--selector-checked-mark);
 
 	/* ── The slider ──────────────────────────────────────────────
 	   `--range-trail-height` is the whole of what looked like a
@@ -417,41 +431,30 @@
 	   the rail and the trail is thin; set it to the thumb's own size
 	   and the clip stops cutting. One length, no variant. */
 	/* The shape the control clips its own trail to. */
-	--range-corners: var(--range-track-corners);
-	--range-rail: calc(var(--range-thumb-size) * 0.5);
-	--range-trail-height: var(--range-rail);
-	--range-track-bg: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
 	--range-track-border-width: 0px;
 	--range-track-border-color: #0000;
 	--range-track-corners: 999px;
-	--range-thumb-bg: var(--color-surface-1);
 	--range-thumb-border-width: 0px;
 	--range-thumb-border-color: currentColor;
 	--range-thumb-corners: 999px;
 	--range-thumb-shadow: 0 0 #0000;
 	--range-thumb-halo: 0.125em;
-	--range-progress: var(--color-primary);
 	/* 1 fills the track before the thumb, 0 leaves it empty. */
 	--range-fill: 1;
 
 	/* ── The colour sample ───────────────────────────────────────
 	   `--swatch-color` is DATA: the author passes it at the call
 	   site and no theme writes it. Everything around it is a value. */
-	--swatch-corners: var(--selector-corners);
-	--swatch-border-width: var(--selector-border-width);
 	--swatch-border-color: initial;
 	--swatch-shadow: none;
 	--swatch-font-weight: 600;
-	--swatch-rest-rotate: var(--selector-angle);
-	--swatch-transition-duration: var(--selector-transition-duration);
 	--swatch-checks: conic-gradient(
 		from 90deg,
-		var(--color-surface-3) 25%,
-		var(--color-surface-2) 0 50%,
-		var(--color-surface-3) 0 75%,
-		var(--color-surface-2) 0
+		var(--color-panel) 25%,
+		var(--color-card) 0 50%,
+		var(--color-panel) 0 75%,
+		var(--color-card) 0
 	);
-	--swatch-active-shadow: 0 0 0 2px var(--color-surface-1), 0 0 0 4px var(--color-primary);
 	--swatch-active-x: 0px;
 	--swatch-active-y: 0px;
 
@@ -461,20 +464,13 @@
 	--tabs-font-size: 0.875rem;
 	--tabs-border-width: 1px;
 	--tabs-border-color: initial;
-	--tabs-corners: var(--selector-corners);
 	--tabs-box-corners: 0.5rem;
-	--tabs-box-bg: var(--color-surface-2);
-	--tabs-active-bg: var(--color-surface-1);
-	--tabs-idle-color: color-mix(in oklch, var(--color-on-surface) 50%, #0000);
 	--tabs-active-color: initial;
 	--tabs-depth: 0;
 	--tabs-shadow-color: initial;
-	--tabs-rest-rotate: var(--action-angle);
 	--tabs-disabled-opacity: 0.4;
 	--tabs-focus-color: currentColor;
 	--tabs-focus-offset: -5px;
-	--tabs-transition-duration: var(--selector-transition-duration);
-	--tabs-transition-easing: var(--selector-transition-easing);
 }
 
 
@@ -492,38 +488,21 @@
 	   section and no controls. */
 
 	/* Shared by the boxes. */
-	--container-corners: 0.5rem;
-	--container-item-corners: var(--container-corners);
-	--container-border-width: 1px;
+	--container-border-width: 0;
 	--container-shadow: none;
 
 	/* The group of fields. */
-	--fieldset-legend-fg: var(--color-on-surface);
-	--fieldset-label-fg: color-mix(in oklch, var(--color-on-surface) 60%, #0000);
 
 	/* The column of rows. */
-	--list-bg: var(--color-surface-1);
-	--list-divider-width: var(--container-border-width);
-	--list-divider-color: color-mix(in oklab, var(--color-on-surface) 5%, #0000);
-	--list-hover-bg: color-mix(in oklab, var(--color-on-surface) 7%, #0000);
-	--list-active-bg: color-mix(in oklab, var(--color-primary) 12%, #0000);
-	--list-active-fg: var(--color-primary);
 	--list-suggestions-border-color: initial;
-	--list-suggestions-shadow: 0 8px 16px -4px color-mix(in oklab, var(--color-on-surface) 10%, #0000);
 
 	/* The bar pinned to the bottom. Its height answers to the screen
 	   rather than to its content, which is why it stays absolute. */
-	--dock-bg: var(--color-surface-3);
 	--dock-border-width: 0.5px;
-	--dock-border-color: color-mix(in oklab, var(--color-on-surface) 5%, #0000);
-	--dock-disabled-color: color-mix(in oklch, var(--color-on-surface) 10%, #0000);
 
 	/* The bar across the top. */
-	--navbar-bg: var(--color-surface-3);
-	--navbar-fg: var(--color-on-surface);
 	--navbar-border: #0000;
 	--navbar-border-width: 0;
-	--navbar-shadow: var(--container-shadow);
 	/* Where a sticky bar comes to rest. It answers to the viewport, not to
 	   its content, so it stays absolute. */
 	--navbar-sticky-top: 0px;
@@ -532,32 +511,22 @@
 	   filling exactly these rather than writing rules — which is why
 	   this was the least eventful migration in the kit despite being
 	   the biggest block. */
-	--menu-bg: var(--color-surface-2);
-	--menu-fg: var(--color-on-surface);
 	--menu-border: #0000;
 	--menu-border-width: 0;
 	--menu-shadow: none;
 	--menu-gap: 0px;
-	--menu-item-radius: var(--container-item-corners);
 	--menu-item-bg: #0000;
 	--menu-item-fg: inherit;
 	--menu-item-transition: color 0.2s cubic-bezier(0, 0, 0.2, 1),
 		background-color 0.2s cubic-bezier(0, 0, 0.2, 1),
 		box-shadow 0.2s cubic-bezier(0, 0, 0.2, 1);
-	--menu-hover-bg: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
-	--menu-hover-fg: var(--color-on-surface);
-	--menu-active-bg: var(--color-neutral);
-	--menu-active-fg: var(--color-on-neutral);
 	--menu-disabled-bg: #0000;
-	--menu-disabled-fg: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
 	--menu-focus-outline: 2px solid currentColor;
 	--menu-focus-offset: 2px;
-	--menu-title-fg: color-mix(in oklab, var(--color-on-surface) 40%, #0000);
 	--menu-title-size: 1em;
 	--menu-title-weight: 600;
 	--menu-title-transform: none;
 	--menu-title-tracking: normal;
-	--menu-divider: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
 	--menu-divider-size: 1px;
 	--menu-sub-transition: 0.25s cubic-bezier(0, 0, 0.2, 1);
 
@@ -565,11 +534,6 @@
 	   line just INSIDE a row rather than around it, the other gives every
 	   other row the opposite tilt. */
 	--menu-item-line: #0000;
-	--menu-item-hover-line: var(--menu-item-line);
-	--menu-item-active-line: var(--menu-item-line);
-	--menu-item-rotate: var(--container-angle);
-	--menu-item-rotate-alt: calc(var(--container-angle) * -0.5);
-	--menu-rest-rotate: var(--container-angle);
 	--menu-item-weight: inherit;
 	--menu-item-active-weight: inherit;
 }
@@ -582,36 +546,27 @@
 	   `badge` has no values at all — it is this section's `join`. It
 	   positions a `.chip` against whatever it wraps and paints
 	   nothing, so it has no controls either. */
-	--marker-bg: var(--color-surface-1);
-	--marker-fg: var(--color-on-surface);
-	--marker-muted-bg: var(--color-surface-2);
-	--marker-border-width: 1px;
+	/* One rung closer to the page than a chip itself, the way a muted chip
+	   reads as the quieter of the two. */
+	--marker-border-width: 0;
 	--marker-border-color: initial;
 	/* A chip is a pill, so Markers has no Corners control. The hand-drawn
 	   recipe still builds on a radius, so it gets the one a pill has —
 	   without which its calc() is invalid and the chip goes square. */
 	--marker-radius: 999px;
-	--marker-corners: var(--marker-radius);
 	--marker-shadow: none;
 	/* How much colour bleeds into a soft chip, and into its edge. */
 	--marker-soft-mix: 8%;
 	--marker-soft-border-mix: 10%;
 	--marker-font-weight: 400;
-	--marker-rest-rotate: var(--marker-angle);
 
 	/* ════════════════════════════════════════════════════════════
 	   SECTION — Feedback
 	   (progress, radial-progress, loading, skeleton)
 	   ════════════════════════════════════════════════════════════ */
-	--feedback-fill: var(--color-on-surface);
 	--feedback-corners: 0.5rem;
-	--feedback-border-width: 1px;
+	--feedback-border-width: 0;
 	--feedback-shadow: none;
-	--feedback-dot-bg: var(--color-surface-2);
-	--skeleton-bg: var(--color-surface-2);
-	--skeleton-shimmer: var(--color-surface-1);
-	--skeleton-mask-edge: color-mix(in oklab, var(--color-on-surface) 20%, transparent);
-	--skeleton-mask-peak: var(--color-on-surface);
 
 	/* ════════════════════════════════════════════════════════════
 	   SECTION — Text   (text, title, subtitle, link)
@@ -622,8 +577,6 @@
 	   and none of these do. */
 	--link-decoration: underline;
 	--link-hover-decoration: underline;
-	--link-focus-width: var(--focus-width);
-	--link-focus-offset: var(--focus-offset);
 	--link-focus-color: currentColor;
 	/* How far a link moves when you hover it, and towards what. */
 	--link-hover-mix: 20%;
@@ -658,26 +611,28 @@
 	--color-border-shade: 0.1;
 	--color-error-color: oklch(63% 0.22 25);
 	--color-error-shade: 0;
+	--color-field-color: initial;
+	--color-field-shade: 0;
 	--color-info-color: oklch(70% 0.13 230);
 	--color-info-shade: 0;
 	--color-neutral-color: oklch(28% 0.01 285);
 	--color-neutral-shade: 0;
-	--color-on-surface-color: initial;
-	--color-on-surface-shade: 0;
+	--color-on-background-color: initial;
+	--color-on-background-shade: 0;
 	--color-primary-color: oklch(55% 0.21 264);
 	--color-primary-shade: 0;
 	--color-secondary-color: oklch(60% 0.2 330);
 	--color-secondary-shade: 0;
 	--color-success-color: oklch(72% 0.16 145);
 	--color-success-shade: 0;
-	--color-surface-1-color: oklch(100% 0 0);
-	--color-surface-1-shade: 0;
-	--color-surface-2-color: initial;
-	--color-surface-2-shade: 0.04;
-	--color-surface-3-color: initial;
-	--color-surface-3-shade: 0.08;
-	--color-surface-4-color: initial;
-	--color-surface-4-shade: 0.12;
+	--color-background-color: oklch(100% 0 0);
+	--color-background-shade: 0;
+	--color-card-color: initial;
+	--color-card-shade: 0.04;
+	--color-panel-color: initial;
+	--color-panel-shade: 0.08;
+	--color-action-color: initial;
+	--color-action-shade: 0.12;
 	--color-warning-color: oklch(80% 0.15 85);
 	--color-warning-shade: 0;
 
@@ -752,6 +707,8 @@
 	--container-fg-color: initial;
 	--container-fg-shade: 0;
 	--container-handdrawn: off;
+	--container-title-color: initial;
+	--container-title-shade: 0.4;
 	--container-item-active-color: initial;
 	--container-item-active-shade: 0;
 	--container-item-hover-color: initial;
@@ -801,7 +758,7 @@
    `:where(*)` and not `:root`, for exactly the reason the geometry
    block at the end of this file gives: a custom property is
    substituted WHERE IT IS DECLARED. On `:root`,
-   `shaded(var(--color-surface-1-color, …))` resolves against the
+   `shaded(var(--color-background-color, …))` resolves against the
    ROOT's pair, and the frozen colour inherits down — so a theme
    applied anywhere but the root moves the pairs and nothing that
    reads them. That is how the scoped preview came out painted in the
@@ -817,10 +774,15 @@
    button.scss).
    ════════════════════════════════════════════════════════════════════ */
 :where(*) {
-	--color-surface-1: #{m.shaded('var(--color-surface-1-color, oklch(100% 0 0))', '--color-surface-1-shade')};
-	--color-surface-2: #{m.shaded('var(--color-surface-2-color, var(--color-surface-1))', '--color-surface-2-shade')};
-	--color-surface-3: #{m.shaded('var(--color-surface-3-color, var(--color-surface-1))', '--color-surface-3-shade')};
-	--color-surface-4: #{m.shaded('var(--color-surface-4-color, var(--color-surface-1))', '--color-surface-4-shade')};
+	--color-background: #{m.shaded('var(--color-background-color, oklch(100% 0 0))', '--color-background-shade')};
+	--color-card: #{m.shaded('var(--color-card-color, var(--color-background))', '--color-card-shade')};
+	--color-panel: #{m.shaded('var(--color-panel-color, var(--color-background))', '--color-panel-shade')};
+	--color-action: #{m.shaded('var(--color-action-color, var(--color-background))', '--color-action-shade')};
+	/* A field is the page by default — that is what daisy and dahlia do. It
+	   needs a name of its own all the same: sunflower tints the PAGE with
+	   its primary and leaves the fields white, so "a field is the
+	   background" is a default, not a truth. */
+	--color-field: #{m.shaded('var(--color-field-color, var(--color-background))', '--color-field-shade')};
 
 	--color-primary: #{m.shaded('var(--color-primary-color, oklch(55% 0.21 264))', '--color-primary-shade')};
 	--color-secondary: #{m.shaded('var(--color-secondary-color, oklch(60% 0.2 330))', '--color-secondary-shade')};
@@ -840,23 +802,60 @@
 	   the surface a few points away, and "the ink, slightly lighter" is a
 	   dark grey rule nobody asked for. `color-mix` towards transparent used
 	   to do this; a shade does it without the alpha. */
-	--color-on-surface: #{m.ink('--color-on-surface-color', 'var(--color-surface-1)', '--color-on-surface-shade')};
-	--color-border: #{m.shaded('var(--color-border-color, var(--color-surface-1))', '--color-border-shade')};
+	--color-on-background: #{m.ink('--color-on-background-color', 'var(--color-background)', '--color-on-background-shade')};
+	--color-border: #{m.shaded('var(--color-border-color, var(--color-background))', '--color-border-shade')};
 
-	--field-bg: #{m.shaded('var(--field-bg-color, var(--color-surface-1))', '--field-bg-shade')};
+	/* What is written ON each of the other four fills. Never controls, for
+	   the same reason `--color-on-primary` is not one: nobody knows at
+	   authoring time what a theme's card will be, and a control here would
+	   undo an automatic contrast check. They share the base ink's shade, so
+	   "how soft is the text" stays ONE answer.
+	
+	   A section's own `-fg` box overrides these — see the block below. */
+	--color-on-card: #{m.contrasting('var(--color-card)', '--color-on-background-shade')};
+	--color-on-panel: #{m.contrasting('var(--color-panel)', '--color-on-background-shade')};
+	--color-on-action: #{m.contrasting('var(--color-action)', '--color-on-background-shade')};
+	--color-on-field: #{m.contrasting('var(--color-field)', '--color-on-background-shade')};
+
+	--field-bg: #{m.shaded('var(--field-bg-color, var(--color-field))', '--field-bg-shade')};
 	--field-fg: #{m.ink('--field-fg-color', 'var(--field-bg)', '--field-fg-shade')};
 
-	--selector-bg: #{m.shaded('var(--selector-bg-color, var(--color-surface-1))', '--selector-bg-shade')};
+	--selector-bg: #{m.shaded('var(--selector-bg-color, var(--color-background))', '--selector-bg-shade')};
 	--selector-checked-bg: #{m.shaded('var(--selector-checked-bg-color, var(--color-primary))', '--selector-checked-bg-shade')};
 
-	--container-bg: #{m.shaded('var(--container-bg-color, var(--color-surface-1))', '--container-bg-shade')};
-	--container-fg: #{m.ink('--container-fg-color', 'var(--container-bg)', '--container-fg-shade')};
-	--menu-bg: var(--container-bg);
-	--menu-fg: var(--container-fg);
-	--navbar-bg: var(--container-bg);
-	--navbar-fg: var(--container-fg);
-	--dock-bg: var(--container-bg);
-	--list-bg: var(--container-bg);
+	/* The Container section spans TWO rungs of the ladder. A card, a
+	   dropdown, a list and a menu rest ON the page and are counted, so they
+	   take `--color-card`; a navbar and a dock are chrome pinned to an edge
+	   of the screen, so they take `--color-panel`. One section, two
+	   defaults — and the section's own box overrides both at once, which is
+	   what makes it one section rather than two.
+	
+	   Every component then aliases the rung it sits on under its OWN name,
+	   so `--card-bg` and `--navbar-bg` are the public slots a caller
+	   overrides — inline, or through the wrapper's `background` prop. */
+	--container-box-bg: #{m.shaded('var(--container-bg-color, var(--color-card))', '--container-bg-shade')};
+	--container-box-fg: var(--container-fg-color, var(--color-on-card));
+	--container-panel-bg: #{m.shaded('var(--container-bg-color, var(--color-panel))', '--container-bg-shade')};
+	--container-panel-fg: var(--container-fg-color, var(--color-on-panel));
+	
+	/* `--container-bg` / `-fg` stay as the BOX rung under their old names:
+	   the hover, border and divider recipes below all measure against a
+	   card, and `dropdown.scss` reads them directly. */
+	--container-bg: var(--container-box-bg);
+	--container-fg: var(--container-box-fg);
+	
+	--card-bg: var(--container-box-bg);
+	--card-fg: var(--container-box-fg);
+	--dropdown-bg: var(--container-box-bg);
+	--dropdown-fg: var(--container-box-fg);
+	--menu-bg: var(--container-box-bg);
+	--menu-fg: var(--container-box-fg);
+	--list-bg: var(--container-box-bg);
+	--list-fg: var(--container-box-fg);
+	--navbar-bg: var(--container-panel-bg);
+	--navbar-fg: var(--container-panel-fg);
+	--dock-bg: var(--container-panel-bg);
+	--dock-fg: var(--container-panel-fg);
 	--menu-active-bg: #{m.shaded('var(--container-item-active-color, var(--color-primary))', '--container-item-active-shade')};
 	--list-active-fg: var(--menu-active-bg);
 	--menu-border-width: var(--container-border-width);
@@ -864,7 +863,10 @@
 	--menu-divider-size: var(--container-divider-width);
 	--list-divider-width: var(--container-divider-width);
 
-	--marker-bg: #{m.shaded('var(--marker-bg-color, var(--color-surface-3))', '--marker-bg-shade')};
+	/* A chip takes the same fill as a button: the two are the small filled
+	   pills of the kit, and in a row of card actions two different tones
+	   side by side are the first thing you see. */
+	--marker-bg: #{m.shaded('var(--marker-bg-color, var(--color-action))', '--marker-bg-shade')};
 
 	--feedback-fill: #{m.shaded('var(--feedback-fill-color, var(--color-primary))', '--feedback-fill-shade')};
 
@@ -879,8 +881,20 @@
 	--menu-item-fg: var(--container-fg);
 	--menu-active-fg: #{m.contrasting('var(--menu-active-bg)', '--container-item-active-shade')};
 	--list-active-bg: var(--menu-hover-bg);
-	--menu-border: #{m.shaded('var(--container-border-color, var(--container-bg))', '--container-border-shade')};
-	--navbar-border: var(--menu-border);
+	/* The section draws these; `menu` was never their owner — `card` and
+	   `dropdown` read them too. The old names stay as aliases so nothing
+	   outside has to move. */
+	--container-border-line: #{m.shaded('var(--container-border-color, var(--container-bg))', '--container-border-shade')};
+	--menu-border: var(--container-border-line);
+	--navbar-border: var(--container-border-line);
+
+	/* The ink of a box's title. Derived from the box's own ink and FADED by
+	   its shade — the three old families softened it to 40%, 55% and 60%,
+	   never accented it, so that is the default. A theme whose look IS
+	   "titles are the accent" sets the source to a semantic and the shade
+	   to 0. Read by `.card-title` and `.menu-title`. */
+	--container-title-fg: #{m.shaded('var(--container-title-color, var(--container-box-fg))', '--container-title-shade')};
+	--menu-title-fg: var(--container-title-fg);
 	--dock-border-color: initial;
 	--menu-divider: #{m.shaded('var(--container-divider-color, var(--container-bg))', '--container-divider-shade')};
 	--list-divider-color: initial;
@@ -891,7 +905,7 @@
 
 	/* Feedback — the track is the surface a touch away; the fill is the
 	   accent. `--skeleton-bg` follows the track, as it always did. */
-	--feedback-track-resolved: #{m.shaded('var(--feedback-track-color, var(--color-surface-1))', '--feedback-track-shade')};
+	--feedback-track-resolved: #{m.shaded('var(--feedback-track-color, var(--color-background))', '--feedback-track-shade')};
 	--skeleton-bg: var(--feedback-track-resolved);
 	--feedback-dot-bg: var(--feedback-fill);
 
@@ -899,41 +913,105 @@
 	/* A tab is a surface with an accent on the active one. Its idle text is
 	   the page's ink, softened; its active colour is the accent. Nothing here
 	   is a question the form asks. */
-	--tabs-idle-color-resolved: #{m.shaded('var(--color-on-surface)', '--tabs-idle-shade')};
+	--tabs-idle-color-resolved: #{m.shaded('var(--color-on-background)', '--tabs-idle-shade')};
 	--tabs-active-color-resolved: var(--color-primary);
 	/* Hand-drawn, per section. `--<p>-wobble` holds the strength verbatim —
 	   that is how the slider reads itself back, since `--<p>-corners` holds
 	   the eight-value recipe built from it — and `--<p>-angle` is the tilt at
 	   rest, which each section's frame applies to what it actually rotates. */
-	--field-wobble: 0;
-	--field-angle: 0deg;
-	--selector-wobble: 0;
-	--selector-angle: 0deg;
-	--container-wobble: 0;
-	--container-angle: 0deg;
-	--marker-wobble: 0;
-	--marker-angle: 0deg;
 
 	/* What is written on each meaning. `initial` until a theme states one, so
 	   the derivation in `_derived-content.scss` is what runs — a full-contrast
 	   reading of the colour beside it. The shade trims that: 0 is maximum
 	   contrast, higher is softer. */
-	--color-on-primary-color: initial;
-	--color-on-primary-shade: 0;
-	--color-on-secondary-color: initial;
-	--color-on-secondary-shade: 0;
-	--color-on-accent-color: initial;
-	--color-on-accent-shade: 0;
-	--color-on-neutral-color: initial;
-	--color-on-neutral-shade: 0;
-	--color-on-info-color: initial;
-	--color-on-info-shade: 0;
-	--color-on-success-color: initial;
-	--color-on-success-shade: 0;
-	--color-on-warning-color: initial;
-	--color-on-warning-shade: 0;
-	--color-on-error-color: initial;
-	--color-on-error-shade: 0;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Everything else that READS another custom property, on `:where(*)`.
+
+   Same rule as the two blocks above and as the geometry below: a custom
+   property is substituted WHERE IT IS DECLARED. On `:root` every one of
+   these resolved against the ROOT and the frozen result inherited down —
+   so `--marker-muted-bg: var(--color-panel)` gave a scoped preview the
+   APP's panel colour, and `--<section>-scale: var(--scale)` froze the
+   size the geometry block had just been moved to set free.
+
+   Found by `check-scope.mjs`, which now fails the build on any of these:
+   there were 88; 17 of them were already dead duplicates of a
+   `:where(*)` declaration further down, and are simply gone.
+   ════════════════════════════════════════════════════════════════════ */
+:where(*) {
+	/* The corner, built here rather than written by the form.
+	
+	   It is PaperCSS's six-value recipe, in px, interpolated by the wobble —
+	   and at a wobble of 0 every term is the radius itself, so one
+	   declaration serves a plain rounded look and a hand-drawn one, and the
+	   Off mode has nothing to say.
+	
+	   The form used to write this string. That broke two rules at once: a
+	   theme may only write scalars, colours and lengths, never a formula
+	   (CLAUDE.md), and `--x-corners` was both an input and a resolution, so
+	   it could not be declared correctly in any scope. Now the form writes
+	   `--x-radius` and `--x-wobble`, and this reads them. */
+	--action-corners: calc(var(--action-radius) + var(--action-wobble) * 0px) calc(var(--action-radius) + var(--action-wobble) * 240px) calc(var(--action-radius) + var(--action-wobble) * 210px) calc(var(--action-radius) + var(--action-wobble) * 0px) / calc(var(--action-radius) + var(--action-wobble) * 240px) calc(var(--action-radius) + var(--action-wobble) * 0px) calc(var(--action-radius) + var(--action-wobble) * 0px) calc(var(--action-radius) + var(--action-wobble) * 210px);
+	--action-rest-rotate: var(--action-angle);
+	--action-hover-rotate: var(--action-rest-rotate);
+	--field-corners: calc(var(--field-radius) + var(--field-wobble) * 0px) calc(var(--field-radius) + var(--field-wobble) * 240px) calc(var(--field-radius) + var(--field-wobble) * 210px) calc(var(--field-radius) + var(--field-wobble) * 0px) / calc(var(--field-radius) + var(--field-wobble) * 240px) calc(var(--field-radius) + var(--field-wobble) * 0px) calc(var(--field-radius) + var(--field-wobble) * 0px) calc(var(--field-radius) + var(--field-wobble) * 210px);
+	--textarea-corners: var(--field-corners);
+	--field-focus-outline-offset: var(--focus-offset);
+	--field-rest-rotate: var(--field-angle);
+	--field-transition-duration: var(--transition-duration);
+	--field-transition-easing: var(--transition-easing);
+	--floating-label-bg: var(--color-background);
+	--selector-corners: calc(var(--selector-radius) + var(--selector-wobble) * 0px) calc(var(--selector-radius) + var(--selector-wobble) * 240px) calc(var(--selector-radius) + var(--selector-wobble) * 210px) calc(var(--selector-radius) + var(--selector-wobble) * 0px) / calc(var(--selector-radius) + var(--selector-wobble) * 240px) calc(var(--selector-radius) + var(--selector-wobble) * 0px) calc(var(--selector-radius) + var(--selector-wobble) * 0px) calc(var(--selector-radius) + var(--selector-wobble) * 210px);
+	--selector-focus-offset: var(--focus-offset);
+	--selector-transition-duration: var(--transition-duration);
+	--selector-transition-easing: var(--transition-easing);
+	--radio-checked-bg: var(--color-background);
+	--toggle-size: var(--selector-size);
+	--toggle-padding: var(--selector-padding);
+	--toggle-corners: var(--selector-corners);
+	--toggle-track-bg: var(--selector-bg);
+	--toggle-thumb-bg: var(--selector-mark);
+	--toggle-thumb-corners: var(--selector-corners);
+	--toggle-checked-track-bg: var(--selector-checked-bg);
+	--toggle-checked-thumb-bg: var(--selector-checked-mark);
+	--range-corners: var(--range-track-corners);
+	--range-rail: calc(var(--range-thumb-size) * 0.5);
+	--range-track-bg: color-mix(in oklab, var(--color-on-background) 10%, #0000);
+	--range-thumb-bg: var(--color-background);
+	--range-progress: var(--color-primary);
+	--swatch-corners: var(--selector-corners);
+	--swatch-border-width: var(--selector-border-width);
+	--swatch-rest-rotate: var(--selector-angle);
+	--swatch-transition-duration: var(--selector-transition-duration);
+	--swatch-active-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px var(--color-primary);
+	--tabs-corners: var(--selector-corners);
+	--tabs-box-bg: var(--color-card);
+	--tabs-active-bg: var(--color-background);
+	--tabs-idle-color: color-mix(in oklch, var(--color-on-background) 50%, #0000);
+	--tabs-rest-rotate: var(--action-angle);
+	--tabs-transition-duration: var(--selector-transition-duration);
+	--tabs-transition-easing: var(--selector-transition-easing);
+	--container-corners: calc(var(--container-radius) + var(--container-wobble) * 0px) calc(var(--container-radius) + var(--container-wobble) * 240px) calc(var(--container-radius) + var(--container-wobble) * 210px) calc(var(--container-radius) + var(--container-wobble) * 0px) / calc(var(--container-radius) + var(--container-wobble) * 240px) calc(var(--container-radius) + var(--container-wobble) * 0px) calc(var(--container-radius) + var(--container-wobble) * 0px) calc(var(--container-radius) + var(--container-wobble) * 210px);
+	--container-item-corners: var(--container-corners);
+	--fieldset-legend-fg: var(--color-on-background);
+	--fieldset-label-fg: color-mix(in oklch, var(--color-on-background) 60%, #0000);
+	--list-suggestions-shadow: 0 8px 16px -4px color-mix(in oklab, var(--color-on-background) 10%, #0000);
+	--dock-disabled-color: color-mix(in oklch, var(--color-on-background) 10%, #0000);
+	--navbar-shadow: var(--container-shadow);
+	--menu-item-radius: var(--container-item-corners);
+	--menu-disabled-fg: color-mix(in oklab, var(--color-on-background) 20%, #0000);
+	--menu-item-hover-line: var(--menu-item-line);
+	--menu-item-active-line: var(--menu-item-line);
+	--menu-item-rotate: var(--container-angle);
+	--menu-item-rotate-alt: calc(var(--container-angle) * -0.5);
+	--menu-rest-rotate: var(--container-angle);
+	--marker-muted-bg: var(--color-panel);
+	--marker-corners: calc(var(--marker-radius) + var(--marker-wobble) * 0px) calc(var(--marker-radius) + var(--marker-wobble) * 240px) calc(var(--marker-radius) + var(--marker-wobble) * 210px) calc(var(--marker-radius) + var(--marker-wobble) * 0px) / calc(var(--marker-radius) + var(--marker-wobble) * 240px) calc(var(--marker-radius) + var(--marker-wobble) * 0px) calc(var(--marker-radius) + var(--marker-wobble) * 0px) calc(var(--marker-radius) + var(--marker-wobble) * 210px);
+	--marker-rest-rotate: var(--marker-angle);
+	--link-focus-width: var(--focus-width);
+	--link-focus-offset: var(--focus-offset);
 }
 
 

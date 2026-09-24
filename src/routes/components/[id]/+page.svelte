@@ -118,7 +118,7 @@
 		margin: 0 0 1.25rem;
 		font-size: 1rem;
 		line-height: 1.6;
-		color: color-mix(in oklab, var(--color-on-surface) 80%, transparent);
+		color: color-mix(in oklab, var(--color-on-background) 80%, transparent);
 	}
 
 	/* Deliberately not a .section box: this is reference, not a demo. */
@@ -126,9 +126,9 @@
 		width: 100%;
 		max-width: 56rem;
 		margin-bottom: 2.5rem;
-		border: 1px solid color-mix(in oklab, var(--color-on-surface) 12%, transparent);
+		border: 1px solid color-mix(in oklab, var(--color-on-background) 12%, transparent);
 		border-radius: 0.85rem;
-		background: color-mix(in oklab, var(--color-surface-2) 60%, var(--color-surface-1));
+		background: color-mix(in oklab, var(--color-card) 60%, var(--color-background));
 		overflow: hidden;
 	}
 
@@ -136,7 +136,7 @@
 		display: flex;
 		gap: 0.15rem;
 		padding: 0.4rem 0.5rem 0;
-		border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 10%, transparent);
+		border-bottom: 1px solid color-mix(in oklab, var(--color-on-background) 10%, transparent);
 	}
 
 	.api-tab {
@@ -149,17 +149,17 @@
 		font-weight: 600;
 		padding: 0.45rem 0.95rem;
 		border-radius: 0.55rem 0.55rem 0 0;
-		color: color-mix(in oklab, var(--color-on-surface) 50%, transparent);
+		color: color-mix(in oklab, var(--color-on-background) 50%, transparent);
 		cursor: pointer;
 		margin-bottom: -1px;
 	}
 	.api-tab:hover {
-		color: var(--color-on-surface);
+		color: var(--color-on-background);
 	}
 	.api-tab[aria-selected='true'] {
-		color: var(--color-on-surface);
-		background: var(--color-surface-1);
-		border-color: color-mix(in oklab, var(--color-on-surface) 10%, transparent);
+		color: var(--color-on-background);
+		background: var(--color-background);
+		border-color: color-mix(in oklab, var(--color-on-background) 10%, transparent);
 	}
 
 	.api-table {
@@ -174,14 +174,14 @@
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 		padding: 0.6rem 1rem;
-		color: color-mix(in oklab, var(--color-on-surface) 55%, transparent);
-		border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 10%, transparent);
+		color: color-mix(in oklab, var(--color-on-background) 55%, transparent);
+		border-bottom: 1px solid color-mix(in oklab, var(--color-on-background) 10%, transparent);
 	}
 	.api-table td {
 		padding: 0.5rem 1rem;
 		vertical-align: top;
 		line-height: 1.45;
-		border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 6%, transparent);
+		border-bottom: 1px solid color-mix(in oklab, var(--color-on-background) 6%, transparent);
 	}
 	.api-table tr:last-child td {
 		border-bottom: none;
@@ -191,7 +191,7 @@
 		font-size: 0.82em;
 		padding: 0.1em 0.35em;
 		border-radius: 0.3rem;
-		background: color-mix(in oklab, var(--color-on-surface) 8%, transparent);
+		background: color-mix(in oklab, var(--color-on-background) 8%, transparent);
 	}
 	.api-type {
 		white-space: normal;
@@ -199,7 +199,7 @@
 	}
 	.api-kind {
 		white-space: nowrap;
-		color: color-mix(in oklab, var(--color-on-surface) 55%, transparent);
+		color: color-mix(in oklab, var(--color-on-background) 55%, transparent);
 	}
 
 	.api-note {
@@ -207,8 +207,8 @@
 		padding: 0.75rem 1rem;
 		font-size: 0.8rem;
 		line-height: 1.5;
-		color: color-mix(in oklab, var(--color-on-surface) 60%, transparent);
-		border-top: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, transparent);
+		color: color-mix(in oklab, var(--color-on-background) 60%, transparent);
+		border-top: 1px solid color-mix(in oklab, var(--color-on-background) 8%, transparent);
 	}
 	.api-none {
 		border-top: none;

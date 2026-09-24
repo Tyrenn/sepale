@@ -41,6 +41,7 @@ export const markers: Section = {
 		/* The weight and the case of a component's text are set by its size
 		   classes (`.btn-lg` and friends), not by the theme. Offering them
 		   here was a control that fought the one place already deciding. */
+		'marker-corners',
 		'marker-font-weight',
 		'marker-text-transform',
 		/* A chip is a pill, so Markers has no Corners control — but the
@@ -67,7 +68,7 @@ export const markers: Section = {
 
 			box('marker-bg', 'Chip', {
 				sources: [],
-				source: 'color-surface-3'
+				source: 'color-action'
 			}),
 			box('marker-fg', 'Chip', {
 				kind: 'contrast',
@@ -81,7 +82,10 @@ export const markers: Section = {
 		/* No Corners group. `--marker-corners` is 999px: a chip is a pill,
 		   always, and Common's Radius does not multiply it. If a look ever
 		   wants square chips, that is a class. */
-		border(M),
+		/* 999px: a chip is a PILL, which is the whole reason Markers has no
+		   Corners group of its own. The shared 0.25rem made the form believe
+		   a chip was a rectangle. */
+		border(M, undefined, '999px'),
 		shadow(M),
 		handDrawn(M)
 	]

@@ -27,7 +27,7 @@
 
 $semantics: primary, secondary, accent, neutral, info, success, warning, error;
 
-/* `--color-on-surface` and `--color-border` are NOT here: they are
+/* `--color-on-background` and `--color-border` are NOT here: they are
    resolved from their pair in `_defaults.scss`, which is the only place
    that knows about the shade. They used to be declared here too, and
    since `@use` hoists this file's output above the file that uses it,

@@ -141,12 +141,20 @@ const radiusControl = (p: string, dflt: string, id = `${p}-radius`, hidden?: str
 export function border(
 	p: string,
 	sources: ColorSource[] = ['own', 'text', 'surface'],
-	radiusDefault = '0.25rem'
+	radiusDefault = '0.25rem',
+	/* How many times this section's radius is the shared one. Container is
+	   the only 2: a box is twice the radius of the things inside it, so
+	   `container-radius: 0.5rem` and `action-radius: 0.25rem` are the SAME
+	   answer said at two scales. Without it Container reads as detached in
+	   every theme — and the field was declared in the schema and never set
+	   by anyone, so the factor the comments described did not exist. */
+	factor = 1
 ): Group {
 	return {
 		id: `${p}-border`,
 		label: 'Border',
 		shared: 'border',
+		sharedFactor: factor,
 		help: 'The style is the group’s own setting: no border is a style, not a width of zero you have to think about.',
 		vars: [
 			`${p}-border`,
@@ -360,7 +368,7 @@ export function handDrawn(p: string): Group {
 		label: 'Hand-drawn',
 		shared: 'handdrawn',
 		help: 'Off true, the way a drawn thing sits. Small numbers read as drawn; large ones read as broken.',
-		vars: [`${p}-handdrawn`, `${p}-corners`, `${p}-wobble`, `${p}-angle`, `${p}-radius`],
+		vars: [`${p}-handdrawn`, `${p}-wobble`, `${p}-angle`, `${p}-radius`],
 		controls: [],
 		type: {
 			default: 'off',
@@ -383,10 +391,7 @@ export function handDrawn(p: string): Group {
 							min: 0,
 							max: 1,
 							step: 0.05,
-							/* `-wobble` first: it is the variable that holds this number
-							   verbatim, while `-corners` is the recipe built from it. A
-							   control reads itself back from the first variable it writes. */
-							vars: [`${p}-wobble`, `${p}-corners`]
+							vars: [`${p}-wobble`]
 						},
 						{
 							id: `${p}-handdrawn-tilt`,
@@ -409,19 +414,15 @@ export function handDrawn(p: string): Group {
 export function registerHandDrawn(p: string) {
 	registerWriters({
 		[`${p}-handdrawn:off`]: () => ({
-			[`${p}-corners`]: `var(--${p}-radius)`,
 			[`${p}-wobble`]: '0',
 			[`${p}-angle`]: '0deg'
 		}),
-		[`${p}-handdrawn:on`]: (_, vars) => {
-			const a = String(vars[`${p}-wobble`] ?? 1);
-			const c = (px: number) => `calc(var(--${p}-radius) + ${a} * ${px}px)`;
-			return {
-				[`${p}-wobble`]: a,
-				[`${p}-corners`]: `${c(0)} ${c(240)} ${c(210)} ${c(0)} / ${c(240)} ${c(0)} ${c(0)} ${c(210)}`,
-				[`${p}-angle`]: String(vars[`${p}-angle`] ?? '0deg')
-			};
-		}
+		[`${p}-handdrawn:on`]: (_, vars) => ({
+			/* Only the two numbers. The corner recipe they feed lives in
+			   _defaults.scss now: a theme writes lengths, never a formula. */
+			[`${p}-wobble`]: String(vars[`${p}-wobble`] ?? 1),
+			[`${p}-angle`]: String(vars[`${p}-angle`] ?? '0deg')
+		})
 	});
 }
 

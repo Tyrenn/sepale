@@ -11,8 +11,8 @@ body {
 	font-family: system-ui, sans-serif;
 	/* --root-bg lets a family repaint the page; defaults to the theme's
 	   base surface. */
-	background: var(--root-bg, var(--color-surface-1));
-	color: var(--color-on-surface);
+	background: var(--root-bg, var(--color-background));
+	color: var(--color-on-background);
 }
 
 .shell {
@@ -30,8 +30,8 @@ body {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	background-color: var(--color-surface-2);
-	border-inline-end: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+	background-color: var(--color-card);
+	border-inline-end: 1px solid color-mix(in oklab, var(--color-on-background) 8%, #0000);
 }
 
 .side-head {
@@ -40,7 +40,7 @@ body {
 	gap: 0.5rem;
 	padding: 0.75rem;
 	flex-shrink: 0;
-	border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+	border-bottom: 1px solid color-mix(in oklab, var(--color-on-background) 8%, #0000);
 }
 
 .side-select {
@@ -55,7 +55,7 @@ body {
 	font-size: 0.7rem;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
-	color: color-mix(in oklch, var(--color-on-surface) 55%, #0000);
+	color: color-mix(in oklch, var(--color-on-background) 55%, #0000);
 }
 
 .side-select > select { flex: 1; min-width: 0; }
@@ -79,8 +79,8 @@ body {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	background: var(--color-surface-2);
-	border-inline-end: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+	background: var(--color-card);
+	border-inline-end: 1px solid color-mix(in oklab, var(--color-on-background) 8%, #0000);
 }
 
 .editor-head {
@@ -89,7 +89,7 @@ body {
 	gap: 0.5rem;
 	padding: 0.75rem;
 	flex-shrink: 0;
-	border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+	border-bottom: 1px solid color-mix(in oklab, var(--color-on-background) 8%, #0000);
 }
 
 .editor-name {
@@ -177,9 +177,9 @@ body {
 	font-size: 0.72rem;
 	font-family: ui-monospace, monospace;
 	padding: 0.3rem 0.4rem;
-	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	border: 1px solid color-mix(in oklab, var(--color-on-background) 20%, #0000);
 	border-radius: 0.35rem;
-	background: var(--color-surface-1);
+	background: var(--color-background);
 	color: inherit;
 }
 
@@ -200,9 +200,9 @@ body {
 	font-size: 0.72rem;
 	font-family: ui-monospace, monospace;
 	padding: 0.3rem 0.4rem;
-	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	border: 1px solid color-mix(in oklab, var(--color-on-background) 20%, #0000);
 	border-radius: 0.35rem;
-	background: var(--color-surface-1);
+	background: var(--color-background);
 	color: inherit;
 }
 .cf-num { width: 3.5rem; }
@@ -237,7 +237,7 @@ body {
 	flex-direction: column;
 	gap: 0.75rem;
 	padding: 1rem;
-	background: var(--color-surface-1);
+	background: var(--color-background);
 	border: 1px solid var(--color-border);
 	border-radius: var(--radius-box, 0.75rem);
 }
@@ -290,7 +290,7 @@ body {
 	position: relative;
 	height: 5rem;
 	border-radius: var(--radius-box, 0.5rem);
-	background: color-mix(in oklab, var(--color-on-surface) 4%, #0000);
+	background: color-mix(in oklab, var(--color-on-background) 4%, #0000);
 	overflow: hidden;
 }
 
@@ -330,15 +330,15 @@ dialog.export {
 	width: 100%;
 }
 dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
-.export-inner { padding: 1.25rem; background: var(--color-surface-1); color: var(--color-on-surface); }
+.export-inner { padding: 1.25rem; background: var(--color-background); color: var(--color-on-background); }
 .export-text {
 	width: 100%;
 	height: 16rem;
 	font-family: ui-monospace, monospace;
 	font-size: 0.78rem;
 	border-radius: 0.4rem;
-	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
-	background: var(--color-surface-2);
+	border: 1px solid color-mix(in oklab, var(--color-on-background) 20%, #0000);
+	background: var(--color-card);
 	color: inherit;
 	padding: 0.6rem;
 }
@@ -381,8 +381,8 @@ dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
 	border: 1px solid var(--color-border);
 }
 .fam-theme[data-scheme='dark'] {
-	background: color-mix(in oklab, var(--color-on-surface) 88%, #0000);
-	color: var(--color-surface-1);
+	background: color-mix(in oklab, var(--color-on-background) 88%, #0000);
+	color: var(--color-background);
 	border-color: transparent;
 }
 
@@ -407,7 +407,7 @@ dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
 }
 .fam-table td {
 	padding: 0.45rem 0.6rem 0.45rem 0;
-	border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 7%, #0000);
+	border-bottom: 1px solid color-mix(in oklab, var(--color-on-background) 7%, #0000);
 	vertical-align: top;
 }
 .fam-table tr[data-active='true'] td { font-weight: 700; }
@@ -423,7 +423,7 @@ dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
 	width: 0.85rem;
 	height: 0.85rem;
 	border-radius: 0.2rem;
-	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	border: 1px solid color-mix(in oklab, var(--color-on-background) 20%, #0000);
 	vertical-align: -0.1rem;
 	margin-inline-end: 0.35rem;
 }

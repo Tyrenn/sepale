@@ -41,12 +41,12 @@
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	padding: var(--dropdown-padding);
-	background-color: var(--container-bg);
-	color: var(--container-fg);
+	background-color: var(--dropdown-bg);
+	color: var(--dropdown-fg);
 	border-radius: var(--container-corners);
 	border-width: var(--container-border-width);
 	border-style: var(--container-border-style);
-	border-color: var(--menu-border);
+	border-color: var(--container-border-line);
 	box-shadow: var(--dropdown-shadow);
 }
 

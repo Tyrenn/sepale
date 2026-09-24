@@ -2,13 +2,15 @@
 	"name": "u.u",
 	"version": "0.0.1",
 	"scripts": {
-		"build:css": "node scripts/build-css.mjs && npm run gen:themes && npm run gen:classes && npm run check:theme",
+		"build:css": "node scripts/build-css.mjs && npm run gen:themes && npm run gen:classes && npm run check:theme && npm run check:defaults && npm run check:scope",
 		"dev": "npm run build:css && vite dev",
 		"build": "npm run build:css && vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync",
 		"check": "npm run build:css && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"check:defaults": "node scripts/check-defaults.mjs",
+		"check:scope": "node scripts/check-scope.mjs",
 		"check:theme": "node scripts/check-theme-vars.mjs",
 		"gen:themes": "node scripts/build-themes.mjs",
 		"gen:classes": "node scripts/gen-classes.mjs"

@@ -2,7 +2,7 @@
 
 **Components** — `checkbox`, `radio`, `toggle`, `range`, `swatch`.
 **Prefixes** — `selector`, `checkbox`, `radio`, `toggle`, `range`, `swatch`.
-**Controls** — **13 in Basic**, 25 in Advanced.
+**Controls** — **9 of its own**, plus 18 it shares with the other sections. The shared ones are answered in **Common** and repeated at the end of this list behind a tick; see [`02-common.md`](./02-common.md).
 
 From **67**. The name was confusing only because `tabs` was in here; it has
 moved to Action, and what is left really is the five things you tick, drag and

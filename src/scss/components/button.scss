@@ -38,7 +38,12 @@
 	   Everything below derives from it, which is what makes a .btn-primary
 	   carry a primary-tinted edge and hover while a plain button carries a
 	   grey one — without a single extra declaration per variant. */
-	--_btn-seed: var(--_btn-color, var(--action-bg-color, var(--color-surface-4)));
+	/* `--btn-bg` first: it is the PUBLIC slot, the one a caller writes — by
+	   hand or through the wrapper's `background` prop — and an explicit
+	   override has to beat `.btn-primary`, not lose to it. Every other
+	   component that paints a fill already had this slot; the button was the
+	   one that did not. */
+	--_btn-seed: var(--btn-bg, var(--_btn-color, var(--action-bg-color, var(--color-action))));
 	--_btn-bg: #{m.shaded('var(--_btn-seed)', '--action-bg-shade')};
 	--_btn-fg: #{m.ink('--action-fg-color', 'var(--_btn-seed)', '--action-fg-shade')};
 	/* The border: a colour of its own, or — when the theme left the source
@@ -188,7 +193,7 @@
 	--_btn-border: #0000;
 	--_btn-fg: var(
 		--action-disabled-color,
-		color-mix(in oklch, var(--color-on-surface) var(--action-disabled-fg-mix), #0000)
+		color-mix(in oklch, var(--color-on-background) var(--action-disabled-fg-mix), #0000)
 	);
 }
 
@@ -199,7 +204,7 @@
 	   other, and `initial` is what makes the fallback win. */
 	--_btn-bg: var(
 		--action-disabled-color,
-		color-mix(in oklch, var(--color-on-surface) var(--action-disabled-mix), #0000)
+		color-mix(in oklch, var(--color-on-background) var(--action-disabled-mix), #0000)
 	);
 	--_btn-shadow: none;
 }
@@ -247,8 +252,8 @@
 .btn-outline:not(.btn-active, :hover, :active, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled),
 .btn-dash:not(.btn-active, :hover, :active, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
 	--_btn-bg: #0000;
-	--_btn-fg: var(--_btn-color, var(--color-on-surface));
-	--_btn-border: var(--_btn-color, var(--color-on-surface));
+	--_btn-fg: var(--_btn-color, var(--color-on-background));
+	--_btn-border: var(--_btn-color, var(--color-on-background));
 }
 
 /* A dashed border needs a width to show through: a look that draws
@@ -259,16 +264,16 @@
 }
 
 .btn-soft:not(.btn-active, :hover, :active, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
-	--_btn-fg: var(--_btn-color, var(--color-on-surface));
+	--_btn-fg: var(--_btn-color, var(--color-on-background));
 	--_btn-bg: color-mix(
 		in oklab,
-		var(--_btn-color, var(--color-on-surface)) var(--action-soft-mix),
-		var(--color-surface-1)
+		var(--_btn-color, var(--color-on-background)) var(--action-soft-mix),
+		var(--color-background)
 	);
 	--_btn-border: color-mix(
 		in oklab,
-		var(--_btn-color, var(--color-on-surface)) calc(var(--action-soft-mix) + 2%),
-		var(--color-surface-1)
+		var(--_btn-color, var(--color-on-background)) calc(var(--action-soft-mix) + 2%),
+		var(--color-background)
 	);
 }
 
@@ -279,9 +284,9 @@
 	--_btn-bg: color-mix(
 		in oklab,
 		var(--_btn-color, var(--color-neutral)) calc(var(--action-tint) * 6%),
-		var(--color-surface-1)
+		var(--color-background)
 	);
-	--_btn-fg: var(--_btn-color, var(--color-on-surface));
+	--_btn-fg: var(--_btn-color, var(--color-on-background));
 	--_btn-border: color-mix(
 		in oklab,
 		var(--_btn-color, var(--color-neutral)) calc(var(--action-tint) * 22%),
@@ -294,16 +299,16 @@
 	--_btn-bg: color-mix(
 		in oklab,
 		var(--_btn-color, var(--color-neutral)) calc(var(--action-tint) * 10%),
-		var(--color-surface-1)
+		var(--color-background)
 	);
-	--_btn-fg: var(--_btn-color, var(--color-on-surface));
+	--_btn-fg: var(--_btn-color, var(--color-on-background));
 	--_btn-border: color-mix(
 		in oklab,
 		var(--_btn-color, var(--color-neutral)) calc(var(--action-tint) * 20%),
 		#0000
 	);
 	border-width: var(--action-variant-border-width);
-	--_btn-shadow: inset 0 -1px 0 0 color-mix(in oklab, var(--color-on-surface) 12%, #0000);
+	--_btn-shadow: inset 0 -1px 0 0 color-mix(in oklab, var(--color-on-background) 12%, #0000);
 }
 
 
