@@ -25,8 +25,16 @@
        help: 'Corner radius of buttons, inputs and selects.',
      )
 
-   `type` is color | length | number. `min`/`max`/`step` turn the
-   control into a slider; `units` adds a unit picker.
+   `type` is color | length | number | edge-width | shadows.
+   `min`/`max`/`step` turn the control into a slider; `units` adds a
+   unit picker. The last two are still ONE variable, with a richer
+   control:
+
+     edge-width  a `border-width` shorthand, edited as a width and
+                 four edge toggles: default '1px 0 1px 0' draws top
+                 and bottom only. Read it as `border-width`.
+     shadows     a whole `box-shadow` value, edited as a list of
+                 layers. Quote the default: it holds commas.
    ============================================================ */
 /* Serialise the map to JSON on a single line, so the build can
    pull it out of the compiled CSS with one regex. */
@@ -119,6 +127,39 @@
    focus, checkbox/radio-as-button behavior, disabled state.
    No look decision: border/shadow resolve to transparent/family
    shadow until a skin assigns them.
+   ------------------------------------------------------------ */
+/* ============================================================
+   card.scss — .card mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   A box with, optionally, a title, a body and a row of actions.
+   Every part is optional and none of them is structural: a card
+   with nothing but a body is a card, and that is the common case.
+
+   It owns its namespace and draws its own parts, so `card-title`,
+   `card-body` and `card-actions` are PARTS, not sub-components
+   (ADR 0009).
+
+   Plumbing contract (the family fills these on `.card`):
+	--card-bg             fill
+	--card-fg             ink
+	--card-border         border colour
+	--card-border-width   border width (0 = none)
+	--card-radius         corner radius
+	--card-shadow         box-shadow
+	--card-rotate         resting angle
+	--card-p              body padding
+	--card-gap            gap between the body's children
+	--card-title-fg       title ink
+	--card-title-size     title font-size
+	--card-title-weight   title font-weight
+	--fontsize            font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   base — the box, its parts, and the layout flags.
    ------------------------------------------------------------ */
 /* ============================================================
    checkbox.scss — .checkbox mixin library
@@ -673,15 +714,41 @@
 
    Nothing is emitted at the top level: a style family `@use`s this
    file and `@include`s its selection (see button.scss for the
-   pattern). Pure structure — no look mixins.
+   pattern). Pure structure — the weights and the leading are the
+   family's.
 
-   Naming: .{type}-s{size}-b{weight}
-	s = size index, 1 = largest
-	b = weight index, 1 = heaviest (600), 2 = medium (500), 3 = regular (400)
-   Subtitles have a fixed weight — no b index. Title is unique.
+   Three components in one file — `text`, `title`, `subtitle` —
+   because separating them would buy nothing. All text-natured:
+   they draw no frame, so `--scale` leaves them alone.
+
+   ── Two axes, not one combination ──────────────────────────
+
+   These used to ship as `.text-s2-b3`: twelve classes for four
+   sizes times three weights. But the two never interacted — `s`
+   carried font-size and line-height, `b` carried font-weight and
+   nothing else — so the product was twelve ways of saying seven
+   things. Split, they are what the Svelte wrapper's two props
+   already wanted to be:
+
+	.text-s{1-4}   size, 1 = largest (and the leading that goes with it)
+	.text-b{1-3}   weight, 1 = heaviest
+
+   Subtitles have a fixed weight — no b axis. Title is unique.
+
+   ── Colour ─────────────────────────────────────────────────
+
+   A semantic colour here is the RAW token, not a contrast-checked
+   reading of it: `.text-primary` must show primary, and an author
+   who puts it on a dark panel wants to see that it fails rather
+   than get a silently different blue. It is the same bargain
+   `.link-primary` makes. Each prefix gets its own eight —
+   `.title-primary` rather than borrowing `.text-primary` —
+   because a class has to be an axis of its own component
+   (ADR 0009).
    ============================================================ */
 /* ------------------------------------------------------------
-   base — .title, .subtitle-s{1,2}, .text-s{1-4}-b{1-3}.
+   base — .title, .subtitle-s{1,2}, .text-s{1-4}, .text-b{1-3},
+   and the colour axis of all three.
    ------------------------------------------------------------ */
 /* ============================================================
    textarea.scss — .textarea mixin library
@@ -941,6 +1008,13 @@ svg {
    Everything daisy decides about this component: its look and
    its variants. Moved out of the shared component file, where
    it used to masquerade as the kit's default. */
+/* daisy — card.
+   Ported from daisyUI's `.card`: `--radius-box` corners, a body padded
+   `1.5rem` with a `.5rem` gap, a semibold `1.125rem` title. daisyUI
+   leaves the card transparent and expects `bg-base-100 shadow-sm` next
+   to it — we have no utilities, so the card paints surface-2 itself and
+   stays flat, like the rest of the family. `.card-border` draws the
+   family hairline. */
 /* daisy — button.
    Everything daisy decides about this component: its look and
    its variants. Moved out of the shared component file, where
@@ -1243,6 +1317,138 @@ svg {
 .btn:disabled,
 .btn[disabled] {
   pointer-events: none;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--card-bg);
+  color: var(--card-fg);
+  border: var(--card-border-width) solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  rotate: var(--card-rotate, 0deg);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  /* Its own corners clip whatever it holds — an image at the top
+     edge has to follow the box, and `overflow` is the only thing
+     that makes a child respect a radius it does not know about. */
+  overflow: hidden;
+}
+
+.card-body {
+  display: flex;
+  flex: auto;
+  flex-direction: column;
+  gap: var(--card-gap);
+  padding: var(--card-p);
+}
+
+/* The title takes its own ink, not the body's: a look whose titles
+   are faded or accented is a family decision. A coloured title in
+   ONE place is `.title-primary`, a class — not this. */
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--card-gap);
+  color: var(--card-title-fg);
+  font-size: var(--card-title-size);
+  font-weight: var(--card-title-weight);
+}
+
+/* The actions sit at the end of the cross axis, so a row of buttons
+   lines up on the right in a left-to-right document without anyone
+   naming a direction. */
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--card-gap);
+}
+
+/* A figure spans the card and is cropped by it. */
+.card figure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.card figure > img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* ── Axis: size ── */
+.card-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.card-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.card-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.card-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.card-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ── Flag: border / dash ──
+   A family that draws no border by default still honours these: a
+   card that wants an edge says so, the same bargain `.btn-outline`
+   makes. */
+.card-border {
+  border-width: max(var(--card-border-width), var(--border, 1px), 1px);
+  border-style: solid;
+}
+
+.card-dash {
+  border-width: max(var(--card-border-width), var(--border, 1px), 1px);
+  border-style: dashed;
+}
+
+/* ── Flag: side ── the figure goes beside the body. */
+.card-side {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.card-side figure > img {
+  height: 100%;
+  max-width: 100%;
+}
+
+/* ── Flag: image-full ──
+   The figure fills the card and the body sits on top of it. The
+   overlay is the card's own fill at a low alpha rather than a fixed
+   black, so a light theme and a dark one both stay legible. */
+.card-image-full {
+  display: grid;
+}
+
+.card-image-full > figure,
+.card-image-full > .card-body {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+
+.card-image-full > figure,
+.card-image-full > figure > img {
+  height: 100%;
+}
+
+.card-image-full > .card-body {
+  position: relative;
+  background-color: color-mix(in oklab, var(--card-bg) 65%, rgba(0, 0, 0, 0));
+  backdrop-filter: blur(2px);
 }
 
 .checkbox {
@@ -2384,56 +2590,70 @@ input[type=color].swatch::-moz-color-swatch {
   font-size: var(--lg, var(--default-lg));
 }
 
-/* Text — s1 (--md) */
-.text-s1-b1 {
+/* ── Axis: s — size ── */
+.text-s1 {
   font-size: var(--md, var(--default-md));
 }
 
-.text-s1-b2 {
-  font-size: var(--md, var(--default-md));
-}
-
-.text-s1-b3 {
-  font-size: var(--md, var(--default-md));
-}
-
-/* Text — s2 (--base) */
-.text-s2-b1 {
+.text-s2 {
   font-size: var(--base, var(--default-base));
 }
 
-.text-s2-b2 {
-  font-size: var(--base, var(--default-base));
-}
-
-.text-s2-b3 {
-  font-size: var(--base, var(--default-base));
-}
-
-/* Text — s3 (--sm) */
-.text-s3-b1 {
+.text-s3 {
   font-size: var(--sm, var(--default-sm));
 }
 
-.text-s3-b2 {
-  font-size: var(--sm, var(--default-sm));
-}
-
-.text-s3-b3 {
-  font-size: var(--sm, var(--default-sm));
-}
-
-/* Text — s4 (--xs) */
-.text-s4-b1 {
+.text-s4 {
   font-size: var(--xs, var(--default-xs));
 }
 
-.text-s4-b2 {
-  font-size: var(--xs, var(--default-xs));
+/* ── Axis: color ── */
+.text-primary,
+.title-primary,
+.subtitle-primary {
+  color: var(--color-primary);
 }
 
-.text-s4-b3 {
-  font-size: var(--xs, var(--default-xs));
+.text-secondary,
+.title-secondary,
+.subtitle-secondary {
+  color: var(--color-secondary);
+}
+
+.text-accent,
+.title-accent,
+.subtitle-accent {
+  color: var(--color-accent);
+}
+
+.text-neutral,
+.title-neutral,
+.subtitle-neutral {
+  color: var(--color-neutral);
+}
+
+.text-info,
+.title-info,
+.subtitle-info {
+  color: var(--color-info);
+}
+
+.text-success,
+.title-success,
+.subtitle-success {
+  color: var(--color-success);
+}
+
+.text-warning,
+.title-warning,
+.subtitle-warning {
+  color: var(--color-warning);
+}
+
+.text-error,
+.title-error,
+.subtitle-error {
+  color: var(--color-error);
 }
 
 .textarea {
@@ -2719,6 +2939,20 @@ input[type=color].swatch::-moz-color-swatch {
 
 .breadcrumbs-xl {
   --fontsize: var(--xl, var(--default-xl));
+}
+
+.card {
+  --card-bg: var(--color-surface-2);
+  --card-fg: var(--color-on-surface);
+  --card-border: var(--color-border);
+  --card-border-width: 0px;
+  --card-radius: var(--radius-box);
+  --card-shadow: none;
+  --card-p: calc(1.5em * var(--scale));
+  --card-gap: calc(0.5em * var(--scale));
+  --card-title-fg: inherit;
+  --card-title-size: 1.125em;
+  --card-title-weight: 600;
 }
 
 /* Values that used to sit in base. They belong to this family now:
@@ -5400,64 +5634,31 @@ label:has(:checked),
   line-height: 1.35;
 }
 
-.text-s1-b1 {
-  font-weight: 600;
+/* Axis: s — the leading that goes with each size. */
+.text-s1,
+.text-s2 {
   line-height: 1.6;
 }
 
-.text-s1-b2 {
-  font-weight: 500;
-  line-height: 1.6;
-}
-
-.text-s1-b3 {
-  font-weight: 400;
-  line-height: 1.6;
-}
-
-.text-s2-b1 {
-  font-weight: 600;
-  line-height: 1.6;
-}
-
-.text-s2-b2 {
-  font-weight: 500;
-  line-height: 1.6;
-}
-
-.text-s2-b3 {
-  font-weight: 400;
-  line-height: 1.6;
-}
-
-.text-s3-b1 {
-  font-weight: 600;
+.text-s3 {
   line-height: 1.55;
 }
 
-.text-s3-b2 {
-  font-weight: 500;
-  line-height: 1.55;
+.text-s4 {
+  line-height: 1.5;
 }
 
-.text-s3-b3 {
-  font-weight: 400;
-  line-height: 1.55;
-}
-
-.text-s4-b1 {
+/* Axis: b — weight. */
+.text-b1 {
   font-weight: 600;
-  line-height: 1.5;
 }
 
-.text-s4-b2 {
+.text-b2 {
   font-weight: 500;
-  line-height: 1.5;
 }
 
-.text-s4-b3 {
+.text-b3 {
   font-weight: 400;
-  line-height: 1.5;
 }
 
 /* Values that used to sit in base. They belong to this family now:

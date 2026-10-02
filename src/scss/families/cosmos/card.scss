@@ -1,0 +1,23 @@
+/* cosmos — card.
+   A sheet of paper drawn with the same pen as the menu: the box wobble,
+   a hand-drawn edge in the border colour and the family's tilt. No
+   shadow — PaperCSS cards sit flat on the page. */
+
+@mixin emit {
+	.card {
+		--card-bg: var(--color-surface-1);
+		--card-fg: var(--color-on-surface);
+		--card-border: var(--color-border);
+		--card-border-width: var(--border);
+		/* A tall box drifts less than a button: same pen, fewer pixels. */
+		--cw: var(--cosmos-wobble-box, 0.2);
+		--card-radius: var(--c2);
+		--card-rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+		--card-shadow: none;
+		--card-p: calc(1.25em * var(--scale));
+		--card-gap: calc(0.5em * var(--scale));
+		--card-title-fg: inherit;
+		--card-title-size: 1.125em;
+		--card-title-weight: 700;
+	}
+}

@@ -12,7 +12,18 @@
  * `--color-border`, which a theme may still set outright.
  */
 
-export type TokenType = 'color' | 'length' | 'number' | 'text';
+/**
+ * `edge-width` and `shadows` are still ONE variable each — what changes is the
+ * control that edits it:
+ *
+ *   edge-width  a width and the edges it is drawn on, as the `border-width`
+ *               shorthand (`1px 0 1px 0`). The parts at `0` ARE the edges that
+ *               are off, so the value is its own record.
+ *   shadows     a whole `box-shadow` value, edited as a list of layers.
+ */
+export type TokenType = 'color' | 'length' | 'number' | 'text' | 'edge-width' | 'shadows';
+
+const TOKEN_TYPES: readonly string[] = ['color', 'length', 'number', 'text', 'edge-width', 'shadows'];
 
 export interface ThemeToken {
 	/** CSS custom property name without the leading `--`. */
@@ -38,11 +49,140 @@ export interface ThemeToken {
  *  meaningless on a border and unreadable on a slider. */
 export const LENGTH_UNITS = ['px', 'rem', 'em', 'ch'];
 
-/** Split a CSS length into its number and its unit (`"0.5rem"` → `[0.5, 'rem']`). */
+/**
+ * Split a CSS length into its number and its unit (`"0.5rem"` → `[0.5, 'rem']`).
+ *
+ * A four-value shorthand — `1px 0 1px 0`, an edge set — reads back as its
+ * first non-zero part, which is exactly the number that was typed.
+ */
 export function splitLength(value: string, fallbackUnit = 'rem'): [number, string] {
-	const m = String(value).trim().match(/^(-?[\d.]+)\s*([a-z%]*)$/i);
+	const parts = String(value).trim().split(/\s+/);
+	const pick = parts.find((p) => p !== '0' && !/^0[a-z%]*$/i.test(p)) ?? parts[0] ?? '0';
+	const m = pick.match(/^(-?[\d.]+)\s*([a-z%]*)$/i);
 	if (!m) return [0, fallbackUnit];
 	return [parseFloat(m[1]) || 0, m[2] || fallbackUnit];
+}
+
+/* ------------------------------------------------------------------ *
+ * Edge width — a width and the edges it is drawn on, in one shorthand
+ * ------------------------------------------------------------------ */
+
+export interface Sides {
+	top: boolean;
+	right: boolean;
+	bottom: boolean;
+	left: boolean;
+}
+
+export interface EdgeWidth {
+	width: string;
+	sides: Sides;
+}
+
+export const SIDES = ['top', 'right', 'bottom', 'left'] as const;
+
+/** A width and its edges as one shorthand. All four on → just the length. */
+export function edgeWidthToCss({ width, sides }: EdgeWidth): string {
+	const e = (s: keyof Sides) => (sides[s] ? width : '0');
+	return sides.top && sides.right && sides.bottom && sides.left
+		? width
+		: `${e('top')} ${e('right')} ${e('bottom')} ${e('left')}`;
+}
+
+/** And back. A part at `0` is an edge that is off. */
+export function edgeWidthFromCss(raw: string, fallbackUnit = 'px'): EdgeWidth {
+	const p = raw.trim().split(/\s+/);
+	const zero = (x: string) => x === '0' || /^0[a-z%]*$/i.test(x);
+	const [n, u] = splitLength(raw, fallbackUnit);
+	if (p.length !== 4) {
+		const on = !zero(p[0] ?? '0');
+		return { width: `${n}${u}`, sides: { top: on, right: on, bottom: on, left: on } };
+	}
+	return {
+		width: `${n}${u}`,
+		sides: { top: !zero(p[0]), right: !zero(p[1]), bottom: !zero(p[2]), left: !zero(p[3]) }
+	};
+}
+
+/* ------------------------------------------------------------------ *
+ * Shadows — a `box-shadow` value, as a list of layers
+ * ------------------------------------------------------------------ */
+
+export interface ShadowLayer {
+	x: string;
+	y: string;
+	blur: string;
+	spread: string;
+	color: string;
+	inset: boolean;
+}
+
+/** The layers as CSS. An empty list is `none`, not an empty string. */
+export function shadowsToCss(layers: ShadowLayer[]): string {
+	if (!layers.length) return 'none';
+	return layers
+		.map((l) => `${l.inset ? 'inset ' : ''}${l.x} ${l.y} ${l.blur} ${l.spread} ${l.color}`)
+		.join(', ');
+}
+
+/** Split on the commas at depth 0 — not the ones inside `oklch(…)`. */
+function splitTop(v: string, sep: (ch: string) => boolean): string[] {
+	const out: string[] = [];
+	let depth = 0;
+	let acc = '';
+	for (const ch of v) {
+		if (ch === '(') depth++;
+		if (ch === ')') depth--;
+		if (depth === 0 && sep(ch)) {
+			if (acc.trim()) out.push(acc.trim());
+			acc = '';
+		} else acc += ch;
+	}
+	if (acc.trim()) out.push(acc.trim());
+	return out;
+}
+
+/**
+ * And back. A layer is up to four lengths and a colour, in any order the
+ * spec allows; whatever is not a length is the colour.
+ */
+export function shadowsFromCss(raw: string): ShadowLayer[] {
+	const v = raw.trim();
+	if (!v || v === 'none' || v === 'initial') return [];
+	return splitTop(v, (ch) => ch === ',').map((layer) => {
+		const words = splitTop(layer, (ch) => /\s/.test(ch));
+		const inset = words.includes('inset');
+		const rest = words.filter((w) => w !== 'inset');
+		const lengths = rest.filter((x) => /^-?[\d.]/.test(x) || x.startsWith('calc('));
+		const color = rest.filter((x) => !lengths.includes(x)).join(' ') || 'currentColor';
+		return {
+			x: lengths[0] ?? '0px',
+			y: lengths[1] ?? '0px',
+			blur: lengths[2] ?? '0px',
+			spread: lengths[3] ?? '0px',
+			color,
+			inset
+		};
+	});
+}
+
+/* ------------------------------------------------------------------ *
+ * Theme files
+ * ------------------------------------------------------------------ */
+
+/**
+ * Read a theme file — any stylesheet of `--name: value;` declarations — back
+ * into variables. A theme IS its variables, so this is all it takes; the
+ * family then keeps the ones it declares (see `tokensForFamily`).
+ */
+export function parseTheme(css: string): { vars: Record<string, string>; scheme?: string } {
+	const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
+	const vars: Record<string, string> = {};
+	for (const [, name, value] of clean.matchAll(/--([\w-]+)\s*:\s*([^;}]+)/g)) {
+		vars[name] = value.trim();
+	}
+	const scheme = clean.match(/(?:^|[\s;{])color-scheme\s*:\s*([^;}]+)/)?.[1].trim();
+	return { vars, scheme };
 }
 
 import { paramsByFamily, familyDocs } from './generated/registry.js';
@@ -59,7 +199,7 @@ function fromParam(p: FamilyParam): ThemeToken {
 		name: p.name,
 		label: p.label,
 		group: p.group,
-		type: (p.type === 'color' || p.type === 'length' ? p.type : p.type === 'number' ? 'number' : 'text') as TokenType,
+		type: (TOKEN_TYPES.includes(p.type) ? p.type : 'text') as TokenType,
 		value: p.value,
 		description: p.description,
 		min: p.min,

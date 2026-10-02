@@ -1,0 +1,21 @@
+/* dahlia — card.
+   After Radix Themes' `Card`: the panel colour, a hairline edge,
+   `--radius-box` corners and the family's directional light. The
+   title is medium weight, never bold — Radix headings in a card are
+   `weight="medium"`. */
+
+@mixin emit {
+	.card {
+		--card-bg: var(--color-surface-1);
+		--card-fg: var(--color-on-surface);
+		--card-border: var(--color-border);
+		--card-border-width: 1px;
+		--card-radius: var(--radius-box);
+		--card-shadow: var(--shadow-light, none);
+		--card-p: calc(1em * var(--scale));
+		--card-gap: calc(0.5em * var(--scale));
+		--card-title-fg: inherit;
+		--card-title-size: 1.0625em;
+		--card-title-weight: 500;
+	}
+}

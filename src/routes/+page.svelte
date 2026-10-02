@@ -4,8 +4,19 @@
 	// component gallery is reachable from the sidebar.
 	import ThemeEditor from './ThemeEditor.svelte';
 	import ThemePreview from './ThemePreview.svelte';
-	import { playground, resetTheme } from './playground.svelte.js';
+	import { playground, resetTheme, importTheme } from './playground.svelte.js';
 	import { serializeTheme } from '$lib/theme.js';
+
+	/* Open a theme `.css` from disk: the round trip of Export theme. */
+	let fileInput = $state<HTMLInputElement | null>(null);
+	async function onImport(e: Event & { currentTarget: HTMLInputElement }) {
+		/* Held before the await: `currentTarget` is null once the event is over. */
+		const input = e.currentTarget;
+		const file = input.files?.[0];
+		if (!file) return;
+		importTheme(await file.text(), file.name.replace(/\.css$/, ''));
+		input.value = '';
+	}
 
 	let dialog = $state<HTMLDialogElement | null>(null);
 	let exportTitle = $state('');
@@ -54,6 +65,8 @@
 		<div class="editor-actions">
 			<button class="btn btn-xs btn-primary" onclick={exportTheme}>Export theme</button>
 			<button class="btn btn-xs" onclick={exportFamily}>Export family</button>
+			<button class="btn btn-xs" onclick={() => fileInput?.click()}>Import theme</button>
+			<input type="file" accept=".css,text/css" hidden bind:this={fileInput} onchange={onImport} />
 			<button class="btn btn-xs btn-ghost" onclick={resetTheme}>Reset</button>
 		</div>
 	</div>
