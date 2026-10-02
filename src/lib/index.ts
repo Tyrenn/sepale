@@ -7,9 +7,11 @@
 // ships — so an exported component cannot offer a variant its stylesheet has
 // never heard of.
 //
-// `text`, `link` and `validator` have no component here on purpose: they are
-// one class on one element, with no axis and no structure, and a wrapper would
-// only add an import. Write `<p class="text-s2-b1">` and `<a class="link">`.
+// `link` and `validator` have no component here on purpose: they are one
+// class on one element, with no axis and no structure, and a wrapper would only
+// add an import. Write `<a class="link">`. Text does have wrappers — `Text`,
+// `Title`, `Subtitle` — because it has three axes (size, weight, colour) and
+// a heading has a tag to choose.
 //
 // A component draws its own inner parts rather than exposing them as separate
 // wrappers: `Menu` renders its rows from `items`, `Tabs` its tabs from `tabs`,
@@ -40,6 +42,10 @@ export { default as Progress } from './components/Progress.svelte';
 export { default as RadialProgress } from './components/RadialProgress.svelte';
 export { default as Skeleton } from './components/Skeleton.svelte';
 export { default as List } from './components/List.svelte';
+export { default as Card } from './components/Card.svelte';
+export { default as Text } from './components/Text.svelte';
+export { default as Title } from './components/Title.svelte';
+export { default as Subtitle } from './components/Subtitle.svelte';
 
 // Navigation
 export { default as Menu, type MenuNode } from './components/Menu.svelte';
@@ -62,6 +68,7 @@ export {
 	serializeTheme,
 	tokensToInlineStyle,
 	tokensForFamily,
+	parseTheme,
 	type ThemeToken,
 	type TokenType
 } from './theme.js';

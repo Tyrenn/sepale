@@ -1,0 +1,23 @@
+/* daisy — card.
+   Ported from daisyUI's `.card`: `--radius-box` corners, a body padded
+   `1.5rem` with a `.5rem` gap, a semibold `1.125rem` title. daisyUI
+   leaves the card transparent and expects `bg-base-100 shadow-sm` next
+   to it — we have no utilities, so the card paints surface-2 itself and
+   stays flat, like the rest of the family. `.card-border` draws the
+   family hairline. */
+
+@mixin emit {
+	.card {
+		--card-bg: var(--color-surface-2);
+		--card-fg: var(--color-on-surface);
+		--card-border: var(--color-border);
+		--card-border-width: 0px;
+		--card-radius: var(--radius-box);
+		--card-shadow: none;
+		--card-p: calc(1.5em * var(--scale));
+		--card-gap: calc(0.5em * var(--scale));
+		--card-title-fg: inherit;
+		--card-title-size: 1.125em;
+		--card-title-weight: 600;
+	}
+}

@@ -13,6 +13,7 @@
 @use 'badge';
 @use 'breadcrumbs';
 @use 'button';
+@use 'card';
 @use 'checkbox';
 @use 'chip';
 @use 'dock';
@@ -190,6 +191,7 @@ svg {
 	@include badge.base;
 	@include breadcrumbs.base;
 	@include button.base;
+	@include card.base;
 	@include checkbox.base;
 	@include chip.base;
 	@include dock.base;

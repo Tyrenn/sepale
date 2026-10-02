@@ -141,7 +141,10 @@ const render = (axis) =>
 		? `[${axis.map((v) => `'${v}'`).join(', ')}]`
 		: Object.keys(axis).length === 0
 			? '{}'
-			: `{ ${Object.entries(axis).map(([k, v]) => `${k}: '${v}'`).join(', ')} }`;
+			: /* Keys are quoted: an unquoted `1:` is a NUMBER key, which
+				   `Values<A>` (string keys only) reads as no value at all —
+				   and the axis silently loses its prop. */
+				`{ ${Object.entries(axis).map(([k, v]) => `'${k}': '${v}'`).join(', ')} }`;
 
 const families = readdirSync(builtDir)
 	.filter((f) => f.endsWith('.css'))

@@ -1,5 +1,5 @@
 import { families, themesByFamily, tokensForFamily, familyCategory } from '$lib/index.js';
-import type { ThemeToken } from '$lib/theme.js';
+import { parseTheme, type ThemeToken } from '$lib/theme.js';
 import type { ThemeData } from '$lib/generated/registry.js';
 
 export { families };
@@ -46,6 +46,7 @@ const GROUPS: { group: string; ids: string[] }[] = [
 			'radial-progress',
 			'skeleton',
 			'list',
+			'card',
 			'text',
 			'link',
 			'swatch'
@@ -123,7 +124,27 @@ export function selectTheme(name: string) {
 	load(themesFor(playground.family).find((t) => t.name === name));
 }
 
+let lastImport: { name: string; css: string } | null = null;
+
+/**
+ * Open a theme file in the editor, for the current family.
+ *
+ * A theme IS its variables, so the file is read back into them and the family
+ * keeps the ones it declares; anything else in the file is ignored, and a
+ * parameter the file does not mention keeps the family's default. The name is
+ * the file's, so an export downloads under the name it came in with.
+ */
+export function importTheme(css: string, name = 'imported') {
+	lastImport = { name, css };
+	const { vars, scheme } = parseTheme(css);
+	playground.theme = name;
+	playground.scheme = scheme ?? playground.scheme;
+	playground.tokens = tokensForFamily(playground.family, vars);
+}
+
 /** Reset edits back to the active theme's original values. */
 export function resetTheme() {
-	selectTheme(playground.theme);
+	/* An imported theme is not in the registry: reset goes back to the file. */
+	if (lastImport?.name === playground.theme) importTheme(lastImport.css, lastImport.name);
+	else selectTheme(playground.theme);
 }

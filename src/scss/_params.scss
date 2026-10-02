@@ -24,8 +24,16 @@
        help: 'Corner radius of buttons, inputs and selects.',
      )
 
-   `type` is color | length | number. `min`/`max`/`step` turn the
-   control into a slider; `units` adds a unit picker.
+   `type` is color | length | number | edge-width | shadows.
+   `min`/`max`/`step` turn the control into a slider; `units` adds a
+   unit picker. The last two are still ONE variable, with a richer
+   control:
+
+     edge-width  a `border-width` shorthand, edited as a width and
+                 four edge toggles: default '1px 0 1px 0' draws top
+                 and bottom only. Read it as `border-width`.
+     shadows     a whole `box-shadow` value, edited as a list of
+                 layers. Quote the default: it holds commas.
    ============================================================ */
 
 @use 'sass:list';

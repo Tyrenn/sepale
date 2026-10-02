@@ -12,54 +12,83 @@
 	import type { ComponentDoc } from '../doc.js';
 
 	export const DOC: ComponentDoc = {
-		namespaces: ["text", "title", "subtitle"],
+		namespaces: ['text', 'title', 'subtitle'],
 		description:
-			"The typographic scale, delivered as classes. Not a component — no frame, no state, no variant, and no Svelte wrapper: write the class on your own element. It is three components in one file — `text`, `title` and `subtitle` — because separating them would buy nothing.",
+			'The typographic scale, delivered as classes — no frame, no state. Three components in one file, `text`, `title` and `subtitle`, because separating them would buy nothing. Size and weight are two axes, and each of the three carries the eight semantic colours.',
 		classes: {
-			/* The scale is mechanical, so its prose is written the same way. */
 			...Object.fromEntries(
-				[1, 2, 3, 4].flatMap((size) =>
-					[1, 2, 3].map((weight) => [
-						`text-s${size}-b${weight}`,
-						`Size step ${size}, weight ${weight}.`
-					])
-				)
+				[1, 2, 3, 4].map((size) => [`text-s${size}`, `Size step ${size}, with its leading.`])
 			),
+			...Object.fromEntries([1, 2, 3].map((weight) => [`text-b${weight}`, `Weight ${weight}.`])),
 			title: "The page's one title.",
-			"subtitle-s1": 'A subtitle, first step down from the title.',
-			"subtitle-s2": 'A subtitle, second step down.'
+			'subtitle-s1': 'A subtitle, first step down from the title.',
+			'subtitle-s2': 'A subtitle, second step down.'
 		},
-		props: {}
+		props: {
+			Title: [
+				{ name: 'level', type: '1 | 2 | 3 | 4 | 5 | 6', default: '1', description: 'Which heading tag to render. Purely semantic; the look never moves.' }
+			],
+			Subtitle: [
+				{ name: 'level', type: '1 | 2 | 3 | 4 | 5 | 6', default: '2', description: 'Which heading tag to render. Purely semantic; the look never moves.' }
+			]
+		}
 	};
 </script>
 
 <script lang="ts">
 	import Section from '../../Section.svelte';
-
+	import { Text, Title, Subtitle } from '$lib/index.js';
 </script>
 
-	<Section
-		title="Headings"
-		html={`<p class="title">Title — .title</p>
-<p class="subtitle-s1">Subtitle s1</p>
-<p class="subtitle-s2">Subtitle s2</p>`}
-	>
-		<div style="text-align:center;">
-			<p class="title">Title — .title</p>
-			<p class="subtitle-s1">Subtitle s1</p>
-			<p class="subtitle-s2">Subtitle s2</p>
-		</div>
-	</Section>
+<Section
+	title="Headings"
+	svelte={`<Title>Title</Title>
+<Subtitle s="1">Subtitle s1</Subtitle>
+<Subtitle s="2" level={3}>Subtitle s2</Subtitle>`}
+	html={`<h1 class="title">Title</h1>
+<h2 class="subtitle-s1">Subtitle s1</h2>
+<h3 class="subtitle-s2">Subtitle s2</h3>`}
+>
+	<div style="text-align:center;">
+		<Title>Title</Title>
+		<Subtitle s="1">Subtitle s1</Subtitle>
+		<Subtitle s="2" level={3}>Subtitle s2</Subtitle>
+	</div>
+</Section>
 
-	<Section
-		title="Body"
-		html={`<p class="text-s2-b1">Base, semibold</p>
-<p class="text-s2-b2">Base, medium</p>
-<p class="text-s2-b3">Base, regular</p>`}
-	>
-		<div style="text-align:center;">
-			<p class="text-s2-b1">Base, semibold</p>
-			<p class="text-s2-b2">Base, medium</p>
-			<p class="text-s2-b3">Base, regular</p>
-		</div>
-	</Section>
+<Section
+	title="Body"
+	subtitle="Size (s) and weight (b) are two axes."
+	svelte={`<Text b="1">Base, semibold</Text>
+<Text b="2">Base, medium</Text>
+<Text b="3">Base, regular</Text>
+<Text s="4">Smallest step</Text>`}
+	html={`<p class="text-s2 text-b1">Base, semibold</p>
+<p class="text-s2 text-b2">Base, medium</p>
+<p class="text-s2 text-b3">Base, regular</p>
+<p class="text-s4 text-b3">Smallest step</p>`}
+>
+	<div style="text-align:center;">
+		<Text b="1">Base, semibold</Text>
+		<Text b="2">Base, medium</Text>
+		<Text b="3">Base, regular</Text>
+		<Text s="4">Smallest step</Text>
+	</div>
+</Section>
+
+<Section
+	title="Colour"
+	subtitle="The raw semantic token, not a contrast-checked reading of it."
+	svelte={`<Title color="primary">Primary title</Title>
+<Subtitle color="secondary">Secondary subtitle</Subtitle>
+<Text color="error">An error, in words.</Text>`}
+	html={`<h1 class="title title-primary">Primary title</h1>
+<h2 class="subtitle-s1 subtitle-secondary">Secondary subtitle</h2>
+<p class="text-s2 text-b3 text-error">An error, in words.</p>`}
+>
+	<div style="text-align:center;">
+		<Title color="primary">Primary title</Title>
+		<Subtitle color="secondary">Secondary subtitle</Subtitle>
+		<Text color="error">An error, in words.</Text>
+	</div>
+</Section>

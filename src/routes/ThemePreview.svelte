@@ -251,12 +251,12 @@
 	<!-- Typography: the text-natured components, which never scale. -->
 	<section class="tp-block">
 		<h3 class="tp-title">Typography</h3>
-		<p class="text-s1-b1">Section title</p>
-		<p class="text-s2-b3">
+		<p class="text-s1 text-b1">Section title</p>
+		<p class="text-s2 text-b3">
 			Body copy sets the measure everything else sits against — a field's frame
 			grows with <em>Element size</em>, this sentence does not.
 		</p>
-		<p class="text-s3-b3" style="opacity:.7;">Secondary copy, one step down the scale.</p>
+		<p class="text-s3 text-b3" style="opacity:.7;">Secondary copy, one step down the scale.</p>
 		<div class="tp-row">
 			<a class="link" href="#preview">Default</a>
 			<a class="link link-primary" href="#preview">Primary</a>

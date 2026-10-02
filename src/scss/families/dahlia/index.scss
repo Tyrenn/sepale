@@ -4,6 +4,7 @@
 @use '../derived-content';
 @use 'badge';
 @use 'breadcrumbs';
+@use 'card';
 @use 'button';
 @use 'checkbox';
 @use 'chip';
@@ -129,6 +130,7 @@ $params: map.merge(
 
 @include badge.emit;
 @include breadcrumbs.emit;
+@include card.emit;
 @include button.emit;
 @include checkbox.emit;
 @include chip.emit;

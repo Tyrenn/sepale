@@ -1,0 +1,20 @@
+/* sunflower — card.
+   The plain sheet every neo-brutalist box is drawn on: surface-2, the
+   family's border, `--radius-box` and the hard offset shadow. The
+   title is bold — the family has one weight for anything that leads. */
+
+@mixin emit {
+	.card {
+		--card-bg: var(--color-surface-2);
+		--card-fg: var(--color-on-surface);
+		--card-border: var(--color-border);
+		--card-border-width: var(--border);
+		--card-radius: var(--radius-box);
+		--card-shadow: var(--sf-shadow);
+		--card-p: calc(1.25em * var(--scale));
+		--card-gap: calc(0.5em * var(--scale));
+		--card-title-fg: inherit;
+		--card-title-size: 1.125em;
+		--card-title-weight: 700;
+	}
+}
