@@ -1,7 +1,6 @@
 <script module lang="ts">
-	/** What .input is made of, classified. Only this block differs between
-	    this file and the copy generated for each family — see
-	    scripts/gen-components.mjs. */
+	/** What .input is made of, classified. Each family's copy writes these out as
+	    plain props (scripts/family-component.mjs). */
 	export const PREFIX = 'input';
 
 	export const AXES = {
@@ -10,18 +9,18 @@
 		variant: ['ghost']
 	} as const;
 
-	export const FLAGS = [] as const;
+	export const FLAGS = {} as const;
 	export const PARTS = [] as const;
 </script>
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLInputAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
 	// `size` is ours — the HTML attribute of the same name is a character count
 	// our CSS overrides anyway.
-	interface Props extends AxisProps<typeof AXES>, Omit<HTMLInputAttributes, 'size' | 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLInputAttributes, 'size' | 'color'> {
 		/**
 		 * Colour the field by its own validity and reveal `hint` once the
 		 * browser marks it invalid. The CSS drives this off `:user-invalid`,
@@ -48,7 +47,7 @@
 		...axes
 	}: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, validator && 'validator', klass));
 </script>
 

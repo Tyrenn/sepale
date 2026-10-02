@@ -7,12 +7,12 @@
 	   the twelve `.text-sN-bN` classes were twelve ways of saying seven
 	   things. */
 	export const AXES = {
-		s: { '1': 's1', '2': 's2', '3': 's3', '4': 's4' },
-		b: { '1': 'b1', '2': 'b2', '3': 'b3' },
+		s: ['1', '2', '3', '4'],
+		b: ['1', '2', '3'],
 		color: ['primary', 'secondary', 'accent', 'neutral', 'info', 'success', 'warning', 'error']
 	} as const;
 
-	export const FLAGS = [] as const;
+	export const FLAGS = {} as const;
 	export const PARTS = [] as const;
 </script>
 
@@ -25,9 +25,9 @@
 	 */
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES>, Omit<HTMLAttributes<HTMLParagraphElement>, 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLParagraphElement>, 'color'> {
 		class?: string;
 		children?: Snippet;
 	}
@@ -36,7 +36,7 @@
 	   props still has to name a size and a weight to have either. */
 	let { s = '2', b = '3', class: klass = '', children, ...axes }: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, { ...axes, s, b }));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, { ...axes, s, b }));
 	let classes = $derived(cx(applied.classes, klass));
 </script>
 

@@ -1,12 +1,12 @@
 /* ============================================================
-   reset.scss — the page reset, OPTIONAL and outside base.
+   reset.scss — the page reset, OPTIONAL and outside every family.
 
-   It lived inside base/_index.scss, which made it impossible to take
+   It once lived inside the shared base, which made it impossible to take
    the kit without it. It is its own stylesheet now: the build emits
-   static/reset.css, the bundle ships it beside base.css, and a page
+   static/reset.css, the bundle ships it beside the family's stylesheet, and a page
    that already has a reset simply does not load it.
 
-   base does NOT depend on it: every component sizes itself with
+   No family depends on it: every component sizes itself with
    `box-sizing: border-box` written at its own site. What this file
    buys is a predictable page around them — no default margins, form
    controls inheriting the page font, media boxed to their container.

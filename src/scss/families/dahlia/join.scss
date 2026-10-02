@@ -1,9 +1,12 @@
-/* ============================================================
-   join.scss — .join mixin library (group adjacent form elements)
+/* dahlia — join.
+   Everything dahlia draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). Pure structure — no look mixins.
+/* ============================================================
+   join.scss — .join (group adjacent form elements)
 
    Exported variables (injected into child .join-item elements,
    consumed by input, select, button, … via
@@ -17,11 +20,11 @@
 
 
 /* ------------------------------------------------------------
-   base — horizontal grouping: corner radius distribution, border
+   structure — horizontal grouping: corner radius distribution, border
    merging, button height stretch.
    ------------------------------------------------------------ */
 
-@mixin base {
+@mixin structure {
 	.join {
 		display: inline-flex;
 		align-items: stretch;
@@ -85,14 +88,6 @@
 		   min-height keeps it from collapsing below its natural size. */
 	/* Border merging */
 
-	/* ── Was one identical file per family until 2026-09-22 ──────────────
-	   Seven copies, 125 rules, byte for byte the same. Nothing below is a
-	   family's decision: it says which corner of which child is square and
-	   how adjacent borders merge. ADR 0008 keeps values out of base, and
-	   these are not values — no family would ever write a different one.
-	   ------------------------------------------------------------------ */
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
 	.join {
 		--join-ss: 0;
 		--join-se: 0;

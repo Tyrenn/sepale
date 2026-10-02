@@ -1,8 +1,75 @@
-/* sunflower — validator. */
+/* sunflower — validator.
+   Everything sunflower draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   validator.scss — .validator (validation states)
+
+   Exported variable (injected into sibling field components):
+	--input-color   overrides the field border/focus color;
+	                consumed by .input, .select, .textarea, .checkbox, …
+
+   Usage: add .validator to a field component; .validator-hint is
+   the sibling element shown on error.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — valid/invalid color driving + error hint.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	/* Valid */
+	.validator:user-valid,
+		.validator:has(:user-valid) {
+		--input-color: var(--color-success);
+	}
+	.validator:user-valid:focus,
+		.validator:has(:user-valid):focus,
+		.validator:user-valid:focus-within,
+		.validator:has(:user-valid):focus-within,
+		.validator:user-valid:checked,
+		.validator:has(:user-valid):checked,
+		.validator:user-valid[aria-checked="true"],
+		.validator:has(:user-valid)[aria-checked="true"] {
+		--input-color: var(--color-success);
+	}
+	/* Invalid */
+	.validator:user-invalid,
+		.validator:has(:user-invalid),
+		.validator[aria-invalid]:not([aria-invalid="false"]),
+		.validator:has([aria-invalid]:not([aria-invalid="false"])) {
+		--input-color: var(--color-error);
+	}
+	.validator:user-invalid:focus,
+		.validator:has(:user-invalid):focus,
+		.validator[aria-invalid]:not([aria-invalid="false"]):focus,
+		.validator:has([aria-invalid]:not([aria-invalid="false"])):focus,
+		.validator:user-invalid:focus-within,
+		.validator:has(:user-invalid):focus-within,
+		.validator[aria-invalid]:not([aria-invalid="false"]):focus-within,
+		.validator:has([aria-invalid]:not([aria-invalid="false"])):focus-within {
+		--input-color: var(--color-error);
+	}
+	/* Show error hint */
+	.validator:user-invalid ~ .validator-hint,
+		.validator:has(:user-invalid) ~ .validator-hint,
+		.validator[aria-invalid]:not([aria-invalid="false"]) ~ .validator-hint,
+		.validator:has([aria-invalid]:not([aria-invalid="false"])) ~ .validator-hint {
+		color: var(--color-error);
+		visibility: visible;
+		display: revert-layer;
+	}
+	.validator-hint {
+		visibility: hidden;
+		font-size: var(--xs, var(--default-xs));
+	}
+}
+
+@mixin look {
 	.validator-hint {
 		margin-top: 0.5em;
 	}

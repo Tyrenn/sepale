@@ -1,0 +1,187 @@
+/* ============================================================
+   daisy — the root.
+
+   Everything this family declares outside any component, emitted
+   before the first one: the page itself (registered properties,
+   inline SVG sizing, root colour and scroll, scrollbar), the type
+   scale, --scale, the light shadow recipe — and the colours derived
+   from the theme's seeds.
+   ============================================================ */
+
+/* ── properties ── */
+/* properties.css */
+
+@property --radialprogress {
+	syntax: "<percentage>";
+	inherits: true;
+	initial-value: 0%;
+}
+
+/* ── svg ── */
+/* ============================================================
+   svg.scss — inline SVG sizing.
+
+   Icons inside components scale with the surrounding font size,
+   which is what makes intrinsic (em-based) sizing work for buttons,
+   chips, tabs and the like.
+   ============================================================ */
+
+svg {
+	height: 1em;
+}
+
+/* ── rootcolor ── */
+/* ============================================================
+   rootcolor
+   Root colour and background for :root and [data-theme] scopes
+   ============================================================ */
+
+:root,
+[data-theme] {
+	background: var(--page-scroll-bg, var(--root-bg));
+	color: var(--color-on-surface);
+}
+
+:where(:root, [data-theme]) {
+	--root-bg: var(--color-surface-1);
+}
+
+/* ── rootscroll ── */
+/* ============================================================
+   rootscroll
+   Scroll gutter and scroll lock (used by modals)
+   ============================================================ */
+
+/* Scroll gutter — darkens the background while a backdrop is active */
+:root {
+	background: var(--page-scroll-bg, var(--root-bg));
+	--page-scroll-bg-on: linear-gradient(var(--root-bg, #0000), var(--root-bg, #0000))
+		color-mix(in srgb, var(--root-bg, #0000), oklch(0% 0 0) calc(var(--page-has-backdrop, 0) * 40%));
+	--page-scroll-transition-on: background-color 0.3s ease-out;
+
+	transition: var(--page-scroll-transition);
+
+	/* Fallback without @supports */
+	scrollbar-gutter: var(--page-scroll-gutter, unset);
+
+	/* With CSS if() support */
+	scrollbar-gutter: if(style(--page-has-scroll: 1): var(--page-scroll-gutter, unset) ; else: unset);
+}
+
+@keyframes set-page-has-scroll {
+	0%, to { --page-has-scroll: 1; }
+}
+
+/* Scroll lock — blocks scrolling while a modal is open */
+:root:not(span) {
+	overflow: var(--page-overflow);
+}
+
+/* ── scrollbar ── */
+/* ============================================================
+   scrollbar
+   Scrollbar colour that follows the theme
+   ============================================================ */
+
+:root {
+	scrollbar-color: color-mix(in oklch, currentColor 35%, #0000) #0000;
+}
+
+/* ── default ── */
+:root{
+
+	/* ── Light shadow system ─────────────────────────────────────
+	   Alternative to --depth. Set --light-intensity > 0 and --depth: 0
+	   for flat/modern directional shadows instead of retro depth.
+	   --light-intensity   opacity multiplier  (0 = off)
+	   --light-depth       distance/blur scale (1 = sm, 2 = md, 3 = lg)
+	   --light-color       shadow hue, default pure black
+	   ──────────────────────────────────────────────────────────── */
+	--light-intensity: 0;
+	--light-depth: 1;
+	--light-color: oklch(0% 0 0);
+
+	/* ── Type scale ──────────────────────────────────────────────
+	   A fixed modular scale (ratio 1.125, base 1rem). Deliberately NOT
+	   fluid: component sizes are intrinsic (em), so a viewport-driven
+	   base would silently resize every component — two competing size
+	   systems. Size is chosen, through --scale below. */
+	--default-xxs:  0.7023rem;
+	--default-xs:   0.7901rem;
+	--default-sm:   0.8889rem;
+	--default-base: 1rem;
+	--default-md:   1.125rem;
+	--default-lg:   1.2656rem;
+	--default-xl:   1.4238rem;
+	--default-xxl:  1.6018rem;
+	--default-xxxl: 1.802rem;
+}
+
+/* ── Element size coefficient ────────────────────────────────────
+   --scale grows or shrinks the FRAME of every component — heights,
+   paddings, gaps, internal offsets — and never the text.
+
+   That is why it is not applied to font-size, and why this stylesheet does not
+   set a root font-size either: a kit that resizes the host page's text
+   when you install it is a kit you uninstall. Each geometric length is
+   written `calc(Nem * var(--scale))` at its own site, so it stays
+   intrinsic (resolved against the element's own font-size, so size
+   variants stay proportioned) while the text is left alone.
+
+   What does NOT scale: text, icons (svg { height: 1em } — they sit on
+   the text baseline), the radii (their own parameters), hairlines in px,
+   and the text-natured components that draw no frame (text, link,
+   breadcrumbs, validator).
+
+   On :where(:root) (specificity 0) so any theme wins, in any load order. */
+:where(:root) {
+	--scale: 1;
+}
+
+/* The recipe is declared on every element (zero specificity via :where) —
+   NOT on :root only. A custom property resolves its var() references where
+   it is declared, so a :root-only --shadow-light would freeze --light-depth
+   forever and per-component overrides (e.g. a button raising its elevation
+   on hover) would do nothing. Declared per element, changing any --light-*
+   on a component recomputes its shadow there. */
+:where(*) {
+	--shadow-light:
+		0 calc(var(--light-depth, 1) * 1px) calc(var(--light-depth, 1) * 3px)
+			color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 15%), #0000),
+		0 calc(var(--light-depth, 1) * 3px) calc(var(--light-depth, 1) * 8px)
+			color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 8%), #0000);
+}
+
+/* ============================================================
+   derived colours — the automatic `--color-on-*`, plus the default
+   border color.
+
+   A theme sets surfaces and semantic colors; what is written *on*
+   them is derived from the seed with the relative color syntax. The lightness flips around a threshold — a light
+   seed gets near-black text, a dark seed gets near-white — while
+   keeping a whisper of the seed's hue.
+
+     clamp(0.145, (0.66 - l) * 999, 0.97)
+		l > 0.66  →  negative  →  clamps to 0.145 (dark text)
+		l < 0.66  →  huge      →  clamps to 0.97  (light text)
+
+   Declared on :where(:root) (zero specificity) so a theme's :root
+   can still override any of them explicitly if it wants to.
+   ============================================================ */
+
+$semantics: primary, secondary, accent, neutral, info, success, warning, error;
+
+:where(:root) {
+	--color-on-surface: oklch(from var(--color-surface-1) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
+
+	/* Borders are almost always a wash of the text color over the surface.
+	   Derived so a theme has only three surfaces to supply — but a theme
+	   (or a family like wireframe) can still set --color-border outright. */
+	--color-border: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+
+	@each $color in $semantics {
+		--color-on-#{$color}: oklch(
+			from var(--color-#{$color}) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+		);
+	}
+}

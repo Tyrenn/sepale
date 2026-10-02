@@ -1,7 +1,6 @@
 <script module lang="ts">
-	/** What .chip is made of, classified. Only this block differs between this
-	    file and the copy generated for each family (scripts/gen-components.mjs):
-	    an axis a family leaves empty loses its prop entirely. */
+	/** What .chip is made of, classified. Each family's copy writes these out as
+	    plain props (scripts/family-component.mjs). */
 	export const PREFIX = 'chip';
 
 	export const AXES = {
@@ -13,16 +12,16 @@
 		variant: ['outline', 'dash', 'soft', 'ghost']
 	} as const;
 
-	export const FLAGS = [] as const;
+	export const FLAGS = {} as const;
 	export const PARTS = [] as const;
 </script>
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES>, Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
 		class?: string;
 		children?: Snippet;
 	}
@@ -35,7 +34,7 @@
 		...axes
 	}: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 </script>
 

@@ -1,9 +1,8 @@
 /**
  * build-css.mjs — compile every family and every theme.
  *
- * A family is a directory now (ADR 0008): `families/<name>/index.scss` pulls in
- * the shared mechanism from `base/` and then its own file per component. The
- * sass CLI's directory mode cannot express "compile only the index", so the
+ * A family is a self-contained directory (ADR 0010): `families/<name>/index.scss`
+ * pulls in its page layer and its own file per component. The sass CLI's directory mode cannot express "compile only the index", so the
  * build runs through the JS API instead.
  *
  *   src/scss/families/<name>/index.scss  ->  static/families/<name>.css
@@ -11,7 +10,7 @@
  *   src/scss/reset.scss                  ->  static/reset.css
  *
  * The reset is compiled on its own because it is optional: a page that
- * already has one does not load it, and base does not depend on it.
+ * already has one does not load it, and no family depends on it.
  */
 
 import { compile } from 'sass';
@@ -53,8 +52,8 @@ for (const family of families) {
 	}
 }
 
-/* Optional, and therefore separate (CONTEXT.md: the bundle ships base.css,
-   theme.css and "an optional reset.css"). */
+/* Optional, and therefore separate (CONTEXT.md: the bundle ships the family's
+   stylesheet, theme.css and "an optional reset.css"). */
 const { css: resetCss } = compile(join(root, 'src/scss/reset.scss'), options);
 write(join(root, 'static/reset.css'), resetCss);
 count++;

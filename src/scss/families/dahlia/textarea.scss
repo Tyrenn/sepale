@@ -1,13 +1,65 @@
 @use '../../_mixins' as m;
 
 /* dahlia — textarea.
-   Everything this family decides about the component: its look,
-   its states and its variants. base supplies the mechanism and
-   no values at all (ADR 0008). */
+   Everything dahlia draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   textarea.scss — .textarea
+
+   Plumbing contract:
+	--input-color   resolved border/accent color (same as input.scss)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-{variant}       semantic accent (set by color-variants)
+	--border / --radius-field
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure: sizing, inner <textarea> handling, focus ring,
+   disabled state.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.textarea {
+		background-color: var(--color-surface-1);
+		border-radius: var(--radius-field);
+		flex-shrink: 1;
+		appearance: none;
+		vertical-align: middle;
+		touch-action: manipulation;
+		border-color: var(--input-color);
+		box-shadow: var(--shadow-light, );
+	}
+	.textarea textarea {
+		appearance: none;
+	}
+	.textarea:focus,
+		.textarea:focus-within {
+		--input-color: var(--color-on-surface);
+		isolation: isolate;
+	}
+	/* Increase font size on iOS to prevent auto-zoom on focus */
+	.textarea:has(> textarea[disabled]),
+		.textarea:is(:disabled, [disabled]) {
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
+		cursor: not-allowed;
+	}
+	.textarea:has(> textarea[disabled]) > textarea[disabled] {
+		cursor: not-allowed;
+	}
+}
+
+@mixin look {
 	.textarea {
 		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
 		border: var(--border) solid #0000;

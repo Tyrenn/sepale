@@ -1,7 +1,6 @@
 <script module lang="ts">
-	/** What .tabs is made of, classified. Only this block differs between this
-	    file and the copy generated for each family (scripts/gen-components.mjs):
-	    an axis a family leaves empty loses its prop entirely.
+	/** What .tabs is made of, classified. Each family's copy writes these out as
+	    plain props (scripts/family-component.mjs).
 
 	    One namespace, `tabs`: the strip AND the tabs in it (ADR 0009). The
 	    component draws every tab, so `.tabs-item` and its states are PARTS.
@@ -17,15 +16,15 @@
 		placement: ['top', 'bottom']
 	} as const;
 
-	export const FLAGS = [] as const;
+	export const FLAGS = {} as const;
 	export const PARTS = ['item', 'item-active', 'item-disabled', 'item-content'] as const;
 
-	import type { Text } from '../internal/snippets.js';
+	import type { Snippet } from 'svelte';
 
 	/** One tab, and optionally the panel it reveals. */
 	export interface TabItem {
 		/** The tab's text, or a snippet drawing whatever belongs in its place. */
-		label: Text;
+		label: string | Snippet;
 		/** Unreachable, and drawn as such. */
 		disabled?: boolean;
 		/** What the tab shows when selected. Omit to place panels yourself. */
@@ -34,16 +33,14 @@
 </script>
 
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
-	import { isSnippet } from '../internal/snippets.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
 	// `onselect` is ours: the native event of that name fires on text
 	// selection and means nothing on the strip, so the attribute is Omitted
 	// rather than the prop renamed.
 	interface Props
-		extends AxisProps<typeof AXES>,
+		extends AxisProps<typeof AXES, typeof FLAGS>,
 			Omit<HTMLAttributes<HTMLDivElement>, 'onselect'> {
 		/**
 		 * The tabs, in order. A tab's `label` takes a snippet as readily as a
@@ -71,7 +68,7 @@
 		...axes
 	}: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
 	function select(i: number) {
@@ -81,7 +78,7 @@
 </script>
 
 {#snippet inside(item: TabItem)}
-	{#if isSnippet(item.label)}{@render item.label()}
+	{#if typeof item.label === 'function'}{@render item.label()}
 	{:else if tab}{@render tab(item)}
 	{:else}{item.label}{/if}
 {/snippet}

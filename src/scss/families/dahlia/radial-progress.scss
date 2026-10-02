@@ -1,13 +1,61 @@
 @use '../../_mixins' as m;
 
 /* dahlia — radial-progress.
-   Everything this family decides about the component: its look,
-   its states and its variants. base supplies the mechanism and
-   no values at all (ADR 0008). */
+   Everything dahlia draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   radial-progress.scss — .radial-progress
+
+   User-set variables (provided in HTML style or CSS):
+	--value       progress value 0–100 (required)
+	--size        ring diameter (default: 5em, scales with font)
+	--thickness   ring stroke width (default: --size / 10)
+
+   Internal variables:
+	--radialprogress   computed from --value (animated CSS property)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — conic ring + rounded cap.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.radial-progress {
+		position: relative;
+		display: inline-grid;
+		height: var(--size);
+		width: var(--size);
+		place-content: center;
+		vertical-align: middle;
+		box-sizing: content-box;
+	}
+	.radial-progress::before {
+		content: "";
+		position: absolute;
+		-webkit-mask: radial-gradient(
+				farthest-side,
+				#0000 calc(100% - var(--thickness)),
+				#000 calc(100% + 0.5px - var(--thickness))
+			);
+		mask: radial-gradient(
+				farthest-side,
+				#0000 calc(100% - var(--thickness)),
+				#000 calc(100% + 0.5px - var(--thickness))
+			);
+	}
+	.radial-progress::after {
+		content: "";
+		position: absolute;
+		transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
+	}
+}
+
+@mixin look {
 	.radial-progress {
 		--value: 0;
 		--size: calc(5em * var(--scale));

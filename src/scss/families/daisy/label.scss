@@ -1,11 +1,43 @@
 /* daisy — label.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   label.scss — .label / .floating-label
+
+   External variables (theme / family):
+	--color-surface-1   floating label background (hides the field border)
+	--border           inline divider width inside .input / .select
+	--size-field       floating label vertical center position
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — inline label + prefix/suffix label inside fields.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.label {
+		display: inline-flex;
+		align-items: center;
+		white-space: nowrap;
+	}
+	.label:has(input) {
+		cursor: pointer;
+	}
+	/* Label inside .input or .select (prefix/suffix icon or text) */
+	.input > .label,
+		.select > .label {
+		display: flex;
+		align-items: center;
+		white-space: nowrap;
+	}
+}
+
+@mixin look {
 	.label {
 		gap: calc(0.375em * var(--scale));
 		color: color-mix(in oklch, currentColor 60%, #0000);

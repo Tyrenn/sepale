@@ -1,13 +1,27 @@
 @use '../../_config' as c;
 
 /* daisy — link.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   link.scss — .link (styled hyperlink)
+
+
+/* ------------------------------------------------------------
+   structure — underlined link + .link-hover variant + focus.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.link {
+		cursor: pointer;
+	}
+}
+
+@mixin look {
 	.link {
 		text-decoration: underline;
 	}

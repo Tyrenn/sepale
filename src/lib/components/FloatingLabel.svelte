@@ -1,7 +1,6 @@
 <script module lang="ts">
-	/** What .floating-label is made of, classified. Only this block differs
-	    between this file and the copy generated for each family
-	    (scripts/gen-components.mjs).
+	/** What .floating-label is made of, classified. Each family's copy writes these out as
+	    plain props (scripts/family-component.mjs).
 
 	    A container that WRAPS a field, unlike `.label`, which is inline and
 	    lives inside one. Two roles, two components (ADR 0009). The <span> must
@@ -11,16 +10,16 @@
 
 	export const AXES = {} as const;
 
-	export const FLAGS = [] as const;
+	export const FLAGS = {} as const;
 	export const PARTS = [] as const;
 </script>
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLLabelAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES>, HTMLLabelAttributes {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLLabelAttributes {
 		/** The text that floats into the field's frame once it has content. */
 		label?: string;
 		class?: string;
@@ -30,7 +29,7 @@
 
 	let { label, class: klass = '', children, ...axes }: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 </script>
 
 <label {...applied.rest} class={cx(PREFIX, applied.classes, klass)}>

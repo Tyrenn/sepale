@@ -47,22 +47,204 @@
    just get their raw name as a label.
    ------------------------------------------------------------ */
 /* ============================================================
-   base/_index.scss — the page layer, then every component base.
+   daisy — the root.
 
-   base owns the MECHANISM: structure, states, intrinsic sizing,
-   accessibility, and the named slots a family fills. It writes
-   `height: var(--size)`; it never writes `--size:`. Nothing here
-   carries a value, so base cannot be used without a family
-   (ADR 0008).
+   Everything this family declares outside any component, emitted
+   before the first one: the page itself (registered properties,
+   inline SVG sizing, root colour and scroll, scrollbar), the type
+   scale, --scale, the light shadow recipe — and the colours derived
+   from the theme's seeds.
    ============================================================ */
-/* The component bases. Mixin-only: nothing is emitted until a
-   family includes them. */
+/* ── properties ── */
+/* properties.css */
+@property --radialprogress {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 0%;
+}
+/* ── svg ── */
 /* ============================================================
-   badge.scss — .badge mixin library (badge overlay wrapper)
+   svg.scss — inline SVG sizing.
 
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). Pure structure — no look mixins.
+   Icons inside components scale with the surrounding font size,
+   which is what makes intrinsic (em-based) sizing work for buttons,
+   chips, tabs and the like.
+   ============================================================ */
+svg {
+  height: 1em;
+}
+
+/* ── rootcolor ── */
+/* ============================================================
+   rootcolor
+   Root colour and background for :root and [data-theme] scopes
+   ============================================================ */
+:root,
+[data-theme] {
+  background: var(--page-scroll-bg, var(--root-bg));
+  color: var(--color-on-surface);
+}
+
+:where(:root, [data-theme]) {
+  --root-bg: var(--color-surface-1);
+}
+
+/* ── rootscroll ── */
+/* ============================================================
+   rootscroll
+   Scroll gutter and scroll lock (used by modals)
+   ============================================================ */
+/* Scroll gutter — darkens the background while a backdrop is active */
+:root {
+  background: var(--page-scroll-bg, var(--root-bg));
+  --page-scroll-bg-on: linear-gradient(var(--root-bg, #0000), var(--root-bg, #0000))
+  	color-mix(in srgb, var(--root-bg, #0000), oklch(0% 0 0) calc(var(--page-has-backdrop, 0) * 40%));
+  --page-scroll-transition-on: background-color 0.3s ease-out;
+  transition: var(--page-scroll-transition);
+  /* Fallback without @supports */
+  scrollbar-gutter: var(--page-scroll-gutter, unset);
+  /* With CSS if() support */
+  scrollbar-gutter: if(style(--page-has-scroll: 1): var(--page-scroll-gutter, unset); else: unset);
+}
+
+@keyframes set-page-has-scroll {
+  0%, to {
+    --page-has-scroll: 1;
+  }
+}
+/* Scroll lock — blocks scrolling while a modal is open */
+:root:not(span) {
+  overflow: var(--page-overflow);
+}
+
+/* ── scrollbar ── */
+/* ============================================================
+   scrollbar
+   Scrollbar colour that follows the theme
+   ============================================================ */
+:root {
+  scrollbar-color: color-mix(in oklch, currentColor 35%, rgba(0, 0, 0, 0)) rgba(0, 0, 0, 0);
+}
+
+/* ── default ── */
+:root {
+  /* ── Light shadow system ─────────────────────────────────────
+     Alternative to --depth. Set --light-intensity > 0 and --depth: 0
+     for flat/modern directional shadows instead of retro depth.
+     --light-intensity   opacity multiplier  (0 = off)
+     --light-depth       distance/blur scale (1 = sm, 2 = md, 3 = lg)
+     --light-color       shadow hue, default pure black
+     ──────────────────────────────────────────────────────────── */
+  --light-intensity: 0;
+  --light-depth: 1;
+  --light-color: oklch(0% 0 0);
+  /* ── Type scale ──────────────────────────────────────────────
+     A fixed modular scale (ratio 1.125, base 1rem). Deliberately NOT
+     fluid: component sizes are intrinsic (em), so a viewport-driven
+     base would silently resize every component — two competing size
+     systems. Size is chosen, through --scale below. */
+  --default-xxs: 0.7023rem;
+  --default-xs: 0.7901rem;
+  --default-sm: 0.8889rem;
+  --default-base: 1rem;
+  --default-md: 1.125rem;
+  --default-lg: 1.2656rem;
+  --default-xl: 1.4238rem;
+  --default-xxl: 1.6018rem;
+  --default-xxxl: 1.802rem;
+}
+
+/* ── Element size coefficient ────────────────────────────────────
+   --scale grows or shrinks the FRAME of every component — heights,
+   paddings, gaps, internal offsets — and never the text.
+
+   That is why it is not applied to font-size, and why this stylesheet does not
+   set a root font-size either: a kit that resizes the host page's text
+   when you install it is a kit you uninstall. Each geometric length is
+   written `calc(Nem * var(--scale))` at its own site, so it stays
+   intrinsic (resolved against the element's own font-size, so size
+   variants stay proportioned) while the text is left alone.
+
+   What does NOT scale: text, icons (svg { height: 1em } — they sit on
+   the text baseline), the radii (their own parameters), hairlines in px,
+   and the text-natured components that draw no frame (text, link,
+   breadcrumbs, validator).
+
+   On :where(:root) (specificity 0) so any theme wins, in any load order. */
+:where(:root) {
+  --scale: 1;
+}
+
+/* The recipe is declared on every element (zero specificity via :where) —
+   NOT on :root only. A custom property resolves its var() references where
+   it is declared, so a :root-only --shadow-light would freeze --light-depth
+   forever and per-component overrides (e.g. a button raising its elevation
+   on hover) would do nothing. Declared per element, changing any --light-*
+   on a component recomputes its shadow there. */
+:where(*) {
+  --shadow-light:
+  	0 calc(var(--light-depth, 1) * 1px) calc(var(--light-depth, 1) * 3px)
+  		color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 15%), #0000),
+  	0 calc(var(--light-depth, 1) * 3px) calc(var(--light-depth, 1) * 8px)
+  		color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 8%), #0000);
+}
+
+/* ============================================================
+   derived colours — the automatic `--color-on-*`, plus the default
+   border color.
+
+   A theme sets surfaces and semantic colors; what is written *on*
+   them is derived from the seed with the relative color syntax. The lightness flips around a threshold — a light
+   seed gets near-black text, a dark seed gets near-white — while
+   keeping a whisper of the seed's hue.
+
+     clamp(0.145, (0.66 - l) * 999, 0.97)
+		l > 0.66  →  negative  →  clamps to 0.145 (dark text)
+		l < 0.66  →  huge      →  clamps to 0.97  (light text)
+
+   Declared on :where(:root) (zero specificity) so a theme's :root
+   can still override any of them explicitly if it wants to.
+   ============================================================ */
+:where(:root) {
+  --color-on-surface: oklch(from var(--color-surface-1) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
+  /* Borders are almost always a wash of the text color over the surface.
+     Derived so a theme has only three surfaces to supply — but a theme
+     (or a family like wireframe) can still set --color-border outright. */
+  --color-border: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+  --color-on-primary: oklch(
+  	from var(--color-primary) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-secondary: oklch(
+  	from var(--color-secondary) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-accent: oklch(
+  	from var(--color-accent) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-neutral: oklch(
+  	from var(--color-neutral) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-info: oklch(
+  	from var(--color-info) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-success: oklch(
+  	from var(--color-success) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-warning: oklch(
+  	from var(--color-warning) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+  --color-on-error: oklch(
+  	from var(--color-error) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
+  );
+}
+
+/* daisy — badge.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   badge.scss — .badge (badge overlay wrapper)
 
    Internal variables (position control):
 	--badge-t    top offset (default: 0)
@@ -76,64 +258,29 @@
    modifiers; the inner .chip is the positioned badge itself.
    ============================================================ */
 /* ------------------------------------------------------------
-   base — wrapper + positioned inner chip.
+   structure — wrapper + positioned inner chip.
    ------------------------------------------------------------ */
+/* daisy — breadcrumbs.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   breadcrumbs.scss — .breadcrumbs mixin library
+   breadcrumbs.scss — .breadcrumbs
 
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). Pure structure — no look mixins.
-   ============================================================ */
+
 /* ------------------------------------------------------------
-   base — scrollable list of items with chevron separators.
+   structure — scrollable list of items with chevron separators.
    ------------------------------------------------------------ */
+/* daisy — card.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   button.scss — .btn mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s the pieces it wants. `base` carries the
-   structure every family shares (layout, intrinsic sizing, state
-   plumbing); every look decision (borders, elevation, hover/press
-   feedback, style variants) is an opt-in mixin. A family is just a
-   selection of these mixins plus its own extra rules.
-
-   Plumbing contract — custom properties painted by `base`, assigned
-   by skins/variants (and overridable per family):
-	--btn-color    color seed — set by `color-variants`, drives bg/outline
-	--btn-bg       resolved background color
-	--btn-fg       resolved text color
-	--btn-border   resolved border color        (base default: transparent)
-	--btn-shadow   box-shadow value             (base default: var(--shadow-light))
-	--btn-p        inline padding
-	--size         button height
-	--fontsize     font size (set by `size-variants` classes)
-
-   External variables (theme / family):
-	--color-surface-2          default button background
-	--color-on-surface      default text color
-	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
-	--radius-field            corner radius
-	--border                  border width (px value)
-	--shadow-light            family shadow system (see base/default.scss)
-
-   Join integration (set by join.scss when inside .join):
-	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
-   ============================================================ */
-/* ------------------------------------------------------------
-   base — structure shared by all families.
-   Layout, intrinsic sizing, typography plumbing, paint plumbing
-   (background/border/shadow read the --btn-* variables), keyboard
-   focus, checkbox/radio-as-button behavior, disabled state.
-   No look decision: border/shadow resolve to transparent/family
-   shadow until a skin assigns them.
-   ------------------------------------------------------------ */
-/* ============================================================
-   card.scss — .card mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   card.scss — .card
 
    A box with, optionally, a title, a body and a row of actions.
    Every part is optional and none of them is structural: a card
@@ -159,14 +306,55 @@
 	--fontsize            font size (set by size-variants classes)
    ============================================================ */
 /* ------------------------------------------------------------
-   base — the box, its parts, and the layout flags.
+   structure — the box, its parts, and the layout flags.
    ------------------------------------------------------------ */
+/* daisy — button.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   checkbox.scss — .checkbox mixin library
+   button.scss — .btn
 
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   Plumbing contract — custom properties painted by `structure`, assigned
+   by skins/variants (and overridable per family):
+	--btn-color    color seed — set by `color-variants`, drives bg/outline
+	--btn-bg       resolved background color
+	--btn-fg       resolved text color
+	--btn-border   resolved border color        (structure default: transparent)
+	--btn-shadow   box-shadow value             (structure default: var(--shadow-light))
+	--btn-p        inline padding
+	--size         button height
+	--fontsize     font size (set by `size-variants` classes)
+
+   External variables (theme / family):
+	--color-surface-2          default button background
+	--color-on-surface      default text color
+	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
+	--radius-field            corner radius
+	--border                  border width (px value)
+	--shadow-light            family shadow system (see _root.scss)
+
+   Join integration (set by join.scss when inside .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+/* ------------------------------------------------------------
+   structure —
+   Layout, intrinsic sizing, typography plumbing, paint plumbing
+   (background/border/shadow read the --btn-* variables), keyboard
+   focus, checkbox/radio-as-button behavior, disabled state.
+   No look decision: border/shadow resolve to transparent/family
+   shadow until a skin assigns them.
+   ------------------------------------------------------------ */
+/* daisy — checkbox.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   checkbox.scss — .checkbox
 
    Plumbing contract:
 	--input-color   border + checked fill color (set by color-variants)
@@ -180,16 +368,18 @@
 	--shadow-light             family shadow system
    ============================================================ */
 /* ------------------------------------------------------------
-   base — structure: box, animated clip-path checkmark, focus ring,
+   structure — structure: box, animated clip-path checkmark, focus ring,
    checked/indeterminate states, forced-colors/print fallbacks,
    disabled.
    ------------------------------------------------------------ */
+/* daisy — chip.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   chip.scss — .chip mixin library (small inline label)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   chip.scss — .chip (small inline label)
 
    Plumbing contract:
 	--chip-color  seed color (set by color-variants)
@@ -205,14 +395,16 @@
 	--shadow-light          family shadow system
    ============================================================ */
 /* ------------------------------------------------------------
-   base — structure and paint plumbing (bg/fg/border from --chip-*).
+   structure — structure and paint plumbing (bg/fg/border from --chip-*).
    ------------------------------------------------------------ */
+/* daisy — dock.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   dock.scss — .dock mixin library (fixed bottom navigation bar)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   dock.scss — .dock (fixed bottom navigation bar)
 
    External variables (theme / family):
 	--color-surface-3  dock background (the most raised surface)
@@ -220,51 +412,57 @@
 	--radius-box          item corner radius
    ============================================================ */
 /* ------------------------------------------------------------
-   base — fixed bar, items, active indicator, disabled.
+   structure — fixed bar, items, active indicator, disabled.
    ------------------------------------------------------------ */
+/* daisy — fieldset.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   fieldset.scss — .fieldset mixin library (form field group)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). Pure structure — no look mixins.
+   fieldset.scss — .fieldset (form field group)
 
    External variables (theme / family):
 	--color-on-surface   legend and label text color
    ============================================================ */
 /* ------------------------------------------------------------
-   base — grid container + legend (+ deprecated .fieldset-label).
+   structure — grid container + legend (+ deprecated .fieldset-label).
    ------------------------------------------------------------ */
+/* daisy — floating-label.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   floating-label.scss — .floating-label mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s the pieces it wants.
+   floating-label.scss — .floating-label
 
    A container that WRAPS a field, unlike `.label`, which is inline
    and lives inside one. Two roles, two components (ADR 0009).
 
-   base owns the stacking and the state plumbing; where the text
-   sits, how big it is and what it is painted on are the family's
-   (ADR 0008).
+   structure owns the stacking and the state plumbing; look decides
+   where the text sits, how big it is and what it is painted on.
 
    External variables (theme / family):
 	--color-surface-1   the span's ground, so it can hide the field border
 	--size-field        vertical centre of the floated text
    ============================================================ */
+/* daisy — file-input.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   file-input.scss — .file-input mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   file-input.scss — .file-input
 
    Plumbing contract:
 	--input-color   field border/accent color (same as input.scss)
 	--btn-color     seed color for the file button (color-variants)
-	--btn-bg        resolved button background   (painted by base)
-	--btn-fg        resolved button text color   (painted by base)
-	--btn-border    resolved button border color (base default: transparent)
+	--btn-bg        resolved button background   (painted by structure)
+	--btn-fg        resolved button text color   (painted by structure)
+	--btn-border    resolved button border color (structure default: transparent)
 	--btn-shadow    button drop shadow           (skin-flat)
 	--size          field height (2.5em, scales with font)
 	--fontsize      font size (set by size-variants classes)
@@ -279,19 +477,21 @@
 	--join-ss / --join-es   start-side radius overrides
    ============================================================ */
 /* ------------------------------------------------------------
-   base — structure: field layout + the ::file-selector-button
+   structure — structure: field layout + the ::file-selector-button
    pseudo-button plumbing (paints from --btn-*), focus ring,
    disabled state.
    ------------------------------------------------------------ */
+/* daisy — input.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   input.scss — .input mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   input.scss — .input
 
    Plumbing contract:
-	--input-color   resolved border/accent color — base defaults it to a
+	--input-color   resolved border/accent color — structure defaults it to a
 	                faint on-surface mix, color-variants override it,
 	                focus resets it to on-surface
 	--size          field height (2.5em × --scale, scales with font)
@@ -311,17 +511,19 @@
 	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
    ============================================================ */
 /* ------------------------------------------------------------
-   base — structure shared by all families: layout, intrinsic
+   structure — structure shared by all families: layout, intrinsic
    sizing, border/outline plumbing, inner <input> handling, focus
    ring, disabled state. Box-shadow defaults to the family shadow;
    skins provide the actual surface recipe.
    ------------------------------------------------------------ */
+/* daisy — join.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   join.scss — .join mixin library (group adjacent form elements)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). Pure structure — no look mixins.
+   join.scss — .join (group adjacent form elements)
 
    Exported variables (injected into child .join-item elements,
    consumed by input, select, button, … via
@@ -333,15 +535,17 @@
 	--radius-field  default corner radius applied to first/last items
    ============================================================ */
 /* ------------------------------------------------------------
-   base — horizontal grouping: corner radius distribution, border
+   structure — horizontal grouping: corner radius distribution, border
    merging, button height stretch.
    ------------------------------------------------------------ */
+/* daisy — label.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   label.scss — .label / .floating-label mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   label.scss — .label / .floating-label
 
    External variables (theme / family):
 	--color-surface-1   floating label background (hides the field border)
@@ -349,24 +553,29 @@
 	--size-field       floating label vertical center position
    ============================================================ */
 /* ------------------------------------------------------------
-   base — inline label + prefix/suffix label inside fields.
+   structure — inline label + prefix/suffix label inside fields.
    ------------------------------------------------------------ */
+/* daisy — link.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   link.scss — .link mixin library (styled hyperlink)
+   link.scss — .link (styled hyperlink)
 
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). Inherits font size and color from context.
-   ============================================================ */
+
 /* ------------------------------------------------------------
-   base — underlined link + .link-hover variant + focus.
+   structure — underlined link + .link-hover variant + focus.
    ------------------------------------------------------------ */
+/* daisy — list.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   list.scss — .list mixin library (rows + suggestion dropdown)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   list.scss — .list (rows + suggestion dropdown)
 
    Plumbing contract:
 	--list-grid-cols   auto-computed grid columns (.list-col-grow index)
@@ -382,24 +591,29 @@
 	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
    ============================================================ */
 /* ------------------------------------------------------------
-   base — list container + data rows with growing columns.
+   structure — list container + data rows with growing columns.
    ------------------------------------------------------------ */
+/* daisy — loading.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   loading.scss — .loading mixin library (animated indicator)
+   loading.scss — .loading (animated indicator)
 
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). Fill uses currentColor; size scales with --fontsize.
-   ============================================================ */
+
 /* ------------------------------------------------------------
-   base — masked square, defaults to the spinner animation.
+   structure — masked square, defaults to the spinner animation.
    ------------------------------------------------------------ */
+/* daisy — menu.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   menu.scss — .menu mixin library (navigation list)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   menu.scss — .menu (navigation list)
 
    A menu is navigation: links, one active, optional section titles
    and optional nested sub-menus. It owns its frame — unlike `dock`
@@ -452,17 +666,17 @@
 	--fontsize            font size (set by size-variants classes)
    ============================================================ */
 /* ------------------------------------------------------------
-   base — the block, its items, their states, section titles,
+   structure — the block, its items, their states, section titles,
    separators, and the collapsible sub-menu.
    ------------------------------------------------------------ */
+/* daisy — navbar.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   navbar.scss — .navbar mixin library (a bar across the top)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). base owns the MECHANISM and no values at all: it
-   writes `background-color: var(--navbar-bg)` and never
-   `--navbar-bg:` (ADR 0008).
+   navbar.scss — .navbar (a bar across the top)
 
    Markup:
 
@@ -494,14 +708,16 @@
 	--fontsize                    set by the size variants
    ============================================================ */
 /* ------------------------------------------------------------
-   base — the bar, its three zones, and the sticky flag.
+   structure — the bar, its three zones, and the sticky flag.
    ------------------------------------------------------------ */
+/* daisy — progress.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   progress.scss — .progress mixin library (linear progress bar)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   progress.scss — .progress (linear progress bar)
 
    External variables (theme / family):
 	--color-on-surface  default track/fill color
@@ -509,15 +725,17 @@
 	--radius-box          bar corner radius
    ============================================================ */
 /* ------------------------------------------------------------
-   base — track + fill (WebKit/Firefox), indeterminate animation.
+   structure — track + fill (WebKit/Firefox), indeterminate animation.
    Color driven by currentColor; height fixed at 0.5rem.
    ------------------------------------------------------------ */
+/* daisy — radial-progress.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   radial-progress.scss — .radial-progress mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). Ring uses currentColor.
+   radial-progress.scss — .radial-progress
 
    User-set variables (provided in HTML style or CSS):
 	--value       progress value 0–100 (required)
@@ -528,14 +746,16 @@
 	--radialprogress   computed from --value (animated CSS property)
    ============================================================ */
 /* ------------------------------------------------------------
-   base — conic ring + rounded cap.
+   structure — conic ring + rounded cap.
    ------------------------------------------------------------ */
+/* daisy — radio.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   radio.scss — .radio mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   radio.scss — .radio
 
    Note: .radio does not consume --shadow-light — families that need
    a shadow skin it directly.
@@ -551,17 +771,19 @@
 	--border
    ============================================================ */
 /* ------------------------------------------------------------
-   base — structure: circle, inner dot, focus ring, checked state,
+   structure — structure: circle, inner dot, focus ring, checked state,
    forced-colors/print fallbacks, disabled, check animation.
    ------------------------------------------------------------ */
+/* daisy — range.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   range.scss — .range mixin library (slider input)
+   range.scss — .range (slider input)
 
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
-
-   Note: the thumb box-shadow recipe stays in `base` — it implements
+   Note: the thumb box-shadow recipe stays in `structure` — it implements
    the track-fill trick (a 100cqw shadow cast from the thumb) and
    cannot be split from the look. Its depth-gated lines are inert
    when the family sets --depth: 0.
@@ -585,15 +807,17 @@
 	--shadow-light          family shadow system
    ============================================================ */
 /* ------------------------------------------------------------
-   base — the whole slider: track, thumb (with the fill-shadow
+   structure — the whole slider: track, thumb (with the fill-shadow
    trick), focus, disabled.
    ------------------------------------------------------------ */
+/* daisy — select.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   select.scss — .select mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   select.scss — .select
 
    Plumbing contract:
 	--input-color   resolved border/accent color (same as input.scss)
@@ -616,15 +840,17 @@
 	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
    ============================================================ */
 /* ------------------------------------------------------------
-   base — structure: layout, chevron, native <select> nesting,
+   structure — structure: layout, chevron, native <select> nesting,
    picker dropdown (base-select), options, focus ring, disabled.
    ------------------------------------------------------------ */
+/* daisy — skeleton.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   skeleton.scss — .skeleton mixin library (loading placeholder)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   skeleton.scss — .skeleton (loading placeholder)
 
    External variables (theme / family):
 	--color-surface-1      shimmer highlight color
@@ -633,14 +859,16 @@
 	--radius-box          corner radius
    ============================================================ */
 /* ------------------------------------------------------------
-   base — shimmering placeholder block + text variant.
+   structure — shimmering placeholder block + text variant.
    ------------------------------------------------------------ */
+/* daisy — swatch.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   swatch.scss — .swatch mixin library (a sample of one colour)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   swatch.scss — .swatch (a sample of one colour)
 
    A swatch shows a colour, and optionally a letter or a short label
    drawn on it. The colour is DATA, not a theme value: the author
@@ -671,14 +899,16 @@
 	--fontsize            font size (set by size-variants classes)
    ============================================================ */
 /* ------------------------------------------------------------
-   base — the sample, its label, and the interactive states.
+   structure — the sample, its label, and the interactive states.
    ------------------------------------------------------------ */
+/* daisy — tabs.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   tabs.scss — .tabs / .tabs-item mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   tabs.scss — .tabs / .tabs-item
 
    Internal variables (set on .tabs / .tabs-item, consumed by children):
 	--tabs-height         container height (auto or fixed)
@@ -705,17 +935,18 @@
 	--fontsize            tab font size (set by size-variants classes)
    ============================================================ */
 /* ------------------------------------------------------------
-   base — structure: flex container, tab element (radio/label
+   structure — structure: flex container, tab element (radio/label
    support), active-content display logic, focus, disabled,
    .tabs-item-content panel plumbing.
    ------------------------------------------------------------ */
+/* daisy — text.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
    text.scss — typography mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). Pure structure — the weights and the leading are the
-   family's.
 
    Three components in one file — `text`, `title`, `subtitle` —
    because separating them would buy nothing. All text-natured:
@@ -747,15 +978,17 @@
    (ADR 0009).
    ============================================================ */
 /* ------------------------------------------------------------
-   base — .title, .subtitle-s{1,2}, .text-s{1-4}, .text-b{1-3},
+   structure — .title, .subtitle-s{1,2}, .text-s{1-4}, .text-b{1-3},
    and the colour axis of all three.
    ------------------------------------------------------------ */
+/* daisy — textarea.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   textarea.scss — .textarea mixin library
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   textarea.scss — .textarea
 
    Plumbing contract:
 	--input-color   resolved border/accent color (same as input.scss)
@@ -769,15 +1002,17 @@
 	--shadow-light          family shadow system
    ============================================================ */
 /* ------------------------------------------------------------
-   base — structure: sizing, inner <textarea> handling, focus ring,
+   structure — structure: sizing, inner <textarea> handling, focus ring,
    disabled state.
    ------------------------------------------------------------ */
+/* daisy — toggle.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   toggle.scss — .toggle mixin library (checkbox-based switch)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern).
+   toggle.scss — .toggle (checkbox-based switch)
 
    Plumbing contract:
 	--input-color   track/thumb color (color-variants set it on :checked)
@@ -796,15 +1031,17 @@
 	--shadow-light          family shadow system
    ============================================================ */
 /* ------------------------------------------------------------
-   base — structure: grid track, sliding thumb, optional icons,
+   structure — structure: grid track, sliding thumb, optional icons,
    checked/indeterminate states, focus ring, disabled.
    ------------------------------------------------------------ */
+/* daisy — validator.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 /* ============================================================
-   validator.scss — .validator mixin library (validation states)
-
-   Nothing is emitted at the top level: a style family `@use`s this
-   file and `@include`s its selection (see button.scss for the
-   pattern). Pure structure — no look mixins.
+   validator.scss — .validator (validation states)
 
    Exported variable (injected into sibling field components):
 	--input-color   overrides the field border/focus color;
@@ -814,314 +1051,17 @@
    the sibling element shown on error.
    ============================================================ */
 /* ------------------------------------------------------------
-   base — valid/invalid color driving + error hint.
+   structure — valid/invalid color driving + error hint.
    ------------------------------------------------------------ */
-/* ── The page layer: what every family needs before any component. ── */
-/* ── properties ── */
-/* properties.css */
-@property --radialprogress {
-  syntax: "<percentage>";
-  inherits: true;
-  initial-value: 0%;
-}
-/* ── svg ── */
-/* ============================================================
-   svg.scss â€” inline SVG sizing.
-
-   Icons inside components scale with the surrounding font size,
-   which is what makes intrinsic (em-based) sizing work for buttons,
-   chips, tabs and the like.
-   ============================================================ */
-svg {
-  height: 1em;
-}
-
-/* ── rootcolor ── */
-/* ============================================================
-   DaisyUI â€” rootcolor.css
-   Couleur et fond de base pour :root et les thÃ¨mes [data-theme]
-   ============================================================ */
-:root,
-[data-theme] {
-  background: var(--page-scroll-bg, var(--root-bg));
-  color: var(--color-on-surface);
-}
-
-:where(:root, [data-theme]) {
-  --root-bg: var(--color-surface-1);
-}
-
-/* ── rootscroll ── */
-/* ============================================================
-   DaisyUI â€” rootscroll.css
-   Gestion du scroll gutter et du scroll lock (utilisÃ© par modal)
-   ============================================================ */
-/* Scroll gutter â€” assombrit le fond quand un backdrop est actif */
-:root {
-  background: var(--page-scroll-bg, var(--root-bg));
-  --page-scroll-bg-on: linear-gradient(var(--root-bg, #0000), var(--root-bg, #0000))
-  	color-mix(in srgb, var(--root-bg, #0000), oklch(0% 0 0) calc(var(--page-has-backdrop, 0) * 40%));
-  --page-scroll-transition-on: background-color 0.3s ease-out;
-  transition: var(--page-scroll-transition);
-  /* Fallback sans @supports */
-  scrollbar-gutter: var(--page-scroll-gutter, unset);
-  /* Avec support CSS if() */
-  scrollbar-gutter: if(style(--page-has-scroll: 1): var(--page-scroll-gutter, unset); else: unset);
-}
-
-@keyframes set-page-has-scroll {
-  0%, to {
-    --page-has-scroll: 1;
-  }
-}
-/* Scroll lock â€” bloque le scroll quand une modale est ouverte */
-:root:not(span) {
-  overflow: var(--page-overflow);
-}
-
-/* ── scrollbar ── */
-/* ============================================================
-   DaisyUI â€” scrollbar.css
-   Couleur de scrollbar adaptÃ©e au thÃ¨me
-   ============================================================ */
-:root {
-  scrollbar-color: color-mix(in oklch, currentColor 35%, rgba(0, 0, 0, 0)) rgba(0, 0, 0, 0);
-}
-
-/* ── default ── */
-:root {
-  /* â”€â”€ Light shadow system â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-     Alternative to --depth. Set --light-intensity > 0 and --depth: 0
-     for flat/modern directional shadows instead of retro depth.
-     --light-intensity   opacity multiplier  (0 = off)
-     --light-depth       distance/blur scale (1 = sm, 2 = md, 3 = lg)
-     --light-color       shadow hue, default pure black
-     â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-  --light-intensity: 0;
-  --light-depth: 1;
-  --light-color: oklch(0% 0 0);
-  /* â”€â”€ Type scale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-     A fixed modular scale (ratio 1.125, base 1rem). Deliberately NOT
-     fluid: component sizes are intrinsic (em), so a viewport-driven
-     base would silently resize every component â€” two competing size
-     systems. Size is chosen, through --scale below. */
-  --default-xxs: 0.7023rem;
-  --default-xs: 0.7901rem;
-  --default-sm: 0.8889rem;
-  --default-base: 1rem;
-  --default-md: 1.125rem;
-  --default-lg: 1.2656rem;
-  --default-xl: 1.4238rem;
-  --default-xxl: 1.6018rem;
-  --default-xxxl: 1.802rem;
-}
-
-/* â”€â”€ Element size coefficient â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   --scale grows or shrinks the FRAME of every component â€” heights,
-   paddings, gaps, internal offsets â€” and never the text.
-
-   That is why it is not applied to font-size, and why base.css does not
-   set a root font-size either: a kit that resizes the host page's text
-   when you install it is a kit you uninstall. Each geometric length is
-   written `calc(Nem * var(--scale))` at its own site, so it stays
-   intrinsic (resolved against the element's own font-size, so size
-   variants stay proportioned) while the text is left alone.
-
-   What does NOT scale: text, icons (svg { height: 1em } â€” they sit on
-   the text baseline), the radii (their own parameters), hairlines in px,
-   and the text-natured components that draw no frame (text, link,
-   breadcrumbs, validator).
-
-   On :where(:root) (specificity 0) so any theme wins, in any load order. */
-:where(:root) {
-  --scale: 1;
-}
-
-/* The recipe is declared on every element (zero specificity via :where) â€”
-   NOT on :root only. A custom property resolves its var() references where
-   it is declared, so a :root-only --shadow-light would freeze --light-depth
-   forever and per-component overrides (e.g. a button raising its elevation
-   on hover) would do nothing. Declared per element, changing any --light-*
-   on a component recomputes its shadow there. */
-:where(*) {
-  --shadow-light:
-  	0 calc(var(--light-depth, 1) * 1px) calc(var(--light-depth, 1) * 3px)
-  		color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 15%), #0000),
-  	0 calc(var(--light-depth, 1) * 3px) calc(var(--light-depth, 1) * 8px)
-  		color-mix(in oklab, var(--light-color, oklch(0% 0 0)) calc(var(--light-intensity, 0) * 8%), #0000);
-}
-
-/* Every component base, emitted by the family that @uses this file. */
-/* ============================================================
-   _derived-content.scss — automatic `--color-on-*` colors, plus the
-   default border color.
-
-   A theme sets surfaces and semantic colors; what is written *on*
-   them is derived from the seed with the relative color syntax. The lightness flips around a threshold — a light
-   seed gets near-black text, a dark seed gets near-white — while
-   keeping a whisper of the seed's hue.
-
-     clamp(0.145, (0.66 - l) * 999, 0.97)
-		l > 0.66  →  negative  →  clamps to 0.145 (dark text)
-		l < 0.66  →  huge      →  clamps to 0.97  (light text)
-
-   Declared on :where(:root) (zero specificity) so a theme's :root
-   can still override any of them explicitly if it wants to.
-   ============================================================ */
-:where(:root) {
-  --color-on-surface: oklch(from var(--color-surface-1) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
-  /* Borders are almost always a wash of the text color over the surface.
-     Derived so a theme has only three surfaces to supply — but a theme
-     (or a family like wireframe) can still set --color-border outright. */
-  --color-border: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
-  --color-on-primary: oklch(
-  	from var(--color-primary) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-secondary: oklch(
-  	from var(--color-secondary) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-accent: oklch(
-  	from var(--color-accent) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-neutral: oklch(
-  	from var(--color-neutral) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-info: oklch(
-  	from var(--color-info) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-success: oklch(
-  	from var(--color-success) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-warning: oklch(
-  	from var(--color-warning) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-error: oklch(
-  	from var(--color-error) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-}
-
-/* daisy — badge.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — breadcrumbs.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — card.
-   Ported from daisyUI's `.card`: `--radius-box` corners, a body padded
-   `1.5rem` with a `.5rem` gap, a semibold `1.125rem` title. daisyUI
-   leaves the card transparent and expects `bg-base-100 shadow-sm` next
-   to it — we have no utilities, so the card paints surface-2 itself and
-   stays flat, like the rest of the family. `.card-border` draws the
-   family hairline. */
-/* daisy — button.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — checkbox.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — chip.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — dock.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — fieldset. */
-/* daisy — floating-label.
-   Everything daisy decides about this component: its look and
-   its variants. Split out of label.scss — a container that wraps a
-   field is not a setting of the inline label (ADR 0009). */
-/* daisy — file-input.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — input.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — label.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — link.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — list.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — loading.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — menu.
-   Ported from daisyUI's `.menu`: a block of navigation links, item
-   padding `.375rem / .75rem`, `--radius-field` corners, the active
-   item painted in the neutral colour. daisyUI leaves the block
-   transparent and expects a `bg-base-200` utility next to it — we
-   have no utilities, so the block paints surface-2 itself, which is
-   what daisyUI's own examples end up looking like. */
-/* daisy — navbar.
-   daisyUI ships .navbar as bare geometry and leaves you to paint it
-   with utilities. We have no utilities, so the family paints: the
-   raised chrome surface, no divider, and the ambient shadow every
-   other daisy object casts. */
-/* daisy — progress.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — radial-progress.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — radio.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — range.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — select.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — skeleton. */
-/* daisy — swatch.
-   daisyUI has no colour sample, so this one is invented in its
-   vocabulary: a `--radius-field` square with the family's hairline
-   border, the letter derived from the sample so it stays legible,
-   and the selected state drawn as a ring in the primary colour with
-   a gap of surface — the same figure daisy uses for a focused
-   selector. */
-/* daisy — tab.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — text. */
-/* daisy — textarea.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — toggle.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
-/* daisy — validator. */
 /* ============================================================
    STYLE FAMILY — « daisy »  (after DaisyUI 5)
    ============================================================
 
    What a family is
    ----------------
-   A family is a SELECTION of component mixins (structure `base` +
-   opt-in look mixins) plus its own root variables. A family commits
+   A family is self-contained: one file per component, each with
+   its structure and its look, plus its own root variables and
+   its own parameters (ADR 0010). A family commits
    to ONE visual direction and is tuned through its THEME only — a
    set of CSS custom properties (colors and radii). A family never
    ships a structural customization mechanism: if you need to
@@ -1198,7 +1138,9 @@ svg {
 
 /* ── Component mixin selection ──────────────────────────────────────
    daisy = the reference daisyUI selection, nothing more. */
-/* The shared mechanism: structure, states, intrinsic sizing, slots. */
+/* The structure of every component first, then the look of every
+   component: a look always comes later in the cascade than any
+   structure, whichever file it sits in. */
 .badge {
   position: relative;
   display: inline-flex;
@@ -1797,14 +1739,6 @@ fieldset:disabled .input {
 	   can stretch to match its siblings via align-items: stretch on .join.
 	   min-height keeps it from collapsing below its natural size. */
 /* Border merging */
-/* ── Was one identical file per family until 2026-09-22 ──────────────
-   Seven copies, 125 rules, byte for byte the same. Nothing below is a
-   family's decision: it says which corner of which child is square and
-   how adjacent borders merge. ADR 0008 keeps values out of base, and
-   these are not values — no family would ever write a different one.
-   ------------------------------------------------------------------ */
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .join {
   --join-ss: 0;
   --join-se: 0;
@@ -2802,8 +2736,6 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 /* What daisy decides, one file per component. */
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .badge {
   width: max-content;
 }
@@ -2861,8 +2793,6 @@ input[type=color].swatch::-moz-color-swatch {
   --badge-y: 50%;
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .breadcrumbs {
   font-size: var(--fontsize, var(--base, var(--default-base)));
   max-width: 100%;
@@ -2955,8 +2885,6 @@ input[type=color].swatch::-moz-color-swatch {
   --card-title-weight: 600;
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 :where(.btn) {
   width: unset;
 }
@@ -3256,8 +3184,6 @@ input[type=color].swatch::-moz-color-swatch {
     display: none;
   }
 }
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .checkbox {
   --size: calc(1.5em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -3402,8 +3328,6 @@ input[type=color].swatch::-moz-color-swatch {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .chip {
   --size: calc(1.6em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -3512,8 +3436,6 @@ input[type=color].swatch::-moz-color-swatch {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .dock {
   right: 0;
   bottom: 0;
@@ -3635,8 +3557,6 @@ input[type=color].swatch::-moz-color-swatch {
   font-size: 0.75rem;
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .fieldset {
   gap: calc(0.375em * var(--scale));
   padding-block: calc(0.25em * var(--scale));
@@ -3720,8 +3640,6 @@ input[type=color].swatch::-moz-color-swatch {
   top: calc(var(--size-field, 0.25rem) * 14 / 2);
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .file-input {
   --size: calc(2.5em * var(--scale));
   --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
@@ -3947,8 +3865,6 @@ input[type=color].swatch::-moz-color-swatch {
   padding-inline-end: calc(1.5em * var(--scale));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 :where(.input) {
   width: unset;
 }
@@ -4115,8 +4031,6 @@ fieldset:disabled .input::placeholder {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .label {
   gap: calc(0.375em * var(--scale));
   color: color-mix(in oklch, currentColor 60%, rgba(0, 0, 0, 0));
@@ -4143,8 +4057,6 @@ fieldset:disabled .input::placeholder {
   border-inline-start: var(--border) solid color-mix(in oklab, currentColor 10%, rgba(0, 0, 0, 0));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .link {
   text-decoration: underline;
 }
@@ -4225,8 +4137,6 @@ fieldset:disabled .input::placeholder {
     color: color-mix(in oklab, var(--color-error) 80%, #000);
   }
 }
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .list {
   font-size: var(--fontsize, var(--base, var(--default-base)));
 }
@@ -4322,8 +4232,6 @@ fieldset:disabled .input::placeholder {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .loading {
   aspect-ratio: 1/1;
   background-color: currentColor;
@@ -4530,8 +4438,6 @@ fieldset:disabled .input::placeholder {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .progress {
   height: calc(0.5em * var(--scale));
   width: 100%;
@@ -4605,8 +4511,6 @@ fieldset:disabled .input::placeholder {
   color: var(--color-error);
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .radial-progress {
   --value: 0;
   --size: calc(5em * var(--scale));
@@ -4663,8 +4567,6 @@ fieldset:disabled .input::placeholder {
   background: radial-gradient(farthest-side, currentColor 98%, rgba(0, 0, 0, 0)) top/var(--thickness) var(--thickness) no-repeat, conic-gradient(currentColor var(--radialprogress), color-mix(in oklch, currentColor 20%, rgba(0, 0, 0, 0)) 0);
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .radio {
   --size: calc(1.5em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -4796,8 +4698,6 @@ fieldset:disabled .input::placeholder {
   --size: calc(2em * var(--scale));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .range {
   --range-thumb-size: calc(1.5em * var(--scale));
   --range-progress: currentColor;
@@ -4928,8 +4828,6 @@ fieldset:disabled .input::placeholder {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 :where(.select) {
   width: unset;
 }
@@ -5151,8 +5049,6 @@ fieldset:disabled .select {
   padding-block: calc(0.375em * var(--scale));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .skeleton {
   background-image: linear-gradient(105deg, rgba(0, 0, 0, 0) 0% 40%, var(--color-surface-1) 50%, rgba(0, 0, 0, 0) 60% 100%);
   background-size: 200% auto;
@@ -5269,8 +5165,6 @@ fieldset:disabled .select {
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .tabs {
   --tabs-height: auto;
   --tabs-direction: row;
@@ -5615,8 +5509,6 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .title {
   font-weight: 800;
   line-height: 1.15;
@@ -5661,8 +5553,6 @@ label:has(:checked),
   font-weight: 400;
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .textarea {
   --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
   border: var(--border) solid rgba(0, 0, 0, 0);
@@ -5806,8 +5696,6 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .toggle {
   --input-color: color-mix(in oklab, var(--color-on-surface) 50%, #0000);
   --size: calc(1.5em * var(--scale));
@@ -5989,8 +5877,6 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
-/* Values that used to sit in base. They belong to this family now:
-   change them here and nobody else moves (ADR 0008). */
 .validator-hint {
   margin-top: 0.5em;
 }

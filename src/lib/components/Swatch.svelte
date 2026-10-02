@@ -1,7 +1,6 @@
 <script module lang="ts">
-	/** What .swatch is made of, classified. Only this block differs between this
-	    file and the copy generated for each family (scripts/gen-components.mjs):
-	    an axis a family leaves empty loses its prop entirely. */
+	/** What .swatch is made of, classified. Each family's copy writes these out as
+	    plain props (scripts/family-component.mjs). */
 	export const PREFIX = 'swatch';
 
 	export const AXES = {
@@ -10,21 +9,21 @@
 		shape: ['circle']
 	} as const;
 
-	export const FLAGS = ['active'] as const;
+	export const FLAGS = {
+		active: 'Mark it as the chosen one.'
+	} as const;
 	export const PARTS = ['disabled'] as const;
 </script>
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES>, Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
 		/** The colour to show. It is DATA, not a theme value, so it is written
 		    here at the call site and never by the family. */
 		sample?: string;
-		/** Mark it as the chosen one. */
-		active?: boolean;
 		/** Grey it out. `.swatch` may be a span, which cannot carry `disabled`. */
 		disabled?: boolean;
 		class?: string;
@@ -35,19 +34,17 @@
 	// resolved by name, so an axis a family drops changes nothing down here.
 	let {
 		sample,
-		active = false,
 		disabled = false,
 		class: klass = '',
 		children,
 		...axes
 	}: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(
 		cx(
 			PREFIX,
 			applied.classes,
-			active && `${PREFIX}-active`,
 			disabled && `${PREFIX}-disabled`,
 			klass
 		)

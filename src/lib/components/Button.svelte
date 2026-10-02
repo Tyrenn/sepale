@@ -1,10 +1,8 @@
 <script module lang="ts">
 	/**
-	 * What .btn is made of, classified. This block is the ONE thing that
-	 * differs between this file and the copy generated for each family: the
-	 * generator filters every list down to the classes that family ships, and
-	 * an axis left empty loses its prop. Nothing else in the file is touched,
-	 * which is why a generated copy is still an ordinary, readable component.
+	 * What .btn is made of, classified. The copy generated for each family
+	 * has none of this: it writes out, as plain props and a plain class list,
+	 * only the values that family ships (scripts/family-component.mjs).
 	 *
 	 * AXES are mutually exclusive and named after what they impact. FLAGS are
 	 * independent booleans. PARTS are class names the component renders itself
@@ -25,26 +23,30 @@
 		variant: ['outline', 'dash', 'soft', 'ghost', 'link', 'classic', 'surface'],
 		/* sunflower only: the hard shadow is the family, so moving or removing
 		   it is its own axis and combines with everything above. */
-		shadow: { none: 'noshadow', reverse: 'reverse' }
+		shadow: ['none', 'reverse']
 	} as const;
 
-	export const FLAGS = ['active', 'ripple'] as const;
-	export const PARTS = ['ripple-wave', 'disabled'] as const;
+	export const FLAGS = {
+		active: 'Draw the button as if it were the current choice.'
+	} as const;
+	/* `ripple` is a part for now, not a flag: its prop carries behaviour (the
+	   waves), so it is written by hand below and every family's copy keeps it,
+	   whether or not the family ships .btn-ripple. It leaves Button for an
+	   attachment later. */
+	export const PARTS = ['ripple', 'ripple-wave', 'disabled'] as const;
 </script>
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
 	// `size` is ours — the HTML attribute of the same name is a character
 	// count our CSS overrides anyway. Any axis whose name collides with an
 	// attribute of the element we render must be Omitted like this, or renamed.
 	interface Props
-		extends AxisProps<typeof AXES>,
+		extends AxisProps<typeof AXES, typeof FLAGS>,
 			Omit<HTMLButtonAttributes & HTMLAnchorAttributes, 'size' | 'color' | 'onpointerdown'> {
-		/** Draw the button as if it were the current choice. */
-		active?: boolean;
 		/** Expanding wave from the pointer on press. */
 		ripple?: boolean;
 		/** Renders an <a> instead of a <button>. */
@@ -61,7 +63,6 @@
 	// the file identical in every family's copy — drop an axis up there and
 	// nothing down here has to know.
 	let {
-		active = false,
 		ripple = false,
 		disabled = false,
 		href,
@@ -71,13 +72,12 @@
 		...axes
 	}: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 
 	let classes = $derived(
 		cx(
 			PREFIX,
 			applied.classes,
-			active && `${PREFIX}-active`,
 			ripple && `${PREFIX}-ripple`,
 			// An <a> cannot be disabled, so the class carries what the attribute
 			// would have: it is the only way the two states cannot drift apart.

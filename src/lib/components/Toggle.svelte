@@ -1,7 +1,6 @@
 <script module lang="ts">
-	/** What .toggle is made of, classified. Only this block differs between this
-	    file and the copy generated for each family (scripts/gen-components.mjs):
-	    an axis a family leaves empty loses its prop entirely. */
+	/** What .toggle is made of, classified. Each family's copy writes these out as
+	    plain props (scripts/family-component.mjs). */
 	export const PREFIX = 'toggle';
 
 	export const AXES = {
@@ -12,16 +11,16 @@
 		variant: ['track']
 	} as const;
 
-	export const FLAGS = [] as const;
+	export const FLAGS = {} as const;
 	export const PARTS = [] as const;
 </script>
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLInputAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES>, Omit<HTMLInputAttributes, 'size' | 'color' | 'type'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLInputAttributes, 'size' | 'color' | 'type'> {
 		/** Colour the control by its own validity and reveal `hint` when invalid. */
 		validator?: boolean;
 		/** Shown below once invalid. It must be the control's next sibling for the
@@ -41,7 +40,7 @@
 		...axes
 	}: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, validator && 'validator', klass));
 </script>
 

@@ -1,7 +1,6 @@
 @use 'sass:map';
 @use '../../params';
-@use '../../base';
-@use '../derived-content';
+@use 'root';
 @use 'badge';
 @use 'breadcrumbs';
 @use 'card';
@@ -13,6 +12,7 @@
 @use 'floating-label';
 @use 'file-input';
 @use 'input';
+@use 'join';
 @use 'label';
 @use 'link';
 @use 'list';
@@ -123,37 +123,68 @@ $params: map.merge(
 	--light-depth: 1;
 }
 
-/* The shared mechanism: structure, states, intrinsic sizing, slots. */
-@include base.components;
+/* The structure of every component first, then the look of every
+   component: a look always comes later in the cascade than any
+   structure, whichever file it sits in. */
+@include badge.structure;
+@include breadcrumbs.structure;
+@include button.structure;
+@include card.structure;
+@include checkbox.structure;
+@include chip.structure;
+@include dock.structure;
+@include fieldset.structure;
+@include floating-label.structure;
+@include file-input.structure;
+@include input.structure;
+@include join.structure;
+@include label.structure;
+@include link.structure;
+@include list.structure;
+@include loading.structure;
+@include menu.structure;
+@include navbar.structure;
+@include progress.structure;
+@include radial-progress.structure;
+@include radio.structure;
+@include range.structure;
+@include select.structure;
+@include skeleton.structure;
+@include swatch.structure;
+@include tabs.structure;
+@include text.structure;
+@include textarea.structure;
+@include toggle.structure;
+@include validator.structure;
 
 /* What dahlia decides, one file per component. */
 
-@include badge.emit;
-@include breadcrumbs.emit;
-@include card.emit;
-@include button.emit;
-@include checkbox.emit;
-@include chip.emit;
-@include dock.emit;
-@include fieldset.emit;
-@include floating-label.emit;
-@include file-input.emit;
-@include input.emit;
-@include label.emit;
-@include link.emit;
-@include list.emit;
-@include loading.emit;
-@include menu.emit;
-@include navbar.emit;
-@include progress.emit;
-@include radial-progress.emit;
-@include radio.emit;
-@include range.emit;
-@include select.emit;
-@include skeleton.emit;
-@include swatch.emit;
-@include tabs.emit;
-@include text.emit;
-@include textarea.emit;
-@include toggle.emit;
-@include validator.emit;
+@include badge.look;
+@include breadcrumbs.look;
+@include card.look;
+@include button.look;
+@include checkbox.look;
+@include chip.look;
+@include dock.look;
+@include fieldset.look;
+@include floating-label.look;
+@include file-input.look;
+@include input.look;
+@include label.look;
+@include link.look;
+@include list.look;
+@include loading.look;
+@include menu.look;
+@include navbar.look;
+@include progress.look;
+@include radial-progress.look;
+@include radio.look;
+@include range.look;
+@include select.look;
+@include skeleton.look;
+@include swatch.look;
+@include tabs.look;
+@include text.look;
+@include textarea.look;
+@include toggle.look;
+@include validator.look;

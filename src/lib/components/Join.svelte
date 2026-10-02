@@ -1,7 +1,6 @@
 <script module lang="ts">
-	/** What .join is made of, classified. Only this block differs between this
-	    file and the copy generated for each family (scripts/gen-components.mjs):
-	    an axis a family leaves empty loses its prop entirely.
+	/** What .join is made of, classified. Each family's copy writes these out as
+	    plain props (scripts/family-component.mjs).
 
 	    Each child must carry `join-item` for the seams to land; that class is
 	    a part of this component, not a component of its own. */
@@ -12,16 +11,16 @@
 		direction: ['horizontal', 'vertical']
 	} as const;
 
-	export const FLAGS = [] as const;
+	export const FLAGS = {} as const;
 	export const PARTS = ['item'] as const;
 </script>
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES>, HTMLAttributes<HTMLDivElement> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLAttributes<HTMLDivElement> {
 		class?: string;
 		children?: Snippet;
 	}
@@ -32,7 +31,7 @@
 		...axes
 	}: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 </script>
 

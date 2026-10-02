@@ -1,13 +1,126 @@
 @use '../../_mixins' as m;
 
 /* cosmos — select.
-   Everything this family decides about the component: its look,
-   its states and its variants. base supplies the mechanism and
-   no values at all (ADR 0008). */
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   select.scss — .select
+
+   Plumbing contract:
+	--input-color   resolved border/accent color (same as input.scss)
+	--size          field height (2.5em × --scale, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        field background
+	--color-surface-2        disabled background and border
+	--color-on-surface    default text color
+	--color-neutral / --color-on-neutral   active option highlight
+	--color-{variant}       semantic accent (set by color-variants)
+	--border                border width
+	--radius-field          field corner radius
+	--radius-box            picker dropdown corner radius
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure: layout, chevron, native <select> nesting,
+   picker dropdown (base-select), options, focus ring, disabled.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.select {
+		background-color: var(--color-surface-1);
+		position: relative;
+		display: inline-flex;
+		flex-shrink: 1;
+		appearance: none;
+		align-items: center;
+		vertical-align: middle;
+		height: var(--size);
+		touch-action: manipulation;
+		border-start-start-radius: var(--join-ss, var(--radius-field));
+		border-start-end-radius: var(--join-se, var(--radius-field));
+		border-end-start-radius: var(--join-es, var(--radius-field));
+		border-end-end-radius: var(--join-ee, var(--radius-field));
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		border-color: var(--input-color);
+		box-shadow: var(--shadow-light, );
+	}
+	.select[multiple] {
+		overflow: auto;
+	}
+	/* Native <select> nested inside the .select wrapper */
+	.select select {
+		appearance: none;
+		align-items: center;
+	}
+	.select:focus,
+		.select:focus-within {
+		--input-color: var(--color-on-surface);
+		isolation: isolate;
+	}
+	.select:has(> select[disabled]),
+		.select:is(:disabled, [disabled]),
+		fieldset:disabled .select {
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
+		cursor: not-allowed;
+	}
+	.select:has(> select[disabled]) > select[disabled] {
+		cursor: not-allowed;
+	}
+	/* base-select appearance support (modern browsers) */
+	.select,
+		.select select {
+		@supports (appearance: base-select) {
+		appearance: base-select;
+	}
+	}
+	.select::picker(select),
+		.select select::picker(select) {
+		border-radius: var(--radius-box);
+	}
+	@supports (appearance: base-select) {
+		.select::picker(select),
+			.select select::picker(select) {
+		appearance: base-select;
+	}
+	}
+	.select::picker-icon,
+		.select select::picker-icon {
+		display: none;
+	}
+	.select option,
+		.select select option {
+		border-radius: var(--radius-field);
+		white-space: normal;
+	}
+	.select option:not(:disabled):hover,
+		.select option:not(:disabled):focus-visible,
+		.select select option:not(:disabled):hover,
+		.select select option:not(:disabled):focus-visible {
+		cursor: pointer;
+	}
+	.select option:not(:disabled):active,
+		.select select option:not(:disabled):active {
+		background-color: var(--color-neutral);
+		color: var(--color-on-neutral);
+	}
+}
+
+@mixin look {
 	:where(.select) {
 		width: unset;
 	}

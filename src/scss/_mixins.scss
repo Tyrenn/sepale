@@ -34,7 +34,7 @@
 
 // A filled trail on a rail thinner than the thumb.
 //
-// The trail is the 100cqw box-shadow the thumb casts (see base/range.scss).
+// The trail is the 100cqw box-shadow the thumb casts (see a family's range.scss).
 // WebKit gives that shadow the thumb's own height, so on a thin rail it reads
 // as a fat bar and every family had to turn it off (--range-fill: 0).
 // clip-path cuts the thumb's whole painting — shadow included — down to a

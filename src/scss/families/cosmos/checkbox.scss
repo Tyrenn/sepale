@@ -1,14 +1,86 @@
-@use '../../_mixins' as m;
 @use '../../_config' as c;
+@use '../../_mixins' as m;
 
 /* cosmos — checkbox.
-   Everything this family decides about the component: its look,
-   its states and its variants. base supplies the mechanism and
-   no values at all (ADR 0008). */
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   checkbox.scss — .checkbox
+
+   Plumbing contract:
+	--input-color   border + checked fill color (set by color-variants)
+	--size          box dimensions (1.5em × 1.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-on-surface       default checkmark color
+	--color-{variant} / --color-on-{variant}  fill / mark colors (color-variants)
+	--border / --radius-selector
+	--shadow-light             family shadow system
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure: box, animated clip-path checkmark, focus ring,
+   checked/indeterminate states, forced-colors/print fallbacks,
+   disabled.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.checkbox {
+		color: var(--color-on-surface);
+		border-radius: var(--radius-selector);
+		position: relative;
+		display: inline-block;
+		flex-shrink: 0;
+		cursor: pointer;
+		appearance: none;
+		vertical-align: middle;
+		width: var(--size);
+		height: var(--size);
+		box-shadow: var(--shadow-light, );
+	}
+	.checkbox::before {
+		--checkbox-mark: "";
+		content: var(--checkbox-mark);
+		display: block;
+		clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 70% 80%, 70% 100%);
+	}
+	.checkbox:checked,
+		.checkbox[aria-checked="true"] {
+		background-color: var(--input-color, #0000);
+	}
+	.checkbox:checked::before,
+		.checkbox[aria-checked="true"]::before {
+		clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 0%, 70% 0%, 70% 100%);
+	}
+	@media (forced-colors: active) {
+		.checkbox:checked::before,
+			.checkbox[aria-checked="true"]::before {
+		--checkbox-mark: "✔︎";
+		clip-path: none;
+	}
+	}
+	@media print {
+		.checkbox:checked::before,
+			.checkbox[aria-checked="true"]::before {
+		--checkbox-mark: "✔︎";
+		clip-path: none;
+	}
+	}
+	.checkbox:indeterminate::before {
+		clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 80% 80%, 80% 100%);
+	}
+	.checkbox:disabled {
+		cursor: not-allowed;
+	}
+}
+
+@mixin look {
 	.checkbox {
 		--size: calc(1.5em * var(--scale));
 		font-size: var(--fontsize, var(--base, var(--default-base)));

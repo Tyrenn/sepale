@@ -1,7 +1,6 @@
 <script module lang="ts">
-	/** What .menu is made of, classified. Only this block differs between this
-	    file and the copy generated for each family (scripts/gen-components.mjs):
-	    an axis a family leaves empty loses its prop entirely.
+	/** What .menu is made of, classified. Each family's copy writes these out as
+	    plain props (scripts/family-component.mjs).
 
 	    The menu draws its own rows, so every class below the root is a PART:
 	    nobody opts into `.menu-item` or `.menu-active`, they follow from the
@@ -14,17 +13,17 @@
 		direction: ['horizontal']
 	} as const;
 
-	export const FLAGS = [] as const;
+	export const FLAGS = {} as const;
 	export const PARTS = ['item', 'active', 'disabled', 'toggle', 'sub', 'sub-closed', 'title'] as const;
 
-	import type { Text } from '../internal/snippets.js';
+	import type { Snippet } from 'svelte';
 
 	/** One row of a menu: a link, a section title, a divider, or a group. */
 	export interface MenuNode {
 		/** The row's text, or a snippet drawing whatever belongs in its place. */
-		label?: Text;
+		label?: string | Snippet;
 		/** A section heading rather than a row — renders `.menu-title`. */
-		title?: Text;
+		title?: string | Snippet;
 		/** A blank separator between two groups — an empty <li>. */
 		divider?: boolean;
 		/** Where the row goes. Without it the row is a <button>. */
@@ -41,16 +40,14 @@
 </script>
 
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
-	import { isSnippet } from '../internal/snippets.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
 	// `onselect` is ours: the native event of that name fires on text
 	// selection and means nothing on a <ul>, so the attribute is Omitted
 	// rather than the prop renamed.
 	interface Props
-		extends AxisProps<typeof AXES>,
+		extends AxisProps<typeof AXES, typeof FLAGS>,
 			Omit<HTMLAttributes<HTMLUListElement>, 'onselect'> {
 		/**
 		 * The rows, nested as deep as needed. A node's `label` and `title` take
@@ -69,7 +66,7 @@
 
 	let { items = [], row, onselect, class: klass = '', ...axes }: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
 	// Open/closed lives here, keyed by the row's path, so the caller can hand
@@ -88,12 +85,12 @@
 	}
 </script>
 
-{#snippet text(value: Text | undefined)}
-	{#if isSnippet(value)}{@render value()}{:else}{value}{/if}
+{#snippet text(value: string | Snippet | undefined)}
+	{#if typeof value === 'function'}{@render value()}{:else}{value}{/if}
 {/snippet}
 
 {#snippet inside(node: MenuNode)}
-	{#if isSnippet(node.label)}{@render node.label()}
+	{#if typeof node.label === 'function'}{@render node.label()}
 	{:else if row}{@render row(node)}
 	{:else}{node.label}{/if}
 {/snippet}

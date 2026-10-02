@@ -1,14 +1,52 @@
-@use '../../_mixins' as m;
 @use '../../_config' as c;
+@use '../../_mixins' as m;
 
 /* cosmos — chip.
-   Everything this family decides about the component: its look,
-   its states and its variants. base supplies the mechanism and
-   no values at all (ADR 0008). */
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   chip.scss — .chip (small inline label)
+
+   Plumbing contract:
+	--chip-color  seed color (set by color-variants)
+	--chip-bg     resolved background color
+	--chip-fg     resolved text color
+	--size        chip height (1.6em, scales with font); padding derived
+	--fontsize    font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-{variant} / --color-on-{variant}  seed / text colors (color-variants)
+	--border / --radius-selector
+	--shadow-light          family shadow system
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure and paint plumbing (bg/fg/border from --chip-*).
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.chip {
+		--chip-bg: var(--chip-color, var(--color-surface-1));
+		--chip-fg: var(--color-on-surface);
+		border-radius: var(--radius-selector);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		vertical-align: middle;
+		color: var(--chip-fg);
+		background-color: var(--chip-bg);
+		height: var(--size);
+		box-shadow: var(--shadow-light, );
+	}
+}
+
+@mixin look {
 	.chip {
 		--size: calc(1.6em * var(--scale));
 		font-size: var(--fontsize, var(--base, var(--default-base)));

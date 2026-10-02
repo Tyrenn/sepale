@@ -1,0 +1,228 @@
+/* cosmos — join.
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   join.scss — .join (group adjacent form elements)
+
+   Exported variables (injected into child .join-item elements,
+   consumed by input, select, button, … via
+   var(--join-ss, var(--radius-field))):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+
+   External variables (theme / family):
+	--border        used for negative margin to merge borders
+	--radius-field  default corner radius applied to first/last items
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — horizontal grouping: corner radius distribution, border
+   merging, button height stretch.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.join {
+		display: inline-flex;
+		align-items: stretch;
+	}
+	.join :where(.join-item) {
+		border-start-start-radius: var(--join-ss, 0);
+		border-start-end-radius: var(--join-se, 0);
+		border-end-start-radius: var(--join-es, 0);
+		border-end-end-radius: var(--join-ee, 0);
+	}
+	.join :where(.join-item) * {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+	/* First direct child */
+	.join > .join-item:where(:first-child) {
+		--join-ss: var(--radius-field);
+		--join-es: var(--radius-field);
+	}
+	.join :first-child:not(:last-child) :where(.join-item) {
+		--join-ss: var(--radius-field);
+		--join-es: var(--radius-field);
+	}
+	/* Last direct child */
+	.join > .join-item:where(:last-child) {
+		--join-se: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+	.join :last-child:not(:first-child) :where(.join-item) {
+		--join-se: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+	/* Only child */
+	.join > .join-item:where(:only-child) {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+	.join :only-child :where(.join-item) {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+	/* Focus */
+	.join > :where(:focus, :has(:focus)) {
+		z-index: 1;
+	}
+	@media (hover: hover) {
+		.join > :where(.btn:hover, :has(.btn:hover)) {
+		isolation: isolate;
+	}
+	}
+	/* join-item height fix.
+		   Buttons use a compact em-based height (--size) while field elements
+		   (input, select) use a taller one. Override height → auto so the button
+		   can stretch to match its siblings via align-items: stretch on .join.
+		   min-height keeps it from collapsing below its natural size. */
+	/* Border merging */
+
+	.join {
+		--join-ss: 0;
+		--join-se: 0;
+		--join-es: 0;
+		--join-ee: 0;
+	}
+	.join > .join-item:where(:first-child) {
+		--join-se: 0;
+		--join-ee: 0;
+	}
+	.join :first-child:not(:last-child) :where(.join-item) {
+		--join-se: 0;
+		--join-ee: 0;
+	}
+	.join > .join-item:where(:last-child) {
+		--join-ss: 0;
+		--join-es: 0;
+	}
+	.join :last-child:not(:first-child) :where(.join-item) {
+		--join-ss: 0;
+		--join-es: 0;
+	}
+	.join > .join-item:where(.btn) {
+		height: unset;
+		min-height: var(--size, calc(2.5em * var(--scale)));
+	}
+	.join-item:where(*:not(:first-child, :disabled, [disabled], .btn-disabled)) {
+		margin-inline-start: calc(var(--border, 1px) * -1);
+		margin-block-start: 0;
+	}
+	.join-item:where(*:is(:disabled, [disabled], .btn-disabled)) {
+		border-width: var(--border, 1px) 0 var(--border, 1px) var(--border, 1px);
+	}
+
+	/* variant vertical */
+	.join-vertical {
+		flex-direction: column;
+	}
+
+	.join-vertical > .join-item:first-child {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: 0;
+		--join-ee: 0;
+	}
+
+	.join-vertical :first-child:not(:last-child) .join-item {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: 0;
+		--join-ee: 0;
+	}
+
+	.join-vertical > .join-item:last-child {
+		--join-ss: 0;
+		--join-se: 0;
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-vertical :last-child:not(:first-child) .join-item {
+		--join-ss: 0;
+		--join-se: 0;
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-vertical > .join-item:only-child {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-vertical :only-child .join-item {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-vertical .join-item:where(*:not(:first-child)) {
+		margin-inline-start: 0;
+		margin-block-start: calc(var(--border, 1px) * -1);
+	}
+
+	/* variant horizontal */
+	.join-horizontal {
+		flex-direction: row;
+	}
+
+	.join-horizontal > .join-item:first-child {
+		--join-ss: var(--radius-field);
+		--join-se: 0;
+		--join-es: var(--radius-field);
+		--join-ee: 0;
+	}
+
+	.join-horizontal :first-child:not(:last-child) .join-item {
+		--join-ss: var(--radius-field);
+		--join-se: 0;
+		--join-es: var(--radius-field);
+		--join-ee: 0;
+	}
+
+	.join-horizontal > .join-item:last-child {
+		--join-ss: 0;
+		--join-se: var(--radius-field);
+		--join-es: 0;
+		--join-ee: var(--radius-field);
+	}
+
+	.join-horizontal :last-child:not(:first-child) .join-item {
+		--join-ss: 0;
+		--join-se: var(--radius-field);
+		--join-es: 0;
+		--join-ee: var(--radius-field);
+	}
+
+	.join-horizontal > .join-item:only-child {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-horizontal :only-child .join-item {
+		--join-ss: var(--radius-field);
+		--join-se: var(--radius-field);
+		--join-es: var(--radius-field);
+		--join-ee: var(--radius-field);
+	}
+
+	.join-horizontal .join-item:where(*:not(:first-child)) {
+		margin-inline-start: calc(var(--border, 1px) * -1);
+		margin-block-start: 0;
+	}
+}

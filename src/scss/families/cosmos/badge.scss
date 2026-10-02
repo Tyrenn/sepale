@@ -1,11 +1,48 @@
 /* cosmos — badge.
-   Variants inherited from the shared set when families still
-   shared one. They belong to this family now: edit them here,
-   or delete the ones this look has no use for (ADR 0008). */
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   badge.scss — .badge (badge overlay wrapper)
+
+   Internal variables (position control):
+	--badge-t    top offset (default: 0)
+	--badge-b    bottom offset (default: auto)
+	--badge-s    inset-inline-start offset (default: auto)
+	--badge-e    inset-inline-end offset (default: 0)
+	--badge-x    horizontal translate (default: 50%)
+	--badge-y    vertical translate (default: -50%)
+
+   Usage: combine the .badge wrapper with .badge-{position}
+   modifiers; the inner .chip is the positioned badge itself.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — wrapper + positioned inner chip.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.badge {
+		position: relative;
+		display: inline-flex;
+	}
+	.badge :where(.chip) {
+		z-index: 1;
+		position: absolute;
+		white-space: nowrap;
+		top: var(--badge-t, 0);
+		bottom: var(--badge-b, auto);
+		left: var(--badge-s, auto);
+		right: var(--badge-e, 0);
+		translate: var(--badge-x, 50%) var(--badge-y, -50%);
+	}
+}
+
+@mixin look {
 	.badge {
 		width: max-content;
 	}

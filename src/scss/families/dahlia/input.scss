@@ -1,13 +1,112 @@
 @use '../../_mixins' as m;
 
 /* dahlia — input.
-   Everything this family decides about the component: its look,
-   its states and its variants. base supplies the mechanism and
-   no values at all (ADR 0008). */
+   Everything dahlia draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   input.scss — .input
+
+   Plumbing contract:
+	--input-color   resolved border/accent color — structure defaults it to a
+	                faint on-surface mix, color-variants override it,
+	                focus resets it to on-surface
+	--size          field height (2.5em × --scale, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        field background
+	--color-surface-2        disabled background and border
+	--color-on-surface    default text color
+	--color-{variant}       semantic accent (set by color-variants)
+	--border                border width
+	--radius-field          field corner radius
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure shared by all families: layout, intrinsic
+   sizing, border/outline plumbing, inner <input> handling, focus
+   ring, disabled state. Box-shadow defaults to the family shadow;
+   skins provide the actual surface recipe.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.input {
+		cursor: text;
+		display: inline-flex;
+		flex-shrink: 1;
+		appearance: none;
+		align-items: center;
+		vertical-align: middle;
+		white-space: nowrap;
+		position: relative;
+		background-color: var(--color-surface-1);
+		height: var(--size);
+		touch-action: manipulation;
+		border-start-start-radius: var(--join-ss, var(--radius-field));
+		border-start-end-radius: var(--join-se, var(--radius-field));
+		border-end-start-radius: var(--join-es, var(--radius-field));
+		border-end-end-radius: var(--join-ee, var(--radius-field));
+		border-color: var(--input-color);
+		box-shadow: var(--shadow-light, );
+	}
+	.input:where(input) {
+		display: inline-flex;
+	}
+	.input :where(input) {
+		display: inline-flex;
+		appearance: none;
+	}
+	.input :where(input[type="url"]),
+		.input :where(input[type="email"]) {
+		direction: ltr;
+	}
+	.input :where(input[type="date"]) {
+		display: inline-flex;
+	}
+	.input:focus,
+		.input:focus-within {
+		--input-color: var(--color-on-surface);
+		isolation: isolate;
+	}
+	/* Increase font size on iOS to prevent auto-zoom on focus */
+	.input:has(> input[disabled]),
+		.input:is(:disabled, [disabled]),
+		fieldset:disabled .input {
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
+		cursor: not-allowed;
+	}
+	.input:has(> input[disabled]) > input[disabled] {
+		cursor: not-allowed;
+	}
+	.input::-webkit-date-and-time-value {
+		text-align: inherit;
+	}
+	.input::-webkit-calendar-picker-indicator {
+		position: absolute;
+	}
+	.input:has(> input[type="date"]) :where(input[type="date"]) {
+		display: inline-flex;
+		-webkit-appearance: none;
+		appearance: none;
+	}
+	.input:has(> input[type="date"]) input[type="date"]::-webkit-calendar-picker-indicator {
+		position: absolute;
+		cursor: pointer;
+	}
+}
+
+@mixin look {
 	:where(.input) {
 		width: unset;
 	}

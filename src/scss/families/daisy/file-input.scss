@@ -1,14 +1,89 @@
-@use '../../_mixins' as m;
 @use '../../_config' as c;
+@use '../../_mixins' as m;
 
 /* daisy — file-input.
-   Everything daisy decides about this component: its look and
-   its variants. Moved out of the shared component file, where
-   it used to masquerade as the kit's default. */
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* ============================================================
+   file-input.scss — .file-input
+
+   Plumbing contract:
+	--input-color   field border/accent color (same as input.scss)
+	--btn-color     seed color for the file button (color-variants)
+	--btn-bg        resolved button background   (painted by structure)
+	--btn-fg        resolved button text color   (painted by structure)
+	--btn-border    resolved button border color (structure default: transparent)
+	--btn-shadow    button drop shadow           (skin-flat)
+	--size          field height (2.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-{variant} / --color-on-{variant}  semantic colors (color-variants)
+	--border / --radius-field
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-es   start-side radius overrides
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure: field layout + the ::file-selector-button
+   pseudo-button plumbing (paints from --btn-*), focus ring,
+   disabled state.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.file-input {
+		--btn-bg: var(--btn-color, var(--color-surface-2));
+		--btn-fg: var(--color-on-surface);
+		cursor: pointer;
+		background-color: var(--color-surface-1);
+		display: inline-flex;
+		appearance: none;
+		align-items: center;
+		vertical-align: middle;
+		user-select: none;
+		height: var(--size);
+		border-start-start-radius: var(--join-ss, var(--radius-field));
+		border-start-end-radius: var(--join-se, var(--radius-field));
+		border-end-start-radius: var(--join-es, var(--radius-field));
+		border-end-end-radius: var(--join-ee, var(--radius-field));
+		border-color: var(--input-color);
+		box-shadow: var(--shadow-light, );
+	}
+	.file-input::file-selector-button {
+		cursor: pointer;
+		user-select: none;
+		color: var(--btn-fg);
+		border-width: var(--border);
+		border-color: var(--btn-border);
+		background-color: var(--btn-bg);
+	}
+	.file-input:focus {
+		--input-color: var(--color-on-surface);
+		isolation: isolate;
+	}
+	.file-input:has(> input[disabled]),
+		.file-input:is(:disabled, [disabled]) {
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
+		cursor: not-allowed;
+	}
+	.file-input:has(> input[disabled])::file-selector-button,
+		.file-input:is(:disabled, [disabled])::file-selector-button {
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
+		cursor: not-allowed;
+	}
+}
+
+@mixin look {
 	.file-input {
 		--size: calc(2.5em * var(--scale));
 		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);

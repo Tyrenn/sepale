@@ -8,16 +8,14 @@
  *
  *   src/lib/components/Button.svelte   hand-written, every axis at full width
  *        ×  static/families/daisy.css  the classes daisy really has
- *        =  src/generated/components/daisy/components/Button.svelte
+ *        =  src/generated/components/daisy/Button.svelte
  *
- * ONLY the AXES block is rewritten. The rest of the file — the props, the
- * markup, the logic — is copied byte for byte, so a generated copy is an
- * ordinary component you can read, and a diff between two families is a
- * handful of array entries.
- *
- * An axis a family leaves empty loses its prop entirely (see AxisProps in
- * src/lib/internal/variants.ts), which is what keeps an exported component
- * from offering a variant its stylesheet has never heard of.
+ * The source is generic — AXES and FLAGS blocks, resolved at run time by
+ * src/lib/variants.ts — because the app shows every family at once. The copy a
+ * consumer downloads is written out as if for that family alone: its props are
+ * plain unions of the values the family ships, its classes a plain array, and
+ * it imports nothing local (scripts/family-component.mjs does the rewrite). An
+ * axis or a flag the family does not ship is simply not there.
  *
  * The script FAILS if a family ships a class this component has not
  * classified: that class is either a variant nobody exposed or a part nobody
@@ -29,10 +27,11 @@
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { compile } from 'svelte/compiler';
+import { familyComponent, axisSuffix, camel } from './family-component.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const srcDir = join(root, 'src/lib/components');
-const internalDir = join(root, 'src/lib/internal');
 const builtDir = join(root, 'static/families');
 const outDir = join(root, 'src/generated/components');
 const docFile = join(root, 'src/lib/generated/components.ts');
@@ -69,6 +68,7 @@ function documentedNamespaces() {
 }
 
 const NL = String.fromCharCode(10);
+const TAB = String.fromCharCode(9);
 
 /** Every class name in a stylesheet. Comments go first — a doc comment
  *  mentioning `.badge-{position}` is not a class — and so do quoted strings and
@@ -108,44 +108,6 @@ function readConst(src, name) {
 	return null;
 }
 
-/** Rewrite one axis's value in place, leaving every comment around it alone.
- *  Scanned rather than matched: a regex would have to know that a value can
- *  be a list or a map, and that the word may also appear in a comment. */
-function replaceAxis(block, key, literal) {
-	const lines = block.split(NL);
-	let offset = 0;
-	let at = -1;
-	for (const line of lines) {
-		if (line.trim().startsWith(key + ':')) {
-			at = offset + line.indexOf(key);
-			break;
-		}
-		offset += line.length + 1;
-	}
-	if (at < 0) throw new Error(`axis ${key}: no such key in the AXES block`);
-
-	const open = at + block.slice(at).search(/[[{]/);
-	const close = block[open] === '[' ? ']' : '}';
-	let depth = 0;
-	for (let i = open; i < block.length; i++) {
-		if (block[i] === block[open]) depth++;
-		else if (block[i] === close && --depth === 0) {
-			return block.slice(0, open) + literal + block.slice(i + 1);
-		}
-	}
-	throw new Error(`axis ${key}: unbalanced value`);
-}
-
-const render = (axis) =>
-	Array.isArray(axis)
-		? `[${axis.map((v) => `'${v}'`).join(', ')}]`
-		: Object.keys(axis).length === 0
-			? '{}'
-			: /* Keys are quoted: an unquoted `1:` is a NUMBER key, which
-				   `Values<A>` (string keys only) reads as no value at all —
-				   and the axis silently loses its prop. */
-				`{ ${Object.entries(axis).map(([k, v]) => `'${k}': '${v}'`).join(', ')} }`;
-
 const families = readdirSync(builtDir)
 	.filter((f) => f.endsWith('.css'))
 	.map((f) => f.replace(/\.css$/, ''))
@@ -158,18 +120,18 @@ const components = readdirSync(srcDir)
 	.filter((c) => c.src.includes('export const AXES'))
 	.map((c) => {
 		const axes = readConst(c.src, 'AXES');
-		const declared = new Set([
-			...(readConst(c.src, 'FLAGS')?.value ?? []),
-			...(readConst(c.src, 'PARTS')?.value ?? [])
-		]);
-		for (const axis of Object.values(axes.value)) {
-			for (const suffix of Array.isArray(axis) ? axis : Object.values(axis)) declared.add(suffix);
+		const flags = readConst(c.src, 'FLAGS')?.value ?? {};
+		if (Array.isArray(flags)) throw new Error(`${c.file}: FLAGS is a map of flag → doc now`);
+		const declared = new Set([...Object.keys(flags), ...(readConst(c.src, 'PARTS')?.value ?? [])]);
+		for (const [key, axis] of Object.entries(axes.value)) {
+			if (!Array.isArray(axis)) throw new Error(`${c.file}: axis ${key} is a list of values now`);
+			for (const v of axis) declared.add(axisSuffix(key, v));
 		}
 		return {
 			...c,
 			prefix: readConst(c.src, 'PREFIX').value,
 			name: c.file.replace(/\.svelte$/, ''),
-			flags: readConst(c.src, 'FLAGS')?.value ?? [],
+			flags,
 			parts: readConst(c.src, 'PARTS')?.value ?? [],
 			axes,
 			declared
@@ -188,12 +150,6 @@ for (const c of components) {
 
 if (existsSync(outDir)) rmSync(outDir, { recursive: true });
 
-/* The whole internal directory travels with the components: they import from
-   it, so a generated copy that is missing one file does not compile. */
-const internals = readdirSync(internalDir).map((file) => ({
-	file,
-	src: readFileSync(join(internalDir, file), 'utf8')
-}));
 const problems = [];
 let written = 0;
 
@@ -214,45 +170,52 @@ const ownerOf = (cls) =>
 	byPrefix.find((c) => cls === c.prefix || cls.startsWith(`${c.prefix}-`));
 
 for (const family of families) {
-	const shipped = classesIn(readFileSync(join(builtDir, `${family}.css`), 'utf8'));
-	mkdirSync(join(outDir, family, 'components'), { recursive: true });
-	mkdirSync(join(outDir, family, 'internal'), { recursive: true });
-	for (const { file, src } of internals) {
-		writeFileSync(join(outDir, family, 'internal', file), src);
-	}
+	const css = readFileSync(join(builtDir, `${family}.css`), 'utf8');
+	const shipped = classesIn(css);
+	mkdirSync(join(outDir, family), { recursive: true });
 
 	const famAxes = {};
 	const famFlags = {};
 
 	for (const { file, src, prefix, name, flags, axes } of components) {
-		let block = axes.text;
-		const kептAxes = {};
-		for (const [key, axis] of Object.entries(axes.value)) {
-			const kept = Array.isArray(axis)
-				? axis.filter((v) => shipped.has(`${prefix}-${v}`))
-				: Object.fromEntries(
-						Object.entries(axis).filter(([, v]) => shipped.has(`${prefix}-${v}`))
-					);
-			kептAxes[key] = kept;
-			block = replaceAxis(block, key, render(kept));
-		}
-
-		/* The prop side of the same decision: which values this family accepts
-		   for each axis, and which flags it can actually paint. */
+		/* Which values this family accepts for each axis, and which flags it can
+		   actually paint: the classes its stylesheet really has. An axis left
+		   empty is dropped, and with it the prop. */
 		const values = {};
-		for (const [key, kept] of Object.entries(kептAxes)) {
-			const list = Array.isArray(kept) ? kept : Object.keys(kept);
-			if (list.length) values[key] = list;
+		for (const [key, axis] of Object.entries(axes.value)) {
+			const kept = axis.filter((v) => shipped.has(`${prefix}-${axisSuffix(key, v)}`));
+			if (kept.length) values[key] = kept;
 		}
 		if (Object.keys(values).length) famAxes[name] = values;
-		const live = flags.filter((f) => shipped.has(`${prefix}-${f}`));
-		if (live.length) famFlags[name] = live;
+		const live = Object.keys(flags).filter((f) => shipped.has(`${prefix}-${f}`));
+		if (live.length) famFlags[name] = live.map(camel);
 
-		writeFileSync(
-			join(outDir, family, 'components', file),
-			src.slice(0, axes.from) + block + src.slice(axes.to)
-		);
-		written++;
+		try {
+			const out = familyComponent(
+				{
+					src,
+					name,
+					prefix,
+					allAxes: axes.value,
+					axes: values,
+					allFlags: flags,
+					flags: live,
+					/* `background` writes --<prefix>-bg; it is only a prop where the
+					   family's stylesheet reads that slot. */
+					background: css.includes(`var(--${prefix}-bg`)
+				},
+				family
+			);
+			/* Parsed by the Svelte compiler before it is written: a rewrite that
+			   breaks the syntax fails the build here, not in a consumer's app.
+			   Types are checked by `npm run check` (svelte-check covers
+			   src/generated/). */
+			compile(out, { filename: file, generate: false });
+			writeFileSync(join(outDir, family, file), out);
+			written++;
+		} catch (e) {
+			problems.push(`${family}/${file}: ${e.message.split(NL)[0]}`);
+		}
 	}
 
 	// What the family ships, against what the components say those classes are.
@@ -289,16 +252,13 @@ for (const family of families) {
 		const suffix = cls.slice(owner.prefix.length + 1);
 		let info = null;
 		for (const [axis, values] of Object.entries(owner.axes.value)) {
-			const entries = Array.isArray(values)
-				? values.map((v) => [v, v])
-				: Object.entries(values);
-			const hit = entries.find(([, sfx]) => sfx === suffix);
-			if (hit) {
-				info = { kind: 'axis', component: owner.name, axis, value: hit[0] };
+			const value = values.find((v) => axisSuffix(axis, v) === suffix);
+			if (value !== undefined) {
+				info = { kind: 'axis', component: owner.name, axis, value };
 				break;
 			}
 		}
-		if (!info && owner.flags.includes(suffix)) info = { kind: 'flag', component: owner.name, prop: suffix };
+		if (!info && suffix in owner.flags) info = { kind: 'flag', component: owner.name, prop: camel(suffix) };
 		if (!info && owner.parts.includes(suffix)) info = { kind: 'part', component: owner.name };
 		if (!info) {
 			info = { kind: 'unclassified', component: owner.name };

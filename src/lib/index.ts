@@ -2,10 +2,10 @@
 //
 // Every component emits the class names of whatever family stylesheet is
 // loaded; bring `families/<name>.css` and a theme alongside. A component
-// declares its own vocabulary in an AXES block, and the build writes a copy
-// per family with that block filtered down to the classes the family actually
-// ships — so an exported component cannot offer a variant its stylesheet has
-// never heard of.
+// declares its own vocabulary in AXES and FLAGS blocks, and the build writes a
+// copy per family as plain code — props typed to exactly the classes the family
+// ships, nothing generic, nothing to import — so an exported component cannot
+// offer a variant its stylesheet has never heard of.
 //
 // `link` and `validator` have no component here on purpose: they are one
 // class on one element, with no axis and no structure, and a wrapper would only
@@ -57,7 +57,7 @@ export { default as Tabs, type TabItem } from './components/Tabs.svelte';
 // Other
 export { default as Join } from './components/Join.svelte';
 
-export { type Axis, type AxisProps, type Values } from './internal/variants.js';
+export { type Axis, type AxisProps, type Values } from './variants.js';
 
 // Registry of style families + their themes, auto-generated from src/scss.
 export { families, themesByFamily, type ThemeData } from './generated/registry.js';

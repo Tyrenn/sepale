@@ -1,5 +1,8 @@
 # base owns the mechanism, families own the values
 
+**Superseded by [0010](./0010-a-family-is-self-contained.md)** (2026-10-02):
+`base/` is gone; each family writes its components whole.
+
 `src/scss/base/` holds one file per component containing structure, states,
 accessibility and plumbing — and **no values at all**. It writes
 `height: var(--size)` and `background-color: var(--btn-bg)`, and it never

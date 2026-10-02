@@ -1,8 +1,87 @@
-/* sunflower — text. */
+@use '../../_config' as c;
 
-@mixin emit {
-	/* Values that used to sit in base. They belong to this family now:
-	   change them here and nobody else moves (ADR 0008). */
+/* sunflower — text.
+   Everything sunflower draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   text.scss — typography mixin library
+
+   Three components in one file — `text`, `title`, `subtitle` —
+   because separating them would buy nothing. All text-natured:
+   they draw no frame, so `--scale` leaves them alone.
+
+   ── Two axes, not one combination ──────────────────────────
+
+   These used to ship as `.text-s2-b3`: twelve classes for four
+   sizes times three weights. But the two never interacted — `s`
+   carried font-size and line-height, `b` carried font-weight and
+   nothing else — so the product was twelve ways of saying seven
+   things. Split, they are what the Svelte wrapper's two props
+   already wanted to be:
+
+	.text-s{1-4}   size, 1 = largest (and the leading that goes with it)
+	.text-b{1-3}   weight, 1 = heaviest
+
+   Subtitles have a fixed weight — no b axis. Title is unique.
+
+   ── Colour ─────────────────────────────────────────────────
+
+   A semantic colour here is the RAW token, not a contrast-checked
+   reading of it: `.text-primary` must show primary, and an author
+   who puts it on a dark panel wants to see that it fails rather
+   than get a silently different blue. It is the same bargain
+   `.link-primary` makes. Each prefix gets its own eight —
+   `.title-primary` rather than borrowing `.text-primary` —
+   because a class has to be an axis of its own component
+   (ADR 0009).
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — .title, .subtitle-s{1,2}, .text-s{1-4}, .text-b{1-3},
+   and the colour axis of all three.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.title {
+		font-size: var(--xxl, var(--default-xxl));
+	}
+	.subtitle-s1 {
+		font-size: var(--xl, var(--default-xl));
+	}
+	.subtitle-s2 {
+		font-size: var(--lg, var(--default-lg));
+	}
+
+	/* ── Axis: s — size ── */
+	.text-s1 {
+		font-size: var(--md, var(--default-md));
+	}
+	.text-s2 {
+		font-size: var(--base, var(--default-base));
+	}
+	.text-s3 {
+		font-size: var(--sm, var(--default-sm));
+	}
+	.text-s4 {
+		font-size: var(--xs, var(--default-xs));
+	}
+
+	/* ── Axis: color ── */
+	@each $name in c.$color-list {
+		.text-#{$name},
+		.title-#{$name},
+		.subtitle-#{$name} {
+			color: var(--color-#{$name});
+		}
+	}
+}
+
+@mixin look {
 	.title {
 		font-weight: 800;
 		line-height: 1.15;

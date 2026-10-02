@@ -1,7 +1,6 @@
 <script module lang="ts">
-	/** What .list is made of, classified. Only this block differs between this
-	    file and the copy generated for each family (scripts/gen-components.mjs):
-	    an axis a family leaves empty loses its prop entirely.
+	/** What .list is made of, classified. Each family's copy writes these out as
+	    plain props (scripts/family-component.mjs).
 
 	    The list draws its own rows: `.list-row` is a PART, not something a
 	    caller opts into. What goes INSIDE a row is the caller's, three ways —
@@ -15,17 +14,16 @@
 		variant: ['suggestions']
 	} as const;
 
-	export const FLAGS = [] as const;
+	export const FLAGS = {} as const;
 	export const PARTS = ['row', 'col-grow', 'col-wrap'] as const;
 </script>
 
 <script lang="ts" generics="Row">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
-	import { isSnippet } from '../internal/snippets.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES>, HTMLAttributes<HTMLUListElement> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLAttributes<HTMLUListElement> {
 		/**
 		 * The rows. An entry is your data — rendered by `row`, or as text when
 		 * there is no `row` — or a snippet standing in for that one row.
@@ -41,7 +39,13 @@
 
 	let { rows = [], row, class: klass = '', ...axes }: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	/* A snippet has no runtime marker — compiled, it is a plain function — so
+	   `typeof` is the only test. Fine as long as a row is never a function.
+	   A guard rather than an inline `typeof`, because `Row` is generic and
+	   TypeScript cannot rule out a callable `Row` on its own. */
+	const isSnippet = (entry: Row | Snippet): entry is Snippet => typeof entry === 'function';
+
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 </script>
 

@@ -9,7 +9,7 @@
 		color: ['primary', 'secondary', 'accent', 'neutral', 'info', 'success', 'warning', 'error']
 	} as const;
 
-	export const FLAGS = [] as const;
+	export const FLAGS = {} as const;
 	export const PARTS = [] as const;
 </script>
 
@@ -26,9 +26,9 @@
 	 */
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { applyAxes, cx, type AxisProps } from '../internal/variants.js';
+	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES>, Omit<HTMLAttributes<HTMLHeadingElement>, 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLHeadingElement>, 'color'> {
 		/** Which heading tag to render. Purely semantic; the look never moves. */
 		level?: 1 | 2 | 3 | 4 | 5 | 6;
 		class?: string;
@@ -37,7 +37,7 @@
 
 	let { level = 1, class: klass = '', children, ...axes }: Props = $props();
 
-	let applied = $derived(applyAxes(PREFIX, AXES, axes));
+	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 </script>
 

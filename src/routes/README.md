@@ -12,8 +12,7 @@ that needs to know what a family actually ships reads its compiled stylesheet.
 ## The chain
 
 ```
-src/scss/families/<fam>/*.scss ─┐
-src/scss/base/*.scss            ├─ scripts/build-css.mjs (sass)
+src/scss/families/<fam>/*.scss ─┬─ scripts/build-css.mjs (sass)
 src/scss/themes/<fam>/*.scss ───┘        │
                                          ▼
                               static/families/<fam>.css
@@ -38,7 +37,7 @@ src/scss/themes/<fam>/*.scss ───┘        │
 
 Runs Sass. One stylesheet per family into `static/families/`, plus
 `static/reset.css` — compiled on its own because the reset is **optional**: a
-page that already has one does not load it, and `base` does not depend on it
+page that already has one does not load it, and no family depends on it
 (every component writes its own `box-sizing`). The app loads it from
 `+layout.svelte` the way a consumer would. A family's
 `index.scss` calls `params.emit($params)`, which writes both the CSS defaults
@@ -60,11 +59,22 @@ Reads every `src/lib/components/*.svelte` — specifically its `<script module>`
 block: `PREFIX`, `AXES`, `FLAGS`, `PARTS` — and intersects it with the classes
 in each compiled stylesheet.
 
-1. **`src/generated/components/<family>/`** — a copy of every component with
-   *only* its `AXES` block rewritten, filtered down to the classes that family
-   ships. An axis left empty loses its prop entirely, so an exported component
-   cannot offer a variant its stylesheet has never heard of. Nothing in the app
-   imports these yet: they are what the bundle hands over.
+1. **`src/generated/components/<family>/<Name>.svelte`** — every component
+   written out for that family as plain code (`scripts/family-component.mjs`):
+   its props are unions of exactly the values the family ships, its classes a
+   plain array, and it imports nothing local. No `AXES`, no `applyAxes`, no
+   `AxisProps` — an axis or a flag the family does not ship is simply absent,
+   and `background` only exists where the stylesheet reads `--<prefix>-bg`.
+   Each copy goes through the Svelte compiler before it is written; types are
+   checked by `npm run check`. Nothing in the app imports these yet: they are
+   what the bundle hands over.
+
+   The rewrite leans on hooks every source writes the same way — the
+   `variants.js` import, `extends AxisProps<typeof AXES, typeof FLAGS>`,
+   `...axes`, `let applied = $derived(applyAxes(…))`, `applied.classes`,
+   `{...applied.rest}` — and fails the build on a component that departs from
+   them. An axis value writes its class by two rules (`none` → `no<axis>`, a
+   number → `<axis><n>`); see `src/lib/variants.ts`.
 2. **`src/lib/generated/components.ts`** — the same intersection, as data:
    every class each family ships, classified (`root` / `axis` / `flag` /
    `part` / `unclassified`), plus the axis values and flags each component has
@@ -134,7 +144,7 @@ from what the example itself writes.
 | a family | `src/scss/families/<name>/` + `src/scss/themes/<name>/`, then `npm run build:css` |
 | a theme | `src/scss/themes/<family>/<name>.scss` |
 | a parameter | declare it in the family's `$params` map; the editor follows |
-| a component | `src/scss/base/<name>.scss` + a file per family + (if a wrapper earns its keep) `src/lib/components/<Name>.svelte` with its `<script module>` block |
+| a component | a file in every family that styles it (`structure` + `look`, ADR 0010) + (if a wrapper earns its keep) `src/lib/components/<Name>.svelte` with its `<script module>` block |
 | a component page | `src/routes/components/docs/<name>.svelte` with a `DOC`. The sidebar finds it on its own; add its id to `GROUPS` in `playground.svelte.ts` only to place it in a group rather than under "Other" |
 
 ## Verification

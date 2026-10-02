@@ -1,8 +1,13 @@
 # u.u
 
-A pure-CSS component kit with two levels of customisation: you first pick an
-opinionated **family**, then tune it through its **parameters**. The web app is
-the distribution channel — it previews the result and hands you the files.
+A collection of components, each one a DOM structure and a set of well-defined
+classes — and, in Svelte, a wrapper that makes a functional piece (an input, a
+menu, a carousel) quick to put in a page. The components come first; the CSS
+comes after.
+
+To style them you pick an opinionated **family**, then tune it lightly through
+its **parameters**. The web app is the distribution channel — it previews the
+result and hands you the files.
 
 ## Language
 
@@ -10,8 +15,10 @@ the distribution channel — it previews the result and hands you the files.
 
 **Family**:
 An opinionated visual direction, shipped as compiled CSS — a directory of
-`src/scss/families/<name>/`. It owns every value in the kit: colours,
-dimensions, variants, state feedback. Changing family is changing a stylesheet,
+`src/scss/families/<name>/` that is **self-contained** (ADR 0010): it writes
+the whole of every component it styles, structure and look, and reads nothing
+from another family. Its parameters are its own — one family may expose fifteen
+background colours, another none. Changing family is changing a stylesheet,
 never the markup.
 _Avoid_: collection, kit, style pack, preset
 
@@ -82,6 +89,13 @@ variants of one axis are not.
 
 ### Authoring
 
+**Structure** / **Look**:
+The two mixins of a family's component file. `structure` is the mechanism —
+layout, states, intrinsic sizing, accessibility, the slots; `look` is the values
+and the variants. Both are the family's; they are two mixins only because a
+family's `index.scss` emits every structure before any look, so a look always
+wins the cascade over any structure.
+
 **Registry**:
 What the build reads back out of the compiled CSS and hands to the app: the
 families, their themes, the parameters each one declares, and the classes each
@@ -92,7 +106,6 @@ stops offering it.
 ### Distribution
 
 **Bundle**:
-The zip the app produces: the chosen family's per-component CSS, `base.css`,
-the generated `theme.css`, an optional `reset.css`, a README, and — in
+The zip the app produces: the chosen family's stylesheet, the generated `theme.css`, an optional `reset.css`, a README, and — in
 CSS + Svelte mode — the component wrappers.
 _Avoid_: package (there is no npm package), export, build
