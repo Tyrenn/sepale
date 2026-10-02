@@ -1,0 +1,62 @@
+@use '../_mixins' as m;
+@use '../_config' as c;
+
+/* ============================================================
+   radio.scss — .radio mixin library
+
+   Nothing is emitted at the top level: a style family `@use`s this
+   file and `@include`s its selection (see button.scss for the
+   pattern).
+
+   Note: .radio does not consume --shadow-light — families that need
+   a shadow skin it directly.
+
+   Plumbing contract:
+	--input-color   border + dot color (set by color-variants)
+	--size          circle dimensions (1.5em × 1.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        background when checked
+	--color-{variant}       accent color (color-variants)
+	--border
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   base — structure: circle, inner dot, focus ring, checked state,
+   forced-colors/print fallbacks, disabled, check animation.
+   ------------------------------------------------------------ */
+
+@mixin base {
+	.radio {
+		position: relative;
+		display: inline-block;
+		flex-shrink: 0;
+		cursor: pointer;
+		appearance: none;
+		vertical-align: middle;
+		width: var(--size);
+		height: var(--size);
+		color: var(--input-color, currentColor);
+	}
+	.radio::before {
+		--radio-mark: "";
+		content: var(--radio-mark);
+		display: block;
+		/* rounded-full */
+	}
+	.radio:checked,
+		.radio[aria-checked="true"] {
+		background-color: var(--color-surface-1);
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.radio:checked,
+			.radio[aria-checked="true"] {
+		animation: radio 0.2s ease-out;
+	}
+	}
+	.radio:disabled {
+		cursor: not-allowed;
+	}
+}

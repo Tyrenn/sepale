@@ -1,0 +1,115 @@
+@use 'config' as c;
+
+// Size variants — each class only sets --fontsize; intrinsic sizing does the rest.
+@mixin size-variants($prefix, $sizes: c.$sizes-field) {
+	@each $size in $sizes {
+		.#{$prefix}-#{$size} {
+			--fontsize: var(--#{$size}, var(--default-#{$size}));
+		}
+	}
+}
+
+// Variants that seed a private color token + foreground (button-style).
+// Used by components whose background derives from a --*-color seed.
+@mixin seed-color-variants($prefix, $seed-prop, $fg-prop) {
+	@each $color in c.$color-list {
+		.#{$prefix}-#{$color} {
+			#{$seed-prop}: var(--color-#{$color});
+			#{$fg-prop}: var(--color-on-#{$color});
+		}
+	}
+}
+
+// Field color variants (input/select/textarea): set --input-color on the
+// class and its focus states.
+@mixin field-color-variants($prefix) {
+	@each $color in c.$color-list {
+		.#{$prefix}-#{$color},
+		.#{$prefix}-#{$color}:focus,
+		.#{$prefix}-#{$color}:focus-within {
+			--input-color: var(--color-#{$color});
+		}
+	}
+}
+
+// A filled trail on a rail thinner than the thumb.
+//
+// The trail is the 100cqw box-shadow the thumb casts (see base/range.scss).
+// WebKit gives that shadow the thumb's own height, so on a thin rail it reads
+// as a fat bar and every family had to turn it off (--range-fill: 0).
+// clip-path cuts the thumb's whole painting — shadow included — down to a
+// cross: a band as tall as --rail spanning the control, plus the square the
+// knob and its ring occupy. It is the only shape that keeps a thin trail and a
+// knob taller than it at the same time. The band is symmetric, so RTL needs
+// nothing. Pair it with a fill offset of --range-thumb-size + --range-halo so
+// the trail stops at the clip instead of leaving a stub beside the knob.
+@mixin railed-fill($halo: 0.125em) {
+	--range-halo: #{$halo};
+	--rail-top: calc((var(--range-thumb-size) - var(--rail)) / 2);
+	--rail-bottom: calc((var(--range-thumb-size) + var(--rail)) / 2);
+	clip-path: polygon(
+		-100vw var(--rail-top),
+		calc(0px - var(--range-halo)) var(--rail-top),
+		calc(0px - var(--range-halo)) calc(0px - var(--range-halo)),
+		calc(100% + var(--range-halo)) calc(0px - var(--range-halo)),
+		calc(100% + var(--range-halo)) var(--rail-top),
+		100vw var(--rail-top),
+		100vw var(--rail-bottom),
+		calc(100% + var(--range-halo)) var(--rail-bottom),
+		calc(100% + var(--range-halo)) calc(100% + var(--range-halo)),
+		calc(0px - var(--range-halo)) calc(100% + var(--range-halo)),
+		calc(0px - var(--range-halo)) var(--rail-bottom),
+		-100vw var(--rail-bottom)
+	);
+}
+
+// .loading-dots as three xsmall, perfectly round, empty buttons.
+//
+// The other loaders are an alpha mask over a flat colour, which can carry a
+// silhouette but never a fill AND a border at once. Three background layers
+// can: each is a disc of --dot-bg ringed by --dot-border-width of
+// --dot-border-color, and one animation moves the three layers out of phase.
+// A family that paints borderless buttons just leaves --dot-border-width at 0.
+@mixin dot-loader {
+	$disc: radial-gradient(
+		circle closest-side,
+		var(--dot-bg) calc(100% - var(--dot-border-width)),
+		var(--dot-border-color) calc(100% - var(--dot-border-width)) 100%,
+		#0000 100%
+	);
+
+	--dot: calc(0.6em * var(--scale));
+	--dot-bg: var(--color-surface-1);
+	--dot-border-color: var(--color-border);
+	--dot-border-width: var(--border, 1px);
+	aspect-ratio: auto;
+	width: calc(var(--dot) * 3.4);
+	height: calc(var(--dot) * 1.9);
+	mask-image: none;
+	background-color: transparent;
+	background-repeat: no-repeat;
+	background-size: var(--dot) var(--dot);
+	background-image: #{$disc}, #{$disc}, #{$disc};
+	animation: loading-dots 1.05s infinite;
+}
+
+// The bounce that goes with dot-loader. Three layers, one timeline: each dot
+// leaves the baseline a fifth of the cycle after the one before it.
+@mixin dot-loader-keyframes {
+	@keyframes loading-dots {
+		0%,
+		80%,
+		100% {
+			background-position: 0 100%, 50% 100%, 100% 100%;
+		}
+		20% {
+			background-position: 0 0, 50% 100%, 100% 100%;
+		}
+		40% {
+			background-position: 0 100%, 50% 0, 100% 100%;
+		}
+		60% {
+			background-position: 0 100%, 50% 100%, 100% 0;
+		}
+	}
+}

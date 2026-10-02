@@ -1,0 +1,29 @@
+/* Theme « pastel » — editable variables only (colors + radii). */
+:root {
+	color-scheme: light;
+	--color-surface-1: oklch(100% 0 0);
+	--color-surface-2: oklch(98.462% 0.001 247.838);
+	--color-surface-3: oklch(92.462% 0.001 247.838);
+	--color-on-surface: oklch(20% 0 0);
+	--color-primary: oklch(90% 0.063 306.703);
+	--color-on-primary: oklch(49% 0.265 301.924);
+	--color-secondary: oklch(89% 0.058 10.001);
+	--color-on-secondary: oklch(51% 0.222 16.935);
+	--color-accent: oklch(90% 0.093 164.15);
+	--color-on-accent: oklch(50% 0.118 165.612);
+	--color-neutral: oklch(55% 0.046 257.417);
+	--color-on-neutral: oklch(92% 0.013 255.508);
+	--color-info: oklch(86% 0.127 207.078);
+	--color-on-info: oklch(52% 0.105 223.128);
+	--color-success: oklch(87% 0.15 154.449);
+	--color-on-success: oklch(52% 0.154 150.069);
+	--color-warning: oklch(83% 0.128 66.29);
+	--color-on-warning: oklch(55% 0.195 38.402);
+	--color-error: oklch(80% 0.114 19.571);
+	--color-on-error: oklch(50% 0.213 27.518);
+	--radius-field: 2rem;
+	--radius-box: 1rem;
+	--radius-selector: 1rem;
+	--border: 2px;
+	--depth: 0;
+}

@@ -1,0 +1,177 @@
+@use 'sass:map';
+@use '../../params';
+@use '../../base';
+@use '../derived-content';
+@use 'badge';
+@use 'breadcrumbs';
+@use 'card';
+@use 'button';
+@use 'checkbox';
+@use 'chip';
+@use 'dock';
+@use 'fieldset';
+@use 'floating-label';
+@use 'file-input';
+@use 'input';
+@use 'label';
+@use 'link';
+@use 'list';
+@use 'loading';
+@use 'menu';
+@use 'navbar';
+@use 'progress';
+@use 'radial-progress';
+@use 'radio';
+@use 'range';
+@use 'select';
+@use 'skeleton';
+@use 'swatch';
+@use 'tabs';
+@use 'text';
+@use 'textarea';
+@use 'toggle';
+@use 'validator';
+
+
+
+/* ============================================================
+   STYLE FAMILY — « sunflower »  (neo-brutalist)
+
+   A sunflower is enormous, bright yellow and completely without
+   subtlety. So is this look.
+
+   The look: a heavy black outline on every control, a hard
+   shadow offset down-right with no blur at all, and a press that
+   PUSHES THE ELEMENT INTO ITS OWN SHADOW — the element slides by
+   exactly the offset while the shadow shrinks to nothing. That
+   one interaction is the whole family.
+
+   Changes made to fit our contract:
+     - The offset is a length in em, not px, so it grows with the
+       control instead of looking dainty on a large button and
+       crushing a small one.
+     - Neo-brutalism has no `ghost`, `soft` or `dash` in the usual
+       sense; those shared variants still exist here and simply
+       lose the shadow, which is the honest translation.
+     - It adds two of its own: `.btn-noshadow` (flat, outline
+       only) and `.btn-reverse` (the shadow on the other side, so
+       the press pushes up-left instead).
+
+   Build: static/families/sunflower.css via `npm run build:css`.
+   ============================================================ */
+
+
+$params: map.merge(
+	params.colors((
+		'color-primary': #ffdc58,
+		'color-border': #000000,
+		'color-on-surface': #000000,
+		'color-secondary': #a3e635,
+		'color-accent': #60a5fa,
+		'color-neutral': #000000,
+		'color-info': #7dd3fc,
+		'color-success': #4ade80,
+		'color-warning': #fbbf24,
+		'color-error': #f87171
+	)),
+	(
+		'radius-field': (
+			label: 'Field radius', group: 'Shape', type: length,
+			default: 0.3125rem, min: 0, max: 1.5, step: 0.025, unit: rem, units: (px rem em),
+			help: 'Neo-brutalism keeps a small radius so the outline reads as drawn, not printed.'
+		),
+		'radius-box': (
+			label: 'Box radius', group: 'Shape', type: length,
+			default: 0.3125rem, min: 0, max: 2, step: 0.05, unit: rem, units: (px rem em),
+			help: 'Corner radius of larger boxes.'
+		),
+		'border': (
+			label: 'Outline width', group: 'Shape', type: length,
+			default: 2px, min: 1, max: 6, step: 0.5, unit: px, units: (px em),
+			help: 'The heavy black line around everything. Below 2px the family stops working.'
+		),
+		'scale': (
+			label: 'Element size', group: 'Size', type: number,
+			default: 1, min: 0.75, max: 2, step: 0.05,
+			help: 'Grows every frame — paddings, heights, spacing. Text is unaffected.'
+		),
+		'sunflower-offset': (
+			label: 'Shadow offset', group: 'Effects', type: length,
+			default: 0.25em, min: 0, max: 1, step: 0.025, unit: em, units: (em rem px),
+			help: 'How far the hard shadow sits down and right — and therefore how far a press travels. This is the family.'
+		),
+		'sunflower-shadow-color': (
+			label: 'Shadow colour', group: 'Effects', type: color,
+			default: #000000,
+			help: 'The hard shadow has no blur and no transparency, so its colour is a flat block.'
+		)
+	)
+);
+
+@include params.emit($params);
+
+/* Family-owned: everything is drawn. No ambient light at all.
+   --radius-selector is NOT a parameter here: in this look every
+   selector — toggle, slider, radio — is a full pill or a circle,
+   and letting a theme square them off would simply break it. */
+:root {
+	--depth: 0;
+	--light-intensity: 0;
+	--radius-selector: 999px;
+	--root-bg: var(--color-surface-1);
+
+	/* Neo-brutalism has ONE colour. neobrutalism.dev ships --main and two
+	   grounds: --background, a pale wash of main that the page sits on, and
+	   --secondary-background, which is the plain sheet every form control,
+	   card and bar is drawn on. So surface-1 is derived from the primary and
+	   is not a parameter, and the other two are the sheet and its shade.
+
+	   The family is light only. A dark reading of it existed and was dropped:
+	   the look is black ink on bright paper, and inverting it turns the hard
+	   shadow into a halo and the yellow into a highlighter stain. Every theme
+	   here therefore sets `color-scheme: light`. */
+	--color-surface-1: color-mix(in oklab, var(--color-primary) 28%, #ffffff);
+	--color-surface-2: #ffffff;
+	--color-surface-3: #e7e7e7;
+}
+
+/* The shared mechanism: structure, states, intrinsic sizing, slots. */
+@include base.components;
+
+/* Family-wide: recipes and rules that belong to no single component. */
+:where(*) {
+	--sf-o: var(--sunflower-offset, 0.25em);
+	--sf-shadow: var(--sf-o) var(--sf-o) 0 0 var(--sunflower-shadow-color, #000);
+}
+
+/* What sunflower decides, one file per component. */
+
+@include badge.emit;
+@include breadcrumbs.emit;
+@include card.emit;
+@include button.emit;
+@include checkbox.emit;
+@include chip.emit;
+@include dock.emit;
+@include fieldset.emit;
+@include floating-label.emit;
+@include file-input.emit;
+@include input.emit;
+@include label.emit;
+@include link.emit;
+@include list.emit;
+@include loading.emit;
+@include menu.emit;
+@include navbar.emit;
+@include progress.emit;
+@include radial-progress.emit;
+@include radio.emit;
+@include range.emit;
+@include select.emit;
+@include skeleton.emit;
+@include swatch.emit;
+@include tabs.emit;
+@include text.emit;
+@include textarea.emit;
+@include toggle.emit;
+@include validator.emit;

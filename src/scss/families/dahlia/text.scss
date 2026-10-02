@@ -1,0 +1,43 @@
+/* dahlia — text. */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.title {
+		font-weight: 800;
+		line-height: 1.15;
+		letter-spacing: -0.02em;
+	}
+	.subtitle-s1 {
+		font-weight: 700;
+		line-height: 1.25;
+		letter-spacing: -0.01em;
+	}
+	.subtitle-s2 {
+		font-weight: 600;
+		line-height: 1.35;
+	}
+
+	/* Axis: s — the leading that goes with each size. */
+	.text-s1,
+	.text-s2 {
+		line-height: 1.6;
+	}
+	.text-s3 {
+		line-height: 1.55;
+	}
+	.text-s4 {
+		line-height: 1.5;
+	}
+
+	/* Axis: b — weight. */
+	.text-b1 {
+		font-weight: 600;
+	}
+	.text-b2 {
+		font-weight: 500;
+	}
+	.text-b3 {
+		font-weight: 400;
+	}
+}

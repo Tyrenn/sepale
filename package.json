@@ -1,0 +1,38 @@
+{
+	"name": "u.u",
+	"version": "0.0.1",
+	"scripts": {
+		"gen:registry": "node scripts/gen-registry.mjs",
+		"gen:components": "node scripts/gen-components.mjs",
+		"build:css": "node scripts/build-css.mjs && npm run gen:registry && npm run gen:components",
+		"dev": "npm run build:css && vite dev",
+		"build": "npm run build:css && vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync && npm run gen:registry || echo ''",
+		"check": "npm run build:css && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+	},
+	"type": "module",
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^7.0.1",
+		"@sveltejs/kit": "^2.57.0",
+		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"playwright": "^1.63.0",
+		"sass": "^1.99.0",
+		"svelte": "^5.55.2",
+		"svelte-check": "^4.4.6",
+		"typescript": "^6.0.2",
+		"vite": "^8.0.7"
+	},
+	"description": "A pure-CSS component kit in seven families, plus the SvelteKit app that previews it and hands it over as a downloadable bundle. Not an npm package (ADR 0001): the app ships a zip.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Tyrenn/u.u.git"
+	},
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Tyrenn/u.u/issues"
+	},
+	"homepage": "https://github.com/Tyrenn/u.u#readme"
+}

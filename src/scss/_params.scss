@@ -1,0 +1,162 @@
+/* ============================================================
+   _params.scss — a family declares the variables it exposes.
+
+   Every family owns its own set of parameters. Sharing a name
+   with another family is a convenience, never an obligation:
+   a family may expose five surfaces, or none, or knobs nobody
+   else has.
+
+   A family writes one map and includes `params.emit($params)`,
+   which does two things:
+
+     1. emits the defaults on `:where(:root)` (specificity 0, so
+        any theme wins in any load order);
+     2. emits the map as one machine-readable comment, which the
+        build reads back to feed the configurator and the
+        Families page. One source of truth: this map.
+
+   Shape of an entry:
+
+     'radius-field': (
+       label: 'Field radius', group: 'Shape', type: length,
+       default: 0.375rem, min: 0, max: 2, step: 0.05,
+       unit: rem, units: (px rem em ch),
+       help: 'Corner radius of buttons, inputs and selects.',
+     )
+
+   `type` is color | length | number | edge-width | shadows.
+   `min`/`max`/`step` turn the control into a slider; `units` adds a
+   unit picker. The last two are still ONE variable, with a richer
+   control:
+
+     edge-width  a `border-width` shorthand, edited as a width and
+                 four edge toggles: default '1px 0 1px 0' draws top
+                 and bottom only. Read it as `border-width`.
+     shadows     a whole `box-shadow` value, edited as a list of
+                 layers. Quote the default: it holds commas.
+   ============================================================ */
+
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:meta';
+
+@function _q($v) {
+	@return '"' + $v + '"';
+}
+
+@function _join($a, $b) {
+	@if $a == '' {
+		@return $b;
+	}
+	@return $a + ',' + $b;
+}
+
+@function _arr($list) {
+	$out: '';
+	@each $item in $list {
+		$out: _join($out, _q($item));
+	}
+	@return '[' + $out + ']';
+}
+
+@function _field($entry, $key, $value, $quoted: true) {
+	$rendered: '#{$value}';
+	@if $quoted {
+		$rendered: _q($value);
+	}
+	@return $entry + ',' + _q($key) + ':' + $rendered;
+}
+
+/* Serialise the map to JSON on a single line, so the build can
+   pull it out of the compiled CSS with one regex. */
+@function to-json($params) {
+	$out: '';
+
+	@each $name, $p in $params {
+		$e: _q('name') + ':' + _q($name);
+		$e: _field($e, 'label', map.get($p, label));
+		$e: _field($e, 'group', map.get($p, group));
+		$e: _field($e, 'type', map.get($p, type));
+		$e: _field($e, 'value', '#{map.get($p, default)}');
+
+		@if map.has-key($p, help) {
+			$e: _field($e, 'description', map.get($p, help));
+		}
+		@if map.has-key($p, min) {
+			$e: _field($e, 'min', map.get($p, min), false);
+		}
+		@if map.has-key($p, max) {
+			$e: _field($e, 'max', map.get($p, max), false);
+		}
+		@if map.has-key($p, step) {
+			$e: _field($e, 'step', map.get($p, step), false);
+		}
+		@if map.has-key($p, unit) {
+			$e: _field($e, 'unit', map.get($p, unit));
+		}
+		@if map.has-key($p, units) {
+			$e: $e + ',' + _q('units') + ':' + _arr(map.get($p, units));
+		}
+
+		$out: _join($out, '{' + $e + '}');
+	}
+
+	@return '[' + $out + ']';
+}
+
+/* Defaults + the machine-readable declaration. */
+@mixin emit($params) {
+	:where(:root) {
+		@each $name, $p in $params {
+			--#{$name}: #{map.get($p, default)};
+		}
+	}
+
+	/*! uu-params #{to-json($params)} */
+}
+
+/* ------------------------------------------------------------
+   colors() — metadata for the colour names families tend to
+   share. Convenience only: a family passes the values it wants,
+   under whatever names it wants, and gets labels and help text
+   for the ones this table knows. Unknown names still work, they
+   just get their raw name as a label.
+   ------------------------------------------------------------ */
+$color-meta: (
+	'color-surface-1': ('Surface 1', 'The ground: page background, and the inside of fields.'),
+	'color-surface-2': ('Surface 2', 'Objects resting on the ground: plain buttons, chips, skeletons.'),
+	'color-surface-3': ('Surface 3', 'Chrome pinned to the edge of the screen: dock, navbar.'),
+	'color-surface-4': ('Surface 4', 'A fourth ground, for looks that stack more levels.'),
+	'color-on-surface': ('Text', 'Text and icons drawn on the surfaces.'),
+	'color-border': ('Border', 'Hairlines, field outlines, dividers.'),
+	'color-primary': ('Primary', 'Main brand and action colour.'),
+	'color-secondary': ('Secondary', 'Secondary brand colour.'),
+	'color-accent': ('Accent', 'Accent and highlight colour.'),
+	'color-neutral': ('Neutral', 'Strong neutral tone for filled, unbranded elements.'),
+	'color-info': ('Info', 'Informational state.'),
+	'color-success': ('Success', 'Success state.'),
+	'color-warning': ('Warning', 'Warning state.'),
+	'color-error': ('Error', 'Error and danger state.')
+);
+
+@function colors($values) {
+	$out: ();
+
+	@each $name, $value in $values {
+		$meta: map.get($color-meta, $name);
+		$label: $name;
+		$help: '';
+		@if $meta {
+			$label: list.nth($meta, 1);
+			$help: list.nth($meta, 2);
+		}
+
+		$out: map.set(
+			$out,
+			$name,
+			(label: $label, group: 'Colors', type: color, default: $value, help: $help)
+		);
+	}
+
+	@return $out;
+}

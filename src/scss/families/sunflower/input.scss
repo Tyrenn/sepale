@@ -1,0 +1,113 @@
+@use '../../_mixins' as m;
+
+/* sunflower — input.
+   Everything this family decides about the component: its look,
+   its states and its variants. base supplies the mechanism and
+   no values at all (ADR 0008). */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	:where(.input) {
+		width: unset;
+	}
+	.input {
+		--size: calc(2.5em * var(--scale));
+		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+		gap: calc(0.5em * var(--scale));
+		padding-inline: calc(0.75em * var(--scale));
+		width: clamp(3rem, 20rem, 100%);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		border: var(--border) solid #0000;
+	}
+	.input :where(input) {
+		height: 100%;
+		width: 100%;
+		background-color: transparent;
+		border: none;
+	}
+	.input :where(input):focus,
+		.input :where(input):focus-within {
+		outline: none;
+	}
+	.input:focus,
+		.input:focus-within {
+		outline: 2px solid var(--input-color);
+		outline-offset: 2px;
+	}
+	@media (pointer: coarse) {
+		@supports (-webkit-touch-callout: none) {
+		.input:focus,
+				.input:focus-within {
+		font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+	}
+	}
+	}
+	.input:has(> input[disabled]),
+		.input:is(:disabled, [disabled]),
+		fieldset:disabled .input {
+		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
+		box-shadow: none;
+	}
+	.input:has(> input[disabled]) input::placeholder,
+		.input:is(:disabled, [disabled]) input::placeholder,
+		fieldset:disabled .input input::placeholder,
+		.input:has(> input[disabled])::placeholder,
+		.input:is(:disabled, [disabled])::placeholder,
+		fieldset:disabled .input::placeholder {
+		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+	}
+	.input[type="number"]::-webkit-inner-spin-button {
+		margin-block: calc(-0.75em * var(--scale));
+		margin-inline-end: calc(-0.75em * var(--scale));
+	}
+	.input::-webkit-calendar-picker-indicator {
+		inset-inline-end: calc(0.75em * var(--scale));
+	}
+	.input:has(> input[type="date"]) input[type="date"]::-webkit-calendar-picker-indicator {
+		inset-inline-end: calc(0.75em * var(--scale));
+		width: 1em;
+		height: 1em;
+	}
+
+	/* variant ghost */
+	.input-ghost {
+		background-color: transparent;
+		box-shadow: none;
+		border-color: #0000;
+	}
+
+	.input-ghost:focus,
+	.input-ghost:focus-within {
+		color: var(--color-on-surface);
+		background-color: var(--color-surface-2);
+		border-color: #0000;
+		box-shadow: none;
+	}
+
+	/* color variants */
+	@include m.field-color-variants('input');
+
+	/* size variants */
+	@include m.size-variants('input');
+
+	.input {
+		border: var(--border) solid var(--color-border);
+	}
+
+	.input {
+		--input-color: var(--color-border);
+		background-color: var(--color-surface-2);
+	}
+
+	.input:focus,
+	.input:focus-within {
+		outline: none;
+		translate: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5);
+		box-shadow: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5) 0 0 var(--sunflower-shadow-color, #000);
+	}
+
+	.input {
+	}
+
+}

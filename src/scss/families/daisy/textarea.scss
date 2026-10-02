@@ -1,0 +1,87 @@
+@use '../../_mixins' as m;
+
+/* daisy — textarea.
+   Everything daisy decides about this component: its look and
+   its variants. Moved out of the shared component file, where
+   it used to masquerade as the kit's default. */
+
+@mixin emit {
+	/* Values that used to sit in base. They belong to this family now:
+	   change them here and nobody else moves (ADR 0008). */
+	.textarea {
+		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+		border: var(--border) solid #0000;
+		min-height: calc(5em * var(--scale));
+		padding-block: calc(0.5em * var(--scale));
+		padding-inline-start: calc(0.75em * var(--scale));
+		padding-inline-end: calc(0.75em * var(--scale));
+		width: clamp(3rem, 20rem, 100%);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.textarea textarea {
+		background-color: transparent;
+		border: none;
+	}
+	.textarea textarea:focus,
+		.textarea textarea:focus-within {
+		outline: none;
+	}
+	.textarea:focus,
+		.textarea:focus-within {
+		outline: 2px solid var(--input-color);
+		outline-offset: 2px;
+	}
+	@media (pointer: coarse) {
+		@supports (-webkit-touch-callout: none) {
+		.textarea:focus,
+				.textarea:focus-within {
+		font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+	}
+	}
+	}
+	.textarea:has(> textarea[disabled]),
+		.textarea:is(:disabled, [disabled]) {
+		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
+		box-shadow: none;
+	}
+	.textarea:has(> textarea[disabled]) textarea::placeholder,
+		.textarea:is(:disabled, [disabled]) textarea::placeholder,
+		.textarea:has(> textarea[disabled])::placeholder,
+		.textarea:is(:disabled, [disabled])::placeholder {
+		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+	}
+
+	/* the flat surface */
+	.textarea {
+		box-shadow:
+			0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset,
+			0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+			var(--shadow-light, );
+	}
+
+	.textarea:focus,
+	.textarea:focus-within {
+		box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000);
+	}
+
+	/* variant ghost */
+	.textarea-ghost {
+		background-color: transparent;
+		box-shadow: none;
+		border-color: #0000;
+	}
+
+	.textarea-ghost:focus,
+	.textarea-ghost:focus-within {
+		color: var(--color-on-surface);
+		background-color: var(--color-surface-1);
+		border-color: #0000;
+		box-shadow: none;
+	}
+
+	/* color variants */
+	@include m.field-color-variants('textarea');
+
+	/* size variants */
+	@include m.size-variants('textarea');
+}

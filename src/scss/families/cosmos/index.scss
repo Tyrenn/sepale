@@ -1,0 +1,221 @@
+@use 'sass:map';
+@use '../../params';
+@use '../../base';
+@use '../derived-content';
+@use 'badge';
+@use 'breadcrumbs';
+@use 'card';
+@use 'button';
+@use 'checkbox';
+@use 'chip';
+@use 'dock';
+@use 'fieldset';
+@use 'floating-label';
+@use 'file-input';
+@use 'input';
+@use 'label';
+@use 'link';
+@use 'list';
+@use 'loading';
+@use 'menu';
+@use 'navbar';
+@use 'progress';
+@use 'radial-progress';
+@use 'radio';
+@use 'range';
+@use 'select';
+@use 'skeleton';
+@use 'swatch';
+@use 'tabs';
+@use 'text';
+@use 'textarea';
+@use 'toggle';
+@use 'validator';
+
+
+
+/* ============================================================
+   STYLE FAMILY — « cosmos »  (after PaperCSS, hand-drawn)
+
+   Cosmos flowers look like they were cut from tissue paper —
+   thin, papery petals that never sit symmetrically. Which is
+   what this family does to every corner it draws.
+
+   The look: nothing is a rectangle. Every frame uses six
+   different elliptical radii so no two corners match, the border
+   is a thick marker line, and elements sit at a fraction of a
+   degree off true. It should look drawn, not rendered.
+
+   Changes made to fit our contract:
+     - PaperCSS imports Patrick Hand from Google Fonts. We do not
+       ship or fetch fonts, so cosmos names a handwriting stack
+       and degrades to the system face. Point
+       --default-font-family at a real hand face and it snaps into
+       character.
+     - The asymmetric radius is a fixed six-value recipe, not a
+       single number, so `--radius-field` cannot express it, and
+       cosmos does not expose the three radii at all. It exposes a
+       `wobble` instead — three of them, one per kind of thing, the
+       way the radii used to be split — mixing between a plain
+       radius and the full hand-drawn recipe. At 0 it is an
+       ordinary rounded family; at 1 it is PaperCSS.
+     - PaperCSS has no dark theme. Ours adds one — a chalk-on-slate
+       reading of the same idea, which is an invention, not a port.
+
+   Build: static/families/cosmos.css via `npm run build:css`.
+   ============================================================ */
+
+
+$params: map.merge(
+	params.colors((
+		'color-surface-1': #fdfdf6,
+		'color-surface-2': #f5f3e8,
+		'color-surface-3': #eae7d6,
+		'color-border': #41403e,
+		'color-on-surface': #41403e,
+		'color-primary': #41403e,
+		'color-secondary': #7f8c8d,
+		'color-accent': #f6c667,
+		'color-neutral': #41403e,
+		'color-info': #6ca9d6,
+		'color-success': #86b98a,
+		'color-warning': #f6c667,
+		'color-error': #d97b6c
+	)),
+	(
+		'default-font-family': (
+			label: 'Typeface', group: 'Typography', type: text,
+			default: ('Patrick Hand', 'Comic Sans MS', 'Segoe Print', cursive),
+			help: 'cosmos is drawn by hand. Without a hand face it reads as a wonky sans — install or link one and it comes alive.'
+		),
+		'border': (
+			label: 'Pen width', group: 'Shape', type: length,
+			default: 2px, min: 1, max: 5, step: 0.5, unit: px, units: (px em),
+			help: 'Thickness of the marker line. This is a drawing, so the line matters more than the fill.'
+		),
+		'scale': (
+			label: 'Element size', group: 'Size', type: number,
+			default: 1, min: 0.75, max: 2, step: 0.05,
+			help: 'Grows every frame — paddings, heights, spacing. Text is unaffected.'
+		),
+		'cosmos-wobble-field': (
+			label: 'Wobble — controls', group: 'Effects', type: number,
+			default: 1, min: 0, max: 1, step: 0.05,
+			help: 'How far the corners drift on a button, an input, a chip. 0 is an ordinary rounded family; 1 is fully hand-drawn.'
+		),
+		'cosmos-wobble-box': (
+			label: 'Wobble — boxes', group: 'Effects', type: number,
+			default: 0.2, min: 0, max: 1, step: 0.05,
+			help: 'Same, for a list, a textarea, a menu. The recipe is in pixels, so a tall box takes the full drift while a button clamps it — which is why boxes need their own, smaller, number.'
+		),
+		'cosmos-wobble-selector': (
+			label: 'Wobble — selectors', group: 'Effects', type: number,
+			default: 0.7, min: 0, max: 1, step: 0.05,
+			help: 'Same, for the small drawn things: tabs, bars, sliders, samples.'
+		),
+		'cosmos-tilt': (
+			label: 'Tilt', group: 'Effects', type: number,
+			default: 0.4, min: 0, max: 3, step: 0.1,
+			help: 'Degrees a control sits off true. Small numbers read as drawn; large ones read as broken.'
+		)
+	)
+);
+
+@include params.emit($params);
+
+/* Family-owned: ink on paper. No cast light.
+
+   The three radii are NOT parameters here. A single number cannot say
+   anything about a corner this family draws — the corner is a six-value
+   recipe — so exposing one would only let a theme flatten the mechanism
+   without ever describing it. They stay as fixed values because the
+   shared mechanism (join, tabs, toggle, slider) still measures against
+   them. What cosmos exposes instead is the wobble, once per kind of
+   thing: see --cosmos-wobble-field / -box / -selector. */
+:root {
+	--depth: 0;
+	--light-intensity: 0;
+	--root-bg: var(--color-surface-1);
+	--radius-field: 0.75rem;
+	--radius-box: 1rem;
+	--radius-selector: 0.5rem;
+}
+
+/* The shared mechanism: structure, states, intrinsic sizing, slots. */
+@include base.components;
+
+/* Family-wide: recipes and rules that belong to no single component. */
+:where(*) {
+	/* The recipe is in px, so a browser scales it down to fit a small box
+	   (a button ends up near-symmetric) but leaves a tall one — a textarea,
+	   a list — with the full 240px drift, which reads as a different family
+	   rather than the same pen. So the amplitude is not one number: each
+	   component points --cw at the knob for its kind, and a box asks for
+	   less drift than a button does. */
+	--cw: var(--cosmos-wobble-field, 1);
+
+	/* PaperCSS ships SIX corner recipes and rotates them across siblings
+	   (.border-1 … .border-6 via .child-borders nth-child(6n+N)) — that
+	   rotation is what stops two neighbours trembling alike. Values are
+	   its own, in px: a pen wobble is the same width on a big box and a
+	   small one, so it answers to the page, not to the content. Wobble
+	   interpolates from a plain 15px radius (0) to the full recipe (1). */
+	--c1: calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 240px)
+	      calc(15px + var(--cw) * 210px) calc(15px + var(--cw) * 0px)
+	    / calc(15px + var(--cw) * 240px) calc(15px + var(--cw) * 0px)
+	      calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 210px);
+	--c2: calc(15px + var(--cw) * 170px) calc(15px + var(--cw) * 10px)
+	      calc(15px + var(--cw) * 5px) calc(15px + var(--cw) * 190px)
+	    / calc(15px + var(--cw) * 10px) calc(15px + var(--cw) * 190px)
+	      calc(15px + var(--cw) * 110px) calc(15px + var(--cw) * 10px);
+	--c3: calc(15px + var(--cw) * 210px) calc(15px + var(--cw) * 0px)
+	      calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 240px)
+	    / calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 240px)
+	      calc(15px + var(--cw) * 210px) calc(15px + var(--cw) * 0px);
+	--c4: calc(15px + var(--cw) * 10px) calc(15px + var(--cw) * 140px)
+	      calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 210px)
+	    / calc(15px + var(--cw) * 100px) calc(15px + var(--cw) * 10px)
+	      calc(15px + var(--cw) * 135px) calc(15px + var(--cw) * 10px);
+	--c5: calc(15px + var(--cw) * 5px) calc(15px + var(--cw) * 0px)
+	      calc(15px + var(--cw) * 235px) calc(15px + var(--cw) * 10px)
+	    / calc(15px + var(--cw) * 100px) calc(15px + var(--cw) * 90px)
+	      calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 65px);
+	--c6: calc(15px + var(--cw) * 0px) calc(15px + var(--cw) * 5px)
+	      calc(15px + var(--cw) * 13px) calc(15px + var(--cw) * 85px)
+	    / calc(15px + var(--cw) * 210px) calc(15px + var(--cw) * 190px)
+	      calc(15px + var(--cw) * 110px) calc(15px + var(--cw) * 15px);
+
+	--cosmos-corners: var(--c1);
+}
+
+/* What cosmos decides, one file per component. */
+
+@include badge.emit;
+@include breadcrumbs.emit;
+@include card.emit;
+@include button.emit;
+@include checkbox.emit;
+@include chip.emit;
+@include dock.emit;
+@include fieldset.emit;
+@include floating-label.emit;
+@include file-input.emit;
+@include input.emit;
+@include label.emit;
+@include link.emit;
+@include list.emit;
+@include loading.emit;
+@include menu.emit;
+@include navbar.emit;
+@include progress.emit;
+@include radial-progress.emit;
+@include radio.emit;
+@include range.emit;
+@include select.emit;
+@include skeleton.emit;
+@include swatch.emit;
+@include tabs.emit;
+@include text.emit;
+@include textarea.emit;
+@include toggle.emit;
+@include validator.emit;
