@@ -24,7 +24,7 @@
  * Output: src/generated/components/ (git-ignored, regenerated on build).
  */
 
-import { readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync, existsSync, cpSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compile } from 'svelte/compiler';
@@ -46,6 +46,17 @@ const pagesDir = join(root, 'src/routes/components/docs');
  * two apart, so the list is written down.
  */
 const EXTERNAL = new Set(['prose', 'filter']);
+/* A vendored library's own classes, reached into from under a class of ours:
+   `calendar.scss` styles `.calendar .air-datepicker-cell` (ADR 0009,
+   integration). Never ours to classify. */
+const EXTERNAL_PREFIXES = ['air-datepicker'];
+const isExternal = (cls) => EXTERNAL.has(cls) || EXTERNAL_PREFIXES.some((p) => cls.startsWith(p));
+
+/* Vendored code a component imports (`../vendor/<lib>/…`). A family's copy
+   of that component takes the folder with it: it is copied next to the copy
+   and the import is rewritten to `./vendor/<lib>/…`. */
+const vendorDir = join(root, 'src/lib/vendor');
+const VENDOR_IMPORT = /(['"])\.\.\/vendor\//g;
 
 /**
  * The namespaces the component pages claim, read straight out of their `DOC`.
@@ -210,8 +221,14 @@ for (const family of families) {
 			   breaks the syntax fails the build here, not in a consumer's app.
 			   Types are checked by `npm run check` (svelte-check covers
 			   src/generated/). */
-			compile(out, { filename: file, generate: false });
-			writeFileSync(join(outDir, family, file), out);
+			const vendored = VENDOR_IMPORT.test(out);
+			VENDOR_IMPORT.lastIndex = 0;
+			const final = vendored ? out.replace(VENDOR_IMPORT, '$1./vendor/') : out;
+			compile(final, { filename: file, generate: false });
+			writeFileSync(join(outDir, family, file), final);
+			if (vendored && !existsSync(join(outDir, family, 'vendor'))) {
+				cpSync(vendorDir, join(outDir, family, 'vendor'), { recursive: true });
+			}
 			written++;
 		} catch (e) {
 			problems.push(`${family}/${file}: ${e.message.split(NL)[0]}`);
@@ -236,7 +253,7 @@ for (const family of families) {
 	const classes = {};
 	for (const cls of [...shipped].sort()) {
 		/* Somebody else's class, named only to qualify one of ours. */
-		if (EXTERNAL.has(cls)) continue;
+		if (isExternal(cls)) continue;
 		const owner = ownerOf(cls);
 		if (!owner) {
 			classes[cls] = { kind: 'unclassified' };

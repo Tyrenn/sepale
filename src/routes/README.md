@@ -83,6 +83,14 @@ in each compiled stylesheet.
 Both come out of one pass, deliberately: a page cannot describe a class the
 generated component does not offer, because the same code decides both.
 
+**Vendored code** goes with its component. `Calendar` imports air-datepicker
+from `src/lib/vendor/air-datepicker/` (copied from its repository, see the
+README there). When a source imports `../vendor/…`, its family copies get the
+`vendor/` folder next to them and the import rewritten to `./vendor/…`, so a
+copy still carries everything it needs. The library's own class names
+(`air-datepicker*`) are external, like `.prose`: `calendar.scss` styles them
+from under `.calendar`, it does not own them.
+
 **It fails the build** when a family ships a `.prefix-*` class that the
 component owning `prefix` classifies nowhere — that class is either a variant
 nobody exposed or a part nobody draws, and both need a human.

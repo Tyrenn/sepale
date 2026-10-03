@@ -101,7 +101,7 @@
 		--navbar-fg: var(--color-on-surface);
 		--navbar-border: var(--color-border);
 		--navbar-border-width: var(--border);
-		--navbar-shadow: 0 var(--sf-o) 0 0 var(--sunflower-shadow-color, #000);
+		--navbar-shadow: 0 var(--sf-o) 0 0 var(--color-border);
 		--navbar-h: calc(4em * var(--scale));
 		--navbar-px: calc(1em * var(--scale));
 		--navbar-py: calc(0.5em * var(--scale));

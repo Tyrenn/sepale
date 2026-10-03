@@ -86,9 +86,11 @@
 @mixin look {
 	.file-input {
 		--size: calc(2.5em * var(--scale));
-		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+		/* The resting edge. Set here, before the colour variants, so they
+		   (and the validator) can still recolour it. */
+		--input-color: var(--color-border);
 		--btn-border: transparent;
-		border: var(--border) solid #0000;
+		border: var(--border) solid var(--input-color, #0000);
 		width: clamp(3rem, 20rem, 100%);
 		padding-inline-end: calc(0.75em * var(--scale));
 		font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -166,13 +168,12 @@
 	}
 
 	.file-input {
-		border: var(--border) solid var(--color-border);
+		border: var(--border) solid var(--input-color);
 		border-radius: var(--c3);
 		rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
 	}
 
 	.file-input {
-		--input-color: var(--color-border);
 		background-color: var(--color-surface-1);
 	}
 

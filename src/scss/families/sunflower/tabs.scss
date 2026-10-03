@@ -29,7 +29,7 @@
 	--tabcontent-order / --tabcontent-margin / --tabcontent-radius-*  content panel
 
    External variables (theme / family):
-	--color-surface-1/200/300 / --color-neutral / --color-on-surface
+	--color-surface-1/2/3 / --color-border / --color-on-surface
 	--border / --radius-field / --radius-box
 	--depth               shadow intensity (variant-box active shadow)
 	--fontsize            tab font size (set by size-variants classes)
@@ -415,8 +415,8 @@
 		background-color: var(--tab-bg, var(--color-surface-2));
 		box-shadow:
 			0 1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
-			0 1px 1px -1px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 50%), #0000),
-			0 1px 6px -4px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 100%), #0000);
+			0 1px 1px -1px color-mix(in oklab, var(--color-border) calc(var(--depth) * 50%), #0000),
+			0 1px 6px -4px color-mix(in oklab, var(--color-border) calc(var(--depth) * 100%), #0000);
 	}
 
 	@media (forced-colors: active) {
@@ -461,7 +461,7 @@
 	@media (hover: hover) {
 	.tabs-item:not(.tabs-item-active, :disabled):hover {
 			translate: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5);
-			box-shadow: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5) 0 0 var(--sunflower-shadow-color, #000);
+			box-shadow: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5) 0 0 var(--color-border);
 		}
 	}
 

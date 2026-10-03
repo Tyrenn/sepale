@@ -15,7 +15,7 @@
    where the text sits, how big it is and what it is painted on.
 
    External variables (theme / family):
-	--color-surface-1   the span's ground, so it can hide the field border
+	--color-base-100   the span's ground, so it can hide the field border
 	--size-field        vertical centre of the floated text
    ============================================================ */
 
@@ -50,7 +50,7 @@
 	}
 
 	.floating-label > span {
-		background-color: var(--color-surface-1);
+		background-color: var(--color-base-100);
 		inset-inline-start: calc(0.75em * var(--scale));
 		padding-inline: calc(0.25em * var(--scale));
 		opacity: 0;

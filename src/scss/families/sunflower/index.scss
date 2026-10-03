@@ -1,9 +1,17 @@
 @use 'sass:map';
+/* The colour axis this family ships: neobrutalism.dev's one colour
+   (primary), its `neutral` (the plain sheet), and the two states a
+   form needs. Configured here, on the first load of the shared
+   config, so every component file below loops over these four only:
+   secondary, accent, info and warning variants do not exist here. */
+@use '../../config' with ($color-list: (primary, neutral, success, error));
 @use '../../params';
 @use 'root';
 @use 'badge';
 @use 'breadcrumbs';
+@use 'calendar';
 @use 'card';
+@use 'carousel';
 @use 'button';
 @use 'checkbox';
 @use 'chip';
@@ -19,6 +27,7 @@
 @use 'loading';
 @use 'menu';
 @use 'navbar';
+@use 'pagination';
 @use 'progress';
 @use 'radial-progress';
 @use 'radio';
@@ -46,6 +55,22 @@
    exactly the offset while the shadow shrinks to nothing. That
    one interaction is the whole family.
 
+   Colours, after neobrutalism.dev, which has one colour (--main)
+   on two grounds (--background, --secondary-background), one ink
+   (--foreground) and one line (--border) that also colours the
+   shadow:
+     --color-primary     --main: filled buttons, checked controls,
+                         progress, active tab, picked option
+     --color-surface-2   --secondary-background: the sheet every
+                         field, card, menu and bar is drawn on, and
+                         the `neutral` variant
+     --color-on-surface  --foreground: all text
+     --color-border      --border: every outline AND the hard shadow
+     --color-success / --color-error   validator and the colour axis
+   Derived, not parameters: --color-surface-1 (the page, a wash of
+   primary), --color-surface-3 (a shade of the sheet), and the ink on
+   primary/success/error.
+
    Changes made to fit our contract:
      - The offset is a length in em, not px, so it grows with the
        control instead of looking dainty on a large button and
@@ -64,14 +89,10 @@
 $params: map.merge(
 	params.colors((
 		'color-primary': #ffdc58,
-		'color-border': #000000,
+		'color-surface-2': #ffffff,
 		'color-on-surface': #000000,
-		'color-secondary': #a3e635,
-		'color-accent': #60a5fa,
-		'color-neutral': #000000,
-		'color-info': #7dd3fc,
+		'color-border': #000000,
 		'color-success': #4ade80,
-		'color-warning': #fbbf24,
 		'color-error': #f87171
 	)),
 	(
@@ -99,11 +120,6 @@ $params: map.merge(
 			label: 'Shadow offset', group: 'Effects', type: length,
 			default: 0.25em, min: 0, max: 1, step: 0.025, unit: em, units: (em rem px),
 			help: 'How far the hard shadow sits down and right — and therefore how far a press travels. This is the family.'
-		),
-		'sunflower-shadow-color': (
-			label: 'Shadow colour', group: 'Effects', type: color,
-			default: #000000,
-			help: 'The hard shadow has no blur and no transparency, so its colour is a flat block.'
 		)
 	)
 );
@@ -123,16 +139,20 @@ $params: map.merge(
 	/* Neo-brutalism has ONE colour. neobrutalism.dev ships --main and two
 	   grounds: --background, a pale wash of main that the page sits on, and
 	   --secondary-background, which is the plain sheet every form control,
-	   card and bar is drawn on. So surface-1 is derived from the primary and
-	   is not a parameter, and the other two are the sheet and its shade.
+	   card and bar is drawn on. So surface-1 is derived from the primary,
+	   surface-2 is the sheet (a parameter) and surface-3 its shade.
 
 	   The family is light only. A dark reading of it existed and was dropped:
 	   the look is black ink on bright paper, and inverting it turns the hard
 	   shadow into a halo and the yellow into a highlighter stain. Every theme
 	   here therefore sets `color-scheme: light`. */
 	--color-surface-1: color-mix(in oklab, var(--color-primary) 28%, #ffffff);
-	--color-surface-2: #ffffff;
-	--color-surface-3: #e7e7e7;
+	--color-surface-3: color-mix(in oklab, var(--color-on-surface) 10%, var(--color-surface-2));
+
+	/* `neutral` is neobrutalism.dev's neutral button: the plain sheet
+	   with the ordinary ink, not a dark fill. */
+	--color-neutral: var(--color-surface-2);
+	--color-on-neutral: var(--color-on-surface);
 }
 
 /* The structure of every component first, then the look of every
@@ -141,7 +161,9 @@ $params: map.merge(
 @include badge.structure;
 @include breadcrumbs.structure;
 @include button.structure;
+@include calendar.structure;
 @include card.structure;
+@include carousel.structure;
 @include checkbox.structure;
 @include chip.structure;
 @include dock.structure;
@@ -156,6 +178,7 @@ $params: map.merge(
 @include loading.structure;
 @include menu.structure;
 @include navbar.structure;
+@include pagination.structure;
 @include progress.structure;
 @include radial-progress.structure;
 @include radio.structure;
@@ -172,14 +195,18 @@ $params: map.merge(
 /* Family-wide: recipes and rules that belong to no single component. */
 :where(*) {
 	--sf-o: var(--sunflower-offset, 0.25em);
-	--sf-shadow: var(--sf-o) var(--sf-o) 0 0 var(--sunflower-shadow-color, #000);
+	/* The shadow is drawn in the line colour, as neobrutalism.dev's
+	   --shadow is drawn in --border. */
+	--sf-shadow: var(--sf-o) var(--sf-o) 0 0 var(--color-border);
 }
 
 /* What sunflower decides, one file per component. */
 
 @include badge.look;
 @include breadcrumbs.look;
+@include calendar.look;
 @include card.look;
+@include carousel.look;
 @include button.look;
 @include checkbox.look;
 @include chip.look;
@@ -194,6 +221,7 @@ $params: map.merge(
 @include loading.look;
 @include menu.look;
 @include navbar.look;
+@include pagination.look;
 @include progress.look;
 @include radial-progress.look;
 @include radio.look;

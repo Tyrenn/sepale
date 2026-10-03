@@ -11,7 +11,7 @@
    progress.scss — .progress (linear progress bar)
 
    External variables (theme / family):
-	--color-on-surface  default track/fill color
+	--color-base-content  default track/fill color
 	--color-{variant}     fill color (color-variants)
 	--radius-box          bar corner radius
    ============================================================ */
@@ -25,7 +25,7 @@
 @mixin structure {
 	.progress {
 		border-radius: var(--radius-box);
-		color: var(--color-on-surface);
+		color: var(--color-base-content);
 		position: relative;
 		appearance: none;
 		overflow: hidden;

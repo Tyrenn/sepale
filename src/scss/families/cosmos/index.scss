@@ -3,7 +3,9 @@
 @use 'root';
 @use 'badge';
 @use 'breadcrumbs';
+@use 'calendar';
 @use 'card';
+@use 'carousel';
 @use 'button';
 @use 'checkbox';
 @use 'chip';
@@ -19,6 +21,7 @@
 @use 'loading';
 @use 'menu';
 @use 'navbar';
+@use 'pagination';
 @use 'progress';
 @use 'radial-progress';
 @use 'radio';
@@ -147,7 +150,9 @@ $params: map.merge(
 @include badge.structure;
 @include breadcrumbs.structure;
 @include button.structure;
+@include calendar.structure;
 @include card.structure;
+@include carousel.structure;
 @include checkbox.structure;
 @include chip.structure;
 @include dock.structure;
@@ -162,6 +167,7 @@ $params: map.merge(
 @include loading.structure;
 @include menu.structure;
 @include navbar.structure;
+@include pagination.structure;
 @include progress.structure;
 @include radial-progress.structure;
 @include radio.structure;
@@ -223,7 +229,9 @@ $params: map.merge(
 
 @include badge.look;
 @include breadcrumbs.look;
+@include calendar.look;
 @include card.look;
+@include carousel.look;
 @include button.look;
 @include checkbox.look;
 @include chip.look;
@@ -238,6 +246,7 @@ $params: map.merge(
 @include loading.look;
 @include menu.look;
 @include navbar.look;
+@include pagination.look;
 @include progress.look;
 @include radial-progress.look;
 @include radio.look;

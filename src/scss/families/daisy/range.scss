@@ -28,8 +28,8 @@
 	--fontsize            font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1        default thumb background
-	--color-{variant} / --color-on-{variant}  track / thumb colors (color-variants)
+	--color-base-100        default thumb background
+	--color-{variant} / --color-{variant}-content  track / thumb colors (color-variants)
 	--radius-selector       thumb and track corner radius
 	--depth                 shadow intensity multiplier
 	--shadow-light          family shadow system
@@ -43,7 +43,7 @@
 
 @mixin structure {
 	.range {
-		--range-thumb: var(--color-surface-1);
+		--range-thumb: var(--color-base-100);
 		/* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
 		appearance: none;
 		-webkit-appearance: none;
@@ -164,7 +164,7 @@
 	@each $color in c.$color-list {
 		.range-#{$color} {
 			color: var(--color-#{$color});
-			--range-thumb: var(--color-on-#{$color});
+			--range-thumb: var(--color-#{$color}-content);
 		}
 	}
 

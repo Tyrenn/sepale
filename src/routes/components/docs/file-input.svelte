@@ -34,6 +34,28 @@
 					type: "FileList | null",
 					default: "$bindable<FileList | null>(null)",
 					description: "The chosen files. Bindable."
+				},
+				{
+					name: "error",
+					type: "string | null",
+					description: "An error from outside — the server said no. Marks the field invalid and shows the text under it, before any `hint`, for as long as it is given: the parent owns it and clears it."
+				},
+				{
+					name: "invalid",
+					type: "string | false",
+					default: "$bindable(false)",
+					description: "The message of the last check, `false` when the field passed. Written by `isValid()` and, with `validator`, on blur. The text is the browser's own `validationMessage`, in the visitor's language."
+				},
+				{
+					name: "element",
+					type: "HTMLInputElement",
+					default: "$bindable()",
+					description: "The native field. Bindable."
+				},
+				{
+					name: "isValid() / clear()",
+					type: "methods",
+					description: "Through `bind:this`: check the field now; drop the chosen files."
 				}
 			]
 		}
@@ -70,4 +92,18 @@
 		<FileInput size="sm" />
 		<FileInput />
 		<FileInput size="lg" />
+	</Section>
+
+	<Section
+		title="Validation"
+		subtitle="`required` and `accept` are the browser's; `error` forces a message."
+		svelte={`<FileInput required validator accept="image/*" />
+<FileInput error="The server refused this file" />`}
+	>
+		<div style="display:flex; flex-direction:column; gap:.5rem;">
+			<FileInput required validator accept="image/*" />
+		</div>
+		<div style="display:flex; flex-direction:column; gap:.5rem;">
+			<FileInput error="The server refused this file" />
+		</div>
 	</Section>

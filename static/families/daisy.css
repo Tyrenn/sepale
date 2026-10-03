@@ -45,6 +45,22 @@
    under whatever names it wants, and gets labels and help text
    for the ones this table knows. Unknown names still work, they
    just get their raw name as a label.
+
+   Each known name also says two things the editor needs and can
+   not guess from a name:
+
+     kind  surface | accent | ink — a ground things rest on, a
+           colour things are painted with, or the text and lines
+           drawn over both. The editor lays surfaces out first.
+     on    the variable holding the ink written on this colour.
+           It may be a parameter of the family (daisy's
+           --color-primary-content) or a value the family derives
+           itself (--color-on-primary): the editor shows an
+           editable tile for the first, a contrast check for the
+           second. A surface names its ink in the table; for an
+           accent it follows the family's convention, passed as
+           `$ink`: `on` gives --color-on-<name>, `content` gives
+           --color-<name>-content (daisyUI).
    ------------------------------------------------------------ */
 /* ============================================================
    daisy — the root.
@@ -82,11 +98,11 @@ svg {
 :root,
 [data-theme] {
   background: var(--page-scroll-bg, var(--root-bg));
-  color: var(--color-on-surface);
+  color: var(--color-base-content);
 }
 
 :where(:root, [data-theme]) {
-  --root-bg: var(--color-surface-1);
+  --root-bg: var(--color-base-100);
 }
 
 /* ── rootscroll ── */
@@ -190,51 +206,19 @@ svg {
 }
 
 /* ============================================================
-   derived colours — the automatic `--color-on-*`, plus the default
-   border color.
-
-   A theme sets surfaces and semantic colors; what is written *on*
-   them is derived from the seed with the relative color syntax. The lightness flips around a threshold — a light
-   seed gets near-black text, a dark seed gets near-white — while
-   keeping a whisper of the seed's hue.
-
-     clamp(0.145, (0.66 - l) * 999, 0.97)
-		l > 0.66  →  negative  →  clamps to 0.145 (dark text)
-		l < 0.66  →  huge      →  clamps to 0.97  (light text)
-
-   Declared on :where(:root) (zero specificity) so a theme's :root
-   can still override any of them explicitly if it wants to.
+   No derived colours. daisyUI makes every ink a theme variable
+   (--color-base-content, --color-primary-content, …) and so does
+   daisy: a theme supplies all twenty colours, the family computes
+   none of them. Borders are a mix of --color-base-content, written
+   where each component draws one, as daisyUI does.
    ============================================================ */
-:where(:root) {
-  --color-on-surface: oklch(from var(--color-surface-1) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h);
-  /* Borders are almost always a wash of the text color over the surface.
-     Derived so a theme has only three surfaces to supply — but a theme
-     (or a family like wireframe) can still set --color-border outright. */
-  --color-border: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
-  --color-on-primary: oklch(
-  	from var(--color-primary) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-secondary: oklch(
-  	from var(--color-secondary) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-accent: oklch(
-  	from var(--color-accent) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-neutral: oklch(
-  	from var(--color-neutral) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-info: oklch(
-  	from var(--color-info) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-success: oklch(
-  	from var(--color-success) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-warning: oklch(
-  	from var(--color-warning) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
-  --color-on-error: oklch(
-  	from var(--color-error) clamp(0.145, (0.66 - l) * 999, 0.97) calc(c * 0.15) h
-  );
+/* ── noise ──
+   daisyUI's grain: a fractal-noise SVG that buttons, badges,
+   checkboxes, radios, toggles, file buttons and the active menu item
+   lay over their fill, sized `calc(var(--noise) * 100%)` — so
+   --noise: 0 collapses it to nothing. */
+:root {
+  --fx-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.34' numOctaves='4' stitchTiles='stitch'%3E%3C/feTurbulence%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23a)' opacity='0.2'%3E%3C/rect%3E%3C/svg%3E");
 }
 
 /* daisy — badge.
@@ -273,6 +257,69 @@ svg {
 /* ------------------------------------------------------------
    structure — scrollable list of items with chevron separators.
    ------------------------------------------------------------ */
+/* daisy — calendar.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   calendar.scss — .calendar
+
+   A date picker. The calendar itself is drawn by air-datepicker
+   (vendored in src/lib/vendor/air-datepicker), whose DOM and class
+   names are its own: `.air-datepicker`, `.air-datepicker-cell`,
+   `.-selected-`… Those classes are NOT ours (ADR 0009) — this file
+   only reaches into them, always from under `.calendar`, the one
+   class we own. Without a `.calendar` ancestor nothing here applies,
+   so the library can live on the page beside anything else.
+
+   The DOM, either way:
+
+     <div class="calendar calendar-primary">        inline
+       <div class="air-datepicker -inline-">…</div>
+     </div>
+
+     <div class="calendar">                         popup
+       <input class="input" />
+       <div class="air-datepicker -active- -bottom-left-">…</div>
+     </div>
+
+   In popup mode the picker is appended to the `.calendar` element
+   (air-datepicker's `container` option) rather than to <body>, and
+   placed against it: `.calendar` is the positioned box.
+
+   The library's own stylesheet is not used: the layout below is a
+   rewrite of it in em, so the calendar scales with its font size.
+
+   Axes:  color (the selected day, the range), size
+
+   Plumbing contract (the family fills these on `.calendar`):
+	--calendar-bg / -fg       ground and ink of the picker
+	--calendar-border         edge colour
+	--calendar-border-width   edge width (0 = none)
+	--calendar-radius         corner radius of the picker
+	--calendar-shadow         shadow of the picker when it pops up
+	--calendar-inline-shadow  shadow of an inline picker
+	--calendar-p              inner padding
+	--calendar-gap            space between navigation, days, buttons
+	--calendar-cell           height and width of a day
+	--calendar-cell-radius    corner radius of a day
+	--calendar-accent         fill of a selected day (color axis)
+	--calendar-accent-fg      ink on it
+	--calendar-current        ink of today
+	--calendar-muted          days of another month, secondary text
+	--calendar-hover-bg       ground under the pointer / keyboard focus
+	--calendar-range-bg       ground of the days inside a range
+	--calendar-day-name-fg    ink of the weekday names
+	--calendar-title-weight   weight of the month title
+	--calendar-z              stacking of a popup
+	--fontsize                font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   structure — the box, the navigation, the grids, the day states,
+   the buttons and the time picker.
+   ------------------------------------------------------------ */
 /* daisy — card.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism (layout, states,
@@ -308,6 +355,48 @@ svg {
 /* ------------------------------------------------------------
    structure — the box, its parts, and the layout flags.
    ------------------------------------------------------------ */
+/* daisy — carousel.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   carousel.scss — .carousel
+
+   A row of slides that scrolls and snaps — natively, so touch,
+   trackpad and keyboard scrolling come for free — with optional
+   arrows over it and an optional pagination under it.
+
+   The root is a grid. The track sits in the first cell, and the two
+   arrows are laid over that SAME cell, at its start and end, so they
+   are centred on the slides whatever sits under them. The pagination
+   takes the next row.
+
+   Parts:   .carousel-track       the scrolling, snapping row
+            .carousel-item        one slide
+            .carousel-prev/next   the cells the arrows are drawn in
+            .carousel-pagination  the cell the pagination is drawn in
+   Axes:    align (where a slide snaps: start, center, end)
+   Flags:   vertical
+
+   A slide is as wide as the track. Several at once: set
+   `--carousel-item-width` (a length or a percentage) on the root.
+
+   Plumbing contract (the family fills these on `.carousel`):
+	--carousel-gap          space between the track and the pagination
+	--carousel-item-gap     space between slides
+	--carousel-item-width   width of a slide (default 100%)
+	--carousel-height       height of a vertical carousel
+	--carousel-radius       corner radius of the track
+	--carousel-border       the track's border (a `border` value)
+	--carousel-shadow       the track's box-shadow
+	--carousel-rotate       resting angle of the track
+	--carousel-arrow-inset  distance of the arrows from the edges
+   ============================================================ */
+/* ------------------------------------------------------------
+   structure — the grid, the snapping track, the overlaid arrows.
+   ------------------------------------------------------------ */
 /* daisy — button.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism (layout, states,
@@ -329,9 +418,9 @@ svg {
 	--fontsize     font size (set by `size-variants` classes)
 
    External variables (theme / family):
-	--color-surface-2          default button background
-	--color-on-surface      default text color
-	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
+	--color-base-200          default button background
+	--color-base-content      default text color
+	--color-{variant} / --color-{variant}-content  semantic colors (primary, secondary, …)
 	--radius-field            corner radius
 	--border                  border width (px value)
 	--shadow-light            family shadow system (see _root.scss)
@@ -362,8 +451,8 @@ svg {
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-on-surface       default checkmark color
-	--color-{variant} / --color-on-{variant}  fill / mark colors (color-variants)
+	--color-base-content       default checkmark color
+	--color-{variant} / --color-{variant}-content  fill / mark colors (color-variants)
 	--border / --radius-selector
 	--shadow-light             family shadow system
    ============================================================ */
@@ -389,8 +478,8 @@ svg {
 	--fontsize    font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1 / --color-surface-2 / --color-on-surface
-	--color-{variant} / --color-on-{variant}  seed / text colors (color-variants)
+	--color-base-100 / --color-base-200 / --color-base-content
+	--color-{variant} / --color-{variant}-content  seed / text colors (color-variants)
 	--border / --radius-selector
 	--shadow-light          family shadow system
    ============================================================ */
@@ -407,8 +496,8 @@ svg {
    dock.scss — .dock (fixed bottom navigation bar)
 
    External variables (theme / family):
-	--color-surface-3  dock background (the most raised surface)
-	--color-on-surface  disabled item text color mix
+	--color-base-100  dock background (as in daisyUI)
+	--color-base-content  disabled item text color mix
 	--radius-box          item corner radius
    ============================================================ */
 /* ------------------------------------------------------------
@@ -424,7 +513,7 @@ svg {
    fieldset.scss — .fieldset (form field group)
 
    External variables (theme / family):
-	--color-on-surface   legend and label text color
+	--color-base-content   legend and label text color
    ============================================================ */
 /* ------------------------------------------------------------
    structure — grid container + legend (+ deprecated .fieldset-label).
@@ -445,7 +534,7 @@ svg {
    where the text sits, how big it is and what it is painted on.
 
    External variables (theme / family):
-	--color-surface-1   the span's ground, so it can hide the field border
+	--color-base-100   the span's ground, so it can hide the field border
 	--size-field        vertical centre of the floated text
    ============================================================ */
 /* daisy — file-input.
@@ -468,8 +557,8 @@ svg {
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1 / --color-surface-2 / --color-on-surface
-	--color-{variant} / --color-on-{variant}  semantic colors (color-variants)
+	--color-base-100 / --color-base-200 / --color-base-content
+	--color-{variant} / --color-{variant}-content  semantic colors (color-variants)
 	--border / --radius-field
 	--shadow-light          family shadow system
 
@@ -492,15 +581,15 @@ svg {
 
    Plumbing contract:
 	--input-color   resolved border/accent color — structure defaults it to a
-	                faint on-surface mix, color-variants override it,
-	                focus resets it to on-surface
+	                faint base-content mix, color-variants override it,
+	                focus resets it to base-content
 	--size          field height (2.5em × --scale, scales with font)
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1        field background
-	--color-surface-2        disabled background and border
-	--color-on-surface    default text color
+	--color-base-100        field background
+	--color-base-200        disabled background and border
+	--color-base-content    default text color
 	--color-{variant}       semantic accent (set by color-variants)
 	--border                border width
 	--radius-field          field corner radius
@@ -548,7 +637,7 @@ svg {
    label.scss — .label / .floating-label
 
    External variables (theme / family):
-	--color-surface-1   floating label background (hides the field border)
+	--color-base-100   floating label background (hides the field border)
 	--border           inline divider width inside .input / .select
 	--size-field       floating label vertical center position
    ============================================================ */
@@ -582,7 +671,7 @@ svg {
 	--fontsize         font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-base-100 / --color-base-200 / --color-base-content
 	--color-primary         selected suggestion highlight
 	--border / --radius-box / --radius-field
 	--shadow-light          family shadow system
@@ -710,6 +799,43 @@ svg {
 /* ------------------------------------------------------------
    structure — the bar, its three zones, and the sticky flag.
    ------------------------------------------------------------ */
+/* daisy — pagination.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   pagination.scss — .pagination
+
+   A row of pages to jump between: numbers, a gap where pages are
+   skipped, and optional previous / next controls. The current page
+   is marked by `aria-current="page"`, not by a class: the state is
+   the accessibility attribute, so it cannot drift from it.
+
+   Parts:   .pagination-item   one page, or a previous / next control
+            .pagination-gap    the "…" standing for skipped pages
+   Axes:    color (the current page), size, variant (dots: the
+            numbers become dots, as under a carousel)
+
+   Plumbing contract (the family fills these on `.pagination`):
+	--pagination-color         fill of the current page
+	--pagination-fg            ink on the current page
+	--pagination-item-bg       fill of the other pages
+	--pagination-item-fg       their ink
+	--pagination-item-border   their edge colour
+	--pagination-hover-bg      fill under the pointer
+	--pagination-border-width  edge width (0 = none)
+	--pagination-radius        corner radius of a page
+	--pagination-shadow        box-shadow of a page
+	--pagination-size          height and minimum width of a page
+	--pagination-dot           diameter of a dot (variant dots)
+	--pagination-gap           space between pages
+	--fontsize                 font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   structure — the row, its pages, the current page, the dots.
+   ------------------------------------------------------------ */
 /* daisy — progress.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism (layout, states,
@@ -720,7 +846,7 @@ svg {
    progress.scss — .progress (linear progress bar)
 
    External variables (theme / family):
-	--color-on-surface  default track/fill color
+	--color-base-content  default track/fill color
 	--color-{variant}     fill color (color-variants)
 	--radius-box          bar corner radius
    ============================================================ */
@@ -766,7 +892,7 @@ svg {
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1        background when checked
+	--color-base-100        background when checked
 	--color-{variant}       accent color (color-variants)
 	--border
    ============================================================ */
@@ -800,8 +926,8 @@ svg {
 	--fontsize            font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1        default thumb background
-	--color-{variant} / --color-on-{variant}  track / thumb colors (color-variants)
+	--color-base-100        default thumb background
+	--color-{variant} / --color-{variant}-content  track / thumb colors (color-variants)
 	--radius-selector       thumb and track corner radius
 	--depth                 shadow intensity multiplier
 	--shadow-light          family shadow system
@@ -825,10 +951,10 @@ svg {
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1        field background
-	--color-surface-2        disabled background and border
-	--color-on-surface    default text color
-	--color-neutral / --color-on-neutral   active option highlight
+	--color-base-100        field background
+	--color-base-200        disabled background and border
+	--color-base-content    default text color
+	--color-neutral / --color-neutral-content   active option highlight
 	--color-{variant}       semantic accent (set by color-variants)
 	--border                border width
 	--radius-field          field corner radius
@@ -853,9 +979,9 @@ svg {
    skeleton.scss — .skeleton (loading placeholder)
 
    External variables (theme / family):
-	--color-surface-1      shimmer highlight color
-	--color-surface-2      skeleton base background
-	--color-on-surface  .skeleton-text shimmer
+	--color-base-100      shimmer highlight color
+	--color-base-300      skeleton base background (as in daisyUI)
+	--color-base-content  .skeleton-text shimmer
 	--radius-box          corner radius
    ============================================================ */
 /* ------------------------------------------------------------
@@ -881,10 +1007,11 @@ svg {
    painted as a flat layer over a checkerboard the family supplies in
    `--swatch-checks`.
 
-   What is written on it is an on-color: a family derives
-   `--swatch-on-color` from `--swatch-color` the same way
-   `--color-on-*` is derived from a surface, so a letter stays legible
-   on a colour nobody knew at authoring time.
+   What is written on it is derived: `--swatch-on-color` flips
+   between near-black and near-white with the lightness of
+   `--swatch-color`, so a letter stays legible on a colour nobody knew
+   at authoring time. (The theme's own inks, --color-*-content, are
+   parameters; a swatch shows an arbitrary colour, so it computes.)
 
    Plumbing contract:
 	--swatch-color        the sample itself (author-set, required)
@@ -929,7 +1056,7 @@ svg {
 	--tabcontent-order / --tabcontent-margin / --tabcontent-radius-*  content panel
 
    External variables (theme / family):
-	--color-surface-1/200/300 / --color-neutral / --color-on-surface
+	--color-base-100/200/300 / --color-neutral / --color-base-content
 	--border / --radius-field / --radius-box
 	--depth               shadow intensity (variant-box active shadow)
 	--fontsize            tab font size (set by size-variants classes)
@@ -995,7 +1122,7 @@ svg {
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-base-100 / --color-base-200 / --color-base-content
 	--color-{variant}       semantic accent (set by color-variants)
 	--border / --radius-field
 	--depth                 flat-skin inset intensity (skin-flat only)
@@ -1022,8 +1149,8 @@ svg {
 	--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) error
 
    External variables (theme / family):
-	--color-surface-1        track background when checked
-	--color-on-surface    thumb color when checked
+	--color-base-100        track background when checked
+	--color-base-content    thumb color when checked
 	--color-{variant}       checked color (color-variants)
 	--border                border width — MUST carry a unit (0px, not 0):
 	                        it is summed with lengths in the width calc()
@@ -1073,8 +1200,9 @@ svg {
 
    Variable ownership
    ------------------
-   - FAMILY-OWNED look variables are set on `:root` here (borders,
-     family's identity and are not meant to be themed.
+   - FAMILY-OWNED look variables are set on `:root` here (the
+     light-shadow switches): they are the family's identity and are
+     not meant to be themed.
    - THEMEABLE variables (colors, radii) get family fallbacks on
      `:where(:root)` (specificity 0) so a theme's `:root` rules
      always win, in any load order.
@@ -1083,26 +1211,34 @@ svg {
    --------------------
    Heavily inspired by DaisyUI v5 (https://github.com/saadeghi/daisyui),
    in plain CSS — no Tailwind, no `@apply`. Same class names (`btn`,
-   `btn-primary`, `input`, `badge`, …) and same look, so the markup is
-   interchangeable — but NOT the theme: our variables carry our own
-   names (--color-surface-1 / --color-on-surface / --color-border, see
-   CONTEXT.md), so a DaisyUI theme pasted as-is will not apply.
+   `btn-primary`, `input`, `badge`, …), same look, and the SAME THEME
+   VARIABLES: a daisyUI theme pasted as-is applies. Each colour also
+   paints the same places it paints in daisyUI.
 
    Characteristics:
-     - Truly flat aesthetic: crisp 1px borders, NO elevation. Both the
-       retro 3D depth (--depth) and the soft directional shadow
-       (--light-intensity) are OFF — this matches DaisyUI's default
-       light/coffee themes exactly (depth 0, no shadow).
+     - Flat: crisp borders, no elevation. --depth adds daisyUI's
+       subtle 3D edge to fields and selectors, --noise its grain.
      - Intrinsic em-based sizing: components scale with `font-size`;
        size variants only set `--fontsize`. No breakpoints.
 
-   Theme variables consumed (see also each component's header)
-   -----------------------------------------------------------
-     --color-surface-1/200/300    surfaces (page, raised, sunken)
-     --color-on-surface        default foreground color
-     --color-{semantic} / --color-on-{semantic} primary/secondary/accent/neutral/
-                                  info/success/warning/error + fg
-     --radius-field/box/selector corner radii (fields / boxes / selectors)
+   Changes made to fit our contract:
+     - --size-field and --size-selector are not parameters: daisyUI
+       sizes fields in rem from those two, daisy sizes them in em and
+       grows the frames with --scale instead.
+     - Breakpoint-prefixed classes (`sm:btn-lg`) do not exist: a
+       component scales with its font size, not with the viewport.
+
+   Theme variables (daisyUI's, one for one)
+   ----------------------------------------
+     --color-base-100/200/300      the page, then one and two steps darker
+     --color-base-content          text on the bases; field borders are
+                                   a mix of it
+     --color-{semantic}            primary/secondary/accent/neutral/
+     --color-{semantic}-content    info/success/warning/error, and the
+                                   text written on each
+     --radius-selector/field/box   corner radii
+     --border                      border width
+     --depth / --noise             3D edge and grain, 0 or 1
 
    Build: compiled to static/families/daisy.css by `npm run build:css`.
    ============================================================ */
@@ -1110,26 +1246,36 @@ svg {
    wins, and declared once here so the configurator and the Families
    page read the same source. */
 :where(:root) {
-  --color-surface-1: oklch(100% 0 0deg);
-  --color-surface-2: oklch(96% 0 0deg);
-  --color-surface-3: oklch(92% 0 0deg);
-  --color-primary: oklch(55% 0.21 264deg);
-  --color-secondary: oklch(60% 0.2 330deg);
-  --color-accent: oklch(65% 0.18 165deg);
-  --color-neutral: oklch(28% 0.01 285deg);
-  --color-info: oklch(70% 0.13 230deg);
-  --color-success: oklch(72% 0.16 145deg);
-  --color-warning: oklch(80% 0.15 85deg);
-  --color-error: oklch(63% 0.22 25deg);
+  --color-base-100: oklch(100% 0 0deg);
+  --color-base-200: oklch(98% 0 0deg);
+  --color-base-300: oklch(95% 0 0deg);
+  --color-base-content: oklch(21% 0.006 285.885deg);
+  --color-primary: oklch(45% 0.24 277.023deg);
+  --color-primary-content: oklch(93% 0.034 272.788deg);
+  --color-secondary: oklch(65% 0.241 354.308deg);
+  --color-secondary-content: oklch(94% 0.028 342.258deg);
+  --color-accent: oklch(77% 0.152 181.912deg);
+  --color-accent-content: oklch(38% 0.063 188.416deg);
+  --color-neutral: oklch(14% 0.005 285.823deg);
+  --color-neutral-content: oklch(92% 0.004 286.32deg);
+  --color-info: oklch(74% 0.16 232.661deg);
+  --color-info-content: oklch(29% 0.066 243.157deg);
+  --color-success: oklch(76% 0.177 163.223deg);
+  --color-success-content: oklch(37% 0.077 168.94deg);
+  --color-warning: oklch(82% 0.189 84.429deg);
+  --color-warning-content: oklch(41% 0.112 45.904deg);
+  --color-error: oklch(71% 0.194 13.428deg);
+  --color-error-content: oklch(27% 0.105 12.094deg);
   --radius-field: 0.25rem;
   --radius-box: 0.5rem;
   --radius-selector: 0.5rem;
   --border: 1px;
   --scale: 1;
   --depth: 1;
+  --noise: 0;
 }
 
-/*! uu-params [{"name":"color-surface-1","label":"Surface 1","group":"Colors","type":"color","value":"oklch(100% 0 0deg)","description":"The ground: page background, and the inside of fields."},{"name":"color-surface-2","label":"Surface 2","group":"Colors","type":"color","value":"oklch(96% 0 0deg)","description":"Objects resting on the ground: plain buttons, chips, skeletons."},{"name":"color-surface-3","label":"Surface 3","group":"Colors","type":"color","value":"oklch(92% 0 0deg)","description":"Chrome pinned to the edge of the screen: dock, navbar."},{"name":"color-primary","label":"Primary","group":"Colors","type":"color","value":"oklch(55% 0.21 264deg)","description":"Main brand and action colour."},{"name":"color-secondary","label":"Secondary","group":"Colors","type":"color","value":"oklch(60% 0.2 330deg)","description":"Secondary brand colour."},{"name":"color-accent","label":"Accent","group":"Colors","type":"color","value":"oklch(65% 0.18 165deg)","description":"Accent and highlight colour."},{"name":"color-neutral","label":"Neutral","group":"Colors","type":"color","value":"oklch(28% 0.01 285deg)","description":"Strong neutral tone for filled, unbranded elements."},{"name":"color-info","label":"Info","group":"Colors","type":"color","value":"oklch(70% 0.13 230deg)","description":"Informational state."},{"name":"color-success","label":"Success","group":"Colors","type":"color","value":"oklch(72% 0.16 145deg)","description":"Success state."},{"name":"color-warning","label":"Warning","group":"Colors","type":"color","value":"oklch(80% 0.15 85deg)","description":"Warning state."},{"name":"color-error","label":"Error","group":"Colors","type":"color","value":"oklch(63% 0.22 25deg)","description":"Error and danger state."},{"name":"radius-field","label":"Field radius","group":"Shape","type":"length","value":"0.25rem","description":"Corner radius of fields: buttons, inputs, selects.","min":0,"max":2,"step":0.05,"unit":"rem","units":["px","rem","em","ch"]},{"name":"radius-box","label":"Box radius","group":"Shape","type":"length","value":"0.5rem","description":"Corner radius of larger boxes: lists, dropdowns.","min":0,"max":3,"step":0.05,"unit":"rem","units":["px","rem","em","ch"]},{"name":"radius-selector","label":"Selector radius","group":"Shape","type":"length","value":"0.5rem","description":"Corner radius of selectors: checkboxes, toggles, tabs.","min":0,"max":2,"step":0.05,"unit":"rem","units":["px","rem","em","ch"]},{"name":"border","label":"Border width","group":"Shape","type":"length","value":"1px","description":"Width of component borders.","min":0,"max":3,"step":0.5,"unit":"px","units":["px","rem","em","ch"]},{"name":"scale","label":"Element size","group":"Size","type":"number","value":"1","description":"Grows every frame - paddings, heights, spacing. Text is unaffected.","min":0.75,"max":2,"step":0.05},{"name":"depth","label":"Depth","group":"Effects","type":"number","value":"1","description":"Subtle 3D depth on fields and selectors. Faithful to daisyUI, which means almost invisible on a dark theme.","min":0,"max":1,"step":0.05}] */
+/*! uu-params [{"name":"color-base-100","label":"Base 100","group":"Colors","type":"color","value":"oklch(100% 0 0deg)","description":"The page, and the inside of fields, cards and menus.","kind":"surface","on":"color-base-content"},{"name":"color-base-200","label":"Base 200","group":"Colors","type":"color","value":"oklch(98% 0 0deg)","description":"A step darker: plain buttons, badges, card borders.","kind":"surface","on":"color-base-content"},{"name":"color-base-300","label":"Base 300","group":"Colors","type":"color","value":"oklch(95% 0 0deg)","description":"Two steps darker: the dock, tab borders, skeletons.","kind":"surface","on":"color-base-content"},{"name":"color-base-content","label":"Base content","group":"Colors","type":"color","value":"oklch(21% 0.006 285.885deg)","description":"Text on the bases — and, mixed down, every field border.","kind":"ink"},{"name":"color-primary","label":"Primary","group":"Colors","type":"color","value":"oklch(45% 0.24 277.023deg)","description":"Main brand and action colour.","kind":"accent","on":"color-primary-content"},{"name":"color-primary-content","label":"Primary content","group":"Colors","type":"color","value":"oklch(93% 0.034 272.788deg)","description":"Text on primary.","kind":"ink"},{"name":"color-secondary","label":"Secondary","group":"Colors","type":"color","value":"oklch(65% 0.241 354.308deg)","description":"Secondary brand colour.","kind":"accent","on":"color-secondary-content"},{"name":"color-secondary-content","label":"Secondary content","group":"Colors","type":"color","value":"oklch(94% 0.028 342.258deg)","description":"Text on secondary.","kind":"ink"},{"name":"color-accent","label":"Accent","group":"Colors","type":"color","value":"oklch(77% 0.152 181.912deg)","description":"Accent and highlight colour.","kind":"accent","on":"color-accent-content"},{"name":"color-accent-content","label":"Accent content","group":"Colors","type":"color","value":"oklch(38% 0.063 188.416deg)","description":"Text on accent.","kind":"ink"},{"name":"color-neutral","label":"Neutral","group":"Colors","type":"color","value":"oklch(14% 0.005 285.823deg)","description":"Strong neutral tone for filled, unbranded elements.","kind":"accent","on":"color-neutral-content"},{"name":"color-neutral-content","label":"Neutral content","group":"Colors","type":"color","value":"oklch(92% 0.004 286.32deg)","description":"Text on neutral.","kind":"ink"},{"name":"color-info","label":"Info","group":"Colors","type":"color","value":"oklch(74% 0.16 232.661deg)","description":"Informational state.","kind":"accent","on":"color-info-content"},{"name":"color-info-content","label":"Info content","group":"Colors","type":"color","value":"oklch(29% 0.066 243.157deg)","description":"Text on info.","kind":"ink"},{"name":"color-success","label":"Success","group":"Colors","type":"color","value":"oklch(76% 0.177 163.223deg)","description":"Success state.","kind":"accent","on":"color-success-content"},{"name":"color-success-content","label":"Success content","group":"Colors","type":"color","value":"oklch(37% 0.077 168.94deg)","description":"Text on success.","kind":"ink"},{"name":"color-warning","label":"Warning","group":"Colors","type":"color","value":"oklch(82% 0.189 84.429deg)","description":"Warning state.","kind":"accent","on":"color-warning-content"},{"name":"color-warning-content","label":"Warning content","group":"Colors","type":"color","value":"oklch(41% 0.112 45.904deg)","description":"Text on warning.","kind":"ink"},{"name":"color-error","label":"Error","group":"Colors","type":"color","value":"oklch(71% 0.194 13.428deg)","description":"Error and danger state.","kind":"accent","on":"color-error-content"},{"name":"color-error-content","label":"Error content","group":"Colors","type":"color","value":"oklch(27% 0.105 12.094deg)","description":"Text on error.","kind":"ink"},{"name":"radius-field","label":"Field radius","group":"Shape","type":"length","value":"0.25rem","description":"Corner radius of fields: buttons, inputs, selects.","min":0,"max":2,"step":0.05,"unit":"rem","units":["px","rem","em","ch"]},{"name":"radius-box","label":"Box radius","group":"Shape","type":"length","value":"0.5rem","description":"Corner radius of larger boxes: lists, dropdowns.","min":0,"max":3,"step":0.05,"unit":"rem","units":["px","rem","em","ch"]},{"name":"radius-selector","label":"Selector radius","group":"Shape","type":"length","value":"0.5rem","description":"Corner radius of selectors: checkboxes, toggles, tabs.","min":0,"max":2,"step":0.05,"unit":"rem","units":["px","rem","em","ch"]},{"name":"border","label":"Border width","group":"Shape","type":"length","value":"1px","description":"Width of component borders.","min":0,"max":3,"step":0.5,"unit":"px","units":["px","rem","em","ch"]},{"name":"scale","label":"Element size","group":"Size","type":"number","value":"1","description":"Grows every frame - paddings, heights, spacing. Text is unaffected.","min":0.75,"max":2,"step":0.05},{"name":"depth","label":"Depth","group":"Effects","type":"number","value":"1","description":"Subtle 3D depth on fields and selectors. Faithful to daisyUI, which means almost invisible on a dark theme.","min":0,"max":1,"step":0.05},{"name":"noise","label":"Noise","group":"Effects","type":"number","value":"0","description":"A grain texture on buttons, badges, checkboxes, radios, toggles and the active menu item.","min":0,"max":1,"step":1}] */
 /* Family-owned look. */
 :root {
   --light-intensity: 0; /* no directional shadow */
@@ -1196,8 +1342,8 @@ svg {
 /* btn links inside prose: no underline */
 .btn {
   /* Internal variables — neutral defaults, skins re-assign */
-  --btn-bg: var(--btn-color, var(--color-surface-2));
-  --btn-fg: var(--color-on-surface);
+  --btn-bg: var(--btn-color, var(--color-base-200));
+  --btn-fg: var(--color-base-content);
   /* daisyUI ships 1rem — half of this was an outlier */
   --btn-shadow: var(--shadow-light, );
   /* Layout */
@@ -1226,7 +1372,7 @@ svg {
   border-end-start-radius: var(--join-es, var(--radius-field));
   border-end-end-radius: var(--join-ee, var(--radius-field));
   /* Outline */
-  outline-color: var(--btn-color, var(--color-on-surface));
+  outline-color: var(--btn-color, var(--color-base-content));
   /* Transition */
   /* Other */
   cursor: pointer;
@@ -1250,7 +1396,7 @@ svg {
 /* Checked checkbox/radio: seed the primary color */
 .btn:where(input:checked) {
   --btn-color: var(--color-primary);
-  --btn-fg: var(--color-on-primary);
+  --btn-fg: var(--color-primary-content);
   isolation: isolate;
 }
 
@@ -1259,6 +1405,430 @@ svg {
 .btn:disabled,
 .btn[disabled] {
   pointer-events: none;
+}
+
+.calendar {
+  position: relative;
+  display: inline-block;
+  vertical-align: top;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+/* ── The picker ── */
+.calendar .air-datepicker {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(4, max-content);
+  grid-template-areas: "nav" "body" "timepicker" "buttons";
+  gap: var(--calendar-gap);
+  /* Seven days wide, whatever the font size. */
+  width: calc(var(--calendar-cell) * 7 + var(--calendar-p) * 2 + var(--calendar-border-width) * 2);
+  padding: var(--calendar-p);
+  color: var(--calendar-fg);
+  background-color: var(--calendar-bg);
+  border: var(--calendar-border-width) solid var(--calendar-border);
+  border-radius: var(--calendar-radius);
+  box-shadow: var(--calendar-shadow);
+  font: inherit;
+  position: absolute;
+  z-index: var(--calendar-z, 20);
+  transition: opacity 0.2s ease-out, translate 0.2s ease-out;
+}
+
+.calendar .air-datepicker:not(.-custom-position-) {
+  opacity: 0;
+}
+
+.calendar .air-datepicker.-from-top- {
+  translate: 0 -0.5em;
+}
+
+.calendar .air-datepicker.-from-right- {
+  translate: 0.5em 0;
+}
+
+.calendar .air-datepicker.-from-bottom- {
+  translate: 0 0.5em;
+}
+
+.calendar .air-datepicker.-from-left- {
+  translate: -0.5em 0;
+}
+
+.calendar .air-datepicker.-active-:not(.-custom-position-) {
+  opacity: 1;
+  translate: none;
+}
+
+.calendar .air-datepicker.-inline- {
+  position: static;
+  opacity: 1;
+  translate: none;
+  box-shadow: var(--calendar-inline-shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calendar .air-datepicker {
+    transition: none;
+  }
+}
+/* The little arrow pointing at the field: not drawn. */
+.calendar .air-datepicker--pointer {
+  display: none;
+}
+
+.calendar .air-datepicker--navigation {
+  grid-area: nav;
+}
+
+.calendar .air-datepicker--content {
+  grid-area: body;
+}
+
+.calendar .air-datepicker--time {
+  grid-area: timepicker;
+}
+
+.calendar .air-datepicker--buttons {
+  grid-area: buttons;
+}
+
+.calendar .-only-timepicker- .air-datepicker-nav {
+  display: none;
+}
+
+/* ── Navigation: previous, title, next ── */
+.calendar .air-datepicker-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--calendar-cell);
+}
+
+.calendar .air-datepicker-nav--title,
+.calendar .air-datepicker-nav--action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--calendar-cell);
+  border-radius: var(--calendar-cell-radius);
+  cursor: pointer;
+  user-select: none;
+}
+
+.calendar .air-datepicker-nav--action {
+  width: var(--calendar-cell);
+}
+
+.calendar .air-datepicker-nav--action.-disabled- {
+  visibility: hidden;
+}
+
+.calendar .air-datepicker-nav--action svg {
+  width: 1.6em;
+  height: 1.6em;
+}
+
+.calendar .air-datepicker-nav--action path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+}
+
+.calendar .air-datepicker-nav--title {
+  padding-inline: 0.6em;
+  font-weight: var(--calendar-title-weight);
+}
+
+.calendar .air-datepicker-nav--title i {
+  font-style: normal;
+  font-weight: normal;
+  color: var(--calendar-muted);
+  margin-inline-start: 0.3em;
+}
+
+.calendar .air-datepicker-nav--title.-disabled- {
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .calendar :is(.air-datepicker-nav--title, .air-datepicker-nav--action):not(.-disabled-):hover {
+    background-color: var(--calendar-hover-bg);
+  }
+}
+/* ── The grids: days, months, years ── */
+.calendar .air-datepicker-body.-hidden- {
+  display: none;
+}
+
+.calendar .air-datepicker-body--day-names {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-block: 0.25em;
+}
+
+.calendar .air-datepicker-body--day-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--calendar-day-name-fg);
+}
+
+.calendar .air-datepicker-body--day-name.-clickable- {
+  cursor: pointer;
+}
+
+.calendar .air-datepicker-body--cells {
+  display: grid;
+}
+
+.calendar .air-datepicker-body--cells.-days- {
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: var(--calendar-cell);
+}
+
+.calendar .air-datepicker-body--cells.-months- {
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: calc(var(--calendar-cell) * 1.4);
+}
+
+.calendar .air-datepicker-body--cells.-years- {
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: calc(var(--calendar-cell) * 1.75);
+}
+
+/* ── A day, a month, a year ── */
+.calendar .air-datepicker-cell {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--calendar-cell-radius);
+  cursor: pointer;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar .air-datepicker-cell.-focus- {
+  background-color: var(--calendar-hover-bg);
+}
+
+.calendar .air-datepicker-cell.-current- {
+  color: var(--calendar-current);
+  font-weight: 700;
+}
+
+.calendar .air-datepicker-cell:is(.-other-month-, .-other-decade-) {
+  color: var(--calendar-muted);
+}
+
+.calendar .air-datepicker-cell:is(.-other-month-, .-other-decade-):empty {
+  background: none;
+  border: none;
+}
+
+.calendar .air-datepicker-cell.-disabled- {
+  cursor: default;
+  color: var(--calendar-muted);
+  opacity: 0.5;
+}
+
+.calendar .air-datepicker-cell.-disabled-.-focus- {
+  background: none;
+}
+
+/* A range: the days inside it share a band, its ends are rounded. */
+.calendar .air-datepicker-cell.-in-range- {
+  background-color: var(--calendar-range-bg);
+  border-radius: 0;
+}
+
+.calendar .air-datepicker-cell.-in-range-.-focus- {
+  background-color: color-mix(in oklab, var(--calendar-range-bg), var(--calendar-accent) 15%);
+}
+
+.calendar .air-datepicker-cell.-range-from- {
+  background-color: var(--calendar-range-bg);
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.calendar .air-datepicker-cell.-range-to- {
+  background-color: var(--calendar-range-bg);
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.calendar .air-datepicker-cell.-range-from-.-range-to- {
+  border-radius: var(--calendar-cell-radius);
+}
+
+/* Selected: the accent. Last, so it wins over every state above. */
+.calendar .air-datepicker-cell.-selected- {
+  color: var(--calendar-accent-fg);
+  background-color: var(--calendar-accent);
+}
+
+.calendar .air-datepicker-cell.-selected-.-focus- {
+  background-color: color-mix(in oklab, var(--calendar-accent), #000 10%);
+}
+
+.calendar .air-datepicker-cell.-selected-:is(.-other-month-, .-other-decade-) {
+  background-color: color-mix(in oklab, var(--calendar-accent) 60%, var(--calendar-bg));
+}
+
+/* ── Buttons (today, clear) ── */
+.calendar .air-datepicker-buttons {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--calendar-gap);
+}
+
+.calendar .air-datepicker-button {
+  appearance: none;
+  display: inline-flex;
+  height: var(--calendar-cell);
+  padding: 0;
+  font: inherit;
+  color: var(--calendar-fg);
+  background: none;
+  border: none;
+  border-radius: var(--calendar-cell-radius);
+  cursor: pointer;
+}
+
+.calendar .air-datepicker-button span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.calendar .air-datepicker-button:is(:hover, :focus-visible) {
+  background-color: var(--calendar-hover-bg);
+  outline: none;
+}
+
+/* ── Time ── */
+.calendar .air-datepicker-time {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 0.75em;
+  align-items: center;
+  padding-inline: 0.5em;
+}
+
+.calendar .air-datepicker-time--current {
+  display: flex;
+  align-items: baseline;
+}
+
+.calendar .air-datepicker-time--current-hours,
+.calendar .air-datepicker-time--current-minutes {
+  font-size: 1.35em;
+  font-variant-numeric: tabular-nums;
+  padding-inline: 0.1em;
+  border-radius: 0.2em;
+}
+
+.calendar :is(.air-datepicker-time--current-hours, .air-datepicker-time--current-minutes).-focus- {
+  background-color: var(--calendar-hover-bg);
+}
+
+.calendar .air-datepicker-time--current-colon {
+  margin-inline: 0.1em;
+}
+
+.calendar .air-datepicker-time--current-ampm {
+  margin-inline-start: 0.35em;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  color: var(--calendar-muted);
+}
+
+.calendar .air-datepicker-time--row {
+  display: flex;
+  align-items: center;
+  height: 1.25em;
+  background: linear-gradient(var(--calendar-muted), var(--calendar-muted)) left 50%/100% 1px no-repeat;
+}
+
+.calendar .air-datepicker-time--row input[type=range] {
+  appearance: none;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* The track is the row's own line: the native one is not drawn. */
+.calendar .air-datepicker-time--row input[type=range]::-webkit-slider-runnable-track {
+  background: none;
+  border: none;
+}
+
+.calendar .air-datepicker-time--row input[type=range]::-moz-range-track {
+  background: none;
+  border: none;
+}
+
+.calendar .air-datepicker-time--row input[type=range]::-webkit-slider-thumb {
+  appearance: none;
+  width: 0.8em;
+  height: 0.8em;
+  border: 1px solid var(--calendar-muted);
+  border-radius: 50%;
+  background: var(--calendar-bg);
+}
+
+.calendar .air-datepicker-time--row input[type=range]::-moz-range-thumb {
+  width: 0.8em;
+  height: 0.8em;
+  border: 1px solid var(--calendar-muted);
+  border-radius: 50%;
+  background: var(--calendar-bg);
+}
+
+.calendar .air-datepicker-time--row input[type=range]:focus-visible::-webkit-slider-thumb {
+  background: var(--calendar-accent);
+  border-color: var(--calendar-accent);
+}
+
+.calendar .air-datepicker-time--row input[type=range]:focus-visible::-moz-range-thumb {
+  background: var(--calendar-accent);
+  border-color: var(--calendar-accent);
+}
+
+/* ── Axis: size ── */
+.calendar-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.calendar-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.calendar-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.calendar-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.calendar-xl {
+  --fontsize: var(--xl, var(--default-xl));
 }
 
 .card {
@@ -1304,7 +1874,7 @@ svg {
 .card-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--card-gap);
 }
 
@@ -1369,9 +1939,9 @@ svg {
 }
 
 /* ── Flag: image-full ──
-   The figure fills the card and the body sits on top of it. The
-   overlay is the card's own fill at a low alpha rather than a fixed
-   black, so a light theme and a dark one both stay legible. */
+   The figure fills the card and the body sits on top of it. As in
+   daisyUI: the image is darkened to 28% and the body is written in
+   --color-neutral-content, the ink daisyUI keeps for dark grounds. */
 .card-image-full {
   display: grid;
 }
@@ -1387,14 +1957,150 @@ svg {
   height: 100%;
 }
 
+.card-image-full > figure > img {
+  filter: brightness(28%);
+}
+
 .card-image-full > .card-body {
   position: relative;
-  background-color: color-mix(in oklab, var(--card-bg) 65%, rgba(0, 0, 0, 0));
-  backdrop-filter: blur(2px);
+  color: var(--color-neutral-content);
+}
+
+.carousel {
+  display: grid;
+  grid-template-columns: 100%;
+  gap: var(--carousel-gap);
+  min-width: 0;
+}
+
+.carousel-track {
+  grid-area: 1/1;
+  /* The slides' offsets are measured from here (to scroll to one). */
+  position: relative;
+  display: flex;
+  gap: var(--carousel-item-gap);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border: var(--carousel-border);
+  border-radius: var(--carousel-radius);
+  box-shadow: var(--carousel-shadow);
+  rotate: var(--carousel-rotate, 0deg);
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .carousel-track {
+    scroll-behavior: smooth;
+  }
+}
+.carousel-track:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.carousel-item {
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  width: var(--carousel-item-width, 100%);
+  scroll-snap-align: start;
+}
+
+.carousel-item > :only-child {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── The arrows, over the track's cell ──
+   The cell lets the pointer through; only what is drawn in it
+   catches it, so the slides stay draggable between the arrows. */
+.carousel-prev,
+.carousel-next {
+  grid-area: 1/1;
+  z-index: 1;
+  align-self: center;
+  display: flex;
+  pointer-events: none;
+}
+
+.carousel-prev > *,
+.carousel-next > * {
+  pointer-events: auto;
+}
+
+.carousel-prev {
+  justify-self: start;
+  margin-inline-start: var(--carousel-arrow-inset);
+}
+
+.carousel-next {
+  justify-self: end;
+  margin-inline-end: var(--carousel-arrow-inset);
+}
+
+/* Chevrons are drawn pointing sideways; in RTL, sideways flips. */
+:where([dir=rtl]) .carousel:not(.carousel-vertical) :is(.carousel-prev, .carousel-next) svg {
+  scale: -1 1;
+}
+
+.carousel-pagination {
+  justify-self: center;
+  display: flex;
+}
+
+/* ── Axis: align ── where a slide comes to rest. */
+.carousel-start .carousel-item {
+  scroll-snap-align: start;
+}
+
+.carousel-center .carousel-item {
+  scroll-snap-align: center;
+}
+
+.carousel-end .carousel-item {
+  scroll-snap-align: end;
+}
+
+/* ── Flag: vertical ── slides go up and down; the arrows sit at the
+   top and the bottom, their chevrons turned. */
+.carousel-vertical .carousel-track {
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scroll-snap-type: y mandatory;
+  height: var(--carousel-height);
+}
+
+.carousel-vertical .carousel-item {
+  width: auto;
+  height: var(--carousel-item-height, 100%);
+}
+
+.carousel-vertical .carousel-prev {
+  align-self: start;
+  justify-self: center;
+  margin: var(--carousel-arrow-inset) 0 0;
+}
+
+.carousel-vertical .carousel-next {
+  align-self: end;
+  justify-self: center;
+  margin: 0 0 var(--carousel-arrow-inset);
+}
+
+.carousel-vertical :is(.carousel-prev, .carousel-next) svg {
+  rotate: 90deg;
 }
 
 .checkbox {
-  color: var(--color-on-surface);
+  color: var(--color-base-content);
   border-radius: var(--radius-selector);
   position: relative;
   display: inline-block;
@@ -1447,8 +2153,8 @@ svg {
 }
 
 .chip {
-  --chip-bg: var(--chip-color, var(--color-surface-1));
-  --chip-fg: var(--color-on-surface);
+  --chip-bg: var(--chip-color, var(--color-base-100));
+  --chip-fg: var(--color-base-content);
   border-radius: var(--radius-selector);
   display: inline-flex;
   align-items: center;
@@ -1461,7 +2167,7 @@ svg {
 }
 
 .dock {
-  background-color: var(--color-surface-3);
+  background-color: var(--color-base-100);
   position: fixed;
   z-index: 1;
   display: flex;
@@ -1507,7 +2213,7 @@ svg {
 }
 
 .fieldset-legend {
-  color: var(--color-on-surface);
+  color: var(--color-base-content);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1545,10 +2251,10 @@ svg {
 }
 
 .file-input {
-  --btn-bg: var(--btn-color, var(--color-surface-2));
-  --btn-fg: var(--color-on-surface);
+  --btn-bg: var(--btn-color, var(--color-base-200));
+  --btn-fg: var(--color-base-content);
   cursor: pointer;
-  background-color: var(--color-surface-1);
+  background-color: var(--color-base-100);
   display: inline-flex;
   appearance: none;
   align-items: center;
@@ -1573,21 +2279,21 @@ svg {
 }
 
 .file-input:focus {
-  --input-color: var(--color-on-surface);
+  --input-color: var(--color-base-content);
   isolation: isolate;
 }
 
 .file-input:has(> input[disabled]),
 .file-input:is(:disabled, [disabled]) {
-  border-color: var(--color-surface-2);
-  background-color: var(--color-surface-2);
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
   cursor: not-allowed;
 }
 
 .file-input:has(> input[disabled])::file-selector-button,
 .file-input:is(:disabled, [disabled])::file-selector-button {
-  border-color: var(--color-surface-2);
-  background-color: var(--color-surface-2);
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
   cursor: not-allowed;
 }
 
@@ -1600,7 +2306,7 @@ svg {
   vertical-align: middle;
   white-space: nowrap;
   position: relative;
-  background-color: var(--color-surface-1);
+  background-color: var(--color-base-100);
   height: var(--size);
   touch-action: manipulation;
   border-start-start-radius: var(--join-ss, var(--radius-field));
@@ -1631,7 +2337,7 @@ svg {
 
 .input:focus,
 .input:focus-within {
-  --input-color: var(--color-on-surface);
+  --input-color: var(--color-base-content);
   isolation: isolate;
 }
 
@@ -1639,8 +2345,8 @@ svg {
 .input:has(> input[disabled]),
 .input:is(:disabled, [disabled]),
 fieldset:disabled .input {
-  border-color: var(--color-surface-2);
-  background-color: var(--color-surface-2);
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
   cursor: not-allowed;
 }
 
@@ -1665,6 +2371,39 @@ fieldset:disabled .input {
 .input:has(> input[type=date]) input[type=date]::-webkit-calendar-picker-indicator {
   position: absolute;
   cursor: pointer;
+}
+
+/* ── Suggestions ──
+   The Input wrapper's `suggest` hangs a .list-suggestions under the
+   field. The list is `list`'s to paint; this only places it, inside
+   the frame (.input is already position: relative). A floating list
+   is placed by the component instead, with inline fixed coordinates. */
+.input > .list-suggestions {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.25em);
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  max-width: max(100%, 40ch);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: default;
+}
+
+/* ── Flag: nospinner ── a number field without its step arrows. */
+.input-nospinner:is([type=number]),
+.input-nospinner input[type=number] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.input-nospinner:is([type=number])::-webkit-inner-spin-button,
+.input-nospinner:is([type=number])::-webkit-outer-spin-button,
+.input-nospinner input[type=number]::-webkit-inner-spin-button,
+.input-nospinner input[type=number]::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
 }
 
 .join {
@@ -1909,7 +2648,7 @@ fieldset:disabled .input {
 .list {
   display: flex;
   flex-direction: column;
-  background-color: var(--color-surface-1);
+  background-color: var(--color-base-100);
   border-start-start-radius: var(--join-ss, var(--radius-box));
   border-start-end-radius: var(--join-se, var(--radius-box));
   border-end-start-radius: var(--join-es, var(--radius-box));
@@ -2130,9 +2869,122 @@ fieldset:disabled .input {
   z-index: 1;
 }
 
+.pagination {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pagination-gap);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.pagination-item {
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--pagination-size);
+  height: var(--pagination-size);
+  padding-inline: calc(var(--pagination-size) / 4);
+  margin: 0;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--pagination-item-fg);
+  background-color: var(--pagination-item-bg);
+  border: var(--pagination-border-width) solid var(--pagination-item-border);
+  border-radius: var(--pagination-radius);
+  box-shadow: var(--pagination-shadow);
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  transition-property: color, background-color, border-color, box-shadow, translate;
+  transition-duration: 0.15s;
+}
+
+.pagination-item svg {
+  height: 1em;
+}
+
+@media (hover: hover) {
+  .pagination-item:not([aria-current=page], :disabled):hover {
+    background-color: var(--pagination-hover-bg);
+  }
+}
+.pagination-item:focus-visible {
+  outline: 2px solid var(--pagination-color);
+  outline-offset: 2px;
+}
+
+.pagination-item[aria-current=page] {
+  color: var(--pagination-fg);
+  background-color: var(--pagination-color);
+  border-color: var(--pagination-active-border, var(--pagination-color));
+  cursor: default;
+}
+
+.pagination-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--pagination-size);
+  height: var(--pagination-size);
+  opacity: 0.6;
+  user-select: none;
+}
+
+/* ── Variant: dots ──
+   The numbers stay in the DOM (and in the accessible name) but are
+   not drawn: a dot per page. Not with `font-size: 0` — the dot is
+   sized in em, and would shrink to nothing with its text. Gaps never
+   appear in this variant. */
+.pagination-dots {
+  gap: calc(var(--pagination-dot) * 0.8);
+}
+
+.pagination-dots .pagination-item {
+  min-width: 0;
+  width: var(--pagination-dot);
+  height: var(--pagination-dot);
+  padding: 0;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0);
+  border-radius: 50%;
+}
+
+.pagination-dots .pagination-gap {
+  display: none;
+}
+
+/* ── Axis: size ── */
+.pagination-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.pagination-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.pagination-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.pagination-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.pagination-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
 .progress {
   border-radius: var(--radius-box);
-  color: var(--color-on-surface);
+  color: var(--color-base-content);
   position: relative;
   appearance: none;
   overflow: hidden;
@@ -2205,7 +3057,7 @@ fieldset:disabled .input {
 
 .radio:checked,
 .radio[aria-checked=true] {
-  background-color: var(--color-surface-1);
+  background-color: var(--color-base-100);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -2219,7 +3071,7 @@ fieldset:disabled .input {
 }
 
 .range {
-  --range-thumb: var(--color-surface-1);
+  --range-thumb: var(--color-base-100);
   /* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
   appearance: none;
   -webkit-appearance: none;
@@ -2268,7 +3120,7 @@ fieldset:disabled .input {
 }
 
 .select {
-  background-color: var(--color-surface-1);
+  background-color: var(--color-base-100);
   position: relative;
   display: inline-flex;
   flex-shrink: 1;
@@ -2300,15 +3152,15 @@ fieldset:disabled .input {
 
 .select:focus,
 .select:focus-within {
-  --input-color: var(--color-on-surface);
+  --input-color: var(--color-base-content);
   isolation: isolate;
 }
 
 .select:has(> select[disabled]),
 .select:is(:disabled, [disabled]),
 fieldset:disabled .select {
-  border-color: var(--color-surface-2);
-  background-color: var(--color-surface-2);
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
   cursor: not-allowed;
 }
 
@@ -2356,11 +3208,36 @@ fieldset:disabled .select {
 .select option:not(:disabled):active,
 .select select option:not(:disabled):active {
   background-color: var(--color-neutral);
-  color: var(--color-on-neutral);
+  color: var(--color-neutral-content);
+}
+
+/* ── Multiple choice ──
+   A Select with `multiple` is drawn as a .select frame that opens a
+   .list-suggestions of checkable rows (a native multi-select is a
+   tall listbox). The list is `list`'s to paint; this only places it,
+   and lets it out of the frame's clipping while it is open. */
+.select:has(> .list-suggestions) {
+  overflow: visible;
+}
+
+.select > .list-suggestions {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.25em);
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  max-width: max(100%, 40ch);
+  white-space: normal;
+  cursor: default;
+}
+
+.select > .list-suggestions > .list-row {
+  gap: 0.75em;
 }
 
 .skeleton {
-  background-color: var(--color-surface-2);
+  background-color: var(--color-base-300);
   border-radius: var(--radius-box);
   will-change: background-position;
 }
@@ -2441,8 +3318,8 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .tabs-item {
-  --tab-bg: var(--color-surface-1);
-  --tab-border-color: var(--color-border);
+  --tab-bg: var(--color-base-100);
+  --tab-border-color: var(--color-base-300);
   position: relative;
   display: inline-flex;
   cursor: pointer;
@@ -2458,7 +3335,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .tabs-item:hover {
-  color: var(--color-on-surface);
+  color: var(--color-base-content);
 }
 
 .tabs-item:is(input[type=radio])::after {
@@ -2591,7 +3468,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .textarea {
-  background-color: var(--color-surface-1);
+  background-color: var(--color-base-100);
   border-radius: var(--radius-field);
   flex-shrink: 1;
   appearance: none;
@@ -2607,15 +3484,15 @@ input[type=color].swatch::-moz-color-swatch {
 
 .textarea:focus,
 .textarea:focus-within {
-  --input-color: var(--color-on-surface);
+  --input-color: var(--color-base-content);
   isolation: isolate;
 }
 
 /* Increase font size on iOS to prevent auto-zoom on focus */
 .textarea:has(> textarea[disabled]),
 .textarea:is(:disabled, [disabled]) {
-  border-color: var(--color-surface-2);
-  background-color: var(--color-surface-2);
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
   cursor: not-allowed;
 }
 
@@ -2651,11 +3528,11 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .toggle > *:nth-child(2) {
-  color: var(--color-surface-1);
+  color: var(--color-base-100);
 }
 
 .toggle > *:nth-child(3) {
-  color: var(--color-surface-1);
+  color: var(--color-base-100);
 }
 
 /* Toggle thumb */
@@ -2672,8 +3549,8 @@ input[type=color].swatch::-moz-color-swatch {
 .toggle[aria-checked=true],
 .toggle:has(> input:checked) {
   grid-template-columns: 1fr 1fr 0fr;
-  background-color: var(--color-surface-1);
-  --input-color: var(--color-on-surface);
+  background-color: var(--color-base-100);
+  --input-color: var(--color-base-content);
 }
 
 .toggle:indeterminate {
@@ -2871,18 +3748,113 @@ input[type=color].swatch::-moz-color-swatch {
   --fontsize: var(--xl, var(--default-xl));
 }
 
+/* As daisyUI draws a date picker: a base-100 box, a hairline of
+   base-200, and the selected day in the ink colour, inverted. */
+.calendar {
+  --calendar-bg: var(--color-base-100);
+  --calendar-fg: var(--color-base-content);
+  --calendar-border: var(--color-base-200);
+  --calendar-border-width: var(--border);
+  --calendar-radius: var(--radius-box);
+  --calendar-shadow: 0 4px 12px oklch(0% 0 0 / 0.15);
+  --calendar-inline-shadow: none;
+  --calendar-p: calc(0.75em * var(--scale));
+  --calendar-gap: calc(0.25em * var(--scale));
+  --calendar-cell: calc(2.25em * var(--scale));
+  --calendar-cell-radius: var(--radius-field);
+  --calendar-accent: var(--color-base-content);
+  --calendar-accent-fg: var(--color-base-100);
+  --calendar-current: var(--color-primary);
+  --calendar-muted: color-mix(in oklab, var(--color-base-content) 40%, #0000);
+  --calendar-hover-bg: var(--color-base-200);
+  --calendar-range-bg: color-mix(in oklab, var(--color-base-content) 8%, #0000);
+  --calendar-day-name-fg: color-mix(in oklab, var(--color-base-content) 60%, #0000);
+  --calendar-title-weight: 600;
+}
+
+/* ── Axis: color ── the selected day and the range, in daisyUI's names. */
+.calendar-primary {
+  --calendar-accent: var(--color-primary);
+  --calendar-accent-fg: var(--color-primary-content);
+  --calendar-current: var(--color-primary);
+  --calendar-range-bg: color-mix(in oklab, var(--color-primary) 15%, #0000);
+}
+
+.calendar-secondary {
+  --calendar-accent: var(--color-secondary);
+  --calendar-accent-fg: var(--color-secondary-content);
+  --calendar-current: var(--color-secondary);
+  --calendar-range-bg: color-mix(in oklab, var(--color-secondary) 15%, #0000);
+}
+
+.calendar-accent {
+  --calendar-accent: var(--color-accent);
+  --calendar-accent-fg: var(--color-accent-content);
+  --calendar-current: var(--color-accent);
+  --calendar-range-bg: color-mix(in oklab, var(--color-accent) 15%, #0000);
+}
+
+.calendar-neutral {
+  --calendar-accent: var(--color-neutral);
+  --calendar-accent-fg: var(--color-neutral-content);
+  --calendar-current: var(--color-neutral);
+  --calendar-range-bg: color-mix(in oklab, var(--color-neutral) 15%, #0000);
+}
+
+.calendar-info {
+  --calendar-accent: var(--color-info);
+  --calendar-accent-fg: var(--color-info-content);
+  --calendar-current: var(--color-info);
+  --calendar-range-bg: color-mix(in oklab, var(--color-info) 15%, #0000);
+}
+
+.calendar-success {
+  --calendar-accent: var(--color-success);
+  --calendar-accent-fg: var(--color-success-content);
+  --calendar-current: var(--color-success);
+  --calendar-range-bg: color-mix(in oklab, var(--color-success) 15%, #0000);
+}
+
+.calendar-warning {
+  --calendar-accent: var(--color-warning);
+  --calendar-accent-fg: var(--color-warning-content);
+  --calendar-current: var(--color-warning);
+  --calendar-range-bg: color-mix(in oklab, var(--color-warning) 15%, #0000);
+}
+
+.calendar-error {
+  --calendar-accent: var(--color-error);
+  --calendar-accent-fg: var(--color-error-content);
+  --calendar-current: var(--color-error);
+  --calendar-range-bg: color-mix(in oklab, var(--color-error) 15%, #0000);
+}
+
+/* daisyUI's .card paints no ground: its docs pair it with
+   `bg-base-100 shadow-sm`, which is the default here. The border
+   flags draw in --color-base-200, as daisyUI's do. */
 .card {
-  --card-bg: var(--color-surface-2);
-  --card-fg: var(--color-on-surface);
-  --card-border: var(--color-border);
+  --card-bg: var(--color-base-100);
+  --card-fg: var(--color-base-content);
+  --card-border: var(--color-base-200);
   --card-border-width: 0px;
   --card-radius: var(--radius-box);
-  --card-shadow: none;
+  --card-shadow: 0 1px 3px 0 oklch(0% 0 0 / 0.1), 0 1px 2px -1px oklch(0% 0 0 / 0.1);
   --card-p: calc(1.5em * var(--scale));
   --card-gap: calc(0.5em * var(--scale));
   --card-title-fg: inherit;
   --card-title-size: 1.125em;
   --card-title-weight: 600;
+}
+
+/* daisyUI's carousel draws nothing: the slides are the picture. */
+.carousel {
+  --carousel-gap: calc(0.75em * var(--scale));
+  --carousel-item-gap: 0px;
+  --carousel-height: 20em;
+  --carousel-radius: var(--radius-box);
+  --carousel-border: 0 solid #0000;
+  --carousel-shadow: none;
+  --carousel-arrow-inset: calc(0.75em * var(--scale));
 }
 
 :where(.btn) {
@@ -2917,13 +3889,13 @@ input[type=color].swatch::-moz-color-swatch {
 .btn:disabled,
 .btn[disabled] {
   --btn-border: #0000;
-  --btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+  --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
 }
 
 .btn-disabled:not(.btn-link, .btn-ghost),
 .btn:disabled:not(.btn-link, .btn-ghost),
 .btn[disabled]:not(.btn-link, .btn-ghost) {
-  background-color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
+  background-color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
   box-shadow: none;
 }
 
@@ -2942,7 +3914,7 @@ input[type=color].swatch::-moz-color-swatch {
 /* Hover darken (pointer devices only) */
 @media (hover: hover) {
   .btn:hover {
-    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
   }
 }
 /* Click / press. Only the two depth shadows are zeroed; the family
@@ -2950,57 +3922,58 @@ input[type=color].swatch::-moz-color-swatch {
    restyle the pressed state (poppy lowers elevation). */
 .btn:active:not(.btn-active) {
   translate: 0 0.5px;
-  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 5%);
-  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 5%);
+  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
   --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0), var(--shadow-light, );
 }
 
 /* Active (forced) */
 .btn-active {
-  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
   --btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0), var(--shadow-light, );
   isolation: isolate;
 }
 
-/* color variants */
+/* color variants — daisyUI names: the ink on a colour is
+   --color-<name>-content, a parameter of its own. */
 .btn-primary {
   --btn-color: var(--color-primary);
-  --btn-fg: var(--color-on-primary);
+  --btn-fg: var(--color-primary-content);
 }
 
 .btn-secondary {
   --btn-color: var(--color-secondary);
-  --btn-fg: var(--color-on-secondary);
+  --btn-fg: var(--color-secondary-content);
 }
 
 .btn-accent {
   --btn-color: var(--color-accent);
-  --btn-fg: var(--color-on-accent);
+  --btn-fg: var(--color-accent-content);
 }
 
 .btn-neutral {
   --btn-color: var(--color-neutral);
-  --btn-fg: var(--color-on-neutral);
+  --btn-fg: var(--color-neutral-content);
 }
 
 .btn-info {
   --btn-color: var(--color-info);
-  --btn-fg: var(--color-on-info);
+  --btn-fg: var(--color-info-content);
 }
 
 .btn-success {
   --btn-color: var(--color-success);
-  --btn-fg: var(--color-on-success);
+  --btn-fg: var(--color-success-content);
 }
 
 .btn-warning {
   --btn-color: var(--color-warning);
-  --btn-fg: var(--color-on-warning);
+  --btn-fg: var(--color-warning-content);
 }
 
 .btn-error {
   --btn-color: var(--color-error);
-  --btn-fg: var(--color-on-error);
+  --btn-fg: var(--color-error-content);
 }
 
 /* variant ghost */
@@ -3047,24 +4020,24 @@ input[type=color].swatch::-moz-color-swatch {
 .btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
   --btn-shadow: ;
   --btn-bg: #0000;
-  --btn-fg: var(--btn-color, var(--color-on-surface));
-  --btn-border: var(--btn-color, var(--color-on-surface));
+  --btn-fg: var(--btn-color, var(--color-base-content));
+  --btn-border: var(--btn-color, var(--color-base-content));
 }
 
 @media (hover: none) {
   .btn-outline:not(.btn-active, :active, :focus-visible, input:checked):hover {
     --btn-shadow: ;
     --btn-bg: #0000;
-    --btn-fg: var(--btn-color, var(--color-on-surface));
-    --btn-border: var(--btn-color, var(--color-on-surface));
+    --btn-fg: var(--btn-color, var(--color-base-content));
+    --btn-border: var(--btn-color, var(--color-base-content));
   }
 }
 /* variant dash */
 .btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
   --btn-shadow: ;
   --btn-bg: #0000;
-  --btn-fg: var(--btn-color, var(--color-on-surface));
-  --btn-border: var(--btn-color, var(--color-on-surface));
+  --btn-fg: var(--btn-color, var(--color-base-content));
+  --btn-border: var(--btn-color, var(--color-base-content));
 }
 
 .btn-dash {
@@ -3075,24 +4048,24 @@ input[type=color].swatch::-moz-color-swatch {
   .btn-dash:not(.btn-active, :active, :focus-visible, input:checked):hover {
     --btn-shadow: ;
     --btn-bg: #0000;
-    --btn-fg: var(--btn-color, var(--color-on-surface));
-    --btn-border: var(--btn-color, var(--color-on-surface));
+    --btn-fg: var(--btn-color, var(--color-base-content));
+    --btn-border: var(--btn-color, var(--color-base-content));
   }
 }
 /* variant soft */
 .btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
   --btn-shadow: ;
-  --btn-fg: var(--btn-color, var(--color-on-surface));
-  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
-  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+  --btn-fg: var(--btn-color, var(--color-base-content));
+  --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 8%, var(--color-base-100));
+  --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 10%, var(--color-base-100));
 }
 
 @media (hover: none) {
   .btn-soft:not(.btn-active, :active, :focus-visible, input:checked):hover {
     --btn-shadow: ;
-    --btn-fg: var(--btn-color, var(--color-on-surface));
-    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
-    --btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+    --btn-fg: var(--btn-color, var(--color-base-content));
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 8%, var(--color-base-100));
+    --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 10%, var(--color-base-100));
   }
 }
 /* size variants */
@@ -3184,10 +4157,27 @@ input[type=color].swatch::-moz-color-swatch {
     display: none;
   }
 }
+/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+.btn {
+  background-image: none, var(--fx-noise);
+  background-size: auto, calc(var(--noise, 0) * 100%);
+}
+
+/* No fill, no grain. */
+.btn-outline,
+.btn-dash,
+.btn-ghost,
+.btn-soft,
+.btn-link,
+.btn:is(.btn-disabled, :disabled, [disabled]) {
+  background-image: none;
+}
+
 .checkbox {
   --size: calc(1.5em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
-  border: var(--border) solid var(--input-color, color-mix(in oklab, var(--color-on-surface) 20%, rgba(0, 0, 0, 0)));
+  border: var(--border) solid var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, rgba(0, 0, 0, 0)));
   padding: calc(0.1667em * var(--scale)); /* daisyUI: .25rem on a 1.5rem box */
   transition: background-color 0.2s, box-shadow 0.2s;
 }
@@ -3230,7 +4220,7 @@ input[type=color].swatch::-moz-color-swatch {
   }
 }
 .checkbox:indeterminate {
-  background-color: var(--input-color, color-mix(in oklab, var(--color-on-surface) 20%, rgba(0, 0, 0, 0)));
+  background-color: var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, rgba(0, 0, 0, 0)));
 }
 
 .checkbox:indeterminate::before {
@@ -3257,7 +4247,7 @@ input[type=color].swatch::-moz-color-swatch {
 .checkbox-outline:checked,
 .checkbox-outline[aria-checked=true] {
   background-color: rgba(0, 0, 0, 0);
-  color: var(--input-color, var(--color-on-surface));
+  color: var(--input-color, var(--color-base-content));
   box-shadow: 0 1px oklch(0% 0 0/calc(var(--depth) * 0.1)) inset, 0 0 rgba(0, 0, 0, 0) inset, var(--shadow-light, );
 }
 
@@ -3268,42 +4258,42 @@ input[type=color].swatch::-moz-color-swatch {
 
 /* color variants */
 .checkbox-primary {
-  color: var(--color-on-primary);
+  color: var(--color-primary-content);
   --input-color: var(--color-primary);
 }
 
 .checkbox-secondary {
-  color: var(--color-on-secondary);
+  color: var(--color-secondary-content);
   --input-color: var(--color-secondary);
 }
 
 .checkbox-accent {
-  color: var(--color-on-accent);
+  color: var(--color-accent-content);
   --input-color: var(--color-accent);
 }
 
 .checkbox-neutral {
-  color: var(--color-on-neutral);
+  color: var(--color-neutral-content);
   --input-color: var(--color-neutral);
 }
 
 .checkbox-info {
-  color: var(--color-on-info);
+  color: var(--color-info-content);
   --input-color: var(--color-info);
 }
 
 .checkbox-success {
-  color: var(--color-on-success);
+  color: var(--color-success-content);
   --input-color: var(--color-success);
 }
 
 .checkbox-warning {
-  color: var(--color-on-warning);
+  color: var(--color-warning-content);
   --input-color: var(--color-warning);
 }
 
 .checkbox-error {
-  color: var(--color-on-error);
+  color: var(--color-error-content);
   --input-color: var(--color-error);
 }
 
@@ -3328,11 +4318,18 @@ input[type=color].swatch::-moz-color-swatch {
   --fontsize: var(--xl, var(--default-xl));
 }
 
+/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+.checkbox {
+  background-image: none, var(--fx-noise);
+  background-size: auto, calc(var(--noise, 0) * 100%);
+}
+
 .chip {
   --size: calc(1.6em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
   gap: calc(0.5em * var(--scale));
-  border: var(--border) solid var(--chip-color, var(--color-surface-2));
+  border: var(--border) solid var(--chip-color, var(--color-base-200));
   width: fit-content;
   padding-inline: calc(var(--size) / 2 - var(--border));
 }
@@ -3360,59 +4357,60 @@ input[type=color].swatch::-moz-color-swatch {
 
 /* variant soft */
 .chip-soft {
-  color: var(--chip-color, var(--color-on-surface));
-  background-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 8%, var(--color-surface-1));
-  border-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+  color: var(--chip-color, var(--color-base-content));
+  background-color: color-mix(in oklab, var(--chip-color, var(--color-base-content)) 8%, var(--color-base-100));
+  border-color: color-mix(in oklab, var(--chip-color, var(--color-base-content)) 10%, var(--color-base-100));
   background-image: none;
 }
 
 /* variant ghost */
 .chip-ghost {
-  border-color: var(--color-surface-2);
-  background-color: var(--color-surface-2);
-  color: var(--color-on-surface);
+  border-color: var(--color-base-200);
+  background-color: var(--color-base-200);
+  color: var(--color-base-content);
   background-image: none;
 }
 
-/* color variants */
+/* color variants — daisyUI names: the ink on a colour is
+   --color-<name>-content, a parameter of its own. */
 .chip-primary {
   --chip-color: var(--color-primary);
-  --chip-fg: var(--color-on-primary);
+  --chip-fg: var(--color-primary-content);
 }
 
 .chip-secondary {
   --chip-color: var(--color-secondary);
-  --chip-fg: var(--color-on-secondary);
+  --chip-fg: var(--color-secondary-content);
 }
 
 .chip-accent {
   --chip-color: var(--color-accent);
-  --chip-fg: var(--color-on-accent);
+  --chip-fg: var(--color-accent-content);
 }
 
 .chip-neutral {
   --chip-color: var(--color-neutral);
-  --chip-fg: var(--color-on-neutral);
+  --chip-fg: var(--color-neutral-content);
 }
 
 .chip-info {
   --chip-color: var(--color-info);
-  --chip-fg: var(--color-on-info);
+  --chip-fg: var(--color-info-content);
 }
 
 .chip-success {
   --chip-color: var(--color-success);
-  --chip-fg: var(--color-on-success);
+  --chip-fg: var(--color-success-content);
 }
 
 .chip-warning {
   --chip-color: var(--color-warning);
-  --chip-fg: var(--color-on-warning);
+  --chip-fg: var(--color-warning-content);
 }
 
 .chip-error {
   --chip-color: var(--color-error);
-  --chip-fg: var(--color-on-error);
+  --chip-fg: var(--color-error-content);
 }
 
 /* size variants */
@@ -3436,6 +4434,20 @@ input[type=color].swatch::-moz-color-swatch {
   --fontsize: var(--xl, var(--default-xl));
 }
 
+/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+.chip {
+  background-image: none, var(--fx-noise);
+  background-size: auto, calc(var(--noise, 0) * 100%);
+}
+
+.chip-outline,
+.chip-dash,
+.chip-soft,
+.chip-ghost {
+  background-image: none;
+}
+
 .dock {
   right: 0;
   bottom: 0;
@@ -3443,7 +4455,7 @@ input[type=color].swatch::-moz-color-swatch {
   width: 100%;
   padding: 0.5rem;
   color: currentColor;
-  border-top: 0.5px solid color-mix(in oklab, var(--color-on-surface) 5%, rgba(0, 0, 0, 0));
+  border-top: 0.5px solid color-mix(in oklab, var(--color-base-content) 5%, rgba(0, 0, 0, 0));
   height: 4rem;
   height: calc(4rem + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
@@ -3465,13 +4477,13 @@ input[type=color].swatch::-moz-color-swatch {
 }
 .dock > *[aria-disabled=true],
 .dock > *[disabled] {
-  color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
   opacity: 1;
 }
 
 .dock > *[aria-disabled=true]:hover,
 .dock > *[disabled]:hover {
-  color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
   opacity: 1;
 }
 
@@ -3571,7 +4583,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .fieldset-label {
-  color: color-mix(in oklch, var(--color-on-surface) 60%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 60%, rgba(0, 0, 0, 0));
   gap: calc(0.375em * var(--scale));
 }
 
@@ -3581,7 +4593,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .floating-label > span {
-  background-color: var(--color-surface-1);
+  background-color: var(--color-base-100);
   inset-inline-start: calc(0.75em * var(--scale));
   padding-inline: calc(0.25em * var(--scale));
   opacity: 0;
@@ -3642,9 +4654,9 @@ input[type=color].swatch::-moz-color-swatch {
 
 .file-input {
   --size: calc(2.5em * var(--scale));
-  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
   --btn-border: transparent;
-  border: var(--border) solid rgba(0, 0, 0, 0);
+  border: var(--border) solid var(--input-color, rgba(0, 0, 0, 0));
   width: clamp(3rem, 20rem, 100%);
   padding-inline-end: calc(0.75em * var(--scale));
   font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -3671,14 +4683,14 @@ input[type=color].swatch::-moz-color-swatch {
 
 .file-input:has(> input[disabled]),
 .file-input:is(:disabled, [disabled]) {
-  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
   box-shadow: none;
 }
 
 .file-input:has(> input[disabled])::file-selector-button,
 .file-input:is(:disabled, [disabled])::file-selector-button {
   --btn-border: #0000;
-  --btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+  --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
 }
 
 /* the flat surface */
@@ -3721,8 +4733,8 @@ input[type=color].swatch::-moz-color-swatch {
 
 .file-input-ghost:focus,
 .file-input-ghost:focus-within {
-  color: var(--color-on-surface);
-  background-color: var(--color-surface-1);
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
@@ -3733,7 +4745,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .file-input-primary::file-selector-button {
-  color: var(--color-on-primary);
+  color: var(--color-primary-content);
 }
 
 .file-input-primary,
@@ -3747,7 +4759,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .file-input-secondary::file-selector-button {
-  color: var(--color-on-secondary);
+  color: var(--color-secondary-content);
 }
 
 .file-input-secondary,
@@ -3761,7 +4773,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .file-input-accent::file-selector-button {
-  color: var(--color-on-accent);
+  color: var(--color-accent-content);
 }
 
 .file-input-accent,
@@ -3775,7 +4787,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .file-input-neutral::file-selector-button {
-  color: var(--color-on-neutral);
+  color: var(--color-neutral-content);
 }
 
 .file-input-neutral,
@@ -3789,7 +4801,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .file-input-info::file-selector-button {
-  color: var(--color-on-info);
+  color: var(--color-info-content);
 }
 
 .file-input-info,
@@ -3803,7 +4815,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .file-input-success::file-selector-button {
-  color: var(--color-on-success);
+  color: var(--color-success-content);
 }
 
 .file-input-success,
@@ -3817,7 +4829,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .file-input-warning::file-selector-button {
-  color: var(--color-on-warning);
+  color: var(--color-warning-content);
 }
 
 .file-input-warning,
@@ -3831,7 +4843,7 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 .file-input-error::file-selector-button {
-  color: var(--color-on-error);
+  color: var(--color-error-content);
 }
 
 .file-input-error,
@@ -3865,18 +4877,29 @@ input[type=color].swatch::-moz-color-swatch {
   padding-inline-end: calc(1.5em * var(--scale));
 }
 
+/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+.file-input::file-selector-button {
+  background-image: var(--fx-noise);
+  background-size: calc(var(--noise, 0) * 100%);
+}
+
+.file-input-ghost::file-selector-button {
+  background-image: none;
+}
+
 :where(.input) {
   width: unset;
 }
 
 .input {
   --size: calc(2.5em * var(--scale));
-  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
   gap: calc(0.5em * var(--scale));
   padding-inline: calc(0.75em * var(--scale));
   width: clamp(3rem, 20rem, 100%);
   font-size: var(--fontsize, var(--base, var(--default-base)));
-  border: var(--border) solid rgba(0, 0, 0, 0);
+  border: var(--border) solid var(--input-color, rgba(0, 0, 0, 0));
 }
 
 .input :where(input) {
@@ -3908,7 +4931,7 @@ input[type=color].swatch::-moz-color-swatch {
 .input:has(> input[disabled]),
 .input:is(:disabled, [disabled]),
 fieldset:disabled .input {
-  color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 40%, rgba(0, 0, 0, 0));
   box-shadow: none;
 }
 
@@ -3918,7 +4941,7 @@ fieldset:disabled .input input::placeholder,
 .input:has(> input[disabled])::placeholder,
 .input:is(:disabled, [disabled])::placeholder,
 fieldset:disabled .input::placeholder {
-  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
 }
 
 .input[type=number]::-webkit-inner-spin-button {
@@ -3955,8 +4978,8 @@ fieldset:disabled .input::placeholder {
 
 .input-ghost:focus,
 .input-ghost:focus-within {
-  color: var(--color-on-surface);
-  background-color: var(--color-surface-1);
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
@@ -4151,7 +5174,7 @@ fieldset:disabled .input::placeholder {
 .list > :not(:last-child) .list-row::after {
   bottom: 0;
   inset-inline: calc(1em * var(--scale));
-  border-bottom: var(--border) solid color-mix(in oklab, var(--color-on-surface) 5%, rgba(0, 0, 0, 0));
+  border-bottom: var(--border) solid color-mix(in oklab, var(--color-base-content) 5%, rgba(0, 0, 0, 0));
 }
 
 .list-row:has(.list-col-grow:nth-child(1)) {
@@ -4177,8 +5200,8 @@ fieldset:disabled .input::placeholder {
 /* variant suggestions */
 .list-suggestions {
   padding: calc(0.25em * var(--scale));
-  border: var(--border) solid var(--color-surface-2);
-  box-shadow: 0 8px 16px -4px color-mix(in oklab, var(--color-on-surface) 10%, rgba(0, 0, 0, 0)), var(--shadow-light, );
+  border: var(--border) solid var(--color-base-200);
+  box-shadow: 0 8px 16px -4px color-mix(in oklab, var(--color-base-content) 10%, rgba(0, 0, 0, 0)), var(--shadow-light, );
   overflow-y: auto;
   max-height: min(16rem, 60dvh);
 }
@@ -4201,7 +5224,7 @@ fieldset:disabled .input::placeholder {
 
 @media (hover: hover) {
   .list-suggestions > .list-row:hover {
-    background-color: color-mix(in oklab, var(--color-on-surface) 7%, rgba(0, 0, 0, 0));
+    background-color: color-mix(in oklab, var(--color-base-content) 7%, rgba(0, 0, 0, 0));
   }
 }
 /* Keyboard-navigated active item */
@@ -4292,42 +5315,9 @@ fieldset:disabled .input::placeholder {
   color: currentColor;
 }
 
-/* Dots: three xsmall, perfectly round, empty buttons. */
-.loading-dots {
-  --dot: calc(0.6em * var(--scale));
-  --dot-bg: var(--color-surface-1);
-  --dot-border-color: var(--color-border);
-  --dot-border-width: var(--border, 1px);
-  aspect-ratio: auto;
-  width: calc(var(--dot) * 3.4);
-  height: calc(var(--dot) * 1.9);
-  mask-image: none;
-  background-color: transparent;
-  background-repeat: no-repeat;
-  background-size: var(--dot) var(--dot);
-  background-image: radial-gradient(circle closest-side, var(--dot-bg) calc(100% - var(--dot-border-width)), var(--dot-border-color) calc(100% - var(--dot-border-width)) 100%, rgba(0, 0, 0, 0) 100%), radial-gradient(circle closest-side, var(--dot-bg) calc(100% - var(--dot-border-width)), var(--dot-border-color) calc(100% - var(--dot-border-width)) 100%, rgba(0, 0, 0, 0) 100%), radial-gradient(circle closest-side, var(--dot-bg) calc(100% - var(--dot-border-width)), var(--dot-border-color) calc(100% - var(--dot-border-width)) 100%, rgba(0, 0, 0, 0) 100%);
-  animation: loading-dots 1.05s infinite;
-  --dot-bg: var(--color-surface-2);
-  --dot-border-width: var(--border, 1px);
-}
-
-@keyframes loading-dots {
-  0%, 80%, 100% {
-    background-position: 0 100%, 50% 100%, 100% 100%;
-  }
-  20% {
-    background-position: 0 0, 50% 100%, 100% 100%;
-  }
-  40% {
-    background-position: 0 100%, 50% 0, 100% 100%;
-  }
-  60% {
-    background-position: 0 100%, 50% 100%, 100% 0;
-  }
-}
 .menu {
-  --menu-bg: var(--color-surface-2);
-  --menu-fg: var(--color-on-surface);
+  --menu-bg: var(--color-base-200);
+  --menu-fg: var(--color-base-content);
   --menu-border: #0000;
   --menu-border-width: 0;
   --menu-shadow: none;
@@ -4342,22 +5332,22 @@ fieldset:disabled .input::placeholder {
   --menu-item-transition: color 0.2s cubic-bezier(0, 0, 0.2, 1),
   	background-color 0.2s cubic-bezier(0, 0, 0.2, 1),
   	box-shadow 0.2s cubic-bezier(0, 0, 0.2, 1);
-  --menu-hover-bg: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
-  --menu-hover-fg: var(--color-on-surface);
+  --menu-hover-bg: color-mix(in oklab, var(--color-base-content) 10%, #0000);
+  --menu-hover-fg: var(--color-base-content);
   --menu-active-bg: var(--color-neutral);
-  --menu-active-fg: var(--color-on-neutral);
+  --menu-active-fg: var(--color-neutral-content);
   --menu-disabled-bg: #0000;
-  --menu-disabled-fg: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+  --menu-disabled-fg: color-mix(in oklab, var(--color-base-content) 20%, #0000);
   --menu-focus-outline: 2px solid currentColor;
   --menu-focus-offset: 2px;
   --menu-title-py: calc(0.5em * var(--scale));
   --menu-title-px: calc(0.75em * var(--scale));
-  --menu-title-fg: color-mix(in oklab, var(--color-on-surface) 40%, #0000);
+  --menu-title-fg: color-mix(in oklab, var(--color-base-content) 40%, #0000);
   --menu-title-size: 1em;
   --menu-title-weight: 600;
   --menu-title-transform: none;
   --menu-title-tracking: normal;
-  --menu-divider: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+  --menu-divider: color-mix(in oklab, var(--color-base-content) 10%, #0000);
   --menu-divider-size: 1px;
   --menu-divider-gap: calc(0.5em * var(--scale));
   --menu-divider-inset: calc(1em * var(--scale));
@@ -4405,12 +5395,23 @@ fieldset:disabled .input::placeholder {
   --fontsize: var(--xl, var(--default-xl));
 }
 
+/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+.menu .menu-active,
+.menu li > :is(a, button, span).menu-active {
+  background-image: none, var(--fx-noise);
+  background-size: auto, calc(var(--noise, 0) * 100%);
+}
+
+/* daisyUI's .navbar paints nothing: every example in its docs adds
+   `bg-base-100 shadow-sm`. With no utility classes here, that pairing
+   is the default. */
 .navbar {
-  --navbar-bg: var(--color-surface-3);
-  --navbar-fg: var(--color-on-surface);
+  --navbar-bg: var(--color-base-100);
+  --navbar-fg: var(--color-base-content);
   --navbar-border: #0000;
   --navbar-border-width: 0;
-  --navbar-shadow: var(--shadow-light);
+  --navbar-shadow: 0 1px 3px 0 oklch(0% 0 0 / 0.1), 0 1px 2px -1px oklch(0% 0 0 / 0.1);
   --navbar-h: calc(4em * var(--scale));
   --navbar-px: calc(0.5em * var(--scale));
   --navbar-py: calc(0.5em * var(--scale));
@@ -4436,6 +5437,71 @@ fieldset:disabled .input::placeholder {
 
 .navbar-xl {
   --fontsize: var(--xl, var(--default-xl));
+}
+
+/* Pages are daisy's plain buttons — base-200, no edge — and the
+   current one takes the primary fill. */
+.pagination {
+  --pagination-color: var(--color-primary);
+  --pagination-fg: var(--color-primary-content);
+  --pagination-item-bg: var(--color-base-200);
+  --pagination-item-fg: var(--color-base-content);
+  --pagination-item-border: var(--color-base-200);
+  --pagination-hover-bg: color-mix(in oklab, var(--color-base-200), #000 7%);
+  --pagination-border-width: var(--border);
+  --pagination-radius: var(--radius-field);
+  --pagination-shadow: none;
+  --pagination-size: calc(2.5em * var(--scale));
+  --pagination-dot: calc(0.625em * var(--scale));
+  --pagination-gap: calc(0.25em * var(--scale));
+  font-weight: 600;
+}
+
+.pagination-dots {
+  --pagination-item-bg: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  --pagination-item-border: #0000;
+  --pagination-hover-bg: color-mix(in oklab, var(--color-base-content) 40%, #0000);
+}
+
+/* ── Axis: color ── the current page, in daisyUI's names. */
+.pagination-primary {
+  --pagination-color: var(--color-primary);
+  --pagination-fg: var(--color-primary-content);
+}
+
+.pagination-secondary {
+  --pagination-color: var(--color-secondary);
+  --pagination-fg: var(--color-secondary-content);
+}
+
+.pagination-accent {
+  --pagination-color: var(--color-accent);
+  --pagination-fg: var(--color-accent-content);
+}
+
+.pagination-neutral {
+  --pagination-color: var(--color-neutral);
+  --pagination-fg: var(--color-neutral-content);
+}
+
+.pagination-info {
+  --pagination-color: var(--color-info);
+  --pagination-fg: var(--color-info-content);
+}
+
+.pagination-success {
+  --pagination-color: var(--color-success);
+  --pagination-fg: var(--color-success-content);
+}
+
+.pagination-warning {
+  --pagination-color: var(--color-warning);
+  --pagination-fg: var(--color-warning-content);
+}
+
+.pagination-error {
+  --pagination-color: var(--color-error);
+  --pagination-fg: var(--color-error-content);
 }
 
 .progress {
@@ -4698,6 +5764,13 @@ fieldset:disabled .input::placeholder {
   --size: calc(2em * var(--scale));
 }
 
+/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+.radio::before {
+  background-image: none, var(--fx-noise);
+  background-size: auto, calc(var(--noise, 0) * 100%);
+}
+
 .range {
   --range-thumb-size: calc(1.5em * var(--scale));
   --range-progress: currentColor;
@@ -4769,42 +5842,42 @@ fieldset:disabled .input::placeholder {
 /* color variants */
 .range-primary {
   color: var(--color-primary);
-  --range-thumb: var(--color-on-primary);
+  --range-thumb: var(--color-primary-content);
 }
 
 .range-secondary {
   color: var(--color-secondary);
-  --range-thumb: var(--color-on-secondary);
+  --range-thumb: var(--color-secondary-content);
 }
 
 .range-accent {
   color: var(--color-accent);
-  --range-thumb: var(--color-on-accent);
+  --range-thumb: var(--color-accent-content);
 }
 
 .range-neutral {
   color: var(--color-neutral);
-  --range-thumb: var(--color-on-neutral);
+  --range-thumb: var(--color-neutral-content);
 }
 
 .range-info {
   color: var(--color-info);
-  --range-thumb: var(--color-on-info);
+  --range-thumb: var(--color-info-content);
 }
 
 .range-success {
   color: var(--color-success);
-  --range-thumb: var(--color-on-success);
+  --range-thumb: var(--color-success-content);
 }
 
 .range-warning {
   color: var(--color-warning);
-  --range-thumb: var(--color-on-warning);
+  --range-thumb: var(--color-warning-content);
 }
 
 .range-error {
   color: var(--color-error);
-  --range-thumb: var(--color-on-error);
+  --range-thumb: var(--color-error-content);
 }
 
 /* size variants */
@@ -4834,8 +5907,8 @@ fieldset:disabled .input::placeholder {
 
 .select {
   --size: calc(2.5em * var(--scale));
-  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
-  border: var(--border) solid rgba(0, 0, 0, 0);
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  border: var(--border) solid var(--input-color, rgba(0, 0, 0, 0));
   gap: calc(0.375em * var(--scale));
   padding-inline-start: calc(0.75em * var(--scale));
   padding-inline-end: calc(1.75em * var(--scale));
@@ -4889,12 +5962,12 @@ fieldset:disabled .input::placeholder {
 .select:has(> select[disabled]),
 .select:is(:disabled, [disabled]),
 fieldset:disabled .select {
-  color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 40%, rgba(0, 0, 0, 0));
 }
 
 .select:has(> select[disabled]) select::placeholder,
 .select:is(:disabled, [disabled]) select::placeholder {
-  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
 }
 
 .select::picker(select),
@@ -4903,7 +5976,7 @@ fieldset:disabled .select {
   max-height: min(24rem, 70dvh);
   margin-inline: calc(0.5em * var(--scale));
   translate: calc(-0.5em * var(--scale)) 0;
-  border: var(--border) solid var(--color-surface-2);
+  border: var(--border) solid var(--color-base-200);
   margin-block: calc(0.5em * var(--scale));
   padding: calc(0.5em * var(--scale));
   background-color: inherit;
@@ -4938,7 +6011,7 @@ fieldset:disabled .select {
 .select option:not(:disabled):focus-visible,
 .select select option:not(:disabled):hover,
 .select select option:not(:disabled):focus-visible {
-  background-color: color-mix(in oklch, var(--color-on-surface) 10%, rgba(0, 0, 0, 0));
+  background-color: color-mix(in oklch, var(--color-base-content) 10%, rgba(0, 0, 0, 0));
   outline: none;
 }
 
@@ -4967,8 +6040,8 @@ fieldset:disabled .select {
 
 .select-ghost:focus,
 .select-ghost:focus-within {
-  color: var(--color-on-surface);
-  background-color: var(--color-surface-1);
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
@@ -5050,7 +6123,7 @@ fieldset:disabled .select {
 }
 
 .skeleton {
-  background-image: linear-gradient(105deg, rgba(0, 0, 0, 0) 0% 40%, var(--color-surface-1) 50%, rgba(0, 0, 0, 0) 60% 100%);
+  background-image: linear-gradient(105deg, rgba(0, 0, 0, 0) 0% 40%, var(--color-base-100) 50%, rgba(0, 0, 0, 0) 60% 100%);
   background-size: 200% auto;
   background-position-x: -50%;
 }
@@ -5063,7 +6136,7 @@ fieldset:disabled .select {
 .skeleton-text {
   background-clip: text;
   color: transparent;
-  background-image: linear-gradient(105deg, color-mix(in oklab, var(--color-on-surface) 20%, transparent) 0% 40%, var(--color-on-surface) 50%, color-mix(in oklab, var(--color-on-surface) 20%, transparent) 60% 100%);
+  background-image: linear-gradient(105deg, color-mix(in oklab, var(--color-base-content) 20%, transparent) 0% 40%, var(--color-base-content) 50%, color-mix(in oklab, var(--color-base-content) 20%, transparent) 60% 100%);
 }
 
 @keyframes skeleton {
@@ -5075,17 +6148,17 @@ fieldset:disabled .select {
   }
 }
 .swatch {
-  --swatch-color: var(--color-surface-1);
+  --swatch-color: var(--color-base-100);
   --swatch-size: calc(2em * var(--scale));
   --swatch-radius: var(--radius-field);
   --swatch-border-width: var(--border);
-  --swatch-border: var(--color-border);
+  --swatch-border: color-mix(in oklab, var(--color-base-content) 10%, #0000);
   --swatch-shadow: none;
   --swatch-disabled-opacity: 0.4;
   --swatch-focus-outline: 2px solid currentColor;
   --swatch-focus-offset: 2px;
   --swatch-transition: box-shadow 0.2s, border-color 0.2s;
-  /* Same flip as --color-on-*: a light sample gets near-black, a dark one
+  /* The flip: a light sample gets near-black, a dark one
      near-white, keeping a whisper of the sample's own hue. */
   --swatch-on-color: oklch(
   	from var(--swatch-color) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h
@@ -5094,10 +6167,10 @@ fieldset:disabled .select {
      top, so a semi-transparent sample lets it through. */
   --swatch-checks: conic-gradient(
   	from 90deg,
-  	var(--color-surface-3) 25%,
-  	var(--color-surface-2) 0 50%,
-  	var(--color-surface-3) 0 75%,
-  	var(--color-surface-2) 0
+  	var(--color-base-300) 25%,
+  	var(--color-base-200) 0 50%,
+  	var(--color-base-300) 0 75%,
+  	var(--color-base-200) 0
   );
   background-size: auto, calc(0.5em * var(--scale)) calc(0.5em * var(--scale));
   font-weight: 600;
@@ -5109,7 +6182,7 @@ fieldset:disabled .select {
 }
 
 .swatch-active {
-  --swatch-shadow: 0 0 0 2px var(--color-surface-1), 0 0 0 4px var(--color-primary);
+  --swatch-shadow: 0 0 0 2px var(--color-base-100), 0 0 0 4px var(--color-primary);
 }
 
 .swatch-primary {
@@ -5205,7 +6278,7 @@ label:has(:checked),
 [aria-selected=true],
 [aria-current=true],
 [aria-current=page]) {
-  color: color-mix(in oklch, var(--color-on-surface) 50%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 50%, rgba(0, 0, 0, 0));
 }
 
 .tabs-item:focus {
@@ -5448,7 +6521,7 @@ label:has(:checked),
 /* variant box */
 .tabs-box {
   --tabs-box-radius: calc(3 * var(--radius-field));
-  background-color: var(--color-surface-2);
+  background-color: var(--color-base-200);
   padding: calc(0.25em * var(--scale));
   border-radius: calc(min(var(--tab-height) / 2, var(--radius-field)) + min(0.25rem, var(--tabs-box-radius)));
   box-shadow: 0 -0.5px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 0.5px oklch(0% 0 0/calc(var(--depth) * 0.05)) inset;
@@ -5471,7 +6544,7 @@ label:has(:checked),
 .tabs-box > :is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]),
 .tabs-box > :is(input:checked),
 .tabs-box > :is(label:has(:checked)) {
-  background-color: var(--tab-bg, var(--color-surface-1));
+  background-color: var(--tab-bg, var(--color-base-100));
   box-shadow: 0 1px oklch(100% 0 0/calc(var(--depth) * 0.1)) inset, 0 1px 1px -1px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 50%), rgba(0, 0, 0, 0)), 0 1px 6px -4px color-mix(in oklab, var(--color-neutral) calc(var(--depth) * 100%), rgba(0, 0, 0, 0));
 }
 
@@ -5554,8 +6627,8 @@ label:has(:checked),
 }
 
 .textarea {
-  --input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
-  border: var(--border) solid rgba(0, 0, 0, 0);
+  --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  border: var(--border) solid var(--input-color, rgba(0, 0, 0, 0));
   min-height: calc(5em * var(--scale));
   padding-block: calc(0.5em * var(--scale));
   padding-inline-start: calc(0.75em * var(--scale));
@@ -5590,7 +6663,7 @@ label:has(:checked),
 }
 .textarea:has(> textarea[disabled]),
 .textarea:is(:disabled, [disabled]) {
-  color: color-mix(in oklch, var(--color-on-surface) 40%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 40%, rgba(0, 0, 0, 0));
   box-shadow: none;
 }
 
@@ -5598,7 +6671,7 @@ label:has(:checked),
 .textarea:is(:disabled, [disabled]) textarea::placeholder,
 .textarea:has(> textarea[disabled])::placeholder,
 .textarea:is(:disabled, [disabled])::placeholder {
-  color: color-mix(in oklch, var(--color-on-surface) 20%, rgba(0, 0, 0, 0));
+  color: color-mix(in oklch, var(--color-base-content) 20%, rgba(0, 0, 0, 0));
 }
 
 /* the flat surface */
@@ -5620,8 +6693,8 @@ label:has(:checked),
 
 .textarea-ghost:focus,
 .textarea-ghost:focus-within {
-  color: var(--color-on-surface);
-  background-color: var(--color-surface-1);
+  color: var(--color-base-content);
+  background-color: var(--color-base-100);
   border-color: rgba(0, 0, 0, 0);
   box-shadow: none;
 }
@@ -5697,7 +6770,7 @@ label:has(:checked),
 }
 
 .toggle {
-  --input-color: color-mix(in oklab, var(--color-on-surface) 50%, #0000);
+  --input-color: color-mix(in oklab, var(--color-base-content) 50%, #0000);
   --size: calc(1.5em * var(--scale));
   --toggle-p: calc(var(--size) * 0.125);
   font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -5804,15 +6877,15 @@ label:has(:checked),
 .toggle-track:checked,
 .toggle-track[aria-checked=true],
 .toggle-track:has(> input:checked) {
-  background-color: var(--input-color, var(--color-on-surface));
+  background-color: var(--input-color, var(--color-base-content));
   background-clip: content-box; /* track stays inside padding = inset/thinner effect */
 }
 
 .toggle-track:checked::before,
 .toggle-track[aria-checked=true]::before,
 .toggle-track:has(> input:checked)::before {
-  background-color: var(--color-on-surface);
-  box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-surface-1);
+  background-color: var(--color-base-content);
+  box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-base-100);
 }
 
 /* color variants */
@@ -5875,6 +6948,13 @@ label:has(:checked),
 
 .toggle-xl {
   --fontsize: var(--xl, var(--default-xl));
+}
+
+/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+.toggle::before {
+  background-image: none, var(--fx-noise);
+  background-size: auto, calc(var(--noise, 0) * 100%);
 }
 
 .validator-hint {

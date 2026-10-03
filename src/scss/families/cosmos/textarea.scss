@@ -61,8 +61,10 @@
 
 @mixin look {
 	.textarea {
-		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
-		border: var(--border) solid #0000;
+		/* The resting edge. Set here, before the colour variants, so they
+		   (and the validator) can still recolour it. */
+		--input-color: var(--color-border);
+		border: var(--border) solid var(--input-color, #0000);
 		min-height: calc(5em * var(--scale));
 		padding-block: calc(0.5em * var(--scale));
 		padding-inline-start: calc(0.75em * var(--scale));
@@ -125,7 +127,7 @@
 	@include m.size-variants('textarea');
 
 	.textarea {
-		border: var(--border) solid var(--color-border);
+		border: var(--border) solid var(--input-color);
 		/* A tall box drifts less than a button: same pen, fewer pixels. */
 		--cw: var(--cosmos-wobble-box, 0.2);
 		border-radius: var(--c4);
@@ -133,7 +135,6 @@
 	}
 
 	.textarea {
-		--input-color: var(--color-border);
 		background-color: var(--color-surface-1);
 	}
 

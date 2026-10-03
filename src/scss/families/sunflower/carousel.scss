@@ -1,0 +1,183 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* sunflower — carousel.
+   Everything sunflower draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   carousel.scss — .carousel
+
+   A row of slides that scrolls and snaps — natively, so touch,
+   trackpad and keyboard scrolling come for free — with optional
+   arrows over it and an optional pagination under it.
+
+   The root is a grid. The track sits in the first cell, and the two
+   arrows are laid over that SAME cell, at its start and end, so they
+   are centred on the slides whatever sits under them. The pagination
+   takes the next row.
+
+   Parts:   .carousel-track       the scrolling, snapping row
+            .carousel-item        one slide
+            .carousel-prev/next   the cells the arrows are drawn in
+            .carousel-pagination  the cell the pagination is drawn in
+   Axes:    align (where a slide snaps: start, center, end)
+   Flags:   vertical
+
+   A slide is as wide as the track. Several at once: set
+   `--carousel-item-width` (a length or a percentage) on the root.
+
+   Plumbing contract (the family fills these on `.carousel`):
+	--carousel-gap          space between the track and the pagination
+	--carousel-item-gap     space between slides
+	--carousel-item-width   width of a slide (default 100%)
+	--carousel-height       height of a vertical carousel
+	--carousel-radius       corner radius of the track
+	--carousel-border       the track's border (a `border` value)
+	--carousel-shadow       the track's box-shadow
+	--carousel-rotate       resting angle of the track
+	--carousel-arrow-inset  distance of the arrows from the edges
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — the grid, the snapping track, the overlaid arrows.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.carousel {
+		display: grid;
+		grid-template-columns: 100%;
+		gap: var(--carousel-gap);
+		min-width: 0;
+	}
+
+	.carousel-track {
+		grid-area: 1 / 1;
+		/* The slides' offsets are measured from here (to scroll to one). */
+		position: relative;
+		display: flex;
+		gap: var(--carousel-item-gap);
+		overflow-x: auto;
+		overflow-y: hidden;
+		overscroll-behavior-x: contain;
+		scroll-snap-type: x mandatory;
+		scrollbar-width: none;
+		border: var(--carousel-border);
+		border-radius: var(--carousel-radius);
+		box-shadow: var(--carousel-shadow);
+		rotate: var(--carousel-rotate, 0deg);
+	}
+	.carousel-track::-webkit-scrollbar {
+		display: none;
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.carousel-track {
+			scroll-behavior: smooth;
+		}
+	}
+	.carousel-track:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+
+	.carousel-item {
+		box-sizing: border-box;
+		display: flex;
+		flex: none;
+		width: var(--carousel-item-width, 100%);
+		scroll-snap-align: start;
+	}
+	.carousel-item > :only-child {
+		flex: 1;
+		min-width: 0;
+	}
+
+	/* ── The arrows, over the track's cell ──
+	   The cell lets the pointer through; only what is drawn in it
+	   catches it, so the slides stay draggable between the arrows. */
+	.carousel-prev,
+	.carousel-next {
+		grid-area: 1 / 1;
+		z-index: 1;
+		align-self: center;
+		display: flex;
+		pointer-events: none;
+	}
+	.carousel-prev > *,
+	.carousel-next > * {
+		pointer-events: auto;
+	}
+	.carousel-prev {
+		justify-self: start;
+		margin-inline-start: var(--carousel-arrow-inset);
+	}
+	.carousel-next {
+		justify-self: end;
+		margin-inline-end: var(--carousel-arrow-inset);
+	}
+	/* Chevrons are drawn pointing sideways; in RTL, sideways flips. */
+	:where([dir="rtl"]) .carousel:not(.carousel-vertical) :is(.carousel-prev, .carousel-next) svg {
+		scale: -1 1;
+	}
+
+	.carousel-pagination {
+		justify-self: center;
+		display: flex;
+	}
+
+	/* ── Axis: align ── where a slide comes to rest. */
+	.carousel-start .carousel-item {
+		scroll-snap-align: start;
+	}
+	.carousel-center .carousel-item {
+		scroll-snap-align: center;
+	}
+	.carousel-end .carousel-item {
+		scroll-snap-align: end;
+	}
+
+	/* ── Flag: vertical ── slides go up and down; the arrows sit at the
+	   top and the bottom, their chevrons turned. */
+	.carousel-vertical .carousel-track {
+		flex-direction: column;
+		overflow-x: hidden;
+		overflow-y: auto;
+		overscroll-behavior-y: contain;
+		scroll-snap-type: y mandatory;
+		height: var(--carousel-height);
+	}
+	.carousel-vertical .carousel-item {
+		width: auto;
+		height: var(--carousel-item-height, 100%);
+	}
+	.carousel-vertical .carousel-prev {
+		align-self: start;
+		justify-self: center;
+		margin: var(--carousel-arrow-inset) 0 0;
+	}
+	.carousel-vertical .carousel-next {
+		align-self: end;
+		justify-self: center;
+		margin: 0 0 var(--carousel-arrow-inset);
+	}
+	.carousel-vertical :is(.carousel-prev, .carousel-next) svg {
+		rotate: 90deg;
+	}
+}
+
+@mixin look {
+	/* A framed strip: the heavy line and the hard shadow, like a card. */
+	.carousel {
+		--carousel-gap: calc(1em * var(--scale));
+		--carousel-item-gap: 0px;
+		--carousel-height: 20em;
+		--carousel-radius: var(--radius-box);
+		--carousel-border: var(--border) solid var(--color-border);
+		--carousel-shadow: var(--sf-shadow);
+		--carousel-arrow-inset: calc(0.75em * var(--scale));
+	}
+}

@@ -1,0 +1,167 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* dahlia — pagination.
+   Everything dahlia draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   pagination.scss — .pagination
+
+   A row of pages to jump between: numbers, a gap where pages are
+   skipped, and optional previous / next controls. The current page
+   is marked by `aria-current="page"`, not by a class: the state is
+   the accessibility attribute, so it cannot drift from it.
+
+   Parts:   .pagination-item   one page, or a previous / next control
+            .pagination-gap    the "…" standing for skipped pages
+   Axes:    color (the current page), size, variant (dots: the
+            numbers become dots, as under a carousel)
+
+   Plumbing contract (the family fills these on `.pagination`):
+	--pagination-color         fill of the current page
+	--pagination-fg            ink on the current page
+	--pagination-item-bg       fill of the other pages
+	--pagination-item-fg       their ink
+	--pagination-item-border   their edge colour
+	--pagination-hover-bg      fill under the pointer
+	--pagination-border-width  edge width (0 = none)
+	--pagination-radius        corner radius of a page
+	--pagination-shadow        box-shadow of a page
+	--pagination-size          height and minimum width of a page
+	--pagination-dot           diameter of a dot (variant dots)
+	--pagination-gap           space between pages
+	--fontsize                 font size (set by size-variants classes)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — the row, its pages, the current page, the dots.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.pagination {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--pagination-gap);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+
+	.pagination-item {
+		appearance: none;
+		box-sizing: border-box;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: var(--pagination-size);
+		height: var(--pagination-size);
+		padding-inline: calc(var(--pagination-size) / 4);
+		margin: 0;
+		font: inherit;
+		font-variant-numeric: tabular-nums;
+		line-height: 1;
+		color: var(--pagination-item-fg);
+		background-color: var(--pagination-item-bg);
+		border: var(--pagination-border-width) solid var(--pagination-item-border);
+		border-radius: var(--pagination-radius);
+		box-shadow: var(--pagination-shadow);
+		cursor: pointer;
+		user-select: none;
+		text-decoration: none;
+		transition-property: color, background-color, border-color, box-shadow, translate;
+		transition-duration: 0.15s;
+	}
+	.pagination-item svg {
+		height: 1em;
+	}
+	@media (hover: hover) {
+		.pagination-item:not([aria-current="page"], :disabled):hover {
+			background-color: var(--pagination-hover-bg);
+		}
+	}
+	.pagination-item:focus-visible {
+		outline: 2px solid var(--pagination-color);
+		outline-offset: 2px;
+	}
+	.pagination-item[aria-current="page"] {
+		color: var(--pagination-fg);
+		background-color: var(--pagination-color);
+		border-color: var(--pagination-active-border, var(--pagination-color));
+		cursor: default;
+	}
+	.pagination-item:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	.pagination-gap {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: var(--pagination-size);
+		height: var(--pagination-size);
+		opacity: 0.6;
+		user-select: none;
+	}
+
+	/* ── Variant: dots ──
+	   The numbers stay in the DOM (and in the accessible name) but are
+	   not drawn: a dot per page. Not with `font-size: 0` — the dot is
+	   sized in em, and would shrink to nothing with its text. Gaps never
+	   appear in this variant. */
+	.pagination-dots {
+		gap: calc(var(--pagination-dot) * 0.8);
+	}
+	.pagination-dots .pagination-item {
+		min-width: 0;
+		width: var(--pagination-dot);
+		height: var(--pagination-dot);
+		padding: 0;
+		overflow: hidden;
+		color: #0000;
+		border-radius: 50%;
+	}
+	.pagination-dots .pagination-gap {
+		display: none;
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('pagination');
+}
+
+@mixin look {
+	/* Radix-like: quiet pages with a hairline, the current one filled
+	   with the accent. */
+	.pagination {
+		--pagination-color: var(--color-primary);
+		--pagination-fg: var(--color-on-primary);
+		--pagination-item-bg: #0000;
+		--pagination-item-fg: var(--color-on-surface);
+		--pagination-item-border: var(--color-border);
+		--pagination-hover-bg: var(--color-surface-2);
+		--pagination-border-width: 1px;
+		--pagination-radius: var(--radius-field);
+		--pagination-shadow: none;
+		--pagination-size: calc(2.25em * var(--scale));
+		--pagination-dot: calc(0.5em * var(--scale));
+		--pagination-gap: calc(0.25em * var(--scale));
+		font-weight: 500;
+	}
+	.pagination-dots {
+		--pagination-item-bg: color-mix(in oklab, var(--color-on-surface) 18%, #0000);
+		--pagination-item-border: #0000;
+		--pagination-hover-bg: color-mix(in oklab, var(--color-on-surface) 35%, #0000);
+	}
+
+	/* ── Axis: color ── the current page. */
+	@each $color in c.$color-list {
+		.pagination-#{$color} {
+			--pagination-color: var(--color-#{$color});
+			--pagination-fg: var(--color-on-#{$color});
+		}
+	}
+}

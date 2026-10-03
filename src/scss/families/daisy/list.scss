@@ -15,7 +15,7 @@
 	--fontsize         font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-base-100 / --color-base-200 / --color-base-content
 	--color-primary         selected suggestion highlight
 	--border / --radius-box / --radius-field
 	--shadow-light          family shadow system
@@ -33,7 +33,7 @@
 	.list {
 		display: flex;
 		flex-direction: column;
-		background-color: var(--color-surface-1);
+		background-color: var(--color-base-100);
 		border-start-start-radius: var(--join-ss, var(--radius-box));
 		border-start-end-radius: var(--join-se, var(--radius-box));
 		border-end-start-radius: var(--join-es, var(--radius-box));
@@ -77,7 +77,7 @@
 		bottom: 0;
 		inset-inline: calc(1em * var(--scale));
 		border-bottom: var(--border) solid
-				color-mix(in oklab, var(--color-on-surface) 5%, #0000);
+				color-mix(in oklab, var(--color-base-content) 5%, #0000);
 	}
 	.list-row:has(.list-col-grow:nth-child(1)) {
 		--list-grid-cols: 1fr;
@@ -98,9 +98,9 @@
 	/* variant suggestions */
 	.list-suggestions {
 		padding: calc(0.25em * var(--scale));
-		border: var(--border) solid var(--color-surface-2);
+		border: var(--border) solid var(--color-base-200);
 		box-shadow:
-			0 8px 16px -4px color-mix(in oklab, var(--color-on-surface) 10%, #0000),
+			0 8px 16px -4px color-mix(in oklab, var(--color-base-content) 10%, #0000),
 			var(--shadow-light, );
 		overflow-y: auto;
 		max-height: min(16rem, 60dvh);
@@ -124,7 +124,7 @@
 
 	@media (hover: hover) {
 		.list-suggestions > .list-row:hover {
-			background-color: color-mix(in oklab, var(--color-on-surface) 7%, #0000);
+			background-color: color-mix(in oklab, var(--color-base-content) 7%, #0000);
 		}
 	}
 

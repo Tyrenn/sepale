@@ -32,8 +32,9 @@
 
 @mixin structure {
 	.chip {
-		--chip-bg: var(--chip-color, var(--color-surface-1));
-		--chip-fg: var(--color-on-surface);
+		/* Badge is bg-main upstream: a chip with no colour is a primary one. */
+		--chip-bg: var(--chip-color, var(--color-primary));
+		--chip-fg: var(--color-on-primary);
 		border-radius: var(--radius-selector);
 		display: inline-flex;
 		align-items: center;
@@ -60,8 +61,10 @@
 	}
 
 	/* variant outline */
+	/* In this look text is always the ink: a coloured word on the pale
+	   page would not read. The colour stays in the fill or the edge. */
 	.chip-outline {
-		color: var(--chip-color);
+		color: var(--color-on-surface);
 		--chip-bg: #0000;
 		background-image: none;
 		border-color: currentColor;
@@ -69,7 +72,7 @@
 
 	/* variant dash */
 	.chip-dash {
-		color: var(--chip-color);
+		color: var(--color-on-surface);
 		--chip-bg: #0000;
 		background-image: none;
 		border-color: currentColor;
@@ -78,9 +81,8 @@
 
 	/* variant soft */
 	.chip-soft {
-		color: var(--chip-color, var(--color-on-surface));
-		background-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 8%, var(--color-surface-1));
-		border-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+		color: var(--color-on-surface);
+		background-color: color-mix(in oklab, var(--chip-color, var(--color-primary)) 30%, var(--color-surface-2));
 		background-image: none;
 	}
 
@@ -109,8 +111,6 @@
 	.chip {
 		border: var(--border) solid var(--color-border);
 		border-radius: 999px;
-		/* Badge is bg-main upstream. */
-		background-color: var(--chip-color, var(--color-primary));
 		font-weight: 700;
 	}
 

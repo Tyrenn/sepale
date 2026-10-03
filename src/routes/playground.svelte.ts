@@ -30,6 +30,7 @@ const GROUPS: { group: string; ids: string[] }[] = [
 			'toggle',
 			'range',
 			'file-input',
+			'calendar',
 			'fieldset',
 			'label',
 			'floating-label'
@@ -47,12 +48,13 @@ const GROUPS: { group: string; ids: string[] }[] = [
 			'skeleton',
 			'list',
 			'card',
+			'carousel',
 			'text',
 			'link',
 			'swatch'
 		]
 	},
-	{ group: 'Navigation', ids: ['breadcrumbs', 'menu', 'navbar', 'dock'] },
+	{ group: 'Navigation', ids: ['breadcrumbs', 'menu', 'navbar', 'dock', 'pagination'] },
 	{ group: 'Other', ids: ['join', 'validator'] }
 ];
 

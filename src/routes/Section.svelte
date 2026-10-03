@@ -142,7 +142,7 @@
 		font-size: 1.4rem;
 		font-weight: 800;
 		letter-spacing: -0.01em;
-		color: var(--color-on-surface);
+		color: var(--app-fg);
 	}
 
 	.section-hash {
@@ -153,22 +153,22 @@
 		border-radius: 0.4rem;
 		font-size: 0.95rem;
 		font-weight: 700;
-		color: color-mix(in oklab, var(--color-on-surface) 45%, transparent);
-		background: color-mix(in oklab, var(--color-on-surface) 7%, transparent);
+		color: color-mix(in oklab, var(--app-fg) 45%, transparent);
+		background: color-mix(in oklab, var(--app-fg) 7%, transparent);
 	}
 
 	.section-subtitle {
 		margin: 0.35rem 0 0 2.1rem;
 		font-size: 0.85rem;
 		line-height: 1.4;
-		color: color-mix(in oklab, var(--color-on-surface) 60%, transparent);
+		color: color-mix(in oklab, var(--app-fg) 60%, transparent);
 	}
 
 	/* ── Tabbed box ──────────────────────────────────────────────────────── */
 	.box {
-		border: 1px solid color-mix(in oklab, var(--color-on-surface) 12%, transparent);
+		border: 1px solid color-mix(in oklab, var(--app-fg) 12%, transparent);
 		border-radius: 0.85rem;
-		background: var(--color-surface-1);
+		background: var(--app-bg);
 		overflow: hidden;
 	}
 
@@ -176,7 +176,7 @@
 		display: flex;
 		gap: 0.15rem;
 		padding: 0.4rem 0.5rem 0;
-		border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 10%, transparent);
+		border-bottom: 1px solid color-mix(in oklab, var(--app-fg) 10%, transparent);
 	}
 
 	.box-tab {
@@ -189,18 +189,18 @@
 		font-weight: 600;
 		padding: 0.45rem 0.95rem;
 		border-radius: 0.55rem 0.55rem 0 0;
-		color: color-mix(in oklab, var(--color-on-surface) 50%, transparent);
+		color: color-mix(in oklab, var(--app-fg) 50%, transparent);
 		cursor: pointer;
 		margin-bottom: -1px;
 		transition: color 0.15s, background 0.15s;
 	}
 	.box-tab:hover {
-		color: var(--color-on-surface);
+		color: var(--app-fg);
 	}
 	.box-tab[aria-selected='true'] {
-		color: var(--color-on-surface);
-		background: var(--color-surface-1);
-		border-color: color-mix(in oklab, var(--color-on-surface) 10%, transparent);
+		color: var(--app-fg);
+		background: var(--app-bg);
+		border-color: color-mix(in oklab, var(--app-fg) 10%, transparent);
 	}
 
 	.box-body {
@@ -219,8 +219,8 @@
 			-45deg,
 			transparent,
 			transparent 6px,
-			color-mix(in oklab, var(--color-on-surface) 5%, transparent) 6px,
-			color-mix(in oklab, var(--color-on-surface) 5%, transparent) 7px
+			color-mix(in oklab, var(--app-fg) 5%, transparent) 6px,
+			color-mix(in oklab, var(--app-fg) 5%, transparent) 7px
 		);
 	}
 
@@ -230,19 +230,19 @@
 		padding: 1.5rem;
 		font-size: 0.85rem;
 		line-height: 1.5;
-		color: color-mix(in oklab, var(--color-on-surface) 60%, transparent);
+		color: color-mix(in oklab, var(--app-fg) 60%, transparent);
 	}
 	.box-absent code {
 		font-family: ui-monospace, SFMono-Regular, monospace;
 		font-size: 0.85em;
 		padding: 0.1em 0.3em;
 		border-radius: 0.3rem;
-		background: color-mix(in oklab, var(--color-on-surface) 8%, transparent);
+		background: color-mix(in oklab, var(--app-fg) 8%, transparent);
 	}
 
 	.box-code {
 		position: relative;
-		background: color-mix(in oklab, var(--color-surface-2) 70%, var(--color-surface-3));
+		background: color-mix(in oklab, var(--app-bg-2) 70%, var(--app-bg-3));
 	}
 	.box-code pre {
 		margin: 0;
@@ -252,7 +252,7 @@
 		font-size: 0.8rem;
 		line-height: 1.55;
 		tab-size: 2;
-		color: var(--color-on-surface);
+		color: var(--app-fg);
 	}
 	.box-copy {
 		position: absolute;
@@ -261,9 +261,9 @@
 		font: inherit;
 		font-size: 0.7rem;
 		padding: 0.2rem 0.55rem;
-		border: 1px solid color-mix(in oklab, var(--color-on-surface) 18%, transparent);
+		border: 1px solid color-mix(in oklab, var(--app-fg) 18%, transparent);
 		border-radius: 0.35rem;
-		background: var(--color-surface-1);
+		background: var(--app-bg);
 		color: inherit;
 		cursor: pointer;
 		opacity: 0.75;

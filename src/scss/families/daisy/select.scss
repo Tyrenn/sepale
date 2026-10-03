@@ -16,10 +16,10 @@
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1        field background
-	--color-surface-2        disabled background and border
-	--color-on-surface    default text color
-	--color-neutral / --color-on-neutral   active option highlight
+	--color-base-100        field background
+	--color-base-200        disabled background and border
+	--color-base-content    default text color
+	--color-neutral / --color-neutral-content   active option highlight
 	--color-{variant}       semantic accent (set by color-variants)
 	--border                border width
 	--radius-field          field corner radius
@@ -39,7 +39,7 @@
 
 @mixin structure {
 	.select {
-		background-color: var(--color-surface-1);
+		background-color: var(--color-base-100);
 		position: relative;
 		display: inline-flex;
 		flex-shrink: 1;
@@ -68,14 +68,14 @@
 	}
 	.select:focus,
 		.select:focus-within {
-		--input-color: var(--color-on-surface);
+		--input-color: var(--color-base-content);
 		isolation: isolate;
 	}
 	.select:has(> select[disabled]),
 		.select:is(:disabled, [disabled]),
 		fieldset:disabled .select {
-		border-color: var(--color-surface-2);
-		background-color: var(--color-surface-2);
+		border-color: var(--color-base-200);
+		background-color: var(--color-base-200);
 		cursor: not-allowed;
 	}
 	.select:has(> select[disabled]) > select[disabled] {
@@ -116,7 +116,30 @@
 	.select option:not(:disabled):active,
 		.select select option:not(:disabled):active {
 		background-color: var(--color-neutral);
-		color: var(--color-on-neutral);
+		color: var(--color-neutral-content);
+	}
+
+	/* ── Multiple choice ──
+	   A Select with `multiple` is drawn as a .select frame that opens a
+	   .list-suggestions of checkable rows (a native multi-select is a
+	   tall listbox). The list is `list`'s to paint; this only places it,
+	   and lets it out of the frame's clipping while it is open. */
+	.select:has(> .list-suggestions) {
+		overflow: visible;
+	}
+	.select > .list-suggestions {
+		position: absolute;
+		z-index: 10;
+		top: calc(100% + 0.25em);
+		left: 0;
+		min-width: 100%;
+		width: max-content;
+		max-width: max(100%, 40ch);
+		white-space: normal;
+		cursor: default;
+	}
+	.select > .list-suggestions > .list-row {
+		gap: 0.75em;
 	}
 }
 
@@ -126,8 +149,8 @@
 	}
 	.select {
 		--size: calc(2.5em * var(--scale));
-		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
-		border: var(--border) solid #0000;
+		--input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+		border: var(--border) solid var(--input-color, #0000);
 		gap: calc(0.375em * var(--scale));
 		padding-inline-start: calc(0.75em * var(--scale));
 		padding-inline-end: calc(1.75em * var(--scale));
@@ -178,11 +201,11 @@
 	.select:has(> select[disabled]),
 		.select:is(:disabled, [disabled]),
 		fieldset:disabled .select {
-		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
+		color: color-mix(in oklch, var(--color-base-content) 40%, #0000);
 	}
 	.select:has(> select[disabled]) select::placeholder,
 		.select:is(:disabled, [disabled]) select::placeholder {
-		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+		color: color-mix(in oklch, var(--color-base-content) 20%, #0000);
 	}
 	.select::picker(select),
 		.select select::picker(select) {
@@ -190,7 +213,7 @@
 		max-height: min(24rem, 70dvh);
 		margin-inline: calc(0.5em * var(--scale));
 		translate: calc(-0.5em * var(--scale)) 0;
-		border: var(--border) solid var(--color-surface-2);
+		border: var(--border) solid var(--color-base-200);
 		margin-block: calc(0.5em * var(--scale));
 		padding: calc(0.5em * var(--scale));
 		background-color: inherit;
@@ -221,7 +244,7 @@
 		.select option:not(:disabled):focus-visible,
 		.select select option:not(:disabled):hover,
 		.select select option:not(:disabled):focus-visible {
-		background-color: color-mix(in oklch, var(--color-on-surface) 10%, #0000);
+		background-color: color-mix(in oklch, var(--color-base-content) 10%, #0000);
 		outline: none;
 	}
 	.select option:not(:disabled):active,
@@ -252,8 +275,8 @@
 
 	.select-ghost:focus,
 	.select-ghost:focus-within {
-		color: var(--color-on-surface);
-		background-color: var(--color-surface-1);
+		color: var(--color-base-content);
+		background-color: var(--color-base-100);
 		border-color: #0000;
 		box-shadow: none;
 	}

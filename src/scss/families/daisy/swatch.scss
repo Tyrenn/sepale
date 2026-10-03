@@ -22,10 +22,11 @@
    painted as a flat layer over a checkerboard the family supplies in
    `--swatch-checks`.
 
-   What is written on it is an on-color: a family derives
-   `--swatch-on-color` from `--swatch-color` the same way
-   `--color-on-*` is derived from a surface, so a letter stays legible
-   on a colour nobody knew at authoring time.
+   What is written on it is derived: `--swatch-on-color` flips
+   between near-black and near-white with the lightness of
+   `--swatch-color`, so a letter stays legible on a colour nobody knew
+   at authoring time. (The theme's own inks, --color-*-content, are
+   parameters; a swatch shows an arbitrary colour, so it computes.)
 
    Plumbing contract:
 	--swatch-color        the sample itself (author-set, required)
@@ -106,18 +107,18 @@
 
 @mixin look {
 	.swatch {
-		--swatch-color: var(--color-surface-1);
+		--swatch-color: var(--color-base-100);
 		--swatch-size: calc(2em * var(--scale));
 		--swatch-radius: var(--radius-field);
 		--swatch-border-width: var(--border);
-		--swatch-border: var(--color-border);
+		--swatch-border: color-mix(in oklab, var(--color-base-content) 10%, #0000);
 		--swatch-shadow: none;
 		--swatch-disabled-opacity: 0.4;
 		--swatch-focus-outline: 2px solid currentColor;
 		--swatch-focus-offset: 2px;
 		--swatch-transition: box-shadow 0.2s, border-color 0.2s;
 
-		/* Same flip as --color-on-*: a light sample gets near-black, a dark one
+		/* The flip: a light sample gets near-black, a dark one
 		   near-white, keeping a whisper of the sample's own hue. */
 		--swatch-on-color: oklch(
 			from var(--swatch-color) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h
@@ -127,10 +128,10 @@
 		   top, so a semi-transparent sample lets it through. */
 		--swatch-checks: conic-gradient(
 			from 90deg,
-			var(--color-surface-3) 25%,
-			var(--color-surface-2) 0 50%,
-			var(--color-surface-3) 0 75%,
-			var(--color-surface-2) 0
+			var(--color-base-300) 25%,
+			var(--color-base-200) 0 50%,
+			var(--color-base-300) 0 75%,
+			var(--color-base-200) 0
 		);
 		background-size: auto, calc(0.5em * var(--scale)) calc(0.5em * var(--scale));
 		font-weight: 600;
@@ -142,7 +143,7 @@
 	}
 
 	.swatch-active {
-		--swatch-shadow: 0 0 0 2px var(--color-surface-1), 0 0 0 4px var(--color-primary);
+		--swatch-shadow: 0 0 0 2px var(--color-base-100), 0 0 0 4px var(--color-primary);
 	}
 
 	@each $color in c.$color-list {

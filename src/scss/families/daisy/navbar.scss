@@ -96,12 +96,15 @@
 }
 
 @mixin look {
+	/* daisyUI's .navbar paints nothing: every example in its docs adds
+	   `bg-base-100 shadow-sm`. With no utility classes here, that pairing
+	   is the default. */
 	.navbar {
-		--navbar-bg: var(--color-surface-3);
-		--navbar-fg: var(--color-on-surface);
+		--navbar-bg: var(--color-base-100);
+		--navbar-fg: var(--color-base-content);
 		--navbar-border: #0000;
 		--navbar-border-width: 0;
-		--navbar-shadow: var(--shadow-light);
+		--navbar-shadow: 0 1px 3px 0 oklch(0% 0 0 / 0.1), 0 1px 2px -1px oklch(0% 0 0 / 0.1);
 		--navbar-h: calc(4em * var(--scale));
 		--navbar-px: calc(0.5em * var(--scale));
 		--navbar-py: calc(0.5em * var(--scale));

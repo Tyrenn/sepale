@@ -104,6 +104,38 @@
 		position: absolute;
 		cursor: pointer;
 	}
+
+	/* ── Suggestions ──
+	   The Input wrapper's `suggest` hangs a .list-suggestions under the
+	   field. The list is `list`'s to paint; this only places it, inside
+	   the frame (.input is already position: relative). A floating list
+	   is placed by the component instead, with inline fixed coordinates. */
+	.input > .list-suggestions {
+		position: absolute;
+		z-index: 10;
+		top: calc(100% + 0.25em);
+		left: 0;
+		min-width: 100%;
+		width: max-content;
+		max-width: max(100%, 40ch);
+		white-space: normal;
+		overflow-wrap: anywhere;
+		cursor: default;
+	}
+
+	/* ── Flag: nospinner ── a number field without its step arrows. */
+	.input-nospinner:is([type="number"]),
+	.input-nospinner input[type="number"] {
+		appearance: textfield;
+		-moz-appearance: textfield;
+	}
+	.input-nospinner:is([type="number"])::-webkit-inner-spin-button,
+	.input-nospinner:is([type="number"])::-webkit-outer-spin-button,
+	.input-nospinner input[type="number"]::-webkit-inner-spin-button,
+	.input-nospinner input[type="number"]::-webkit-outer-spin-button {
+		appearance: none;
+		margin: 0;
+	}
 }
 
 @mixin look {
@@ -112,12 +144,14 @@
 	}
 	.input {
 		--size: calc(2.5em * var(--scale));
-		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+		/* The resting edge. Set here, before the colour variants, so they
+		   (and the validator) can still recolour it. */
+		--input-color: var(--color-border);
 		gap: calc(0.5em * var(--scale));
 		padding-inline: calc(0.5em * var(--scale)); /* Radix --text-field-padding: var(--space-2) */
 		width: clamp(3rem, 20rem, 100%);
 		font-size: var(--fontsize, var(--base, var(--default-base)));
-		border: var(--border) solid #0000;
+		border: var(--border) solid var(--input-color, #0000);
 	}
 	.input :where(input) {
 		height: 100%;
@@ -191,7 +225,6 @@
 	@include m.size-variants('input');
 
 	.input {
-		--input-color: var(--color-border);
 		background-color: var(--color-surface-2);
 	}
 

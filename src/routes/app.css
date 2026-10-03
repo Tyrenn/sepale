@@ -5,14 +5,26 @@
 
 * { box-sizing: border-box; }
 
+/* The chrome follows the active theme, but families name their colours as
+   they please (ADR 0010): daisy uses daisyUI's --color-base-*, the others
+   --color-surface-*. These are the only place the chrome reads a
+   family's names, each with the daisyUI name as a fallback. */
+:root {
+	--app-bg: var(--color-surface-1, var(--color-base-100));
+	--app-bg-2: var(--color-surface-2, var(--color-base-200));
+	--app-bg-3: var(--color-surface-3, var(--color-base-300));
+	--app-fg: var(--color-on-surface, var(--color-base-content));
+	--app-line: var(--color-border, color-mix(in oklab, var(--app-fg) 10%, #0000));
+}
+
 html, body { margin: 0; height: 100%; }
 
 body {
 	font-family: system-ui, sans-serif;
 	/* --root-bg lets a family repaint the page; defaults to the theme's
-	   base surface. */
-	background: var(--root-bg, var(--color-surface-1));
-	color: var(--color-on-surface);
+	   lowest ground. */
+	background: var(--root-bg, var(--app-bg));
+	color: var(--app-fg);
 }
 
 .shell {
@@ -30,8 +42,8 @@ body {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	background-color: var(--color-surface-2);
-	border-inline-end: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+	background-color: var(--app-bg-2);
+	border-inline-end: 1px solid color-mix(in oklab, var(--app-fg) 8%, #0000);
 }
 
 .side-head {
@@ -40,7 +52,7 @@ body {
 	gap: 0.5rem;
 	padding: 0.75rem;
 	flex-shrink: 0;
-	border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+	border-bottom: 1px solid color-mix(in oklab, var(--app-fg) 8%, #0000);
 }
 
 .side-select {
@@ -55,7 +67,7 @@ body {
 	font-size: 0.7rem;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
-	color: color-mix(in oklch, var(--color-on-surface) 55%, #0000);
+	color: color-mix(in oklch, var(--app-fg) 55%, #0000);
 }
 
 .side-select > select { flex: 1; min-width: 0; }
@@ -71,6 +83,34 @@ body {
 	width: 100%;
 }
 
+/* Groups read as blocks: a hairline and some air above each one, a
+   heading in the ink at full strength, and a count of what it holds. The
+   folding and the indent under the heading are the family's sub-menu. */
+.side-group {
+	margin-top: 0.35rem;
+	padding-top: 0.35rem;
+	border-top: 1px solid color-mix(in oklab, var(--app-fg) 9%, #0000);
+}
+.side-nav .menu-toggle {
+	font-weight: 650;
+	letter-spacing: 0.01em;
+}
+.side-count {
+	justify-self: end;
+	min-width: 1.6em;
+	padding: 0 0.4em;
+	border-radius: 999px;
+	font-size: 0.7rem;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+	background: color-mix(in oklab, var(--app-fg) 8%, #0000);
+	color: color-mix(in oklab, var(--app-fg) 70%, #0000);
+}
+.side-group-title {
+	font-weight: 650;
+}
+
 /* ── Theme editor: second column, against the sidebar ────────────────────── */
 
 .editor {
@@ -79,8 +119,8 @@ body {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	background: var(--color-surface-2);
-	border-inline-end: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+	background: var(--app-bg-2);
+	border-inline-end: 1px solid color-mix(in oklab, var(--app-fg) 8%, #0000);
 }
 
 .editor-head {
@@ -89,7 +129,7 @@ body {
 	gap: 0.5rem;
 	padding: 0.75rem;
 	flex-shrink: 0;
-	border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+	border-bottom: 1px solid color-mix(in oklab, var(--app-fg) 8%, #0000);
 }
 
 .editor-name {
@@ -165,9 +205,9 @@ body {
 	font-size: 0.72rem;
 	font-family: ui-monospace, monospace;
 	padding: 0.3rem 0.4rem;
-	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	border: 1px solid color-mix(in oklab, var(--app-fg) 20%, #0000);
 	border-radius: 0.35rem;
-	background: var(--color-surface-1);
+	background: var(--app-bg);
 	color: inherit;
 }
 
@@ -188,9 +228,9 @@ body {
 	font-size: 0.72rem;
 	font-family: ui-monospace, monospace;
 	padding: 0.3rem 0.4rem;
-	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	border: 1px solid color-mix(in oklab, var(--app-fg) 20%, #0000);
 	border-radius: 0.35rem;
-	background: var(--color-surface-1);
+	background: var(--app-bg);
 	color: inherit;
 }
 .cf-num { width: 3.5rem; }
@@ -213,7 +253,100 @@ body {
    several components at once — including where they meet. */
 .content-preview { padding: 1rem; }
 
+/* ── The make-believe app ───────────────────────────────────────────────
+   A small dashboard built from the kit, the way daisyUI's theme generator
+   previews a theme: a sidebar and a main column, figures, a list, a form, a
+   carousel. Only the layout is the app's; every control is the family's. */
+.db {
+	flex-shrink: 0;
+	display: grid;
+	grid-template-columns: 13rem minmax(0, 1fr);
+	margin-bottom: 1rem;
+	background: var(--app-bg);
+	border: 1px solid var(--app-line);
+	border-radius: var(--radius-box, 0.75rem);
+	overflow: hidden;
+}
+.db-side {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 0.75rem;
+	background: var(--app-bg);
+	border-inline-end: 1px solid var(--app-line);
+}
+.db-side .menu { width: 100%; }
+.db-upgrade { margin-top: auto; }
+.db-brand {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.25rem 0.25rem 0.5rem;
+	font-weight: 700;
+	font-size: 1.05rem;
+}
+/* The content sits on the second ground, so cards drawn on the first one
+   stand out — the way a daisyUI page is base-200 under base-100 cards. */
+.db-main { display: flex; flex-direction: column; min-width: 0; background: var(--app-bg-2); }
+.db-main > .navbar { background-color: var(--app-bg); }
+.db-main > .navbar { border-bottom: 1px solid var(--app-line); }
+.db-body { display: flex; flex-direction: column; gap: 1rem; padding: 1rem; }
+.db-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+.db-head .title { margin: 0; }
+.db-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+	gap: 0.75rem;
+}
+.db-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+	gap: 0.75rem;
+	align-items: start;
+}
+.db-span { grid-column: 1 / -1; }
+.db-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.db-between { justify-content: space-between; }
+.db-stats .db-row { flex-wrap: nowrap; }
+.db-strong { font-weight: 600; }
+.db-muted { font-size: 0.85em; color: color-mix(in oklab, currentColor 60%, #0000); }
+.db-figure { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.01em; }
+.db-channels { display: flex; align-items: center; gap: 1rem; }
+.db-bars { flex: 1; display: flex; flex-direction: column; gap: 0.6rem; }
+.db-bar { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9em; }
+.db-goal { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+/* A slide is tinted with the colour it is about; the families name their
+   colours alike enough for --color-primary / -success / -error. */
+.db-slide {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	padding: 1rem 3.25rem;
+	min-height: 7rem;
+	justify-content: center;
+	background: color-mix(in oklab, var(--tint, var(--app-fg)) 14%, var(--app-bg));
+}
+/* The dock is page chrome: it needs a screen to sit at the bottom of. */
+.db-phone {
+	position: relative;
+	height: 13rem;
+	width: 11rem;
+	margin-inline: auto;
+	border: 6px solid color-mix(in oklab, var(--app-fg) 85%, #0000);
+	border-radius: 1.5rem;
+	overflow: hidden;
+	background: var(--app-bg);
+}
+.db-phone-screen { display: flex; flex-direction: column; gap: 0.35rem; padding: 1rem 0.85rem; }
+
 .tp-grid {
+	flex-shrink: 0;
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
 	gap: 0.75rem;
@@ -225,8 +358,8 @@ body {
 	flex-direction: column;
 	gap: 0.75rem;
 	padding: 1rem;
-	background: var(--color-surface-1);
-	border: 1px solid var(--color-border);
+	background: var(--app-bg);
+	border: 1px solid var(--app-line);
 	border-radius: var(--radius-box, 0.75rem);
 }
 
@@ -257,7 +390,7 @@ body {
 	gap: 0.5rem;
 	padding: 0.75rem;
 	border-radius: var(--radius-box, 0.5rem);
-	border: 1px solid var(--color-border);
+	border: 1px solid var(--app-line);
 }
 
 .tp-surf > span {
@@ -278,7 +411,7 @@ body {
 	position: relative;
 	height: 5rem;
 	border-radius: var(--radius-box, 0.5rem);
-	background: color-mix(in oklab, var(--color-on-surface) 4%, #0000);
+	background: color-mix(in oklab, var(--app-fg) 4%, #0000);
 	overflow: hidden;
 }
 
@@ -318,15 +451,15 @@ dialog.export {
 	width: 100%;
 }
 dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
-.export-inner { padding: 1.25rem; background: var(--color-surface-1); color: var(--color-on-surface); }
+.export-inner { padding: 1.25rem; background: var(--app-bg); color: var(--app-fg); }
 .export-text {
 	width: 100%;
 	height: 16rem;
 	font-family: ui-monospace, monospace;
 	font-size: 0.78rem;
 	border-radius: 0.4rem;
-	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
-	background: var(--color-surface-2);
+	border: 1px solid color-mix(in oklab, var(--app-fg) 20%, #0000);
+	background: var(--app-bg-2);
 	color: inherit;
 	padding: 0.6rem;
 }
@@ -366,11 +499,11 @@ dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
 	font-size: 0.75rem;
 	padding: 0.2rem 0.55rem;
 	border-radius: 0.35rem;
-	border: 1px solid var(--color-border);
+	border: 1px solid var(--app-line);
 }
 .fam-theme[data-scheme='dark'] {
-	background: color-mix(in oklab, var(--color-on-surface) 88%, #0000);
-	color: var(--color-surface-1);
+	background: color-mix(in oklab, var(--app-fg) 88%, #0000);
+	color: var(--app-bg);
 	border-color: transparent;
 }
 
@@ -390,12 +523,12 @@ dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
 	letter-spacing: 0.05em;
 	opacity: 0.5;
 	padding: 0.4rem 0.6rem 0.4rem 0;
-	border-bottom: 1px solid var(--color-border);
+	border-bottom: 1px solid var(--app-line);
 	white-space: nowrap;
 }
 .fam-table td {
 	padding: 0.45rem 0.6rem 0.45rem 0;
-	border-bottom: 1px solid color-mix(in oklab, var(--color-on-surface) 7%, #0000);
+	border-bottom: 1px solid color-mix(in oklab, var(--app-fg) 7%, #0000);
 	vertical-align: top;
 }
 .fam-table tr[data-active='true'] td { font-weight: 700; }
@@ -411,7 +544,7 @@ dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
 	width: 0.85rem;
 	height: 0.85rem;
 	border-radius: 0.2rem;
-	border: 1px solid color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+	border: 1px solid color-mix(in oklab, var(--app-fg) 20%, #0000);
 	vertical-align: -0.1rem;
 	margin-inline-end: 0.35rem;
 }

@@ -20,7 +20,7 @@
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1        background when checked
+	--color-base-100        background when checked
 	--color-{variant}       accent color (color-variants)
 	--border
    ============================================================ */
@@ -51,7 +51,7 @@
 	}
 	.radio:checked,
 		.radio[aria-checked="true"] {
-		background-color: var(--color-surface-1);
+		background-color: var(--color-base-100);
 	}
 	@media (prefers-reduced-motion: no-preference) {
 		.radio:checked,
@@ -149,5 +149,12 @@
 
 	.radio-xl:is([type="radio"]) {
 		--size: calc(2em * var(--scale));
+	}
+
+	/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+	   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+	.radio::before {
+		background-image: none, var(--fx-noise);
+		background-size: auto, calc(var(--noise, 0) * 100%);
 	}
 }

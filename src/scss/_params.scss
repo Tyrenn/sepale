@@ -39,6 +39,7 @@
 @use 'sass:list';
 @use 'sass:map';
 @use 'sass:meta';
+@use 'sass:string';
 
 @function _q($v) {
 	@return '"' + $v + '"';
@@ -94,6 +95,12 @@
 		@if map.has-key($p, unit) {
 			$e: _field($e, 'unit', map.get($p, unit));
 		}
+		@if map.has-key($p, kind) {
+			$e: _field($e, 'kind', map.get($p, kind));
+		}
+		@if map.has-key($p, on) {
+			$e: _field($e, 'on', map.get($p, on));
+		}
 		@if map.has-key($p, units) {
 			$e: $e + ',' + _q('units') + ':' + _arr(map.get($p, units));
 		}
@@ -121,41 +128,78 @@
    under whatever names it wants, and gets labels and help text
    for the ones this table knows. Unknown names still work, they
    just get their raw name as a label.
+
+   Each known name also says two things the editor needs and can
+   not guess from a name:
+
+     kind  surface | accent | ink — a ground things rest on, a
+           colour things are painted with, or the text and lines
+           drawn over both. The editor lays surfaces out first.
+     on    the variable holding the ink written on this colour.
+           It may be a parameter of the family (daisy's
+           --color-primary-content) or a value the family derives
+           itself (--color-on-primary): the editor shows an
+           editable tile for the first, a contrast check for the
+           second. A surface names its ink in the table; for an
+           accent it follows the family's convention, passed as
+           `$ink`: `on` gives --color-on-<name>, `content` gives
+           --color-<name>-content (daisyUI).
    ------------------------------------------------------------ */
 $color-meta: (
-	'color-surface-1': ('Surface 1', 'The ground: page background, and the inside of fields.'),
-	'color-surface-2': ('Surface 2', 'Objects resting on the ground: plain buttons, chips, skeletons.'),
-	'color-surface-3': ('Surface 3', 'Chrome pinned to the edge of the screen: dock, navbar.'),
-	'color-surface-4': ('Surface 4', 'A fourth ground, for looks that stack more levels.'),
-	'color-on-surface': ('Text', 'Text and icons drawn on the surfaces.'),
-	'color-border': ('Border', 'Hairlines, field outlines, dividers.'),
-	'color-primary': ('Primary', 'Main brand and action colour.'),
-	'color-secondary': ('Secondary', 'Secondary brand colour.'),
-	'color-accent': ('Accent', 'Accent and highlight colour.'),
-	'color-neutral': ('Neutral', 'Strong neutral tone for filled, unbranded elements.'),
-	'color-info': ('Info', 'Informational state.'),
-	'color-success': ('Success', 'Success state.'),
-	'color-warning': ('Warning', 'Warning state.'),
-	'color-error': ('Error', 'Error and danger state.')
+	/* Our own names: surfaces, plus inks a family usually derives. */
+	'color-surface-1': ('Surface 1', 'The ground: page background, and the inside of fields.', surface, 'color-on-surface'),
+	'color-surface-2': ('Surface 2', 'Objects resting on the ground: plain buttons, chips, skeletons.', surface, 'color-on-surface'),
+	'color-surface-3': ('Surface 3', 'Chrome pinned to the edge of the screen: dock, navbar.', surface, 'color-on-surface'),
+	'color-surface-4': ('Surface 4', 'A fourth ground, for looks that stack more levels.', surface, 'color-on-surface'),
+	'color-on-surface': ('Text', 'Text and icons drawn on the surfaces.', ink, null),
+	'color-border': ('Border', 'Hairlines, field outlines, dividers.', ink, null),
+	'color-primary': ('Primary', 'Main brand and action colour.', accent, null),
+	'color-secondary': ('Secondary', 'Secondary brand colour.', accent, null),
+	'color-accent': ('Accent', 'Accent and highlight colour.', accent, null),
+	'color-neutral': ('Neutral', 'Strong neutral tone for filled, unbranded elements.', accent, null),
+	'color-info': ('Info', 'Informational state.', accent, null),
+	'color-success': ('Success', 'Success state.', accent, null),
+	'color-warning': ('Warning', 'Warning state.', accent, null),
+	'color-error': ('Error', 'Error and danger state.', accent, null),
+
+	/* daisyUI's names (the daisy family), where every ink is a
+	   parameter: --color-<name>-content. */
+	'color-base-100': ('Base 100', 'The page, and the inside of fields, cards and menus.', surface, 'color-base-content'),
+	'color-base-200': ('Base 200', 'A step darker: plain buttons, badges, card borders.', surface, 'color-base-content'),
+	'color-base-300': ('Base 300', 'Two steps darker: the dock, tab borders, skeletons.', surface, 'color-base-content'),
+	'color-base-content': ('Base content', 'Text on the bases — and, mixed down, every field border.', ink, null),
+	'color-primary-content': ('Primary content', 'Text on primary.', ink, null),
+	'color-secondary-content': ('Secondary content', 'Text on secondary.', ink, null),
+	'color-accent-content': ('Accent content', 'Text on accent.', ink, null),
+	'color-neutral-content': ('Neutral content', 'Text on neutral.', ink, null),
+	'color-info-content': ('Info content', 'Text on info.', ink, null),
+	'color-success-content': ('Success content', 'Text on success.', ink, null),
+	'color-warning-content': ('Warning content', 'Text on warning.', ink, null),
+	'color-error-content': ('Error content', 'Text on error.', ink, null)
 );
 
-@function colors($values) {
+@function colors($values, $ink: on) {
 	$out: ();
 
 	@each $name, $value in $values {
 		$meta: map.get($color-meta, $name);
-		$label: $name;
-		$help: '';
+		$entry: (label: $name, group: 'Colors', type: color, default: $value, help: '', kind: accent);
 		@if $meta {
-			$label: list.nth($meta, 1);
-			$help: list.nth($meta, 2);
+			$entry: map.merge($entry, (label: list.nth($meta, 1), help: list.nth($meta, 2), kind: list.nth($meta, 3)));
+			@if list.nth($meta, 4) {
+				$entry: map.set($entry, on, list.nth($meta, 4));
+			}
+		}
+		@if map.get($entry, kind) == accent {
+			$short: string.slice($name, 7); /* drop `color-` */
+			@if $ink == content {
+				$entry: map.set($entry, on, $name + '-content');
+			} @else {
+				$entry: map.set($entry, on, 'color-on-' + $short);
+			}
 		}
 
-		$out: map.set(
-			$out,
-			$name,
-			(label: $label, group: 'Colors', type: color, default: $value, help: $help)
-		);
+		$out: map.set($out, $name, $entry);
 	}
 
 	@return $out;

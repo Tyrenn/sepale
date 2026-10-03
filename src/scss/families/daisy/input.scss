@@ -12,15 +12,15 @@
 
    Plumbing contract:
 	--input-color   resolved border/accent color — structure defaults it to a
-	                faint on-surface mix, color-variants override it,
-	                focus resets it to on-surface
+	                faint base-content mix, color-variants override it,
+	                focus resets it to base-content
 	--size          field height (2.5em × --scale, scales with font)
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1        field background
-	--color-surface-2        disabled background and border
-	--color-on-surface    default text color
+	--color-base-100        field background
+	--color-base-200        disabled background and border
+	--color-base-content    default text color
 	--color-{variant}       semantic accent (set by color-variants)
 	--border                border width
 	--radius-field          field corner radius
@@ -49,7 +49,7 @@
 		vertical-align: middle;
 		white-space: nowrap;
 		position: relative;
-		background-color: var(--color-surface-1);
+		background-color: var(--color-base-100);
 		height: var(--size);
 		touch-action: manipulation;
 		border-start-start-radius: var(--join-ss, var(--radius-field));
@@ -75,15 +75,15 @@
 	}
 	.input:focus,
 		.input:focus-within {
-		--input-color: var(--color-on-surface);
+		--input-color: var(--color-base-content);
 		isolation: isolate;
 	}
 	/* Increase font size on iOS to prevent auto-zoom on focus */
 	.input:has(> input[disabled]),
 		.input:is(:disabled, [disabled]),
 		fieldset:disabled .input {
-		border-color: var(--color-surface-2);
-		background-color: var(--color-surface-2);
+		border-color: var(--color-base-200);
+		background-color: var(--color-base-200);
 		cursor: not-allowed;
 	}
 	.input:has(> input[disabled]) > input[disabled] {
@@ -104,6 +104,38 @@
 		position: absolute;
 		cursor: pointer;
 	}
+
+	/* ── Suggestions ──
+	   The Input wrapper's `suggest` hangs a .list-suggestions under the
+	   field. The list is `list`'s to paint; this only places it, inside
+	   the frame (.input is already position: relative). A floating list
+	   is placed by the component instead, with inline fixed coordinates. */
+	.input > .list-suggestions {
+		position: absolute;
+		z-index: 10;
+		top: calc(100% + 0.25em);
+		left: 0;
+		min-width: 100%;
+		width: max-content;
+		max-width: max(100%, 40ch);
+		white-space: normal;
+		overflow-wrap: anywhere;
+		cursor: default;
+	}
+
+	/* ── Flag: nospinner ── a number field without its step arrows. */
+	.input-nospinner:is([type="number"]),
+	.input-nospinner input[type="number"] {
+		appearance: textfield;
+		-moz-appearance: textfield;
+	}
+	.input-nospinner:is([type="number"])::-webkit-inner-spin-button,
+	.input-nospinner:is([type="number"])::-webkit-outer-spin-button,
+	.input-nospinner input[type="number"]::-webkit-inner-spin-button,
+	.input-nospinner input[type="number"]::-webkit-outer-spin-button {
+		appearance: none;
+		margin: 0;
+	}
 }
 
 @mixin look {
@@ -112,12 +144,12 @@
 	}
 	.input {
 		--size: calc(2.5em * var(--scale));
-		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+		--input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
 		gap: calc(0.5em * var(--scale));
 		padding-inline: calc(0.75em * var(--scale));
 		width: clamp(3rem, 20rem, 100%);
 		font-size: var(--fontsize, var(--base, var(--default-base)));
-		border: var(--border) solid #0000;
+		border: var(--border) solid var(--input-color, #0000);
 	}
 	.input :where(input) {
 		height: 100%;
@@ -145,7 +177,7 @@
 	.input:has(> input[disabled]),
 		.input:is(:disabled, [disabled]),
 		fieldset:disabled .input {
-		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
+		color: color-mix(in oklch, var(--color-base-content) 40%, #0000);
 		box-shadow: none;
 	}
 	.input:has(> input[disabled]) input::placeholder,
@@ -154,7 +186,7 @@
 		.input:has(> input[disabled])::placeholder,
 		.input:is(:disabled, [disabled])::placeholder,
 		fieldset:disabled .input::placeholder {
-		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+		color: color-mix(in oklch, var(--color-base-content) 20%, #0000);
 	}
 	.input[type="number"]::-webkit-inner-spin-button {
 		margin-block: calc(-0.75em * var(--scale));
@@ -191,8 +223,8 @@
 
 	.input-ghost:focus,
 	.input-ghost:focus-within {
-		color: var(--color-on-surface);
-		background-color: var(--color-surface-1);
+		color: var(--color-base-content);
+		background-color: var(--color-base-100);
 		border-color: #0000;
 		box-shadow: none;
 	}

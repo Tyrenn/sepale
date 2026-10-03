@@ -10,7 +10,8 @@ families/dahlia/
   index.scss            parameters, root tokens, the include order
   _root.scss            everything outside a component: the page (root
                         colour and scroll, svg, @property), the type scale,
-                        --scale, the light shadow, the derived --color-on-*
+                        --scale, the light shadow, and whatever colours
+                        the family derives instead of exposing them
   button.scss           everything dahlia draws for .btn
   input.scss
   join.scss
@@ -48,6 +49,19 @@ $params: map.merge(
 );
 
 @include params.emit($params);
+
+/* Colour names and inks are the family's call. `colors()` adds labels and
+   two hints the editor needs: `kind` (surface / accent / ink) and `on`, the
+   variable holding the text written on a colour. Accents follow the
+   family's ink convention:
+     params.colors((…))                 → --color-on-primary  (derived by
+                                          the family, in _root.scss)
+     params.colors($ink: content, …)    → --color-primary-content (daisy:
+                                          a parameter, as in daisyUI)
+   The colour axis (`.btn-primary`, `.btn-secondary`…) is
+   `_config.$color-list`. A family that ships fewer colours configures it
+   on its first line: `@use '../../config' with ($color-list: (…));`
+   (sunflower ships four). */
 
 /* 2. Family-owned values a theme must not touch. */
 :root {

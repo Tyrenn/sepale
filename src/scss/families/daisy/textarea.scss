@@ -15,7 +15,7 @@
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-base-100 / --color-base-200 / --color-base-content
 	--color-{variant}       semantic accent (set by color-variants)
 	--border / --radius-field
 	--depth                 flat-skin inset intensity (skin-flat only)
@@ -30,7 +30,7 @@
 
 @mixin structure {
 	.textarea {
-		background-color: var(--color-surface-1);
+		background-color: var(--color-base-100);
 		border-radius: var(--radius-field);
 		flex-shrink: 1;
 		appearance: none;
@@ -44,14 +44,14 @@
 	}
 	.textarea:focus,
 		.textarea:focus-within {
-		--input-color: var(--color-on-surface);
+		--input-color: var(--color-base-content);
 		isolation: isolate;
 	}
 	/* Increase font size on iOS to prevent auto-zoom on focus */
 	.textarea:has(> textarea[disabled]),
 		.textarea:is(:disabled, [disabled]) {
-		border-color: var(--color-surface-2);
-		background-color: var(--color-surface-2);
+		border-color: var(--color-base-200);
+		background-color: var(--color-base-200);
 		cursor: not-allowed;
 	}
 	.textarea:has(> textarea[disabled]) > textarea[disabled] {
@@ -61,8 +61,8 @@
 
 @mixin look {
 	.textarea {
-		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
-		border: var(--border) solid #0000;
+		--input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+		border: var(--border) solid var(--input-color, #0000);
 		min-height: calc(5em * var(--scale));
 		padding-block: calc(0.5em * var(--scale));
 		padding-inline-start: calc(0.75em * var(--scale));
@@ -93,14 +93,14 @@
 	}
 	.textarea:has(> textarea[disabled]),
 		.textarea:is(:disabled, [disabled]) {
-		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
+		color: color-mix(in oklch, var(--color-base-content) 40%, #0000);
 		box-shadow: none;
 	}
 	.textarea:has(> textarea[disabled]) textarea::placeholder,
 		.textarea:is(:disabled, [disabled]) textarea::placeholder,
 		.textarea:has(> textarea[disabled])::placeholder,
 		.textarea:is(:disabled, [disabled])::placeholder {
-		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+		color: color-mix(in oklch, var(--color-base-content) 20%, #0000);
 	}
 
 	/* the flat surface */
@@ -125,8 +125,8 @@
 
 	.textarea-ghost:focus,
 	.textarea-ghost:focus-within {
-		color: var(--color-on-surface);
-		background-color: var(--color-surface-1);
+		color: var(--color-base-content);
+		background-color: var(--color-base-100);
 		border-color: #0000;
 		box-shadow: none;
 	}

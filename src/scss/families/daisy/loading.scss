@@ -67,13 +67,4 @@
 	.loading {
 		color: currentColor;
 	}
-
-	/* Dots: three xsmall, perfectly round, empty buttons. */
-	.loading-dots {
-		@include m.dot-loader;
-		--dot-bg: var(--color-surface-2);
-		--dot-border-width: var(--border, 1px);
-	}
-
-	@include m.dot-loader-keyframes;
 }

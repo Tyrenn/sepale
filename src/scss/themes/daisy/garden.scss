@@ -1,29 +1,32 @@
-/* Theme « garden » — editable variables only (colors + radii). */
+/* Theme « garden » — copied from daisyUI 5.7 (themes/garden.css), value for
+   value. --size-field and --size-selector are left out: daisy sizes its
+   components in em, through --scale (see index.scss). */
 :root {
 	color-scheme: light;
-	--color-surface-1: oklch(92.951% 0.002 17.197);
-	--color-surface-2: oklch(86.445% 0.002 17.197);
-	--color-surface-3: oklch(79.938% 0.001 17.197);
-	--color-on-surface: oklch(16.961% 0.001 17.32);
+	--color-base-100: oklch(92.951% 0.002 17.197);
+	--color-base-200: oklch(86.445% 0.002 17.197);
+	--color-base-300: oklch(79.938% 0.001 17.197);
+	--color-base-content: oklch(16.961% 0.001 17.32);
 	--color-primary: oklch(62.45% 0.278 3.836);
-	--color-on-primary: oklch(100% 0 0);
+	--color-primary-content: oklch(100% 0 0);
 	--color-secondary: oklch(48.495% 0.11 355.095);
-	--color-on-secondary: oklch(89.699% 0.022 355.095);
+	--color-secondary-content: oklch(89.699% 0.022 355.095);
 	--color-accent: oklch(56.273% 0.054 154.39);
-	--color-on-accent: oklch(100% 0 0);
+	--color-accent-content: oklch(100% 0 0);
 	--color-neutral: oklch(24.155% 0.049 89.07);
-	--color-on-neutral: oklch(92.951% 0.002 17.197);
+	--color-neutral-content: oklch(92.951% 0.002 17.197);
 	--color-info: oklch(72.06% 0.191 231.6);
-	--color-on-info: oklch(0% 0 0);
+	--color-info-content: oklch(0% 0 0);
 	--color-success: oklch(64.8% 0.15 160);
-	--color-on-success: oklch(0% 0 0);
+	--color-success-content: oklch(0% 0 0);
 	--color-warning: oklch(84.71% 0.199 83.87);
-	--color-on-warning: oklch(0% 0 0);
+	--color-warning-content: oklch(0% 0 0);
 	--color-error: oklch(71.76% 0.221 22.18);
-	--color-on-error: oklch(0% 0 0);
+	--color-error-content: oklch(0% 0 0);
+	--radius-selector: 1rem;
 	--radius-field: 0.5rem;
 	--radius-box: 1rem;
-	--radius-selector: 1rem;
 	--border: 1px;
 	--depth: 0;
+	--noise: 0;
 }

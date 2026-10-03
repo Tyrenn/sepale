@@ -17,6 +17,9 @@
 
 	let themes = $derived(themesFor(playground.family));
 
+	/* Groups of the nav fold: open until folded by hand. */
+	let folded = $state<Record<string, boolean>>({});
+
 	// The active theme is applied to :root so the whole app chrome is styled
 	// by it — the app is its own showcase. Edited tokens override the
 	// family's fallbacks live.
@@ -67,6 +70,7 @@
 		     menu wrong is visible immediately. -->
 		<nav class="side-nav">
 			<ul class="menu menu-sm">
+				<li class="menu-title side-group-title">Family</li>
 				<li>
 					<a href="/description" class:menu-active={page.url.pathname === '/description'}>
 						Description
@@ -74,18 +78,33 @@
 				</li>
 				<li><a href="/" class:menu-active={page.url.pathname === '/'}>Theme</a></li>
 
+				<!-- Each group is a sub-menu of the family's own: a heading that
+				     folds, with its pages pushed in under it. -->
 				{#each COMPONENTS as group (group.group)}
-					<li class="menu-title">{group.group}</li>
-					{#each group.items as item (item.id)}
-						<li>
-							<a
-								href="/components/{item.id}"
-								class:menu-active={page.url.pathname === `/components/${item.id}`}
-							>
-								{item.label}
-							</a>
-						</li>
-					{/each}
+					{@const open = !folded[group.group]}
+					<li class="side-group">
+						<button
+							type="button"
+							class="menu-toggle"
+							aria-expanded={open}
+							onclick={() => (folded[group.group] = open)}
+						>
+							<span>{group.group}</span>
+							<span class="side-count">{group.items.length}</span>
+						</button>
+						<ul class="menu-sub" class:menu-sub-closed={!open}>
+							{#each group.items as item (item.id)}
+								<li>
+									<a
+										href="/components/{item.id}"
+										class:menu-active={page.url.pathname === `/components/${item.id}`}
+									>
+										{item.label}
+									</a>
+								</li>
+							{/each}
+						</ul>
+					</li>
 				{/each}
 			</ul>
 		</nav>

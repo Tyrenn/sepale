@@ -17,38 +17,52 @@
 	const ORDER = ['Colors', 'Shape', 'Size', 'Effects', 'Elevation'];
 
 	// The palette is laid out as tiles, not rows, and it is derived from
-	// whatever the family declares — a family with four surfaces, or with
-	// names of its own, comes through unchanged. Each tile that has a matching
-	// on-colour shows a second, NON-editable tile painting an "A" in it:
-	// on-colours are derived in CSS, so that tile is a live contrast check
-	// rather than a control. The picker grades the same pair numerically.
+	// whatever the family declares — nothing here reads a colour's NAME. Each
+	// colour says through `on` which variable holds the ink written on it:
+	//   - when that ink is a parameter too (daisy's --color-primary-content),
+	//     it is shown as an editable tile next to its colour;
+	//   - when the family derives it (--color-on-primary), a second,
+	//     NON-editable tile paints an "A" in it: a live contrast check rather
+	//     than a control. The picker grades the same pair numerically.
 	let colorTokens = $derived(playground.tokens.filter((t) => t.type === 'color'));
 
-	/** Surfaces first, lowest to most raised — they read as one stack. */
-	let surfaces = $derived(colorTokens.filter((t) => t.name.startsWith('color-surface')));
+	/** Surfaces first, then the colours, then the inks that stand alone. */
+	const RANK: Record<string, number> = { surface: 0, accent: 1, ink: 2 };
 
-	/** Semantics: everything that is neither a surface nor plain ink. */
-	let semantics = $derived(
-		colorTokens.filter(
-			(t) => !t.name.startsWith('color-surface') && !['color-on-surface', 'color-border'].includes(t.name)
-		)
-	);
+	/** `derivedInk` is an ink shown only as a contrast check: derived by the
+	 *  family, or a parameter already shown beside an earlier colour. */
+	type Entry = { token: ThemeToken; partner?: ThemeToken; derivedInk?: string };
 
-	/** Ink: the text and hairline colours, when the family exposes them. */
-	let ink = $derived(colorTokens.filter((t) => ['color-on-surface', 'color-border'].includes(t.name)));
+	let palette = $derived.by(() => {
+		const byName = new Map(colorTokens.map((t) => [t.name, t]));
+		/* An ink that is a parameter AND some colour's `on` is drawn beside
+		   that colour, once — not on its own. */
+		const owned = new Set(colorTokens.map((t) => t.on).filter((n) => n && byName.has(n)));
+		const shown = new Set<string>();
+		return colorTokens
+			.filter((t) => !owned.has(t.name))
+			.sort((a, b) => (RANK[a.kind ?? 'accent'] ?? 1) - (RANK[b.kind ?? 'accent'] ?? 1))
+			.map((token): Entry => {
+				const ink = token.on;
+				if (!ink) return { token };
+				const partner = byName.get(ink);
+				if (partner && !shown.has(ink)) {
+					shown.add(ink);
+					return { token, partner };
+				}
+				return { token, derivedInk: ink };
+			});
+	});
 
 	const shortName = (name: string) => name.replace(/^color-/, '');
 
-	/** What a colour is graded against: the ink written on it, or for the
-	 *  ink itself, the ground it is written on. A border has no partner. */
-	const contrastOf = (name: string) =>
-		name === 'color-border'
-			? ''
-			: name === 'color-on-surface'
-				? 'var(--color-surface-1)'
-				: name.startsWith('color-surface')
-					? 'var(--color-on-surface)'
-					: `var(--color-on-${shortName(name)})`;
+	/** What a colour is graded against: the ink written on it, or for an ink,
+	 *  the first colour it is written on. A line (a border) has no partner. */
+	const contrastOf = (token: ThemeToken) => {
+		if (token.on) return `var(--${token.on})`;
+		const ground = colorTokens.find((t) => t.on === token.name);
+		return ground ? `var(--${ground.name})` : '';
+	};
 
 	let groups = $derived.by(() => {
 		const map = new Map<string, ThemeToken[]>();
@@ -82,7 +96,7 @@
 		value={token.value}
 		label={token.label}
 		help={token.description}
-		contrast={contrastOf(token.name)}
+		contrast={contrastOf(token)}
 		onchange={(v) => (token.value = v)}
 	/>
 {/snippet}
@@ -93,43 +107,24 @@
 
 		{#if name === 'Colors'}
 			<div class="pal">
-				<!-- Surfaces, lowest to most raised, each showing the text it
-				     carries. However many the family declares. -->
-				{#each surfaces as token (token.name)}
+				<!-- One entry per colour, surfaces first. A colour whose ink is a
+				     parameter shows it as a second editable tile; one whose ink is
+				     derived shows that ink painting an "A". -->
+				{#each palette as { token, partner, derivedInk } (token.name)}
 					<div class="pal-item">
 						<div class="pal-tiles">
 							{@render tile(token)}
-							<span
-								class="swatch ct ct-derived"
-								style="--swatch-color:var(--{token.name}); --swatch-on-color:var(--color-on-surface);"
-								title="--color-on-surface — derived from the surface colour"
-							>A</span>
+							{#if partner}
+								{@render tile(partner)}
+							{:else if derivedInk}
+								<span
+									class="swatch ct ct-derived"
+									style="--swatch-color:var(--{token.name}); --swatch-on-color:var(--{derivedInk});"
+									title="--{derivedInk} written on --{token.name}"
+								>A</span>
+							{/if}
 						</div>
 						<span class="pal-label">{shortName(token.name)}</span>
-					</div>
-				{/each}
-
-				{#each ink as token (token.name)}
-					<div class="pal-item">
-						<div class="pal-tiles">
-							{@render tile(token)}
-						</div>
-						<span class="pal-label">{shortName(token.name)}</span>
-					</div>
-				{/each}
-
-				{#each semantics as token (token.name)}
-					{@const key = shortName(token.name)}
-					<div class="pal-item">
-						<div class="pal-tiles">
-							{@render tile(token)}
-							<span
-								class="swatch ct ct-derived"
-								style="--swatch-color:var(--{token.name}); --swatch-on-color:var(--color-on-{key});"
-								title="--color-on-{key} — derived from --{token.name}"
-							>A</span>
-						</div>
-						<span class="pal-label">{key}</span>
 					</div>
 				{/each}
 			</div>

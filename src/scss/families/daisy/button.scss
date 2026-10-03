@@ -23,9 +23,9 @@
 	--fontsize     font size (set by `size-variants` classes)
 
    External variables (theme / family):
-	--color-surface-2          default button background
-	--color-on-surface      default text color
-	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
+	--color-base-200          default button background
+	--color-base-content      default text color
+	--color-{variant} / --color-{variant}-content  semantic colors (primary, secondary, …)
 	--radius-field            corner radius
 	--border                  border width (px value)
 	--shadow-light            family shadow system (see _root.scss)
@@ -49,8 +49,8 @@
 	/* btn links inside prose: no underline */
 	.btn {
 		/* Internal variables — neutral defaults, skins re-assign */
-		--btn-bg: var(--btn-color, var(--color-surface-2));
-		--btn-fg: var(--color-on-surface);
+		--btn-bg: var(--btn-color, var(--color-base-200));
+		--btn-fg: var(--color-base-content);
 		/* daisyUI ships 1rem — half of this was an outlier */
 		--btn-shadow: var(--shadow-light, );
 		/* Layout */
@@ -79,7 +79,7 @@
 		border-end-start-radius: var(--join-es, var(--radius-field));
 		border-end-end-radius: var(--join-ee, var(--radius-field));
 		/* Outline */
-		outline-color: var(--btn-color, var(--color-on-surface));
+		outline-color: var(--btn-color, var(--color-base-content));
 		/* Transition */
 		/* Other */
 		cursor: pointer;
@@ -99,7 +99,7 @@
 	/* Checked checkbox/radio: seed the primary color */
 	.btn:where(input:checked) {
 		--btn-color: var(--color-primary);
-		--btn-fg: var(--color-on-primary);
+		--btn-fg: var(--color-primary-content);
 		isolation: isolate;
 	}
 	/* Disabled */
@@ -139,12 +139,12 @@
 		.btn:disabled,
 		.btn[disabled] {
 		--btn-border: #0000;
-		--btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+		--btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
 	}
 	.btn-disabled:not(.btn-link, .btn-ghost),
 		.btn:disabled:not(.btn-link, .btn-ghost),
 		.btn[disabled]:not(.btn-link, .btn-ghost) {
-		background-color: color-mix(in oklch, var(--color-on-surface) 10%, #0000);
+		background-color: color-mix(in oklch, var(--color-base-content) 10%, #0000);
 		box-shadow: none;
 	}
 
@@ -168,7 +168,7 @@
 	/* Hover darken (pointer devices only) */
 	@media (hover: hover) {
 		.btn:hover {
-			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
+			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
 		}
 	}
 
@@ -177,20 +177,26 @@
 	   restyle the pressed state (poppy lowers elevation). */
 	.btn:active:not(.btn-active) {
 		translate: 0 0.5px;
-		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 5%);
-		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
+		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 5%);
+		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
 		--btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0), var(--shadow-light, );
 	}
 
 	/* Active (forced) */
 	.btn-active {
-		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-2)), #000 7%);
+		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
 		--btn-shadow: 0 0 0 0 oklch(0% 0 0/0), 0 0 0 0 oklch(0% 0 0/0), var(--shadow-light, );
 		isolation: isolate;
 	}
 
-	/* color variants */
-	@include m.seed-color-variants('btn', --btn-color, --btn-fg);
+	/* color variants — daisyUI names: the ink on a colour is
+	   --color-<name>-content, a parameter of its own. */
+	@each $color in c.$color-list {
+		.btn-#{$color} {
+			--btn-color: var(--color-#{$color});
+			--btn-fg: var(--color-#{$color}-content);
+		}
+	}
 
 	/* variant ghost */
 	.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked) {
@@ -237,16 +243,16 @@
 	.btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
 		--btn-shadow: ;
 		--btn-bg: #0000;
-		--btn-fg: var(--btn-color, var(--color-on-surface));
-		--btn-border: var(--btn-color, var(--color-on-surface));
+		--btn-fg: var(--btn-color, var(--color-base-content));
+		--btn-border: var(--btn-color, var(--color-base-content));
 	}
 
 	@media (hover: none) {
 		.btn-outline:not(.btn-active, :active, :focus-visible, input:checked):hover {
 			--btn-shadow: ;
 			--btn-bg: #0000;
-			--btn-fg: var(--btn-color, var(--color-on-surface));
-			--btn-border: var(--btn-color, var(--color-on-surface));
+			--btn-fg: var(--btn-color, var(--color-base-content));
+			--btn-border: var(--btn-color, var(--color-base-content));
 		}
 	}
 
@@ -254,8 +260,8 @@
 	.btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
 		--btn-shadow: ;
 		--btn-bg: #0000;
-		--btn-fg: var(--btn-color, var(--color-on-surface));
-		--btn-border: var(--btn-color, var(--color-on-surface));
+		--btn-fg: var(--btn-color, var(--color-base-content));
+		--btn-border: var(--btn-color, var(--color-base-content));
 	}
 
 	.btn-dash {
@@ -266,25 +272,25 @@
 		.btn-dash:not(.btn-active, :active, :focus-visible, input:checked):hover {
 			--btn-shadow: ;
 			--btn-bg: #0000;
-			--btn-fg: var(--btn-color, var(--color-on-surface));
-			--btn-border: var(--btn-color, var(--color-on-surface));
+			--btn-fg: var(--btn-color, var(--color-base-content));
+			--btn-border: var(--btn-color, var(--color-base-content));
 		}
 	}
 
 	/* variant soft */
 	.btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
 		--btn-shadow: ;
-		--btn-fg: var(--btn-color, var(--color-on-surface));
-		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
-		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+		--btn-fg: var(--btn-color, var(--color-base-content));
+		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 8%, var(--color-base-100));
+		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 10%, var(--color-base-100));
 	}
 
 	@media (hover: none) {
 		.btn-soft:not(.btn-active, :active, :focus-visible, input:checked):hover {
 			--btn-shadow: ;
-			--btn-fg: var(--btn-color, var(--color-on-surface));
-			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
-			--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+			--btn-fg: var(--btn-color, var(--color-base-content));
+			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 8%, var(--color-base-100));
+			--btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 10%, var(--color-base-100));
 		}
 	}
 
@@ -347,5 +353,21 @@
 		.btn-ripple-wave {
 			display: none;
 		}
+	}
+
+	/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+	   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+	.btn {
+		background-image: none, var(--fx-noise);
+		background-size: auto, calc(var(--noise, 0) * 100%);
+	}
+	/* No fill, no grain. */
+	.btn-outline,
+	.btn-dash,
+	.btn-ghost,
+	.btn-soft,
+	.btn-link,
+	.btn:is(.btn-disabled, :disabled, [disabled]) {
+		background-image: none;
 	}
 }

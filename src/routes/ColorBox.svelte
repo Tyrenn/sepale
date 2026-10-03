@@ -163,9 +163,9 @@
 		width: 20rem;
 		padding: 0.75rem;
 		border-radius: 0.6rem;
-		background: var(--color-surface-1);
-		color: var(--color-on-surface);
-		border: 1px solid var(--color-border);
+		background: var(--app-bg);
+		color: var(--app-fg);
+		border: 1px solid var(--app-line);
 		box-shadow:
 			0 1px 2px color-mix(in oklab, currentColor 8%, #0000),
 			0 8px 24px -8px color-mix(in oklab, currentColor 18%, #0000);
@@ -215,7 +215,7 @@
 		appearance: none;
 		height: 1.5rem;
 		border-radius: 0.3rem;
-		border: 1px solid var(--color-border);
+		border: 1px solid var(--app-line);
 	}
 	.slider input[type='range']::-webkit-slider-thumb {
 		appearance: none;

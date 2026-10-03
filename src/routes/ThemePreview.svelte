@@ -1,18 +1,18 @@
 <script lang="ts">
-	// The theme preview: composite blocks, not one cell per component. A theme
-	// breaks at the joints and in the colour sweep — an input beside a button,
-	// four status colours side by side — so each block puts several components
-	// together and every semantic colour appears at least once.
+	// The theme preview. First a make-believe app — a small analytics
+	// dashboard built from nothing but the kit — because a theme is judged on
+	// an interface, not on a catalogue: where a field meets a button, how a
+	// card sits on the page, whether the menu, the chips and the charts still
+	// read as one product. Then, under it, the sweeps a dashboard would never
+	// show at once: every colour, every selector state, the surfaces, the type.
 	import {
 		Button,
 		Input,
 		Select,
-		Textarea,
 		Checkbox,
 		Radio,
 		Toggle,
 		Range,
-		FileInput,
 		Chip,
 		Badge,
 		Loading,
@@ -23,8 +23,19 @@
 		Tabs,
 		Breadcrumbs,
 		Dock,
-		Join
+		Join,
+		Card,
+		Carousel,
+		Menu,
+		Navbar,
+		Pagination,
+		Fieldset,
+		Swatch,
+		Title,
+		Text
 	} from '$lib/index.js';
+	import { playground } from './playground.svelte.js';
+	import { classesByFamily } from '$lib/generated/components.js';
 
 	const COLORS = [
 		'primary',
@@ -36,61 +47,327 @@
 		'warning',
 		'error'
 	] as const;
+
+	/* Only the colours the active family ships: sunflower has four, daisy
+	   eight. A colour it lacks would render as an unstyled default and read
+	   as a bug. */
+	let colors = $derived(COLORS.filter((c) => classesByFamily[playground.family]?.[`btn-${c}`]));
+
+	/** The colour if the family ships it, else none (the plain variant). */
+	const has = <C extends (typeof COLORS)[number]>(c: C): C | undefined =>
+		colors.includes(c) ? c : undefined;
+
+	/** The grounds the family lets a theme set, in the editor's order. */
+	let surfaces = $derived(playground.tokens.filter((t) => t.type === 'color' && t.kind === 'surface'));
+
+	/* ── The make-believe data ───────────────────────────────────────── */
+
+	const STATS = [
+		{ label: 'Revenue', value: '€48.2k', delta: '+12.4%', up: true, progress: 72 },
+		{ label: 'Orders', value: '1,284', delta: '+3.1%', up: true, progress: 54 },
+		{ label: 'Refunds', value: '23', delta: '-8.0%', up: false, progress: 18 },
+		{ label: 'Visitors', value: '19.7k', delta: '+21%', up: true, progress: 88 }
+	];
+
+	const CHANNELS = [
+		{ name: 'Online store', share: 64, color: 'primary' },
+		{ name: 'Marketplace', share: 41, color: 'secondary' },
+		{ name: 'Retail', share: 27, color: 'accent' },
+		{ name: 'Wholesale', share: 12, color: 'neutral' }
+	] as const;
+
+	const ORDERS = [
+		{ who: 'Camille Durand', initials: 'CD', what: '2 × Linen shirt', amount: '€118', status: 'paid' },
+		{ who: 'Noah Martin', initials: 'NM', what: 'Leather bag', amount: '€249', status: 'pending' },
+		{ who: 'Léa Bernard', initials: 'LB', what: '3 × Wool socks', amount: '€36', status: 'refunded' },
+		{ who: 'Hugo Petit', initials: 'HP', what: 'Rain jacket', amount: '€189', status: 'paid' }
+	] as const;
+
+	const FEATURED = [
+		{ title: 'Autumn sale', body: 'Up to 30% off outerwear until Sunday.', tint: 'primary' },
+		{ title: 'New arrivals', body: '42 products added this week.', tint: 'success' },
+		{ title: 'Stock alert', body: '6 products are running low.', tint: 'error' }
+	] as const;
+
+	/* `null`: a row still loading. */
+	const ACTIVITY = [
+		{ text: 'Noah Martin placed an order', when: '2 min ago' },
+		{ text: 'Stock updated for Rain jacket', when: '18 min ago' },
+		null,
+		null
+	] as const;
+
+	let page = $state(1);
+	let plan = $state('pro');
+	let budget = $state(60);
 </script>
 
+{#snippet orderRow(o: (typeof ORDERS)[number])}
+	<Swatch shape="circle" size="sm" color={o.status === 'refunded' ? 'error' : 'primary'}>{o.initials}</Swatch>
+	<div class="list-col-grow">
+		<div class="db-strong">{o.who}</div>
+		<div class="db-muted">{o.what}</div>
+	</div>
+	<span class="db-strong">{o.amount}</span>
+	{#if o.status === 'paid'}
+		<Chip color="success" size="sm">paid</Chip>
+	{:else if o.status === 'pending'}
+		<Chip color={has('warning')} variant="soft" size="sm">pending</Chip>
+	{:else}
+		<Chip color="error" variant="outline" size="sm">refunded</Chip>
+	{/if}
+{/snippet}
+
+{#snippet activityRow(a: (typeof ACTIVITY)[number])}
+	{#if a}
+		<div class="list-col-grow">
+			<div>{a.text}</div>
+			<div class="db-muted">{a.when}</div>
+		</div>
+	{:else}
+		<!-- Still loading. -->
+		<Skeleton style="width:2rem; height:2rem; border-radius:9999px;" />
+		<div class="list-col-grow" style="display:flex; flex-direction:column; gap:.35rem;">
+			<Skeleton style="width:70%; height:.7rem;" />
+			<Skeleton style="width:40%; height:.6rem;" />
+		</div>
+	{/if}
+{/snippet}
+
+<!-- ══ The app ═══════════════════════════════════════════════════════════ -->
+<div class="db">
+	<aside class="db-side">
+		<div class="db-brand">
+			<Swatch shape="circle" size="sm" color="primary">O</Swatch>
+			<span>Orbit</span>
+		</div>
+
+		<Menu
+			size="sm"
+			items={[
+				{ label: 'Dashboard', active: true },
+				{ label: 'Orders' },
+				{ label: 'Products' },
+				{ label: 'Customers' },
+				{ divider: true },
+				{ title: 'Settings' },
+				{ label: 'Team' },
+				{ label: 'Billing' },
+				{ label: 'Archive', disabled: true }
+			]}
+		/>
+
+		<Card size="sm" class="db-upgrade">
+			<div class="db-strong">Storage</div>
+			<Progress color="primary" value={72} />
+			<div class="db-muted">7.2 of 10 GB used</div>
+			{#snippet actions()}<Button size="sm" color="primary">Upgrade</Button>{/snippet}
+		</Card>
+	</aside>
+
+	<div class="db-main">
+		<Navbar>
+			{#snippet start()}
+				<Breadcrumbs>
+					<li><a href="#preview">Orbit</a></li>
+					<li>Dashboard</li>
+				</Breadcrumbs>
+			{/snippet}
+			{#snippet end()}
+				<Input size="sm" type="search" placeholder="Search…" style="width:12rem;">
+					{#snippet start()}
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+					{/snippet}
+				</Input>
+				<Badge side="top" align="end">
+					{#snippet badge()}3{/snippet}
+					<Button size="sm" variant="ghost" shape="circle" aria-label="Notifications">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+					</Button>
+				</Badge>
+				<Swatch shape="circle" size="sm" color="neutral">AR</Swatch>
+			{/snippet}
+		</Navbar>
+
+		<div class="db-body">
+			<header class="db-head">
+				<div>
+					<Title level={2}>Good morning, Alex</Title>
+					<Text s="3" class="db-muted">Here is what happened in your store today.</Text>
+				</div>
+				<div class="db-row">
+					<Tabs variant="box" size="sm" tabs={[{ label: 'Day' }, { label: 'Week' }, { label: 'Month' }]} />
+					<Button color="primary" size="sm">Export</Button>
+				</div>
+			</header>
+
+			<!-- Figures -->
+			<div class="db-stats">
+				{#each STATS as s (s.label)}
+					<Card size="sm">
+						<div class="db-row db-between">
+							<span class="db-muted">{s.label}</span>
+							<Chip size="sm" color={s.up ? 'success' : 'error'} variant="soft">{s.delta}</Chip>
+						</div>
+						<div class="db-figure">{s.value}</div>
+						<Progress color={s.up ? 'primary' : 'error'} value={s.progress} />
+					</Card>
+				{/each}
+			</div>
+
+			<div class="db-grid">
+				<!-- Sales by channel -->
+				<Card>
+					{#snippet title()}Sales by channel{/snippet}
+					<div class="db-channels">
+						<div class="db-bars">
+							{#each CHANNELS as ch (ch.name)}
+								<div class="db-bar">
+									<div class="db-row db-between">
+										<span>{ch.name}</span>
+										<span class="db-muted">{ch.share}%</span>
+									</div>
+									<Progress color={has(ch.color) ?? 'primary'} value={ch.share} />
+								</div>
+							{/each}
+						</div>
+						<div class="db-goal">
+							<RadialProgress value={72} />
+							<span class="db-muted">monthly goal</span>
+						</div>
+					</div>
+				</Card>
+
+				<!-- Featured -->
+				<Card>
+					{#snippet title()}Featured{/snippet}
+					<Carousel items={[...FEATURED]} arrow pagination loop>
+						{#snippet children(f)}
+							<div class="db-slide" style="--tint: var(--color-{f.tint});">
+								<div class="db-strong">{f.title}</div>
+								<div class="db-muted">{f.body}</div>
+								<div><Button size="sm" color={has(f.tint) ?? 'primary'}>Open</Button></div>
+							</div>
+						{/snippet}
+					</Carousel>
+				</Card>
+
+				<!-- Orders -->
+				<Card class="db-span">
+					{#snippet title()}
+						Recent orders
+						<Chip size="sm" variant="ghost">128</Chip>
+					{/snippet}
+					<List rows={[...ORDERS]} row={orderRow} />
+					<div class="db-row db-between">
+						<span class="db-muted">Showing 4 of 128</span>
+						<Pagination count={32} bind:page size="sm" />
+					</div>
+				</Card>
+
+				<!-- Settings -->
+				<Card>
+					{#snippet title()}Quick settings{/snippet}
+					<Fieldset>
+						{#snippet legend()}Store email{/snippet}
+						<Input type="email" value="hello@orbit.shop" validator required />
+					</Fieldset>
+					<Fieldset>
+						{#snippet legend()}Plan{/snippet}
+						<Select
+							options={[
+								{ value: 'free', name: 'Free' },
+								{ value: 'pro', name: 'Pro — €29/month' },
+								{ value: 'team', name: 'Team — €99/month' }
+							]}
+							bind:value={plan}
+						/>
+					</Fieldset>
+					<label class="db-row db-between">
+						<span>Email notifications</span>
+						<Toggle color="primary" checked />
+					</label>
+					<label class="db-row"><Checkbox checked /> <span>Weekly digest</span></label>
+					<div class="db-row">
+						<label class="db-row"><Radio name="db-cur" checked /> EUR</label>
+						<label class="db-row"><Radio name="db-cur" /> USD</label>
+						<label class="db-row"><Radio name="db-cur" disabled /> GBP</label>
+					</div>
+					<div>
+						<div class="db-row db-between"><span>Ad budget</span><span class="db-muted">€{budget * 10}</span></div>
+						<Range color="primary" bind:value={budget} />
+					</div>
+					{#snippet actions()}
+						<Join>
+							<Button size="sm">Cancel</Button>
+							<Button size="sm" color="primary">Save</Button>
+						</Join>
+					{/snippet}
+				</Card>
+
+				<!-- Activity -->
+				<Card>
+					{#snippet title()}
+						Activity
+						<Loading variant="dots" size="sm" />
+					{/snippet}
+					<List rows={[...ACTIVITY]} row={activityRow} />
+				</Card>
+
+				<!-- Phone -->
+				<Card>
+					{#snippet title()}On the phone{/snippet}
+					<div class="db-phone">
+						<div class="db-phone-screen">
+							<div class="db-strong">Today</div>
+							<div class="db-figure">€1,920</div>
+							<Progress color="success" value={64} />
+						</div>
+						<Dock size="sm" style="position:absolute;">
+							<button class="dock-active">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V21H3z" /></svg>
+								<span class="dock-label">Home</span>
+							</button>
+							<button>
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2" /></svg>
+								<span class="dock-label">Stats</span>
+							</button>
+							<button>
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+								<span class="dock-label">Me</span>
+							</button>
+						</Dock>
+					</div>
+				</Card>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ══ The sweeps ════════════════════════════════════════════════════════ -->
 <div class="tp-grid">
 	<!-- Actions: the densest colour sweep in the kit. -->
 	<section class="tp-block tp-wide">
-		<h3 class="tp-title">Actions</h3>
+		<h3 class="tp-title">Every colour</h3>
 		<div class="tp-row">
-			{#each COLORS as c (c)}
+			{#each colors as c (c)}
 				<Button color={c}>{c}</Button>
 			{/each}
 			<Button>plain</Button>
 		</div>
 		<div class="tp-row">
 			<Button variant="outline" color="primary">outline</Button>
-			<Button variant="dash" color="secondary">dash</Button>
-			<Button variant="soft" color="accent">soft</Button>
+			<Button variant="dash" color={has('secondary')}>dash</Button>
+			<Button variant="soft" color={has('accent')}>soft</Button>
 			<Button variant="ghost">ghost</Button>
 			<Button variant="link">link</Button>
 			<Button active color="primary">active</Button>
 			<Button disabled>disabled</Button>
 		</div>
 		<div class="tp-row">
-			<Button size="xs">xs</Button>
-			<Button size="sm">sm</Button>
-			<Button>base</Button>
-			<Button size="lg">lg</Button>
-			<Button size="xl">xl</Button>
-			<Join>
-				<Button>Prev</Button>
-				<Button color="primary">1</Button>
-				<Button>2</Button>
-				<Button>Next</Button>
-			</Join>
-			<Badge side="top" align="end">
-				{#snippet badge()}9+{/snippet}
-				<Button>badge</Button>
-			</Badge>
-		</div>
-	</section>
-
-	<!-- Form: fields as they actually appear, stacked and interleaved. -->
-	<section class="tp-block">
-		<h3 class="tp-title">Form</h3>
-		<Input placeholder="Email" />
-		<Select>
-			<option>Pick an option</option>
-			<option>Another option</option>
-		</Select>
-		<Textarea placeholder="Message"></Textarea>
-		<FileInput />
-		<Input color="error" value="not-an-email" />
-		<p class="validator-hint">Enter a valid email address</p>
-		<div class="tp-row">
-			<Button color="primary">Submit</Button>
-			<Button variant="ghost">Cancel</Button>
+			{#each colors as c (c)}
+				<Chip color={c}>{c}</Chip>
+			{/each}
 		</div>
 	</section>
 
@@ -98,154 +375,41 @@
 	<section class="tp-block">
 		<h3 class="tp-title">Selectors</h3>
 		<div class="tp-row">
-			{#each COLORS.slice(0, 5) as c (c)}
+			{#each colors.slice(0, 5) as c (c)}
 				<Checkbox color={c} checked />
 			{/each}
 			<Checkbox />
 			<Checkbox disabled />
 		</div>
 		<div class="tp-row">
-			{#each COLORS.slice(0, 5) as c (c)}
+			{#each colors.slice(0, 5) as c (c)}
 				<Radio name="tp-r-{c}" color={c} checked />
 			{/each}
 			<Radio name="tp-r0" />
 			<Radio name="tp-r1" disabled />
 		</div>
 		<div class="tp-row">
-			{#each COLORS.slice(0, 5) as c (c)}
+			{#each colors.slice(0, 5) as c (c)}
 				<Toggle color={c} checked />
 			{/each}
 			<Toggle />
 			<Toggle disabled />
 		</div>
-		<Range value={40} />
-		<Range color="primary" value={70} />
 	</section>
 
-	<!-- Statuses: the four state colours, in every shape that carries them. -->
-	<section class="tp-block">
-		<h3 class="tp-title">Statuses</h3>
-		<div class="tp-row">
-			<Chip color="info">info</Chip>
-			<Chip color="success">success</Chip>
-			<Chip color="warning">warning</Chip>
-			<Chip color="error">error</Chip>
-		</div>
-		<div class="tp-row">
-			<Chip color="success" variant="soft">soft</Chip>
-			<Chip color="warning" variant="outline">outline</Chip>
-			<Chip color="error" variant="dash">dash</Chip>
-			<Chip variant="ghost">ghost</Chip>
-		</div>
-		<Progress color="info" value={30} />
-		<Progress color="success" value={60} />
-		<Progress color="warning" value={80} />
-		<Progress color="error" value={95} />
-		<div class="tp-row">
-			<RadialProgress value={35} />
-			<RadialProgress value={70} />
-			<Loading variant="spinner" />
-			<Loading variant="dots" />
-			<Loading variant="ring" />
-			<Loading variant="ball" />
-		</div>
-	</section>
-
-	<!-- Data: a real list, where badges and chips actually live. -->
-	<section class="tp-block">
-		<h3 class="tp-title">Data</h3>
-		{#snippet deployRow()}
-			<div>
-				<p style="font-weight:600;">Deployment</p>
-				<p style="opacity:.6; font-size:.875em;">production</p>
-			</div>
-			<div class="list-col-grow" style="text-align:right;">
-				<Chip color="success">live</Chip>
-			</div>
-		{/snippet}
-		{#snippet buildRow()}
-			<div>
-				<p style="font-weight:600;">Build</p>
-				<p style="opacity:.6; font-size:.875em;">queued 2 min ago</p>
-			</div>
-			<div class="list-col-grow" style="text-align:right;">
-				<Chip color="warning" variant="soft">pending</Chip>
-			</div>
-		{/snippet}
-		{#snippet rollbackRow()}
-			<div>
-				<p style="font-weight:600;">Rollback</p>
-				<p style="opacity:.6; font-size:.875em;">failed</p>
-			</div>
-			<div class="list-col-grow" style="text-align:right;">
-				<Chip color="error" variant="outline">error</Chip>
-			</div>
-		{/snippet}
-		<List
-			rows={[deployRow, buildRow, rollbackRow]}
-			style="border:1px solid var(--color-border);"
-		/>
-		<div class="tp-row">
-			<Skeleton style="width:3rem; height:3rem; border-radius:9999px" />
-			<Skeleton style="flex:1; height:1rem; border-radius:4px" />
-		</div>
-	</section>
-
-	<!-- Navigation. -->
-	<section class="tp-block">
-		<h3 class="tp-title">Navigation</h3>
-		<Breadcrumbs>
-			<li><a href="#preview">Home</a></li>
-			<li><a href="#preview">Library</a></li>
-			<li>Theme</li>
-		</Breadcrumbs>
-		<Tabs
-			variant="border"
-			tabs={[{ label: 'Overview' }, { label: 'Settings' }, { label: 'Billing' }]}
-		/>
-		<Tabs variant="box" tabs={[{ label: 'Day' }, { label: 'Week' }, { label: 'Month' }]} />
-		<div class="tp-dock">
-			<Dock style="position:absolute;">
-				<button>
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" /></svg>
-					<span class="dock-label">Home</span>
-				</button>
-				<button class="dock-active">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" /></svg>
-					<span class="dock-label">Search</span>
-				</button>
-				<button>
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" /></svg>
-					<span class="dock-label">Mail</span>
-				</button>
-			</Dock>
-		</div>
-	</section>
-
-	<!-- Surfaces: the three levels next to each other, which is the only way
-	     to judge whether a theme separates them enough — and the only place
-	     the depth effect is legible, since it lives on those very edges. -->
+	<!-- Surfaces: the levels next to each other, which is the only way to
+	     judge whether a theme separates them enough — and the only place the
+	     depth effect is legible, since it lives on those very edges. -->
 	<section class="tp-block">
 		<h3 class="tp-title">Surfaces &amp; depth</h3>
 		<div class="tp-surfaces">
-			<div class="tp-surf" style="background:var(--color-surface-1);">
-				<span>surface-1</span>
-				<Button>plain</Button>
-			</div>
-			<div class="tp-surf" style="background:var(--color-surface-2);">
-				<span>surface-2</span>
-				<Button>plain</Button>
-			</div>
-			<div class="tp-surf" style="background:var(--color-surface-3);">
-				<span>surface-3</span>
-				<Button>plain</Button>
-			</div>
+			{#each surfaces as t (t.name)}
+				<div class="tp-surf" style="background:var(--{t.name});">
+					<span>{t.name.replace(/^color-/, '')}</span>
+					<Button>plain</Button>
+				</div>
+			{/each}
 		</div>
-		<p class="tp-note">
-			Depth lives on those edges: a 5% darkened border, a 6% white inset and a
-			drop shadow tinted with the button's own colour. Faithful to daisyUI,
-			and by design almost invisible on a dark theme.
-		</p>
 	</section>
 
 	<!-- Typography: the text-natured components, which never scale. -->
@@ -256,7 +420,6 @@
 			Body copy sets the measure everything else sits against — a field's frame
 			grows with <em>Element size</em>, this sentence does not.
 		</p>
-		<p class="text-s3 text-b3" style="opacity:.7;">Secondary copy, one step down the scale.</p>
 		<div class="tp-row">
 			<a class="link" href="#preview">Default</a>
 			<a class="link link-primary" href="#preview">Primary</a>

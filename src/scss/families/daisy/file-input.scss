@@ -22,8 +22,8 @@
 	--fontsize      font size (set by size-variants classes)
 
    External variables (theme / family):
-	--color-surface-1 / --color-surface-2 / --color-on-surface
-	--color-{variant} / --color-on-{variant}  semantic colors (color-variants)
+	--color-base-100 / --color-base-200 / --color-base-content
+	--color-{variant} / --color-{variant}-content  semantic colors (color-variants)
 	--border / --radius-field
 	--shadow-light          family shadow system
 
@@ -40,10 +40,10 @@
 
 @mixin structure {
 	.file-input {
-		--btn-bg: var(--btn-color, var(--color-surface-2));
-		--btn-fg: var(--color-on-surface);
+		--btn-bg: var(--btn-color, var(--color-base-200));
+		--btn-fg: var(--color-base-content);
 		cursor: pointer;
-		background-color: var(--color-surface-1);
+		background-color: var(--color-base-100);
 		display: inline-flex;
 		appearance: none;
 		align-items: center;
@@ -66,19 +66,19 @@
 		background-color: var(--btn-bg);
 	}
 	.file-input:focus {
-		--input-color: var(--color-on-surface);
+		--input-color: var(--color-base-content);
 		isolation: isolate;
 	}
 	.file-input:has(> input[disabled]),
 		.file-input:is(:disabled, [disabled]) {
-		border-color: var(--color-surface-2);
-		background-color: var(--color-surface-2);
+		border-color: var(--color-base-200);
+		background-color: var(--color-base-200);
 		cursor: not-allowed;
 	}
 	.file-input:has(> input[disabled])::file-selector-button,
 		.file-input:is(:disabled, [disabled])::file-selector-button {
-		border-color: var(--color-surface-2);
-		background-color: var(--color-surface-2);
+		border-color: var(--color-base-200);
+		background-color: var(--color-base-200);
 		cursor: not-allowed;
 	}
 }
@@ -86,9 +86,9 @@
 @mixin look {
 	.file-input {
 		--size: calc(2.5em * var(--scale));
-		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+		--input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
 		--btn-border: transparent;
-		border: var(--border) solid #0000;
+		border: var(--border) solid var(--input-color, #0000);
 		width: clamp(3rem, 20rem, 100%);
 		padding-inline-end: calc(0.75em * var(--scale));
 		font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -112,13 +112,13 @@
 	}
 	.file-input:has(> input[disabled]),
 		.file-input:is(:disabled, [disabled]) {
-		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+		color: color-mix(in oklch, var(--color-base-content) 20%, #0000);
 		box-shadow: none;
 	}
 	.file-input:has(> input[disabled])::file-selector-button,
 		.file-input:is(:disabled, [disabled])::file-selector-button {
 		--btn-border: #0000;
-		--btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+		--btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
 	}
 
 	/* the flat surface */
@@ -173,8 +173,8 @@
 
 	.file-input-ghost:focus,
 	.file-input-ghost:focus-within {
-		color: var(--color-on-surface);
-		background-color: var(--color-surface-1);
+		color: var(--color-base-content);
+		background-color: var(--color-base-100);
 		border-color: #0000;
 		box-shadow: none;
 	}
@@ -182,7 +182,7 @@
 	/* color variants */
 	@each $color in c.$color-list {
 		.file-input-#{$color} { --btn-color: var(--color-#{$color}); }
-		.file-input-#{$color}::file-selector-button { color: var(--color-on-#{$color}); }
+		.file-input-#{$color}::file-selector-button { color: var(--color-#{$color}-content); }
 		.file-input-#{$color},
 		.file-input-#{$color}:focus,
 		.file-input-#{$color}:focus-within { --input-color: var(--color-#{$color}); }
@@ -193,5 +193,15 @@
 
 	.file-input-xl {
 		padding-inline-end: calc(1.5em * var(--scale));
+	}
+
+	/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+	   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+	.file-input::file-selector-button {
+		background-image: var(--fx-noise);
+		background-size: calc(var(--noise, 0) * 100%);
+	}
+	.file-input-ghost::file-selector-button {
+		background-image: none;
 	}
 }

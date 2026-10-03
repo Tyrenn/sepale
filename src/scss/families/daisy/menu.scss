@@ -194,8 +194,8 @@
 
 @mixin look {
 	.menu {
-		--menu-bg: var(--color-surface-2);
-		--menu-fg: var(--color-on-surface);
+		--menu-bg: var(--color-base-200);
+		--menu-fg: var(--color-base-content);
 		--menu-border: #0000;
 		--menu-border-width: 0;
 		--menu-shadow: none;
@@ -212,24 +212,24 @@
 			background-color 0.2s cubic-bezier(0, 0, 0.2, 1),
 			box-shadow 0.2s cubic-bezier(0, 0, 0.2, 1);
 
-		--menu-hover-bg: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
-		--menu-hover-fg: var(--color-on-surface);
+		--menu-hover-bg: color-mix(in oklab, var(--color-base-content) 10%, #0000);
+		--menu-hover-fg: var(--color-base-content);
 		--menu-active-bg: var(--color-neutral);
-		--menu-active-fg: var(--color-on-neutral);
+		--menu-active-fg: var(--color-neutral-content);
 		--menu-disabled-bg: #0000;
-		--menu-disabled-fg: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
+		--menu-disabled-fg: color-mix(in oklab, var(--color-base-content) 20%, #0000);
 		--menu-focus-outline: 2px solid currentColor;
 		--menu-focus-offset: 2px;
 
 		--menu-title-py: calc(0.5em * var(--scale));
 		--menu-title-px: calc(0.75em * var(--scale));
-		--menu-title-fg: color-mix(in oklab, var(--color-on-surface) 40%, #0000);
+		--menu-title-fg: color-mix(in oklab, var(--color-base-content) 40%, #0000);
 		--menu-title-size: 1em;
 		--menu-title-weight: 600;
 		--menu-title-transform: none;
 		--menu-title-tracking: normal;
 
-		--menu-divider: color-mix(in oklab, var(--color-on-surface) 10%, #0000);
+		--menu-divider: color-mix(in oklab, var(--color-base-content) 10%, #0000);
 		--menu-divider-size: 1px;
 		--menu-divider-gap: calc(0.5em * var(--scale));
 		--menu-divider-inset: calc(1em * var(--scale));
@@ -259,4 +259,12 @@
 
 	/* size variants */
 	@include m.size-variants('menu');
+
+	/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+	   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+	.menu .menu-active,
+	.menu li > :is(a, button, span).menu-active {
+		background-image: none, var(--fx-noise);
+		background-size: auto, calc(var(--noise, 0) * 100%);
+	}
 }

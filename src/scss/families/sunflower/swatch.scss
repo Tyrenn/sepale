@@ -137,7 +137,7 @@
 	}
 
 	.swatch-active {
-		--swatch-shadow: 0 0 0 0 var(--sunflower-shadow-color, #000);
+		--swatch-shadow: 0 0 0 0 var(--color-border);
 		translate: var(--sf-o) var(--sf-o);
 	}
 

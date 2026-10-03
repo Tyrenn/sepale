@@ -9,8 +9,8 @@
    dock.scss — .dock (fixed bottom navigation bar)
 
    External variables (theme / family):
-	--color-surface-3  dock background (the most raised surface)
-	--color-on-surface  disabled item text color mix
+	--color-base-100  dock background (as in daisyUI)
+	--color-base-content  disabled item text color mix
 	--radius-box          item corner radius
    ============================================================ */
 
@@ -21,7 +21,7 @@
 
 @mixin structure {
 	.dock {
-		background-color: var(--color-surface-3);
+		background-color: var(--color-base-100);
 		position: fixed;
 		z-index: 1;
 		display: flex;
@@ -67,7 +67,7 @@
 		width: 100%;
 		padding: 0.5rem;
 		color: currentColor;
-		border-top: 0.5px solid color-mix(in oklab, var(--color-on-surface) 5%, #0000);
+		border-top: 0.5px solid color-mix(in oklab, var(--color-base-content) 5%, #0000);
 		height: 4rem;
 		height: calc(4rem + env(safe-area-inset-bottom));
 		padding-bottom: env(safe-area-inset-bottom);
@@ -87,12 +87,12 @@
 	}
 	.dock > *[aria-disabled="true"],
 		.dock > *[disabled] {
-		color: color-mix(in oklch, var(--color-on-surface) 10%, #0000);
+		color: color-mix(in oklch, var(--color-base-content) 10%, #0000);
 		opacity: 1;
 	}
 	.dock > *[aria-disabled="true"]:hover,
 		.dock > *[disabled]:hover {
-		color: color-mix(in oklch, var(--color-on-surface) 10%, #0000);
+		color: color-mix(in oklch, var(--color-base-content) 10%, #0000);
 		opacity: 1;
 	}
 	.dock-label {

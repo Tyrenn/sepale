@@ -3,7 +3,9 @@
 @use 'root';
 @use 'badge';
 @use 'breadcrumbs';
+@use 'calendar';
 @use 'card';
+@use 'carousel';
 @use 'button';
 @use 'checkbox';
 @use 'chip';
@@ -19,6 +21,7 @@
 @use 'loading';
 @use 'menu';
 @use 'navbar';
+@use 'pagination';
 @use 'progress';
 @use 'radial-progress';
 @use 'radio';
@@ -53,8 +56,9 @@
 
    Variable ownership
    ------------------
-   - FAMILY-OWNED look variables are set on `:root` here (borders,
-     family's identity and are not meant to be themed.
+   - FAMILY-OWNED look variables are set on `:root` here (the
+     light-shadow switches): they are the family's identity and are
+     not meant to be themed.
    - THEMEABLE variables (colors, radii) get family fallbacks on
      `:where(:root)` (specificity 0) so a theme's `:root` rules
      always win, in any load order.
@@ -63,26 +67,34 @@
    --------------------
    Heavily inspired by DaisyUI v5 (https://github.com/saadeghi/daisyui),
    in plain CSS — no Tailwind, no `@apply`. Same class names (`btn`,
-   `btn-primary`, `input`, `badge`, …) and same look, so the markup is
-   interchangeable — but NOT the theme: our variables carry our own
-   names (--color-surface-1 / --color-on-surface / --color-border, see
-   CONTEXT.md), so a DaisyUI theme pasted as-is will not apply.
+   `btn-primary`, `input`, `badge`, …), same look, and the SAME THEME
+   VARIABLES: a daisyUI theme pasted as-is applies. Each colour also
+   paints the same places it paints in daisyUI.
 
    Characteristics:
-     - Truly flat aesthetic: crisp 1px borders, NO elevation. Both the
-       retro 3D depth (--depth) and the soft directional shadow
-       (--light-intensity) are OFF — this matches DaisyUI's default
-       light/coffee themes exactly (depth 0, no shadow).
+     - Flat: crisp borders, no elevation. --depth adds daisyUI's
+       subtle 3D edge to fields and selectors, --noise its grain.
      - Intrinsic em-based sizing: components scale with `font-size`;
        size variants only set `--fontsize`. No breakpoints.
 
-   Theme variables consumed (see also each component's header)
-   -----------------------------------------------------------
-     --color-surface-1/200/300    surfaces (page, raised, sunken)
-     --color-on-surface        default foreground color
-     --color-{semantic} / --color-on-{semantic} primary/secondary/accent/neutral/
-                                  info/success/warning/error + fg
-     --radius-field/box/selector corner radii (fields / boxes / selectors)
+   Changes made to fit our contract:
+     - --size-field and --size-selector are not parameters: daisyUI
+       sizes fields in rem from those two, daisy sizes them in em and
+       grows the frames with --scale instead.
+     - Breakpoint-prefixed classes (`sm:btn-lg`) do not exist: a
+       component scales with its font size, not with the viewport.
+
+   Theme variables (daisyUI's, one for one)
+   ----------------------------------------
+     --color-base-100/200/300      the page, then one and two steps darker
+     --color-base-content          text on the bases; field borders are
+                                   a mix of it
+     --color-{semantic}            primary/secondary/accent/neutral/
+     --color-{semantic}-content    info/success/warning/error, and the
+                                   text written on each
+     --radius-selector/field/box   corner radii
+     --border                      border width
+     --depth / --noise             3D edge and grain, 0 or 1
 
    Build: compiled to static/families/daisy.css by `npm run build:css`.
    ============================================================ */
@@ -92,18 +104,29 @@
    wins, and declared once here so the configurator and the Families
    page read the same source. */
 $params: map.merge(
-	params.colors((
-		'color-surface-1': oklch(100% 0 0),
-		'color-surface-2': oklch(96% 0 0),
-		'color-surface-3': oklch(92% 0 0),
-		'color-primary': oklch(55% 0.21 264),
-		'color-secondary': oklch(60% 0.2 330),
-		'color-accent': oklch(65% 0.18 165),
-		'color-neutral': oklch(28% 0.01 285),
-		'color-info': oklch(70% 0.13 230),
-		'color-success': oklch(72% 0.16 145),
-		'color-warning': oklch(80% 0.15 85),
-		'color-error': oklch(63% 0.22 25)
+	/* daisyUI's own colour set and its `light` theme values. Every ink is
+	   a parameter named --color-<name>-content. */
+	params.colors($ink: content, $values: (
+		'color-base-100': oklch(100% 0 0),
+		'color-base-200': oklch(98% 0 0),
+		'color-base-300': oklch(95% 0 0),
+		'color-base-content': oklch(21% 0.006 285.885),
+		'color-primary': oklch(45% 0.24 277.023),
+		'color-primary-content': oklch(93% 0.034 272.788),
+		'color-secondary': oklch(65% 0.241 354.308),
+		'color-secondary-content': oklch(94% 0.028 342.258),
+		'color-accent': oklch(77% 0.152 181.912),
+		'color-accent-content': oklch(38% 0.063 188.416),
+		'color-neutral': oklch(14% 0.005 285.823),
+		'color-neutral-content': oklch(92% 0.004 286.32),
+		'color-info': oklch(74% 0.16 232.661),
+		'color-info-content': oklch(29% 0.066 243.157),
+		'color-success': oklch(76% 0.177 163.223),
+		'color-success-content': oklch(37% 0.077 168.94),
+		'color-warning': oklch(82% 0.189 84.429),
+		'color-warning-content': oklch(41% 0.112 45.904),
+		'color-error': oklch(71% 0.194 13.428),
+		'color-error-content': oklch(27% 0.105 12.094)
 	)),
 	(
 		'radius-field': (
@@ -135,6 +158,11 @@ $params: map.merge(
 			label: 'Depth', group: 'Effects', type: number,
 			default: 1, min: 0, max: 1, step: 0.05,
 			help: 'Subtle 3D depth on fields and selectors. Faithful to daisyUI, which means almost invisible on a dark theme.'
+		),
+		'noise': (
+			label: 'Noise', group: 'Effects', type: number,
+			default: 0, min: 0, max: 1, step: 1,
+			help: 'A grain texture on buttons, badges, checkboxes, radios, toggles and the active menu item.'
 		)
 	)
 );
@@ -156,7 +184,9 @@ $params: map.merge(
 @include badge.structure;
 @include breadcrumbs.structure;
 @include button.structure;
+@include calendar.structure;
 @include card.structure;
+@include carousel.structure;
 @include checkbox.structure;
 @include chip.structure;
 @include dock.structure;
@@ -171,6 +201,7 @@ $params: map.merge(
 @include loading.structure;
 @include menu.structure;
 @include navbar.structure;
+@include pagination.structure;
 @include progress.structure;
 @include radial-progress.structure;
 @include radio.structure;
@@ -188,7 +219,9 @@ $params: map.merge(
 
 @include badge.look;
 @include breadcrumbs.look;
+@include calendar.look;
 @include card.look;
+@include carousel.look;
 @include button.look;
 @include checkbox.look;
 @include chip.look;
@@ -203,6 +236,7 @@ $params: map.merge(
 @include loading.look;
 @include menu.look;
 @include navbar.look;
+@include pagination.look;
 @include progress.look;
 @include radial-progress.look;
 @include radio.look;

@@ -84,7 +84,7 @@
 	.card-actions {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: center;
+		align-items: flex-start;
 		gap: var(--card-gap);
 	}
 
@@ -128,9 +128,9 @@
 	}
 
 	/* ── Flag: image-full ──
-	   The figure fills the card and the body sits on top of it. The
-	   overlay is the card's own fill at a low alpha rather than a fixed
-	   black, so a light theme and a dark one both stay legible. */
+	   The figure fills the card and the body sits on top of it. As in
+	   daisyUI: the image is darkened to 28% and the body is written in
+	   --color-neutral-content, the ink daisyUI keeps for dark grounds. */
 	.card-image-full {
 		display: grid;
 	}
@@ -143,21 +143,26 @@
 	.card-image-full > figure > img {
 		height: 100%;
 	}
+	.card-image-full > figure > img {
+		filter: brightness(28%);
+	}
 	.card-image-full > .card-body {
 		position: relative;
-		background-color: color-mix(in oklab, var(--card-bg) 65%, #0000);
-		backdrop-filter: blur(2px);
+		color: var(--color-neutral-content);
 	}
 }
 
 @mixin look {
+	/* daisyUI's .card paints no ground: its docs pair it with
+	   `bg-base-100 shadow-sm`, which is the default here. The border
+	   flags draw in --color-base-200, as daisyUI's do. */
 	.card {
-		--card-bg: var(--color-surface-2);
-		--card-fg: var(--color-on-surface);
-		--card-border: var(--color-border);
+		--card-bg: var(--color-base-100);
+		--card-fg: var(--color-base-content);
+		--card-border: var(--color-base-200);
 		--card-border-width: 0px;
 		--card-radius: var(--radius-box);
-		--card-shadow: none;
+		--card-shadow: 0 1px 3px 0 oklch(0% 0 0 / 0.1), 0 1px 2px -1px oklch(0% 0 0 / 0.1);
 		--card-p: calc(1.5em * var(--scale));
 		--card-gap: calc(0.5em * var(--scale));
 		--card-title-fg: inherit;

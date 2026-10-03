@@ -7,9 +7,10 @@
  * the declaration out of the registry and serialises the edited values back
  * to a drop-in `:root { … }` stylesheet.
  *
- * On-colors (`--color-on-*`) are never editable: every family derives them
- * from the seed color in CSS (see families/_derived-content.scss). So is
- * `--color-border`, which a theme may still set outright.
+ * Which inks are parameters is the family's call: daisy exposes every one
+ * (`--color-primary-content`, as daisyUI does), the others derive theirs in
+ * CSS (`--color-on-primary`, see each family's `_root.scss`). A colour token
+ * says which variable holds its ink through `on`; nothing here reads a name.
  */
 
 /**
@@ -43,6 +44,12 @@ export interface ThemeToken {
 	/** Units the editor offers for this token. A length with several units gets
 	 *  a unit picker next to its number; the CSS never cares which one is used. */
 	units?: string[];
+	/** Colours only: `surface` (a ground), `accent` (a colour things are
+	 *  painted with) or `ink` (text and lines drawn over both). */
+	kind?: string;
+	/** Colours only: the variable (without `--`) holding the ink written on
+	 *  this colour — another token of the family, or a value it derives. */
+	on?: string;
 }
 
 /** Units offered for editable lengths. `%` is excluded on purpose: it is
@@ -206,7 +213,9 @@ function fromParam(p: FamilyParam): ThemeToken {
 		max: p.max,
 		step: p.step,
 		unit: p.unit,
-		units: p.units
+		units: p.units,
+		kind: p.kind,
+		on: p.on
 	};
 }
 

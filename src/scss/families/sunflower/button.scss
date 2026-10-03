@@ -25,7 +25,7 @@
    External variables (theme / family):
 	--color-surface-2          default button background
 	--color-on-surface      default text color
-	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
+	--color-{variant} / --color-on-{variant}  semantic colors (primary, neutral, success, error)
 	--radius-field            corner radius
 	--border                  border width (px value)
 	--shadow-light            family shadow system (see _root.scss)
@@ -48,11 +48,13 @@
 	/* Width reset in some contexts (e.g. join) */
 	/* btn links inside prose: no underline */
 	.btn {
-		/* Internal variables — neutral defaults, skins re-assign */
-		--btn-bg: var(--btn-color, var(--color-surface-2));
+		/* Internal variables — the defaults every variant re-assigns.
+		   neobrutalism's default button is bg-main with the hard shadow,
+		   not a white block. Set here, before any variant, so the
+		   variants (link, ghost, outline…) can still clear them. */
+		--btn-bg: var(--btn-color, var(--color-primary));
 		--btn-fg: var(--color-on-surface);
-		/* daisyUI ships 1rem — half of this was an outlier */
-		--btn-shadow: var(--shadow-light, );
+		--btn-shadow: var(--sf-shadow);
 		/* Layout */
 		display: inline-flex;
 		flex-shrink: 0;
@@ -117,7 +119,7 @@
 	.btn {
 		--size: calc(2.5em * var(--scale));
 		--btn-p: calc(1em * var(--scale));
-		--btn-border: transparent;
+		--btn-border: var(--color-border);
 		gap: calc(0.375em * var(--scale));
 		font-size: var(--fontsize, var(--base, var(--default-base)));
 		font-weight: 600;
@@ -183,8 +185,10 @@
 		--btn-shadow: ;
 	}
 
+	/* An underlined word in the ink: primary text on the primary-washed
+	   page would not read. */
 	.btn-link:not(.btn-disabled, .btn:disabled, .btn[disabled]) {
-		--btn-fg: var(--btn-color, var(--color-primary));
+		--btn-fg: var(--color-on-surface);
 	}
 
 	.btn-link:is(.btn-active, :hover, :active:focus, :focus-visible) {
@@ -192,11 +196,12 @@
 		--btn-bg: #0000;
 	}
 
-	/* variant outline */
+	/* variant outline — text is always the ink here (a yellow word on
+	   the yellow page would vanish); a colour, if given, stays in the edge. */
 	.btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
 		--btn-shadow: ;
 		--btn-bg: #0000;
-		--btn-fg: var(--btn-color, var(--color-on-surface));
+		--btn-fg: var(--color-on-surface);
 		--btn-border: var(--btn-color, var(--color-on-surface));
 	}
 
@@ -204,7 +209,7 @@
 		.btn-outline:not(.btn-active, :active, :focus-visible, input:checked):hover {
 			--btn-shadow: ;
 			--btn-bg: #0000;
-			--btn-fg: var(--btn-color, var(--color-on-surface));
+			--btn-fg: var(--color-on-surface);
 			--btn-border: var(--btn-color, var(--color-on-surface));
 		}
 	}
@@ -213,7 +218,7 @@
 	.btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
 		--btn-shadow: ;
 		--btn-bg: #0000;
-		--btn-fg: var(--btn-color, var(--color-on-surface));
+		--btn-fg: var(--color-on-surface);
 		--btn-border: var(--btn-color, var(--color-on-surface));
 	}
 
@@ -225,7 +230,7 @@
 		.btn-dash:not(.btn-active, :active, :focus-visible, input:checked):hover {
 			--btn-shadow: ;
 			--btn-bg: #0000;
-			--btn-fg: var(--btn-color, var(--color-on-surface));
+			--btn-fg: var(--color-on-surface);
 			--btn-border: var(--btn-color, var(--color-on-surface));
 		}
 	}
@@ -233,7 +238,7 @@
 	/* variant soft */
 	.btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
 		--btn-shadow: ;
-		--btn-fg: var(--btn-color, var(--color-on-surface));
+		--btn-fg: var(--color-on-surface);
 		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
 		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
 	}
@@ -241,7 +246,7 @@
 	@media (hover: none) {
 		.btn-soft:not(.btn-active, :active, :focus-visible, input:checked):hover {
 			--btn-shadow: ;
-			--btn-fg: var(--btn-color, var(--color-on-surface));
+			--btn-fg: var(--color-on-surface);
 			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
 			--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
 		}
@@ -308,16 +313,13 @@
 		}
 	}
 
+	/* The heavy line, in --btn-border: the variants that clear it (link,
+	   ghost) still can. */
 	.btn {
-		border: var(--border) solid var(--color-border);
+		border: var(--border) solid var(--btn-border);
 	}
 
 	.btn {
-		/* neobrutalism's default variant is bg-main, not a white block. */
-		--btn-bg: var(--btn-color, var(--color-primary));
-		--btn-fg: var(--color-on-surface);
-		--btn-border: var(--color-border);
-		--btn-shadow: var(--sf-shadow);
 		font-weight: 700;
 		transition: translate 0.08s ease-out, box-shadow 0.08s ease-out;
 	}
@@ -331,7 +333,7 @@
 	@media (hover: hover) {
 	.btn:not(:disabled, [disabled], .btn-disabled):hover {
 			translate: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5);
-			--btn-shadow: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5) 0 0 var(--sunflower-shadow-color, #000);
+			--btn-shadow: calc(var(--sf-o) * 0.5) calc(var(--sf-o) * 0.5) 0 0 var(--color-border);
 		}
 	}
 
@@ -341,7 +343,7 @@
 	}
 
 	.btn-reverse {
-		--btn-shadow: calc(var(--sf-o) * -1) calc(var(--sf-o) * -1) 0 0 var(--sunflower-shadow-color, #000);
+		--btn-shadow: calc(var(--sf-o) * -1) calc(var(--sf-o) * -1) 0 0 var(--color-border);
 	}
 
 	.btn-reverse:active:not(.btn-active) {

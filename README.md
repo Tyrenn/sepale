@@ -10,7 +10,6 @@
 
 
 
-* Avatar
 * Badge => Rename to chip
 * Indicator => Badge
 * Table but with grid
@@ -35,6 +34,10 @@
 * Validator
 
 * Mask ?
+* Avatar
+* DataControl
+* DataView
+
 
 
 * Label => To InsideLabel and FloatingLabel

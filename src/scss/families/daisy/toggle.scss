@@ -19,8 +19,8 @@
 	--radius-selector-max  workaround for PostCSS/Nuxt calc(min(calc())) error
 
    External variables (theme / family):
-	--color-surface-1        track background when checked
-	--color-on-surface    thumb color when checked
+	--color-base-100        track background when checked
+	--color-base-content    thumb color when checked
 	--color-{variant}       checked color (color-variants)
 	--border                border width — MUST carry a unit (0px, not 0):
 	                        it is summed with lengths in the width calc()
@@ -61,10 +61,10 @@
 		appearance: none;
 	}
 	.toggle > *:nth-child(2) {
-		color: var(--color-surface-1);
+		color: var(--color-base-100);
 	}
 	.toggle > *:nth-child(3) {
-		color: var(--color-surface-1);
+		color: var(--color-base-100);
 	}
 	/* Toggle thumb */
 	.toggle::before {
@@ -79,8 +79,8 @@
 		.toggle[aria-checked="true"],
 		.toggle:has(> input:checked) {
 		grid-template-columns: 1fr 1fr 0fr;
-		background-color: var(--color-surface-1);
-		--input-color: var(--color-on-surface);
+		background-color: var(--color-base-100);
+		--input-color: var(--color-base-content);
 	}
 	.toggle:indeterminate {
 		grid-template-columns: 0.5fr 1fr 0.5fr;
@@ -92,7 +92,7 @@
 
 @mixin look {
 	.toggle {
-		--input-color: color-mix(in oklab, var(--color-on-surface) 50%, #0000);
+		--input-color: color-mix(in oklab, var(--color-base-content) 50%, #0000);
 		--size: calc(1.5em * var(--scale));
 		--toggle-p: calc(var(--size) * 0.125);
 		font-size: var(--fontsize, var(--base, var(--default-base)));
@@ -200,15 +200,15 @@
 	.toggle-track:checked,
 	.toggle-track[aria-checked="true"],
 	.toggle-track:has(> input:checked) {
-		background-color: var(--input-color, var(--color-on-surface));
+		background-color: var(--input-color, var(--color-base-content));
 		background-clip: content-box; /* track stays inside padding = inset/thinner effect */
 	}
 
 	.toggle-track:checked::before,
 	.toggle-track[aria-checked="true"]::before,
 	.toggle-track:has(> input:checked)::before {
-		background-color: var(--color-on-surface);
-		box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-surface-1);
+		background-color: var(--color-base-content);
+		box-shadow: 0 0 0 calc(0.1em * var(--scale)) var(--color-base-100);
 	}
 
 	/* color variants */
@@ -219,4 +219,11 @@
 
 	/* size variants */
 	@include m.size-variants('toggle');
+
+	/* --noise: daisyUI's grain laid over the fill. `--fx-noise` is the
+	   texture (_root.scss); its size is `--noise * 100%`, so 0 hides it. */
+	.toggle::before {
+		background-image: none, var(--fx-noise);
+		background-size: auto, calc(var(--noise, 0) * 100%);
+	}
 }

@@ -9,7 +9,7 @@
    fieldset.scss — .fieldset (form field group)
 
    External variables (theme / family):
-	--color-on-surface   legend and label text color
+	--color-base-content   legend and label text color
    ============================================================ */
 
 
@@ -24,7 +24,7 @@
 		grid-auto-rows: max-content;
 	}
 	.fieldset-legend {
-		color: var(--color-on-surface);
+		color: var(--color-base-content);
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -52,7 +52,7 @@
 		font-weight: 600;
 	}
 	.fieldset-label {
-		color: color-mix(in oklch, var(--color-on-surface) 60%, #0000);
+		color: color-mix(in oklch, var(--color-base-content) 60%, #0000);
 		gap: calc(0.375em * var(--scale));
 	}
 }

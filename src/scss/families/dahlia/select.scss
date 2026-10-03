@@ -118,6 +118,29 @@
 		background-color: var(--color-neutral);
 		color: var(--color-on-neutral);
 	}
+
+	/* ── Multiple choice ──
+	   A Select with `multiple` is drawn as a .select frame that opens a
+	   .list-suggestions of checkable rows (a native multi-select is a
+	   tall listbox). The list is `list`'s to paint; this only places it,
+	   and lets it out of the frame's clipping while it is open. */
+	.select:has(> .list-suggestions) {
+		overflow: visible;
+	}
+	.select > .list-suggestions {
+		position: absolute;
+		z-index: 10;
+		top: calc(100% + 0.25em);
+		left: 0;
+		min-width: 100%;
+		width: max-content;
+		max-width: max(100%, 40ch);
+		white-space: normal;
+		cursor: default;
+	}
+	.select > .list-suggestions > .list-row {
+		gap: 0.75em;
+	}
 }
 
 @mixin look {
@@ -126,8 +149,10 @@
 	}
 	.select {
 		--size: calc(2.5em * var(--scale));
-		--input-color: color-mix(in oklab, var(--color-on-surface) 20%, #0000);
-		border: var(--border) solid #0000;
+		/* The resting edge. Set here, before the colour variants, so they
+		   (and the validator) can still recolour it. */
+		--input-color: var(--color-border);
+		border: var(--border) solid var(--input-color, #0000);
 		gap: calc(0.375em * var(--scale));
 		padding-inline-start: calc(0.75em * var(--scale));
 		padding-inline-end: calc(1.75em * var(--scale));
@@ -258,7 +283,6 @@
 	}
 
 	.select {
-		--input-color: var(--color-border);
 		background-color: var(--color-surface-2);
 	}
 
