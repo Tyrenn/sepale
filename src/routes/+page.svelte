@@ -63,11 +63,11 @@
 	<div class="editor-head">
 		<strong class="editor-name">{playground.theme}</strong>
 		<div class="editor-actions">
-			<button class="btn btn-xs btn-primary" onclick={exportTheme}>Export theme</button>
-			<button class="btn btn-xs" onclick={exportFamily}>Export family</button>
-			<button class="btn btn-xs" onclick={() => fileInput?.click()}>Import theme</button>
+			<button class="ui-btn ui-btn-xs ui-btn-primary" onclick={exportTheme}>Export theme</button>
+			<button class="ui-btn ui-btn-xs" onclick={exportFamily}>Export family</button>
+			<button class="ui-btn ui-btn-xs" onclick={() => fileInput?.click()}>Import theme</button>
 			<input type="file" accept=".css,text/css" hidden bind:this={fileInput} onchange={onImport} />
-			<button class="btn btn-xs btn-ghost" onclick={resetTheme}>Reset</button>
+			<button class="ui-btn ui-btn-xs ui-btn-ghost" onclick={resetTheme}>Reset</button>
 		</div>
 	</div>
 	<div class="editor-body">
@@ -75,7 +75,7 @@
 	</div>
 </aside>
 
-<main class="content content-preview" id="preview">
+<main class="content content-preview uu-island" id="preview">
 	<ThemePreview />
 </main>
 
@@ -84,9 +84,9 @@
 		<h3 style="margin-top:0">{exportTitle}</h3>
 		<textarea class="export-text" readonly value={exportText}></textarea>
 		<div class="export-row">
-			<button class="btn btn-sm btn-primary" onclick={downloadCurrent}>Download</button>
-			<button class="btn btn-sm" onclick={() => navigator.clipboard.writeText(exportText)}>Copy</button>
-			<button class="btn btn-sm btn-ghost" onclick={() => dialog?.close()}>Close</button>
+			<button class="ui-btn ui-btn-sm ui-btn-primary" onclick={downloadCurrent}>Download</button>
+			<button class="ui-btn ui-btn-sm" onclick={() => navigator.clipboard.writeText(exportText)}>Copy</button>
+			<button class="ui-btn ui-btn-sm ui-btn-ghost" onclick={() => dialog?.close()}>Close</button>
 		</div>
 	</div>
 </dialog>

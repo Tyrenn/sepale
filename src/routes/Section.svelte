@@ -114,7 +114,7 @@
 						: ''}{/each}, so this example has nothing to show.{#if elsewhere.length}{' '}It belongs to {elsewhere.join(', ')}.{/if}
 			</p>
 		{:else if active === 'preview'}
-			<div class="box-body box-preview">{@render children()}</div>
+			<div class="box-body box-preview uu-island">{@render children()}</div>
 		{:else}
 			<div class="box-body box-code">
 				<button type="button" class="box-copy" onclick={copy}>{copied ? 'Copied' : 'Copy'}</button>
@@ -219,8 +219,8 @@
 			-45deg,
 			transparent,
 			transparent 6px,
-			color-mix(in oklab, var(--app-fg) 5%, transparent) 6px,
-			color-mix(in oklab, var(--app-fg) 5%, transparent) 7px
+			color-mix(in oklab, var(--pv-fg) 5%, transparent) 6px,
+			color-mix(in oklab, var(--pv-fg) 5%, transparent) 7px
 		);
 	}
 

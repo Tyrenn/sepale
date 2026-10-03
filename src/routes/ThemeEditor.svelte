@@ -118,8 +118,8 @@
 								{@render tile(partner)}
 							{:else if derivedInk}
 								<span
-									class="swatch ct ct-derived"
-									style="--swatch-color:var(--{token.name}); --swatch-on-color:var(--{derivedInk});"
+									class="ui-swatch ct ct-derived"
+									style="--ui-swatch-color:var(--{token.name}); --ui-swatch-on-color:var(--{derivedInk});"
 									title="--{derivedInk} written on --{token.name}"
 								>A</span>
 							{/if}
@@ -234,7 +234,7 @@
 		flex: 1;
 		min-width: 0;
 	}
-	.pal-tiles :global(.box > .swatch) {
+	.pal-tiles :global(.box > .ui-swatch) {
 		width: 100%;
 		height: auto;
 		aspect-ratio: 1;

@@ -6,6 +6,10 @@
 	// read as one product. Then, under it, the sweeps a dashboard would never
 	// show at once: every colour, every selector state, the surfaces, the type.
 	import {
+		Avatar,
+		Bubble,
+		Stat,
+		Stats,
 		Button,
 		Input,
 		Select,
@@ -30,7 +34,6 @@
 		Navbar,
 		Pagination,
 		Fieldset,
-		Swatch,
 		Title,
 		Text
 	} from '$lib/index.js';
@@ -97,13 +100,18 @@
 		null
 	] as const;
 
+	/* A face needs a picture; an inline SVG keeps the page offline. */
+	const face = `data:image/svg+xml,${encodeURIComponent(
+		'<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><defs><linearGradient id="g" x2="1" y2="1"><stop offset="0" stop-color="#fc6"/><stop offset="1" stop-color="#f69"/></linearGradient></defs><rect width="96" height="96" fill="url(#g)"/><circle cx="48" cy="38" r="17" fill="#fff8"/><ellipse cx="48" cy="92" rx="32" ry="26" fill="#fff8"/></svg>'
+	)}`;
+
 	let page = $state(1);
 	let plan = $state('pro');
 	let budget = $state(60);
 </script>
 
 {#snippet orderRow(o: (typeof ORDERS)[number])}
-	<Swatch shape="circle" size="sm" color={o.status === 'refunded' ? 'error' : 'primary'}>{o.initials}</Swatch>
+	<Avatar size="sm">{o.initials}</Avatar>
 	<div class="list-col-grow">
 		<div class="db-strong">{o.who}</div>
 		<div class="db-muted">{o.what}</div>
@@ -136,40 +144,15 @@
 
 <!-- ══ The app ═══════════════════════════════════════════════════════════ -->
 <div class="db">
-	<aside class="db-side">
-		<div class="db-brand">
-			<Swatch shape="circle" size="sm" color="primary">O</Swatch>
-			<span>Orbit</span>
-		</div>
-
-		<Menu
-			size="sm"
-			items={[
-				{ label: 'Dashboard', active: true },
-				{ label: 'Orders' },
-				{ label: 'Products' },
-				{ label: 'Customers' },
-				{ divider: true },
-				{ title: 'Settings' },
-				{ label: 'Team' },
-				{ label: 'Billing' },
-				{ label: 'Archive', disabled: true }
-			]}
-		/>
-
-		<Card size="sm" class="db-upgrade">
-			<div class="db-strong">Storage</div>
-			<Progress color="primary" value={72} />
-			<div class="db-muted">7.2 of 10 GB used</div>
-			{#snippet actions()}<Button size="sm" color="primary">Upgrade</Button>{/snippet}
-		</Card>
-	</aside>
-
 	<div class="db-main">
 		<Navbar>
 			{#snippet start()}
+				<div class="db-brand">
+					<Avatar size="sm" color={has('primary')}>O</Avatar>
+					<span>Orbit</span>
+				</div>
 				<Breadcrumbs>
-					<li><a href="#preview">Orbit</a></li>
+					<li><a href="#preview">Store</a></li>
 					<li>Dashboard</li>
 				</Breadcrumbs>
 			{/snippet}
@@ -185,7 +168,7 @@
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
 					</Button>
 				</Badge>
-				<Swatch shape="circle" size="sm" color="neutral">AR</Swatch>
+				<Avatar size="sm" src={face} alt="Alex" />
 			{/snippet}
 		</Navbar>
 
@@ -201,19 +184,18 @@
 				</div>
 			</header>
 
-			<!-- Figures -->
-			<div class="db-stats">
+			<!-- Figures: one frame of stats, the way a dashboard leads. -->
+			<Stats style="width:100%">
 				{#each STATS as s (s.label)}
-					<Card size="sm">
-						<div class="db-row db-between">
-							<span class="db-muted">{s.label}</span>
-							<Chip size="sm" color={s.up ? 'success' : 'error'} variant="soft">{s.delta}</Chip>
-						</div>
-						<div class="db-figure">{s.value}</div>
-						<Progress color={s.up ? 'primary' : 'error'} value={s.progress} />
-					</Card>
+					<Stat title={s.label} value={s.value}>
+						{#snippet desc()}
+							<Chip size="xs" color={s.up ? 'success' : 'error'} variant="soft">{s.delta}</Chip>
+							vs last week
+						{/snippet}
+						<Progress color={s.up ? 'primary' : 'error'} value={s.progress} style="margin-top:.5rem" />
+					</Stat>
 				{/each}
-			</div>
+			</Stats>
 
 			<div class="db-grid">
 				<!-- Sales by channel -->
@@ -303,6 +285,47 @@
 							<Button size="sm" color="primary">Save</Button>
 						</Join>
 					{/snippet}
+				</Card>
+
+				<!-- Support chat -->
+				<Card>
+					{#snippet title()}
+						Support
+						<Chip size="sm" color={has('success')} variant="soft">online</Chip>
+					{/snippet}
+					<div class="db-chat">
+						<div class="db-row">
+							<Avatar size="xs" color={has('secondary')}>CD</Avatar>
+							<span class="db-muted">Camille Durand</span>
+						</div>
+						<Bubble noTail>Hi! My order hasn't shipped yet.</Bubble>
+						<Bubble>It was placed on Monday.</Bubble>
+						<Bubble end color={has('primary')}>Sorry about that — it leaves the warehouse today.</Bubble>
+						<Bubble>Thanks a lot!</Bubble>
+					</div>
+					<Input size="sm" placeholder="Write a reply…" />
+				</Card>
+
+				<!-- Team -->
+				<Card>
+					{#snippet title()}Team{/snippet}
+					<div class="db-row">
+						<Avatar src={face} alt="Alex" color={has('primary')} />
+						<Avatar color={has('success')}>LB
+							{#snippet badge()}2{/snippet}
+						</Avatar>
+						<Avatar shape="square">HP</Avatar>
+						<Avatar size="sm" color={has('warning')}>NM</Avatar>
+					</div>
+					<Menu
+						size="sm"
+						items={[
+							{ label: 'Members', active: true },
+							{ label: 'Roles' },
+							{ divider: true },
+							{ label: 'Archive', disabled: true }
+						]}
+					/>
 				</Card>
 
 				<!-- Activity -->

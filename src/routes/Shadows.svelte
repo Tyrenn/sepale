@@ -84,9 +84,9 @@
 			<div class="layer-editor" transition:slide={{ duration: 160 }}>
 				<div class="grid">
 					<div class="fields">
-						<label><span>X</span><input class="input input-xs xy" value={l.x}
+						<label><span>X</span><input class="ui-input ui-input-xs xy" value={l.x}
 							onchange={(e) => set(i, { x: e.currentTarget.value })} /></label>
-						<label><span>Y</span><input class="input input-xs xy" value={l.y}
+						<label><span>Y</span><input class="ui-input ui-input-xs xy" value={l.y}
 							onchange={(e) => set(i, { y: e.currentTarget.value })} /></label>
 					</div>
 					<!-- Two numbers that are really one gesture. -->
@@ -105,10 +105,10 @@
 
 				{#each [['blur', 'Blur', 0, 40], ['spread', 'Spread', -10, 20]] as [k, name, lo, hi] (k)}
 					<label class="slide"><span>{name}</span>
-						<input type="range" class="range" min={lo} max={hi} step="1"
+						<input type="range" class="ui-range" min={lo} max={hi} step="1"
 							value={num(l[k as 'blur' | 'spread'])}
 							oninput={(e) => set(i, { [k]: `${e.currentTarget.value}${unit(l[k as 'blur' | 'spread'])}` })} />
-						<select class="select select-xs unit"
+						<select class="ui-select ui-select-xs unit"
 							value={unit(l[k as 'blur' | 'spread'])}
 							onchange={(e) => set(i, { [k]: `${num(l[k as 'blur' | 'spread'])}${e.currentTarget.value}` })}>
 							{#each UNITS as u (u)}<option value={u}>{u}</option>{/each}
@@ -120,7 +120,7 @@
 							onchange={(v) => set(i, { color: v })} />
 					</span></label>
 				<label class="slide"><span>Inset</span>
-					<input type="checkbox" class="toggle toggle-xs" checked={l.inset}
+					<input type="checkbox" class="ui-toggle ui-toggle-xs" checked={l.inset}
 						onchange={(e) => set(i, { inset: e.currentTarget.checked })} /></label>
 			</div>
 		{/if}
@@ -137,7 +137,7 @@
 		width: 100%;
 		min-width: 0;
 	}
-	.layer-editor :global(.range) {
+	.layer-editor :global(.ui-range) {
 		min-width: 0;
 	}
 	.row {
@@ -199,8 +199,8 @@
 		flex: 1 1 auto;
 		min-width: 0;
 	}
-	.fields :global(.input),
-	.slide :global(.input) {
+	.fields :global(.ui-input),
+	.slide :global(.ui-input) {
 		min-width: 0;
 		width: 100%;
 	}
@@ -238,7 +238,7 @@
 		width: 0.7rem;
 		height: 0.7rem;
 		border-radius: 50%;
-		background: var(--color-primary);
+		background: var(--ui-color-primary);
 		translate: -50% -50%;
 		pointer-events: none;
 	}

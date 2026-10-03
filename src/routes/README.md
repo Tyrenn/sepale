@@ -106,6 +106,17 @@ only ever named to qualify our own selectors.
 
 ## The app
 
+### Chrome and islands
+
+The app's own interface — sidebar, theme editor, tables, tabs — does not wear
+the family being previewed. It wears daisy in the `corporate` theme, compiled
+by `build-css.mjs` into `static/app-ui.css` and renamed out of the way: every
+class `.x` is `.ui-x`, every custom property `--x` is `--ui-x`, `:root` is
+`.app-ui`. Both stylesheets share the page and cannot meet. Chrome markup
+writes `ui-btn`, `ui-menu`, `ui-select`…; the family under preview shows only
+inside a `.uu-island` (the theme page's preview, each `Section`'s preview
+box), which takes back the family's ground, ink, font and colour scheme.
+
 | Route | File | What it shows |
 | --- | --- | --- |
 | `/` | `+page.svelte` | The theme editor: parameters on the left, `ThemePreview` on the right |

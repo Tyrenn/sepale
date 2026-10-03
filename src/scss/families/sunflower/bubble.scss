@@ -1,0 +1,146 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* sunflower — bubble.
+   Everything sunflower draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   bubble.scss — .bubble
+
+   A chat message: a fill, an ink, and a tail at the bottom corner
+   of one side. It is one class on one block — whatever it holds is
+   the message.
+
+   Here the tail has to be DRAWN — outlined like the bubble, and
+   casting the same hard shadow — so it is two right triangles,
+   both clipped (clip-path) out of a square at the squared bottom
+   corner:
+	::before   the outline: line colour, flush with the border's
+	           outer edge
+	::after    the fill: smaller by the border on every side, and
+	           reaching over the bubble's own border so the inside
+	           of the tail opens into the inside of the bubble
+   The shadow is a drop-shadow FILTER rather than a box-shadow: a
+   box-shadow is cast by the box alone, a filter by everything it
+   paints, tail included. `.bubble-end` moves the tail to the other
+   side and mirrors it; in a right-to-left document both follow.
+
+   Plumbing contract (the family fills these on `.bubble`):
+	--bubble-bg              fill (the tail too)
+	--bubble-fg              ink
+	--bubble-border(-width)  outline colour and width
+	--bubble-shadow          a drop-shadow() filter, or none
+	--bubble-radius          corner radius
+	--bubble-tail            tail size
+	--bubble-px/py           padding
+	--fontsize               font size (set by size-variants classes)
+   ============================================================ */
+
+@mixin structure {
+	.bubble {
+		--bubble-flip: 1;
+		position: relative;
+		display: block;
+		box-sizing: border-box;
+		width: fit-content;
+		max-width: calc(90% - var(--bubble-tail));
+		min-width: calc(2.5em * var(--scale));
+		min-height: calc(2em * var(--scale));
+		margin-inline: calc(var(--bubble-tail) + var(--bubble-border-width)) 0;
+		padding: var(--bubble-py) var(--bubble-px);
+		background-color: var(--bubble-bg);
+		color: var(--bubble-fg);
+		border: var(--bubble-border-width) solid var(--bubble-border);
+		border-radius: var(--bubble-radius);
+		border-end-start-radius: 0;
+		filter: var(--bubble-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		overflow-wrap: anywhere;
+	}
+
+	.bubble::before,
+	.bubble::after {
+		content: '';
+		position: absolute;
+		clip-path: polygon(100% 0, 100% 100%, 0 100%);
+		scale: var(--bubble-flip) 1;
+	}
+	.bubble::before {
+		bottom: calc(-1 * var(--bubble-border-width));
+		inset-inline-start: calc(-1 * var(--bubble-tail) - var(--bubble-border-width));
+		width: var(--bubble-tail);
+		height: var(--bubble-tail);
+		background-color: var(--bubble-border);
+	}
+	/* Inset by the border measured square to the slope: √2 of it. */
+	.bubble::after {
+		--bubble-tail-in: calc(var(--bubble-tail) - 1.4142 * var(--bubble-border-width));
+		bottom: 0;
+		inset-inline-start: calc(-1 * var(--bubble-tail-in));
+		width: var(--bubble-tail-in);
+		height: var(--bubble-tail-in);
+		background-color: var(--bubble-bg);
+	}
+
+	/* ── Axis: side ── */
+	.bubble-end {
+		--bubble-flip: -1;
+		margin-inline: auto calc(var(--bubble-tail) + var(--bubble-border-width));
+		border-end-start-radius: var(--bubble-radius);
+		border-end-end-radius: 0;
+	}
+	.bubble-end::before {
+		inset-inline: auto calc(-1 * var(--bubble-tail) - var(--bubble-border-width));
+	}
+	.bubble-end::after {
+		inset-inline: auto calc(-1 * var(--bubble-tail-in));
+	}
+	[dir="rtl"] .bubble {
+		--bubble-flip: -1;
+	}
+	[dir="rtl"] .bubble-end {
+		--bubble-flip: 1;
+	}
+
+	/* ── Flag: no-tail ── a follow-up message: same column, no tail. */
+	.bubble-no-tail {
+		border-end-start-radius: var(--bubble-radius);
+		border-end-end-radius: var(--bubble-radius);
+	}
+	.bubble-no-tail::before,
+	.bubble-no-tail::after {
+		content: none;
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('bubble', c.$sizes-field);
+}
+
+@mixin look {
+	/* The sheet, outlined, on the hard shadow. A colour fills it; the
+	   ink stays the ink, as everywhere in this look. */
+	.bubble {
+		--bubble-bg: var(--color-surface-2);
+		--bubble-fg: var(--color-on-surface);
+		--bubble-border: var(--color-border);
+		--bubble-border-width: var(--border);
+		--bubble-shadow: drop-shadow(var(--sf-o) var(--sf-o) 0 var(--color-border));
+		--bubble-radius: var(--radius-box);
+		--bubble-tail: calc(0.9em * var(--scale));
+		--bubble-px: calc(1em * var(--scale));
+		--bubble-py: calc(0.5em * var(--scale));
+		font-weight: 500;
+	}
+
+	/* ── Axis: color ── */
+	@each $color in c.$color-list {
+		.bubble-#{$color} {
+			--bubble-bg: var(--color-#{$color});
+			--bubble-fg: var(--color-on-#{$color});
+		}
+	}
+}

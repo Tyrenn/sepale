@@ -39,8 +39,10 @@ const GROUPS: { group: string; ids: string[] }[] = [
 	{
 		group: 'Display',
 		ids: [
+			'avatar',
 			'chip',
 			'badge',
+			'bubble',
 			'tabs',
 			'loading',
 			'progress',
@@ -48,6 +50,7 @@ const GROUPS: { group: string; ids: string[] }[] = [
 			'skeleton',
 			'list',
 			'card',
+			'stat',
 			'carousel',
 			'text',
 			'link',

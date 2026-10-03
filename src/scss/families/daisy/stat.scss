@@ -1,0 +1,160 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* daisy — stat.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   stat.scss — .stat and .stats
+
+   A figure worth a glance: a small title, a big value, a line of
+   description, and optionally an icon or picture on the side and a
+   row of actions. A box like `.card`, with another default layout:
+   a two-column grid where the text stacks in the first column and
+   `.stat-figure` spans the rows of the second.
+
+   `.stats` is a second namespace in the same file, as `text.scss`
+   holds three (CONTEXT.md): it lines several stats up in ONE frame
+   and draws a divider between them, so the stats it holds put their
+   own frame down. A row by default, `.stats-vertical` stacks them.
+
+   Plumbing contract (the family fills these on `.stat` / `.stats`):
+	--stat-bg / -fg            fill and ink
+	--stat-border(-width)      edge colour and width (0 = none)
+	--stat-radius              corner radius
+	--stat-shadow              box-shadow
+	--stat-px / -py / -gap     padding, and the gap between columns
+	--stat-muted               ink of the title and the description
+	--stat-title-size          title and description font-size
+	--stat-value-size/-weight  the value
+	--stat-figure-fg           ink of the figure
+	--stats-divider            the line between two stats in .stats
+	--stats-*                  the frame .stats draws, as --stat-*
+	--fontsize                 font size (set by size-variants classes)
+   ============================================================ */
+
+@mixin structure {
+	.stat {
+		position: relative;
+		display: inline-grid;
+		grid-template-columns: 1fr auto;
+		align-content: start;
+		column-gap: var(--stat-gap);
+		box-sizing: border-box;
+		padding: var(--stat-py) var(--stat-px);
+		background-color: var(--stat-bg);
+		color: var(--stat-fg);
+		border: var(--stat-border-width) solid var(--stat-border);
+		border-radius: var(--stat-radius);
+		box-shadow: var(--stat-shadow);
+		rotate: var(--stat-rotate, 0deg);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.stat > * {
+		grid-column-start: 1;
+	}
+
+	.stat-title,
+	.stat-desc {
+		color: var(--stat-muted);
+		font-size: var(--stat-title-size);
+		white-space: nowrap;
+	}
+	.stat-value {
+		color: var(--stat-value-fg, inherit);
+		font-size: var(--stat-value-size);
+		font-weight: var(--stat-value-weight);
+		line-height: 1.2;
+		white-space: nowrap;
+	}
+	.stat > .stat-figure {
+		grid-column-start: 2;
+		grid-row: 1 / span 3;
+		align-self: center;
+		justify-self: end;
+		color: var(--stat-figure-fg, inherit);
+	}
+	.stat-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--stat-gap);
+		margin-block-start: calc(0.5em * var(--scale));
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('stat', c.$sizes-field);
+
+	/* ── .stats ── one frame for several. */
+	.stats {
+		position: relative;
+		display: inline-grid;
+		grid-auto-flow: column;
+		overflow-x: auto;
+		background-color: var(--stats-bg);
+		color: var(--stats-fg);
+		border: var(--stats-border-width) solid var(--stats-border);
+		border-radius: var(--stats-radius);
+		box-shadow: var(--stats-shadow);
+		rotate: var(--stats-rotate, 0deg);
+	}
+	.stats > .stat {
+		--stat-bg: #0000;
+		--stat-border-width: 0px;
+		--stat-shadow: none;
+		--stat-rotate: 0deg;
+		--stat-radius: 0;
+	}
+	.stats > .stat:not(:last-child) {
+		border-inline-end: var(--stats-divider-width) var(--stats-divider-style, solid) var(--stats-divider);
+	}
+
+	/* ── Axis: direction ── */
+	.stats-horizontal {
+		grid-auto-flow: column;
+	}
+	.stats-vertical {
+		grid-auto-flow: row;
+		overflow-x: visible;
+	}
+	.stats-vertical > .stat:not(:last-child) {
+		border-inline-end: 0;
+		border-block-end: var(--stats-divider-width) var(--stats-divider-style, solid) var(--stats-divider);
+	}
+}
+
+@mixin look {
+	/* daisyUI's .stats paints no ground: its docs pair it with
+	   `shadow`, and with bg-base-100 the page already is. Its dividers
+	   are dashed, base-content at 10%. */
+	.stat,
+	.stats {
+		--stat-bg: var(--color-base-100);
+		--stat-fg: var(--color-base-content);
+		--stat-border: var(--color-base-200);
+		--stat-border-width: 0px;
+		--stat-radius: var(--radius-box);
+		--stat-shadow: 0 1px 3px 0 oklch(0% 0 0 / 0.1), 0 1px 2px -1px oklch(0% 0 0 / 0.1);
+		--stats-bg: var(--stat-bg);
+		--stats-fg: var(--stat-fg);
+		--stats-border: var(--stat-border);
+		--stats-border-width: var(--stat-border-width);
+		--stats-radius: var(--stat-radius);
+		--stats-shadow: var(--stat-shadow);
+		--stats-divider: color-mix(in oklab, var(--color-base-content) 10%, #0000);
+		--stats-divider-width: var(--border, 1px);
+		--stats-divider-style: dashed;
+	}
+	.stat {
+		--stat-px: calc(1.5em * var(--scale));
+		--stat-py: calc(1em * var(--scale));
+		--stat-gap: calc(1em * var(--scale));
+		--stat-muted: color-mix(in oklab, var(--color-base-content) 60%, #0000);
+		--stat-title-size: 0.75em;
+		--stat-value-size: 2em;
+		--stat-value-weight: 800;
+	}
+}

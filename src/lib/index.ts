@@ -35,6 +35,8 @@ export { default as Label } from './components/Label.svelte';
 export { default as FloatingLabel } from './components/FloatingLabel.svelte';
 
 // Display
+export { default as Avatar } from './components/Avatar.svelte';
+export { default as Bubble } from './components/Bubble.svelte';
 export { default as Chip } from './components/Chip.svelte';
 export { default as Badge } from './components/Badge.svelte';
 export { default as Swatch } from './components/Swatch.svelte';
@@ -44,6 +46,8 @@ export { default as RadialProgress } from './components/RadialProgress.svelte';
 export { default as Skeleton } from './components/Skeleton.svelte';
 export { default as List } from './components/List.svelte';
 export { default as Card } from './components/Card.svelte';
+export { default as Stat } from './components/Stat.svelte';
+export { default as Stats } from './components/Stats.svelte';
 export { default as Carousel } from './components/Carousel.svelte';
 export { default as Text } from './components/Text.svelte';
 export { default as Title } from './components/Title.svelte';

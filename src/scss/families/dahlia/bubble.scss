@@ -1,0 +1,112 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* dahlia — bubble.
+   Everything dahlia draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   bubble.scss — .bubble
+
+   A chat message: a fill, an ink, and a tail on one side. It is one
+   class on one block — whatever it holds is the message.
+
+   dahlia keeps every corner rounded and points with a small arrow
+   instead: ::before, painted in the bubble's fill and CLIPPED to a
+   triangle (clip-path), sitting against the side a little above the
+   bottom corner — Radix's popover arrow, turned sideways.
+   `.bubble-end` moves it to the other side and mirrors it; in a
+   right-to-left document both sides follow.
+
+   The bubble keeps a margin as wide as its tail on the tail side,
+   so a column of them never overflows, and an end bubble pushes
+   itself to the end of the line.
+
+   Plumbing contract (the family fills these on `.bubble`):
+	--bubble-bg       fill (the tail too)
+	--bubble-fg       ink
+	--bubble-radius   corner radius
+	--bubble-tail     tail width (it is twice as tall)
+	--bubble-px/py    padding
+	--fontsize        font size (set by size-variants classes)
+   ============================================================ */
+
+@mixin structure {
+	.bubble {
+		--bubble-flip: 1;
+		position: relative;
+		display: block;
+		box-sizing: border-box;
+		width: fit-content;
+		max-width: calc(90% - var(--bubble-tail));
+		min-width: calc(2.5em * var(--scale));
+		min-height: calc(2em * var(--scale));
+		margin-inline: var(--bubble-tail) 0;
+		padding: var(--bubble-py) var(--bubble-px);
+		background-color: var(--bubble-bg);
+		color: var(--bubble-fg);
+		border-radius: var(--bubble-radius);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		overflow-wrap: anywhere;
+	}
+
+	.bubble::before {
+		content: '';
+		position: absolute;
+		bottom: calc(0.5em * var(--scale));
+		inset-inline-start: calc(-1 * var(--bubble-tail));
+		/* One pixel into the bubble: no hairline seam at fractional zoom. */
+		width: calc(var(--bubble-tail) + 1px);
+		height: calc(2 * var(--bubble-tail));
+		background-color: var(--bubble-bg);
+		clip-path: polygon(100% 0, 0 50%, 100% 100%);
+		scale: var(--bubble-flip) 1;
+	}
+
+	/* ── Axis: side ── */
+	.bubble-end {
+		--bubble-flip: -1;
+		margin-inline: auto var(--bubble-tail);
+	}
+	.bubble-end::before {
+		inset-inline: auto calc(-1 * var(--bubble-tail));
+	}
+	[dir="rtl"] .bubble {
+		--bubble-flip: -1;
+	}
+	[dir="rtl"] .bubble-end {
+		--bubble-flip: 1;
+	}
+
+	/* ── Flag: no-tail ── a follow-up message: same column, no tail. */
+	.bubble-no-tail::before {
+		content: none;
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('bubble', c.$sizes-field);
+}
+
+@mixin look {
+	/* The grey ground of a Radix surface, one step up from the page;
+	   a colour is the solid weight, with its ink. */
+	.bubble {
+		--bubble-bg: var(--color-surface-3);
+		--bubble-fg: var(--color-on-surface);
+		--bubble-radius: var(--radius-box);
+		--bubble-tail: calc(0.4em * var(--scale));
+		--bubble-px: calc(0.875em * var(--scale));
+		--bubble-py: calc(0.5em * var(--scale));
+	}
+
+	/* ── Axis: color ── */
+	@each $color in c.$color-list {
+		.bubble-#{$color} {
+			--bubble-bg: var(--color-#{$color});
+			--bubble-fg: var(--color-on-#{$color});
+		}
+	}
+}

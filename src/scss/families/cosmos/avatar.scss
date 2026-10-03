@@ -1,0 +1,156 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* cosmos — avatar.
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   avatar.scss — .avatar
+
+   A picture or a few letters standing for someone, cropped to a
+   shape. `.avatar` is the frame; its one child — an <img>, or a
+   <span> of initials — fills it and is cropped to the same shape.
+
+   The coloured contour is the frame's own fill showing through its
+   padding: a ring that follows ANY shape, masked ones included,
+   where an outline or a box-shadow would be cut off by the mask.
+   The gap between ring and picture is the child's border.
+
+   A status or a count is a `.badge` wrapped around the avatar; this
+   file reaches into it (integration, ADR 0009) so the chip lands on
+   the shape's edge rather than on its bounding box's corner.
+
+   Plumbing contract (the family fills these on `.avatar`):
+	--avatar-size          width and height
+	--avatar-radius        corner radius of the frame
+	--avatar-inner-radius  corner radius of the picture
+	--avatar-mask          a mask shorthand, or none
+	--avatar-corner        how far the shape's edge sits inside its
+	                       box at 45°, as a % of the width (badge)
+	--avatar-ring          contour colour
+	--avatar-ring-width    contour width (0 = none)
+	--avatar-gap           colour between contour and picture
+	--avatar-gap-width     width of that gap
+	--avatar-border        / --avatar-border-width: an outer line
+	--avatar-shadow        box-shadow
+	--avatar-bg / -fg      ground and ink of the initials
+	--fontsize             font size (set by size-variants classes)
+   ============================================================ */
+
+@mixin structure {
+	.avatar {
+		position: relative;
+		display: inline-grid;
+		flex: none;
+		box-sizing: border-box;
+		width: var(--avatar-size);
+		height: var(--avatar-size);
+		padding: var(--avatar-ring-width);
+		vertical-align: middle;
+		background-color: var(--avatar-ring);
+		border: var(--avatar-border-width) solid var(--avatar-border);
+		border-radius: var(--avatar-radius);
+		box-shadow: var(--avatar-shadow);
+		mask: var(--avatar-mask);
+		rotate: var(--avatar-rotate, 0deg);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		line-height: 1;
+		user-select: none;
+	}
+
+	/* The picture or the initials: whatever the avatar holds fills it. */
+	.avatar > * {
+		grid-area: 1 / 1;
+		box-sizing: border-box;
+		display: grid;
+		place-items: center;
+		width: 100%;
+		height: 100%;
+		min-width: 0;
+		overflow: hidden;
+		object-fit: cover;
+		border: var(--avatar-gap-width) solid var(--avatar-gap);
+		border-radius: var(--avatar-inner-radius);
+		mask: var(--avatar-mask);
+		background-color: var(--avatar-bg);
+		color: var(--avatar-fg);
+		font-weight: var(--avatar-weight, 400);
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('avatar', c.$sizes-field);
+
+	/* ── Integration: a .badge around an avatar ──
+	   The chip is centred on the corner of the badge's box; on a round
+	   avatar that corner is empty air. A margin on the anchored sides
+	   pulls it in onto the shape's edge. % margins resolve against the
+	   width, and the avatar is square. */
+	.badge:has(> .avatar) {
+		--avatar-pull: var(--avatar-corner, 14.64%);
+	}
+	.badge:has(> .avatar) > :where(.chip) {
+		margin-block-start: var(--avatar-pull);
+		margin-inline-end: var(--avatar-pull);
+	}
+	.badge-bottom:has(> .avatar) > :where(.chip) {
+		margin-block: 0 var(--avatar-pull);
+	}
+	.badge-middle:has(> .avatar) > :where(.chip) {
+		margin-block: 0;
+	}
+	.badge-start:has(> .avatar) > :where(.chip) {
+		margin-inline: var(--avatar-pull) 0;
+	}
+	.badge-center:has(> .avatar) > :where(.chip) {
+		margin-inline: 0;
+	}
+}
+
+@mixin look {
+	/* A circle drawn by hand: the pen never closes it at the same
+	   radius twice. The wobble is in %, so it is the same drift on a
+	   small avatar and a large one. */
+	.avatar {
+		--cw: var(--cosmos-wobble-selector, 0.7);
+		--avatar-size: calc(3em * var(--scale));
+		--avatar-radius:
+			calc(50% + var(--cw) * 6%) calc(50% - var(--cw) * 8%) calc(50% + var(--cw) * 7%) calc(50% - var(--cw) * 5%)
+			/ calc(50% - var(--cw) * 7%) calc(50% + var(--cw) * 5%) calc(50% - var(--cw) * 6%) calc(50% + var(--cw) * 8%);
+		--avatar-inner-radius: var(--avatar-radius);
+		--avatar-mask: none;
+		--avatar-ring: #0000;
+		--avatar-ring-width: 0px;
+		--avatar-gap: var(--color-surface-1);
+		--avatar-gap-width: 0px;
+		--avatar-border: var(--color-border);
+		--avatar-border-width: var(--border);
+		--avatar-shadow: none;
+		--avatar-rotate: calc(var(--cosmos-tilt, 0.4) * 1deg);
+		--avatar-bg: var(--color-surface-3);
+		--avatar-fg: var(--color-on-surface);
+		--avatar-weight: 700;
+	}
+
+	/* ── Axis: color ── the contour, a second pen line in colour. */
+	@each $color in c.$color-list {
+		.avatar-#{$color} {
+			--avatar-ring: var(--color-#{$color});
+			--avatar-ring-width: 0.2em;
+			--avatar-gap-width: 2px;
+		}
+	}
+
+	/* ── Axis: shape ── the boxes' recipe. */
+	.avatar-square {
+		--cw: var(--cosmos-wobble-field, 1);
+		--avatar-radius: var(--c3);
+		--avatar-inner-radius: var(--c3);
+	}
+	.badge:has(> .avatar-square) {
+		--avatar-corner: 4%;
+	}
+}

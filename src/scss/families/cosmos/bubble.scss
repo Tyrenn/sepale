@@ -1,0 +1,148 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* cosmos — bubble.
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   bubble.scss — .bubble
+
+   A chat message: a fill, an ink, and a tail at the bottom corner
+   of one side. It is one class on one block — whatever it holds is
+   the message.
+
+   A comic speech balloon, drawn in marker: the frame wobbles like
+   every box here, and the tail is a curve sweeping out of the
+   squared bottom corner. Like sunflower's it is two layers, but cut
+   by an SVG mask (a curve) rather than a polygon:
+	::before   the pen line: the curve in ink, flush with the
+	           border's outer edge
+	::after    the paper: the same curve, smaller by the pen on
+	           every side, reaching over the bubble's own border so
+	           the tail opens into the balloon
+   `.bubble-end` moves the tail to the other side and mirrors it; in
+   a right-to-left document both follow.
+
+   Plumbing contract (the family fills these on `.bubble`):
+	--bubble-bg              fill (the tail too)
+	--bubble-fg              ink
+	--bubble-border(-width)  pen colour and width
+	--bubble-radius          corner radius
+	--bubble-rotate          resting angle
+	--bubble-tail            tail size
+	--bubble-tail-mask       the tail's shape, an image
+	--bubble-px/py           padding
+	--fontsize               font size (set by size-variants classes)
+   ============================================================ */
+
+@mixin structure {
+	.bubble {
+		--bubble-flip: 1;
+		position: relative;
+		display: block;
+		box-sizing: border-box;
+		width: fit-content;
+		max-width: calc(90% - var(--bubble-tail));
+		min-width: calc(2.5em * var(--scale));
+		min-height: calc(2em * var(--scale));
+		margin-inline: calc(var(--bubble-tail) + var(--bubble-border-width)) 0;
+		padding: var(--bubble-py) var(--bubble-px);
+		background-color: var(--bubble-bg);
+		color: var(--bubble-fg);
+		border: var(--bubble-border-width) solid var(--bubble-border);
+		border-radius: var(--bubble-radius);
+		border-end-start-radius: 0;
+		rotate: var(--bubble-rotate, 0deg);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		overflow-wrap: anywhere;
+	}
+
+	.bubble::before,
+	.bubble::after {
+		content: '';
+		position: absolute;
+		mask: var(--bubble-tail-mask) right bottom / 100% 100% no-repeat;
+		scale: var(--bubble-flip) 1;
+	}
+	.bubble::before {
+		bottom: calc(-1 * var(--bubble-border-width));
+		inset-inline-start: calc(-1 * var(--bubble-tail) - var(--bubble-border-width));
+		width: var(--bubble-tail);
+		height: var(--bubble-tail);
+		background-color: var(--bubble-border);
+	}
+	.bubble::after {
+		--bubble-tail-in: calc(var(--bubble-tail) - 1.4142 * var(--bubble-border-width));
+		bottom: 0;
+		inset-inline-start: calc(-1 * var(--bubble-tail-in));
+		width: var(--bubble-tail-in);
+		height: var(--bubble-tail-in);
+		background-color: var(--bubble-bg);
+	}
+
+	/* ── Axis: side ── */
+	.bubble-end {
+		--bubble-flip: -1;
+		margin-inline: auto calc(var(--bubble-tail) + var(--bubble-border-width));
+		border-end-start-radius: var(--bubble-radius);
+		border-end-end-radius: 0;
+	}
+	.bubble-end::before {
+		inset-inline: auto calc(-1 * var(--bubble-tail) - var(--bubble-border-width));
+	}
+	.bubble-end::after {
+		inset-inline: auto calc(-1 * var(--bubble-tail-in));
+	}
+	[dir="rtl"] .bubble {
+		--bubble-flip: -1;
+	}
+	[dir="rtl"] .bubble-end {
+		--bubble-flip: 1;
+	}
+
+	/* ── Flag: no-tail ── a follow-up message: same column, no tail. */
+	.bubble-no-tail {
+		border-end-start-radius: var(--bubble-radius);
+		border-end-end-radius: var(--bubble-radius);
+	}
+	.bubble-no-tail::before,
+	.bubble-no-tail::after {
+		content: none;
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('bubble', c.$sizes-field);
+}
+
+@mixin look {
+	/* Paper and marker; a colour washes the paper. The drift is the
+	   controls' one: a balloon is a line or two, not a box. */
+	.bubble {
+		--cw: var(--cosmos-wobble-field, 1);
+		--bubble-bg: var(--color-surface-1);
+		--bubble-fg: var(--color-on-surface);
+		--bubble-border: var(--color-border);
+		--bubble-border-width: var(--border);
+		--bubble-radius: var(--c4);
+		--bubble-rotate: calc(var(--cosmos-tilt, 0.4) * -1deg);
+		--bubble-tail: calc(1em * var(--scale));
+		--bubble-px: calc(1em * var(--scale));
+		--bubble-py: calc(0.5em * var(--scale));
+		--bubble-tail-mask: url("data:image/svg+xml,%3csvg width='16' height='16' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M0 16C6 15.5 9 11 9 0H16V16Z'/%3e%3c/svg%3e");
+	}
+	.bubble-end {
+		--bubble-rotate: calc(var(--cosmos-tilt, 0.4) * 1deg);
+	}
+
+	/* ── Axis: color ── */
+	@each $color in c.$color-list {
+		.bubble-#{$color} {
+			--bubble-bg: var(--color-#{$color});
+			--bubble-fg: var(--color-on-#{$color});
+		}
+	}
+}

@@ -2,7 +2,7 @@
 	/**
 	 * One colour, edited in OKLCH.
 	 *
-	 * The tile is the kit's own `.swatch`; clicking it opens a panel with three
+	 * The tile is the chrome's `.ui-swatch`; clicking it opens a panel with three
 	 * sliders — lightness, chroma, hue — whose tracks are drawn as the gradient
 	 * they move along, plus the raw value for anything the sliders cannot say
 	 * (`color-mix(…)`, a `var()`).
@@ -85,8 +85,8 @@
 
 <span class="box" class:small bind:this={box}>
 	<button
-		class="swatch"
-		style:--swatch-color={value}
+		class="ui-swatch"
+		style:--ui-swatch-color={value}
 		onclick={toggle}
 		aria-expanded={open}
 		aria-label={label}
@@ -96,8 +96,8 @@
 	{#if open}
 		<div class="panel" style:left="{at.x}px" style:top="{at.y}px" transition:slide={{ duration: 160 }}>
 			<header>
-				<span class="swatch swatch-lg" style:--swatch-color={value}></span>
-				<span class="title">{label}</span>
+				<span class="ui-swatch ui-swatch-lg" style:--ui-swatch-color={value}></span>
+				<span class="ui-title">{label}</span>
 				{#if ratio}
 					<span class="grade" class:bad={ratio < 4.5} title="Contrast with its text">
 						{grade}<small>{ratio}</small>
@@ -127,7 +127,7 @@
 			</label>
 			<label class="slider value">
 				<span>Value</span>
-				<input type="text" class="input input-xs" {value} spellcheck="false"
+				<input type="text" class="ui-input ui-input-xs" {value} spellcheck="false"
 					onchange={(e) => {
 						onchange(e.currentTarget.value);
 						lch = toOklch(e.currentTarget.value);
@@ -142,8 +142,8 @@
 		display: inline-flex;
 		position: relative;
 	}
-	:global(.box .swatch) {
-		--swatch-size: 2.5rem;
+	:global(.box .ui-swatch) {
+		--ui-swatch-size: 2.5rem;
 		/* A ring the swatch's own border cannot give: a white tile on a white
 		   page is otherwise simply not there. */
 		outline: 1px solid color-mix(in oklab, currentColor 28%, #0000);
@@ -151,11 +151,11 @@
 		cursor: pointer;
 		padding: 0;
 	}
-	:global(.box .swatch-lg) {
-		--swatch-size: 3rem;
+	:global(.box .ui-swatch-lg) {
+		--ui-swatch-size: 3rem;
 	}
-	:global(.box.small .swatch) {
-		--swatch-size: 1.5rem;
+	:global(.box.small .ui-swatch) {
+		--ui-swatch-size: 1.5rem;
 	}
 	.panel {
 		position: fixed;
@@ -176,7 +176,7 @@
 		gap: 0.55rem;
 		margin-bottom: 0.5rem;
 	}
-	.title {
+	.ui-title {
 		font-weight: 600;
 		font-size: 0.85rem;
 		flex: 1;
@@ -191,7 +191,7 @@
 		opacity: 0.8;
 	}
 	.grade.bad {
-		color: var(--color-error);
+		color: var(--ui-color-error);
 		opacity: 1;
 	}
 	.grade small {

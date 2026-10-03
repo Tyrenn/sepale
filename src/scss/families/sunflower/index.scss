@@ -7,7 +7,9 @@
 @use '../../config' with ($color-list: (primary, neutral, success, error));
 @use '../../params';
 @use 'root';
+@use 'avatar';
 @use 'badge';
+@use 'bubble';
 @use 'breadcrumbs';
 @use 'calendar';
 @use 'card';
@@ -34,6 +36,7 @@
 @use 'range';
 @use 'select';
 @use 'skeleton';
+@use 'stat';
 @use 'swatch';
 @use 'tabs';
 @use 'text';
@@ -158,7 +161,9 @@ $params: map.merge(
 /* The structure of every component first, then the look of every
    component: a look always comes later in the cascade than any
    structure, whichever file it sits in. */
+@include avatar.structure;
 @include badge.structure;
+@include bubble.structure;
 @include breadcrumbs.structure;
 @include button.structure;
 @include calendar.structure;
@@ -185,6 +190,7 @@ $params: map.merge(
 @include range.structure;
 @include select.structure;
 @include skeleton.structure;
+@include stat.structure;
 @include swatch.structure;
 @include tabs.structure;
 @include text.structure;
@@ -202,7 +208,9 @@ $params: map.merge(
 
 /* What sunflower decides, one file per component. */
 
+@include avatar.look;
 @include badge.look;
+@include bubble.look;
 @include breadcrumbs.look;
 @include calendar.look;
 @include card.look;
@@ -228,6 +236,7 @@ $params: map.merge(
 @include range.look;
 @include select.look;
 @include skeleton.look;
+@include stat.look;
 @include swatch.look;
 @include tabs.look;
 @include text.look;

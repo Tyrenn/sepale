@@ -221,6 +221,44 @@ svg {
   --fx-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.34' numOctaves='4' stitchTiles='stitch'%3E%3C/feTurbulence%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23a)' opacity='0.2'%3E%3C/rect%3E%3C/svg%3E");
 }
 
+/* daisy — avatar.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   avatar.scss — .avatar
+
+   A picture or a few letters standing for someone, cropped to a
+   shape. `.avatar` is the frame; its one child — an <img>, or a
+   <span> of initials — fills it and is cropped to the same shape.
+
+   The coloured contour is the frame's own fill showing through its
+   padding: a ring that follows ANY shape, masked ones included,
+   where an outline or a box-shadow would be cut off by the mask.
+   The gap between ring and picture is the child's border.
+
+   A status or a count is a `.badge` wrapped around the avatar; this
+   file reaches into it (integration, ADR 0009) so the chip lands on
+   the shape's edge rather than on its bounding box's corner.
+
+   Plumbing contract (the family fills these on `.avatar`):
+	--avatar-size          width and height
+	--avatar-radius        corner radius of the frame
+	--avatar-inner-radius  corner radius of the picture
+	--avatar-mask          a mask shorthand, or none
+	--avatar-corner        how far the shape's edge sits inside its
+	                       box at 45°, as a % of the width (badge)
+	--avatar-ring          contour colour
+	--avatar-ring-width    contour width (0 = none)
+	--avatar-gap           colour between contour and picture
+	--avatar-gap-width     width of that gap
+	--avatar-border        / --avatar-border-width: an outer line
+	--avatar-shadow        box-shadow
+	--avatar-bg / -fg      ground and ink of the initials
+	--fontsize             font size (set by size-variants classes)
+   ============================================================ */
 /* daisy — badge.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism (layout, states,
@@ -244,6 +282,38 @@ svg {
 /* ------------------------------------------------------------
    structure — wrapper + positioned inner chip.
    ------------------------------------------------------------ */
+/* daisy — bubble.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   bubble.scss — .bubble
+
+   A chat message: a fill, an ink, and a tail at the bottom corner
+   of one side. It is one class on one block — whatever it holds is
+   the message.
+
+   The tail is ::before, painted in the bubble's own fill and cut
+   to shape by a mask, on the outside of the bottom-start corner,
+   which is squared so the two join. daisy's tail is daisyUI's: a
+   curve sweeping out to a point. `.bubble-end` moves it to the
+   other side and mirrors it; in a right-to-left document both
+   sides follow.
+
+   The bubble keeps a margin as wide as its tail on the tail side,
+   so a column of them never overflows, and an end bubble pushes
+   itself to the end of the line.
+
+   Plumbing contract (the family fills these on `.bubble`):
+	--bubble-bg       fill (the tail too)
+	--bubble-fg       ink
+	--bubble-radius   corner radius
+	--bubble-tail     tail size
+	--bubble-px/py    padding
+	--fontsize        font size (set by size-variants classes)
+   ============================================================ */
 /* daisy — breadcrumbs.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism (layout, states,
@@ -987,6 +1057,40 @@ svg {
 /* ------------------------------------------------------------
    structure — shimmering placeholder block + text variant.
    ------------------------------------------------------------ */
+/* daisy — stat.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   stat.scss — .stat and .stats
+
+   A figure worth a glance: a small title, a big value, a line of
+   description, and optionally an icon or picture on the side and a
+   row of actions. A box like `.card`, with another default layout:
+   a two-column grid where the text stacks in the first column and
+   `.stat-figure` spans the rows of the second.
+
+   `.stats` is a second namespace in the same file, as `text.scss`
+   holds three (CONTEXT.md): it lines several stats up in ONE frame
+   and draws a divider between them, so the stats it holds put their
+   own frame down. A row by default, `.stats-vertical` stacks them.
+
+   Plumbing contract (the family fills these on `.stat` / `.stats`):
+	--stat-bg / -fg            fill and ink
+	--stat-border(-width)      edge colour and width (0 = none)
+	--stat-radius              corner radius
+	--stat-shadow              box-shadow
+	--stat-px / -py / -gap     padding, and the gap between columns
+	--stat-muted               ink of the title and the description
+	--stat-title-size          title and description font-size
+	--stat-value-size/-weight  the value
+	--stat-figure-fg           ink of the figure
+	--stats-divider            the line between two stats in .stats
+	--stats-*                  the frame .stats draws, as --stat-*
+	--fontsize                 font size (set by size-variants classes)
+   ============================================================ */
 /* daisy — swatch.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism (layout, states,
@@ -1287,6 +1391,96 @@ svg {
 /* The structure of every component first, then the look of every
    component: a look always comes later in the cascade than any
    structure, whichever file it sits in. */
+.avatar {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  padding: var(--avatar-ring-width);
+  vertical-align: middle;
+  background-color: var(--avatar-ring);
+  border: var(--avatar-border-width) solid var(--avatar-border);
+  border-radius: var(--avatar-radius);
+  box-shadow: var(--avatar-shadow);
+  mask: var(--avatar-mask);
+  rotate: var(--avatar-rotate, 0deg);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  line-height: 1;
+  user-select: none;
+}
+
+/* The picture or the initials: whatever the avatar holds fills it. */
+.avatar > * {
+  grid-area: 1/1;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  object-fit: cover;
+  border: var(--avatar-gap-width) solid var(--avatar-gap);
+  border-radius: var(--avatar-inner-radius);
+  mask: var(--avatar-mask);
+  background-color: var(--avatar-bg);
+  color: var(--avatar-fg);
+  font-weight: var(--avatar-weight, 400);
+}
+
+/* ── Axis: size ── */
+.avatar-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.avatar-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.avatar-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.avatar-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.avatar-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ── Integration: a .badge around an avatar ──
+   The chip is centred on the corner of the badge's box; on a round
+   avatar that corner is empty air. A margin on the anchored sides
+   pulls it in onto the shape's edge. % margins resolve against the
+   width, and the avatar is square. */
+.badge:has(> .avatar) {
+  --avatar-pull: var(--avatar-corner, 14.64%);
+}
+
+.badge:has(> .avatar) > :where(.chip) {
+  margin-block-start: var(--avatar-pull);
+  margin-inline-end: var(--avatar-pull);
+}
+
+.badge-bottom:has(> .avatar) > :where(.chip) {
+  margin-block: 0 var(--avatar-pull);
+}
+
+.badge-middle:has(> .avatar) > :where(.chip) {
+  margin-block: 0;
+}
+
+.badge-start:has(> .avatar) > :where(.chip) {
+  margin-inline: var(--avatar-pull) 0;
+}
+
+.badge-center:has(> .avatar) > :where(.chip) {
+  margin-inline: 0;
+}
+
 .badge {
   position: relative;
   display: inline-flex;
@@ -1301,6 +1495,89 @@ svg {
   left: var(--badge-s, auto);
   right: var(--badge-e, 0);
   translate: var(--badge-x, 50%) var(--badge-y, -50%);
+}
+
+.bubble {
+  --bubble-flip: 1;
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: calc(90% - var(--bubble-tail));
+  min-width: calc(2.5em * var(--scale));
+  min-height: calc(2em * var(--scale));
+  margin-inline: var(--bubble-tail) 0;
+  padding: var(--bubble-py) var(--bubble-px);
+  background-color: var(--bubble-bg);
+  color: var(--bubble-fg);
+  border-radius: var(--bubble-radius);
+  border-end-start-radius: 0;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  overflow-wrap: anywhere;
+}
+
+.bubble::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  inset-inline-start: calc(-1 * var(--bubble-tail));
+  /* One pixel into the bubble: no hairline seam at fractional zoom. */
+  width: calc(var(--bubble-tail) + 1px);
+  height: var(--bubble-tail);
+  background-color: var(--bubble-bg);
+  mask: var(--bubble-tail-mask) right bottom/100% 100% no-repeat;
+  scale: var(--bubble-flip) 1;
+}
+
+/* ── Axis: side ── */
+.bubble-end {
+  --bubble-flip: -1;
+  margin-inline: auto var(--bubble-tail);
+  border-end-start-radius: var(--bubble-radius);
+  border-end-end-radius: 0;
+}
+
+.bubble-end::before {
+  inset-inline: auto calc(-1 * var(--bubble-tail));
+}
+
+[dir=rtl] .bubble {
+  --bubble-flip: -1;
+}
+
+[dir=rtl] .bubble-end {
+  --bubble-flip: 1;
+}
+
+/* ── Flag: no-tail ── a follow-up message: same column, no tail. */
+.bubble-no-tail {
+  border-end-start-radius: var(--bubble-radius);
+  border-end-end-radius: var(--bubble-radius);
+}
+
+.bubble-no-tail::before {
+  content: none;
+}
+
+/* ── Axis: size ── */
+.bubble-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.bubble-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.bubble-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.bubble-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.bubble-xl {
+  --fontsize: var(--xl, var(--default-xl));
 }
 
 .breadcrumbs {
@@ -3251,6 +3528,119 @@ fieldset:disabled .select {
   -webkit-background-clip: text;
 }
 
+.stat {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr auto;
+  align-content: start;
+  column-gap: var(--stat-gap);
+  box-sizing: border-box;
+  padding: var(--stat-py) var(--stat-px);
+  background-color: var(--stat-bg);
+  color: var(--stat-fg);
+  border: var(--stat-border-width) solid var(--stat-border);
+  border-radius: var(--stat-radius);
+  box-shadow: var(--stat-shadow);
+  rotate: var(--stat-rotate, 0deg);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.stat > * {
+  grid-column-start: 1;
+}
+
+.stat-title,
+.stat-desc {
+  color: var(--stat-muted);
+  font-size: var(--stat-title-size);
+  white-space: nowrap;
+}
+
+.stat-value {
+  color: var(--stat-value-fg, inherit);
+  font-size: var(--stat-value-size);
+  font-weight: var(--stat-value-weight);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.stat > .stat-figure {
+  grid-column-start: 2;
+  grid-row: 1/span 3;
+  align-self: center;
+  justify-self: end;
+  color: var(--stat-figure-fg, inherit);
+}
+
+.stat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--stat-gap);
+  margin-block-start: calc(0.5em * var(--scale));
+}
+
+/* ── Axis: size ── */
+.stat-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.stat-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.stat-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.stat-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.stat-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* ── .stats ── one frame for several. */
+.stats {
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  overflow-x: auto;
+  background-color: var(--stats-bg);
+  color: var(--stats-fg);
+  border: var(--stats-border-width) solid var(--stats-border);
+  border-radius: var(--stats-radius);
+  box-shadow: var(--stats-shadow);
+  rotate: var(--stats-rotate, 0deg);
+}
+
+.stats > .stat {
+  --stat-bg: #0000;
+  --stat-border-width: 0px;
+  --stat-shadow: none;
+  --stat-rotate: 0deg;
+  --stat-radius: 0;
+}
+
+.stats > .stat:not(:last-child) {
+  border-inline-end: var(--stats-divider-width) var(--stats-divider-style, solid) var(--stats-divider);
+}
+
+/* ── Axis: direction ── */
+.stats-horizontal {
+  grid-auto-flow: column;
+}
+
+.stats-vertical {
+  grid-auto-flow: row;
+  overflow-x: visible;
+}
+
+.stats-vertical > .stat:not(:last-child) {
+  border-inline-end: 0;
+  border-block-end: var(--stats-divider-width) var(--stats-divider-style, solid) var(--stats-divider);
+}
+
 .swatch {
   display: inline-grid;
   place-items: center;
@@ -3613,6 +4003,105 @@ input[type=color].swatch::-moz-color-swatch {
 }
 
 /* What daisy decides, one file per component. */
+/* daisyUI's avatar is a bare crop; its placeholder is
+   `bg-neutral text-neutral-content`, its ring `ring-2
+   ring-offset-2` on the page colour. */
+.avatar {
+  --avatar-size: calc(3em * var(--scale));
+  --avatar-radius: 50%;
+  --avatar-inner-radius: 50%;
+  --avatar-mask: none;
+  --avatar-ring: #0000;
+  --avatar-ring-width: 0px;
+  --avatar-gap: var(--color-base-100);
+  --avatar-gap-width: 0px;
+  --avatar-border: #0000;
+  --avatar-border-width: 0px;
+  --avatar-shadow: none;
+  --avatar-bg: var(--color-neutral);
+  --avatar-fg: var(--color-neutral-content);
+}
+
+/* ── Axis: color ── the contour. */
+.avatar-primary {
+  --avatar-ring: var(--color-primary);
+  --avatar-ring-width: 2px;
+  --avatar-gap-width: 2px;
+}
+
+.avatar-secondary {
+  --avatar-ring: var(--color-secondary);
+  --avatar-ring-width: 2px;
+  --avatar-gap-width: 2px;
+}
+
+.avatar-accent {
+  --avatar-ring: var(--color-accent);
+  --avatar-ring-width: 2px;
+  --avatar-gap-width: 2px;
+}
+
+.avatar-neutral {
+  --avatar-ring: var(--color-neutral);
+  --avatar-ring-width: 2px;
+  --avatar-gap-width: 2px;
+}
+
+.avatar-info {
+  --avatar-ring: var(--color-info);
+  --avatar-ring-width: 2px;
+  --avatar-gap-width: 2px;
+}
+
+.avatar-success {
+  --avatar-ring: var(--color-success);
+  --avatar-ring-width: 2px;
+  --avatar-gap-width: 2px;
+}
+
+.avatar-warning {
+  --avatar-ring: var(--color-warning);
+  --avatar-ring-width: 2px;
+  --avatar-gap-width: 2px;
+}
+
+.avatar-error {
+  --avatar-ring: var(--color-error);
+  --avatar-ring-width: 2px;
+  --avatar-gap-width: 2px;
+}
+
+/* ── Axis: shape ── daisyUI's masks. The corner is where the
+   badge lands: none of these leaves much air at 45°. */
+.avatar-square {
+  --avatar-radius: var(--radius-box);
+  --avatar-inner-radius: max(0px, calc(var(--radius-box) - var(--avatar-ring-width)));
+}
+
+.badge:has(> .avatar-square) {
+  --avatar-corner: 0%;
+}
+
+.avatar-squircle {
+  --avatar-radius: 0;
+  --avatar-inner-radius: 0;
+  --avatar-mask: url("data:image/svg+xml,%3csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M100 0C20 0 0 20 0 100s20 100 100 100 100-20 100-100S180 0 100 0Z'/%3e%3c/svg%3e") center / contain no-repeat;
+}
+
+.badge:has(> .avatar-squircle) {
+  --avatar-corner: 6%;
+}
+
+.avatar-hexagon {
+  --avatar-radius: 0;
+  --avatar-inner-radius: 0;
+  --avatar-mask: url("data:image/svg+xml,%3csvg width='182' height='201' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M.3 65.486c0-9.196 6.687-20.063 14.211-25.078l61.86-35.946c8.36-5.016 20.899-5.016 29.258 0l61.86 35.946c8.36 5.015 14.211 15.882 14.211 25.078v71.055c0 9.196-6.687 20.063-14.211 25.079l-61.86 35.945c-8.36 4.18-20.899 4.18-29.258 0L14.51 161.62C6.151 157.44.3 145.737.3 136.54V65.486Z'/%3e%3c/svg%3e") center / contain no-repeat;
+}
+
+.badge:has(> .avatar-hexagon) {
+  --avatar-corner: 16%;
+}
+
 .badge {
   width: max-content;
 }
@@ -3668,6 +4157,59 @@ input[type=color].swatch::-moz-color-swatch {
   --badge-t: auto;
   --badge-b: 0;
   --badge-y: 50%;
+}
+
+/* daisyUI's .chat-bubble: neutral ground, field radius, and its
+   swept tail. */
+.bubble {
+  --bubble-bg: var(--color-neutral);
+  --bubble-fg: var(--color-neutral-content);
+  --bubble-radius: var(--radius-field);
+  --bubble-tail: calc(0.75em * var(--scale));
+  --bubble-px: calc(1em * var(--scale));
+  --bubble-py: calc(0.5em * var(--scale));
+  --bubble-tail-mask: url("data:image/svg+xml,%3csvg width='13' height='13' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M0 13C5 13 9.5 9 11 0H13V13Z'/%3e%3c/svg%3e");
+}
+
+/* ── Axis: color ── daisyUI names: the ink is --color-<name>-content. */
+.bubble-primary {
+  --bubble-bg: var(--color-primary);
+  --bubble-fg: var(--color-primary-content);
+}
+
+.bubble-secondary {
+  --bubble-bg: var(--color-secondary);
+  --bubble-fg: var(--color-secondary-content);
+}
+
+.bubble-accent {
+  --bubble-bg: var(--color-accent);
+  --bubble-fg: var(--color-accent-content);
+}
+
+.bubble-neutral {
+  --bubble-bg: var(--color-neutral);
+  --bubble-fg: var(--color-neutral-content);
+}
+
+.bubble-info {
+  --bubble-bg: var(--color-info);
+  --bubble-fg: var(--color-info-content);
+}
+
+.bubble-success {
+  --bubble-bg: var(--color-success);
+  --bubble-fg: var(--color-success-content);
+}
+
+.bubble-warning {
+  --bubble-bg: var(--color-warning);
+  --bubble-fg: var(--color-warning-content);
+}
+
+.bubble-error {
+  --bubble-bg: var(--color-error);
+  --bubble-fg: var(--color-error-content);
 }
 
 .breadcrumbs {
@@ -6147,6 +6689,38 @@ fieldset:disabled .select {
     background-position: -50%;
   }
 }
+/* daisyUI's .stats paints no ground: its docs pair it with
+   `shadow`, and with bg-base-100 the page already is. Its dividers
+   are dashed, base-content at 10%. */
+.stat,
+.stats {
+  --stat-bg: var(--color-base-100);
+  --stat-fg: var(--color-base-content);
+  --stat-border: var(--color-base-200);
+  --stat-border-width: 0px;
+  --stat-radius: var(--radius-box);
+  --stat-shadow: 0 1px 3px 0 oklch(0% 0 0 / 0.1), 0 1px 2px -1px oklch(0% 0 0 / 0.1);
+  --stats-bg: var(--stat-bg);
+  --stats-fg: var(--stat-fg);
+  --stats-border: var(--stat-border);
+  --stats-border-width: var(--stat-border-width);
+  --stats-radius: var(--stat-radius);
+  --stats-shadow: var(--stat-shadow);
+  --stats-divider: color-mix(in oklab, var(--color-base-content) 10%, #0000);
+  --stats-divider-width: var(--border, 1px);
+  --stats-divider-style: dashed;
+}
+
+.stat {
+  --stat-px: calc(1.5em * var(--scale));
+  --stat-py: calc(1em * var(--scale));
+  --stat-gap: calc(1em * var(--scale));
+  --stat-muted: color-mix(in oklab, var(--color-base-content) 60%, #0000);
+  --stat-title-size: 0.75em;
+  --stat-value-size: 2em;
+  --stat-value-weight: 800;
+}
+
 .swatch {
   --swatch-color: var(--color-base-100);
   --swatch-size: calc(2em * var(--scale));

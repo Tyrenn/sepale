@@ -20,11 +20,11 @@
 	/* Groups of the nav fold: open until folded by hand. */
 	let folded = $state<Record<string, boolean>>({});
 
-	// The active theme is applied to :root so the whole app chrome is styled
-	// by it — the app is its own showcase. Edited tokens override the
-	// family's fallbacks live.
+	// The active theme is applied to :root, where the family reads it. The
+	// chrome reads none of it — it is daisy renamed to --ui-* (app-ui.css) —
+	// and only the islands (.uu-island) take the theme's colour scheme.
 	let rootStyle = $derived(
-		`:root{color-scheme:${playground.scheme};${tokensToInlineStyle(playground.tokens)}}`
+		`:root{--pv-scheme:${playground.scheme};${tokensToInlineStyle(playground.tokens)}}`
 	);
 </script>
 
@@ -32,13 +32,16 @@
 	<!-- The optional reset, now its own file rather than part of base: the app
 	     loads it the way a consumer would. -->
 	<link rel="stylesheet" href="/reset.css" />
+	<!-- The chrome: daisy in a sober theme, renamed to .ui-* / --ui-* so it
+	     cannot meet the family below (scripts/build-css.mjs). -->
+	<link rel="stylesheet" href="/app-ui.css" />
 	<!-- Active style family (compiled by `npm run build:css`). The theme
 	     <style> below comes after so its :root values always win. -->
 	<link rel="stylesheet" href={`/families/${playground.family}.css`} />
 	{@html `<style>${rootStyle}</style>`}
 </svelte:head>
 
-<div class="shell">
+<div class="shell app-ui">
 	<!-- The sidebar lives in the layout: it is the same on the theme page and
 	     on every component page. -->
 	<aside class="side">
@@ -46,7 +49,7 @@
 			<label class="side-select">
 				<span>Family</span>
 				<select
-					class="select select-sm"
+					class="ui-select ui-select-sm"
 					value={playground.family}
 					onchange={(e) => selectFamily(e.currentTarget.value)}
 				>
@@ -56,7 +59,7 @@
 			<label class="side-select">
 				<span>Theme</span>
 				<select
-					class="select select-sm"
+					class="ui-select ui-select-sm"
 					value={playground.theme}
 					onchange={(e) => selectTheme(e.currentTarget.value)}
 				>
@@ -65,18 +68,16 @@
 			</label>
 		</div>
 
-		<!-- The app's own navigation is a .menu of the active family: the
-		     chrome is built from the kit it ships, so a family that gets its
-		     menu wrong is visible immediately. -->
+		<!-- The app's own navigation: a daisy .menu, in the chrome's ui- space. -->
 		<nav class="side-nav">
-			<ul class="menu menu-sm">
-				<li class="menu-title side-group-title">Family</li>
+			<ul class="ui-menu ui-menu-sm">
+				<li class="ui-menu-title side-group-title">Family</li>
 				<li>
-					<a href="/description" class:menu-active={page.url.pathname === '/description'}>
+					<a href="/description" class:ui-menu-active={page.url.pathname === '/description'}>
 						Description
 					</a>
 				</li>
-				<li><a href="/" class:menu-active={page.url.pathname === '/'}>Theme</a></li>
+				<li><a href="/" class:ui-menu-active={page.url.pathname === '/'}>Theme</a></li>
 
 				<!-- Each group is a sub-menu of the family's own: a heading that
 				     folds, with its pages pushed in under it. -->
@@ -85,19 +86,19 @@
 					<li class="side-group">
 						<button
 							type="button"
-							class="menu-toggle"
+							class="ui-menu-toggle"
 							aria-expanded={open}
 							onclick={() => (folded[group.group] = open)}
 						>
 							<span>{group.group}</span>
 							<span class="side-count">{group.items.length}</span>
 						</button>
-						<ul class="menu-sub" class:menu-sub-closed={!open}>
+						<ul class="ui-menu-sub" class:ui-menu-sub-closed={!open}>
 							{#each group.items as item (item.id)}
 								<li>
 									<a
 										href="/components/{item.id}"
-										class:menu-active={page.url.pathname === `/components/${item.id}`}
+										class:ui-menu-active={page.url.pathname === `/components/${item.id}`}
 									>
 										{item.label}
 									</a>
