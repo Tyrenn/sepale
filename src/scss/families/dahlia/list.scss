@@ -12,6 +12,8 @@
 
    Plumbing contract:
 	--list-grid-cols   auto-computed grid columns (.list-col-grow index)
+	--list-selected    the fill of a selected row
+	--list-dirty       the mark of a row with unsaved changes
 	--fontsize         font size (set by size-variants classes)
 
    External variables (theme / family):
@@ -61,11 +63,36 @@
 		grid-row-start: 2;
 		grid-column: 1 / -1;
 	}
+	/* Row states: a selected row is filled, a changed one marked at its
+	   start edge. */
+	.list-row-selected {
+		background-color: var(--list-selected);
+	}
+	.list-row-dirty {
+		box-shadow: inset calc(0.2em * var(--scale)) 0 0 var(--list-dirty);
+	}
+	/* Flag: loading — the rows fade while new ones are fetched. */
+	.list-loading > .list-row {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+	.list-loading {
+		cursor: progress;
+	}
+	.list-empty {
+		text-align: center;
+	}
 }
 
 @mixin look {
 	.list {
+		--list-selected: color-mix(in oklab, var(--color-primary) 12%, #0000);
+		--list-dirty: var(--color-warning);
 		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.list-empty {
+		padding: calc(2em * var(--scale));
+		color: color-mix(in oklab, var(--color-on-surface) 55%, #0000);
 	}
 	.list-row {
 		--list-grid-cols: minmax(0, auto) 1fr;

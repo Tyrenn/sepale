@@ -37,9 +37,14 @@ _Avoid_: palette, skin, preset, scheme
 ### A component
 
 **Component**:
-A DOM structure with a style applied to it. The style is described by classes,
-all of them rooted in the component's own name. A component may contain other
-components.
+Usually a DOM structure with a style applied to it. The style is described by
+classes, all of them rooted in the component's own name. A component may
+contain other components.
+
+A component may also draw nothing at all and bring only behaviour: the
+**data handler** renders no element of its own and exists only to hand its
+children a live resource. Such a component has no namespace and nothing for a
+family to style.
 
 Nothing ties a component to a file: `text.scss` holds three of them (`text`,
 `title`, `subtitle`) because separating them would buy nothing, and a component
@@ -86,6 +91,37 @@ kind, type
 A variant that excludes nothing, and therefore belongs to no axis —
 `.btn-active`, `.menu-sub-closed`. Two flags at once are a legal state; two
 variants of one axis are not.
+
+### Working with data
+
+**Data handler**:
+The live state of one remote resource: the rows of the current page, the
+total, the search, the sort, the filter values, the selection, the pending
+edits and their history. It fetches, updates, deletes and exports the
+resource. Each row it hands out carries its own actions (select, update,
+save, reset, delete). It is usable either as a component, which passes itself
+to its children, or directly as an object. Table, grid and list know nothing
+of it: they receive its rows as if they were static.
+_Avoid_: visualizer, store, data source, provider
+
+**Data control**:
+The component that puts a data handler's controls on the page: filters, sort,
+search, page size, pagination, and the actions on the selection or the whole
+resource (save, reset, delete, add, export, plus the caller's own). Every one
+of them is optional. It wraps the table, grid or list showing the rows, so a
+family can draw it as a container whatever sits inside.
+_Avoid_: controls, toolbar
+
+**Filter**:
+A typed criterion the data handler sends with every fetch — text, number,
+date, select, boolean, or entity (a reference to another resource, picked
+from suggestions). A filter is available, shown, or immutable (set by the
+page and never offered to the user).
+
+**Dialog**:
+A component laid over the page that asks for the user's attention — a
+confirmation, a form. Named after the HTML element it is built on.
+_Avoid_: modal, popup
 
 ### Authoring
 

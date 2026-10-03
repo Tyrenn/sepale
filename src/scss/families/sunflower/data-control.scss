@@ -1,0 +1,197 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* sunflower — data-control.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   data-control.scss — .data-control (the controls of a data
+   handler, around the view that shows its rows)
+
+	<div class="data-control">
+	  <div class="data-control-bar">
+	    <div class="data-control-bar-left">  filters, sort, search  </div>
+	    <div class="data-control-bar-right"> page size, count, actions </div>
+	  </div>
+	  <div class="data-control-filters">
+	    <span class="chip data-control-filter">
+	      <button>Status: active</button>
+	      <button class="data-control-filter-remove">×</button>
+	    </span>
+	  </div>
+	  <div class="data-control-pagination">
+	    <span class="data-control-range">1–10 / 120</span> <nav class="pagination">…</nav>
+	  </div>
+	  <div class="data-control-body"> the table, grid or list </div>
+	</div>
+
+   The buttons, fields, chips and pagination inside are the kit's
+   own components; this file only lays them out. A family may draw
+   the whole thing as a container (`.data-control-boxed`), whatever
+   view sits in the body.
+
+   Plumbing contract (the family fills these on `.data-control`):
+	--data-control-gap       space between the bar, filters, body
+	--data-control-bar-gap   space between controls in a row
+	--data-control-bg / --data-control-fg
+	--data-control-border / --data-control-border-width
+	--data-control-radius / --data-control-shadow
+	--data-control-p         padding (0 unless boxed)
+	--data-control-muted     the ink of the range and the count
+	--data-control-search    the search field's width
+	--data-control-editor    the width of a filter's editor
+	--fontsize               font size (set by size-variants classes)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — rows of controls, the chips, the pagination row,
+   the body.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.data-control {
+		display: flex;
+		flex-direction: column;
+		gap: var(--data-control-gap);
+		min-width: 0;
+		padding: var(--data-control-p);
+		background-color: var(--data-control-bg);
+		color: var(--data-control-fg);
+		border: var(--data-control-border-width) solid var(--data-control-border);
+		border-radius: var(--data-control-radius);
+		box-shadow: var(--data-control-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+
+	.data-control-bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--data-control-bar-gap);
+	}
+	.data-control-bar-left,
+	.data-control-bar-right {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--data-control-bar-gap);
+		min-width: 0;
+	}
+	.data-control-bar-right {
+		margin-inline-start: auto;
+	}
+
+	/* Fields in the bar take their own width, not the full-width default
+	   a form gives them. */
+	.data-control-bar :is(.input, .select) {
+		width: auto;
+	}
+	.data-control-bar .data-control-search {
+		width: var(--data-control-search);
+		max-width: 100%;
+	}
+
+	.data-control-count,
+	.data-control-range {
+		color: var(--data-control-muted);
+		font-size: 0.875em;
+		white-space: nowrap;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.data-control-filters {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--data-control-bar-gap);
+	}
+	/* A filter is a chip holding two buttons: the one that opens its
+	   editor, and the one that takes it off. */
+	.data-control-filter {
+		gap: calc(0.25em * var(--scale));
+	}
+	.data-control-filter > button {
+		display: inline-flex;
+		align-items: center;
+		gap: calc(0.25em * var(--scale));
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+	}
+	.data-control-filter-remove {
+		opacity: 0.6;
+	}
+	@media (hover: hover) {
+		.data-control-filter-remove:hover {
+			opacity: 1;
+		}
+	}
+	.data-control-filter > button:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+
+	.data-control-editor {
+		display: flex;
+		flex-direction: column;
+		gap: calc(0.5em * var(--scale));
+		width: var(--data-control-editor);
+		padding: calc(0.5em * var(--scale));
+	}
+
+	.data-control-pagination {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--data-control-bar-gap);
+	}
+
+	.data-control-body {
+		min-width: 0;
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('data-control', c.$sizes-field);
+}
+
+/* ------------------------------------------------------------
+   look — open by default; boxed, the outlined sheet with its hard
+   shadow.
+   ------------------------------------------------------------ */
+
+@mixin look {
+	.data-control {
+		--data-control-gap: calc(1em * var(--scale));
+		--data-control-bar-gap: calc(0.75em * var(--scale));
+		--data-control-bg: #0000;
+		--data-control-fg: var(--color-on-surface);
+		--data-control-border: #0000;
+		--data-control-border-width: 0px;
+		--data-control-radius: 0px;
+		--data-control-shadow: none;
+		--data-control-p: 0px;
+		--data-control-muted: color-mix(in oklab, var(--color-on-surface) 70%, #0000);
+		--data-control-search: calc(16em * var(--scale));
+		--data-control-editor: calc(16em * var(--scale));
+	}
+
+	/* ── Axis: variant ── the sheet around the controls and the view. */
+	.data-control-boxed {
+		--data-control-bg: var(--color-surface-2);
+		--data-control-border: var(--color-border);
+		--data-control-border-width: var(--border);
+		--data-control-radius: var(--radius-box);
+		--data-control-shadow: var(--sf-shadow);
+		--data-control-p: calc(1.25em * var(--scale));
+	}
+}

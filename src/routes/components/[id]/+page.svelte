@@ -62,6 +62,11 @@
 							{/each}
 						</tbody>
 					</table>
+					{:else if !entry.doc.namespaces.length}
+						<p class="api-note api-none">
+							No class at all: this component draws nothing, so there is nothing for a
+							family to style. It only exists in Svelte.
+						</p>
 					{:else}
 						<p class="api-note api-none">
 							{playground.family} ships no class in this namespace.

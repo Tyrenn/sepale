@@ -531,6 +531,151 @@ svg {
    checked/indeterminate states, forced-colors/print fallbacks,
    disabled.
    ------------------------------------------------------------ */
+/* daisy — data-control.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   data-control.scss — .data-control (the controls of a data
+   handler, around the view that shows its rows)
+
+	<div class="data-control">
+	  <div class="data-control-bar">
+	    <div class="data-control-bar-left">  filters, sort, search  </div>
+	    <div class="data-control-bar-right"> page size, count, actions </div>
+	  </div>
+	  <div class="data-control-filters">
+	    <span class="chip data-control-filter">
+	      <button>Status: active</button>
+	      <button class="data-control-filter-remove">×</button>
+	    </span>
+	  </div>
+	  <div class="data-control-pagination">
+	    <span class="data-control-range">1–10 / 120</span> <nav class="pagination">…</nav>
+	  </div>
+	  <div class="data-control-body"> the table, grid or list </div>
+	</div>
+
+   The buttons, fields, chips and pagination inside are the kit's
+   own components; this file only lays them out. A family may draw
+   the whole thing as a container (`.data-control-boxed`), whatever
+   view sits in the body.
+
+   Plumbing contract (the family fills these on `.data-control`):
+	--data-control-gap       space between the bar, filters, body
+	--data-control-bar-gap   space between controls in a row
+	--data-control-bg / --data-control-fg
+	--data-control-border / --data-control-border-width
+	--data-control-radius / --data-control-shadow
+	--data-control-p         padding (0 unless boxed)
+	--data-control-muted     the ink of the range and the count
+	--data-control-search    the search field's width
+	--data-control-editor    the width of a filter's editor
+	--fontsize               font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   structure — rows of controls, the chips, the pagination row,
+   the body.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   look — open by default, like a daisyUI page section; boxed, a
+   card.
+   ------------------------------------------------------------ */
+/* daisy — dialog.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   dialog.scss — .dialog (built on the <dialog> element)
+
+   The element covers the viewport and lays its box out on a grid;
+   whatever is not the box is the overlay, so a click there lands
+   on the <dialog> itself. Behind it, `::backdrop` is the browser's
+   own layer — opened with showModal(), it shades the page; opened
+   with show(), there is none and the page stays usable.
+
+	<dialog class="dialog">
+	  <div class="dialog-box">
+	    <form method="dialog"><button class="dialog-close" aria-label="Close">…</button></form>
+	    <h2 class="dialog-title">Delete 3 rows?</h2>
+	    <div class="dialog-body">…</div>
+	    <form method="dialog" class="dialog-actions">
+	      <button class="btn" value="cancel">Cancel</button>
+	      <button class="btn btn-error" value="delete">Delete</button>
+	    </form>
+	  </div>
+	</dialog>
+
+   Nothing here animates: opening and closing are instant in CSS.
+   The Svelte wrapper brings its own transitions.
+
+   Plumbing contract (the family fills these on `.dialog`):
+	--dialog-backdrop      the shade behind a modal dialog
+	--dialog-bg / --dialog-fg
+	--dialog-border / --dialog-border-width
+	--dialog-radius / --dialog-shadow
+	--dialog-p             box padding
+	--dialog-gap           space between title, body and actions
+	--dialog-width         the box's preferred width
+	--dialog-margin        room kept free around the box
+	--dialog-title-size / --dialog-title-weight
+	--dialog-close-size    the close button's side
+	--dialog-close-hover   its fill on hover
+	--fontsize             font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   structure — the overlay, the box, its parts and placements.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   look — daisyUI's modal: a white box with a long soft shadow
+   over a 40% black shade.
+   ------------------------------------------------------------ */
+/* daisy — dropdown.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   dropdown.scss — .dropdown (a trigger and a floating box)
+
+   The box is hidden until the dropdown is open. Without a script,
+   three things open it: a `<details class="dropdown">` that is
+   [open], keyboard or pointer focus inside the dropdown, or the
+   `.dropdown-open` class written by whoever drives it.
+
+	<details class="dropdown">
+	  <summary class="btn">Sort</summary>
+	  <div class="dropdown-content"> <ul class="menu">…</ul> </div>
+	</details>
+
+   The box sits under the trigger, in `position: absolute`: an
+   ancestor with `overflow: hidden` crops it. The Svelte wrapper
+   writes `.dropdown-fixed` and places the box itself, in fixed
+   coordinates, which no overflow crops.
+
+   Nothing here animates: the Svelte wrapper brings the transition.
+
+   Plumbing contract (the family fills these on `.dropdown`):
+	--dropdown-bg / --dropdown-fg
+	--dropdown-border / --dropdown-border-width
+	--dropdown-radius / --dropdown-shadow
+	--dropdown-p          padding inside the box
+	--dropdown-gap        distance between the trigger and the box
+	--dropdown-z          stacking order of the box
+	--fontsize            font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   structure — the anchor, the box, open states, sides.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   look — daisyUI's dropdown box: the page colour, the box radius,
+   a small shadow.
+   ------------------------------------------------------------ */
 /* daisy — chip.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism (layout, states,
@@ -607,6 +752,43 @@ svg {
 	--color-base-100   the span's ground, so it can hide the field border
 	--size-field        vertical centre of the floated text
    ============================================================ */
+/* daisy — grid.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   grid.scss — .grid (items in as many columns as fit)
+
+	<div class="grid">
+	  <div class="grid-item grid-item-selected"> <div class="card">…</div> </div>
+	  <div class="grid-item">…</div>
+	</div>
+
+   Intrinsic: a column is at least --grid-min wide, and as many as
+   fit share the width. No breakpoint — the item size is in em, so
+   a size variant changes how many columns there are.
+
+   Masonry is the Svelte wrapper's: it reads how many columns the
+   grid made, deals the items into that many `.grid-lane`s in turn,
+   and writes `.grid-masonry`. The reading order stays row by row.
+   Without a script there is no masonry.
+
+   Plumbing contract (the family fills these on `.grid`):
+	--grid-min            the narrowest a column may be
+	--grid-gap            space between items
+	--grid-radius         the corners the selection ring follows
+	--grid-selected       the selection ring
+	--grid-dirty          the mark of an item with unsaved changes
+	--fontsize            font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   structure — the auto-fill grid, the masonry lanes, states.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   look — daisyUI has no grid; the values follow its cards.
+   ------------------------------------------------------------ */
 /* daisy — file-input.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism (layout, states,
@@ -738,6 +920,8 @@ svg {
 
    Plumbing contract:
 	--list-grid-cols   auto-computed grid columns (.list-col-grow index)
+	--list-selected    the fill of a selected row
+	--list-dirty       the mark of a row with unsaved changes
 	--fontsize         font size (set by size-variants classes)
 
    External variables (theme / family):
@@ -1131,6 +1315,68 @@ svg {
    ============================================================ */
 /* ------------------------------------------------------------
    structure — the sample, its label, and the interactive states.
+   ------------------------------------------------------------ */
+/* daisy — table.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+/* ============================================================
+   table.scss — .table (a real <table>)
+
+	<div class="table-scroll">
+	  <table class="table">
+	    <thead>
+	      <tr class="table-head">
+	        <th class="table-cell table-sticky" aria-sort="ascending">
+	          <button class="table-sort">Name</button>
+	        </th>
+	        <th class="table-cell">Email</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr class="table-row table-row-selected">
+	        <td class="table-cell table-sticky">Ada</td>
+	        <td class="table-cell">ada@…</td>
+	      </tr>
+	      <tr><td class="table-empty" colspan="2">Nothing yet</td></tr>
+	    </tbody>
+	  </table>
+	</div>
+
+   A row paints through its cells, not on itself: the row sets
+   --table-row-bg and every cell fills with it. That is what lets a
+   sticky cell stay opaque while the others scroll under it, in
+   every state the row can take (zebra, hover, selected).
+
+   Columns are sized on their header cell: a width is honoured as a
+   minimum, and the text wraps inside it. Sticky columns are offset
+   by the wrapper (`inset-inline-start`, inline), which measures the
+   sticky columns before them.
+
+   Plumbing contract (the family fills these on `.table-scroll`):
+	--table-frame / --table-frame-width   the frame's line
+	--table-frame-radius / --table-frame-shadow
+
+   … and these on `.table`:
+	--table-bg / --table-fg
+	--table-cell-py / --table-cell-px
+	--table-head-fg / --table-head-size / --table-head-weight
+	--table-head-bg
+	--table-border          the line between rows
+	--table-stripe          the fill of every other row (zebra)
+	--table-hover           the fill of a hovered row
+	--table-selected        the fill of a selected row
+	--table-dirty           the mark of a row with unsaved changes
+	--table-sticky-shadow   the edge a sticky column casts
+	--fontsize              font size (set by size-variants classes)
+   ============================================================ */
+/* ------------------------------------------------------------
+   structure — scrolling, cells, sticky columns and head, states.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   look — daisyUI's table: small text, faded head, hairlines.
    ------------------------------------------------------------ */
 /* daisy — tabs.
    Everything daisy draws for this component, and nothing another
@@ -2443,6 +2689,285 @@ svg {
   box-shadow: var(--shadow-light, );
 }
 
+.data-control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--data-control-gap);
+  min-width: 0;
+  padding: var(--data-control-p);
+  background-color: var(--data-control-bg);
+  color: var(--data-control-fg);
+  border: var(--data-control-border-width) solid var(--data-control-border);
+  border-radius: var(--data-control-radius);
+  box-shadow: var(--data-control-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.data-control-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--data-control-bar-gap);
+}
+
+.data-control-bar-left,
+.data-control-bar-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--data-control-bar-gap);
+  min-width: 0;
+}
+
+.data-control-bar-right {
+  margin-inline-start: auto;
+}
+
+/* Fields in the bar take their own width, not the full-width default
+   a form gives them. */
+.data-control-bar :is(.input, .select) {
+  width: auto;
+}
+
+.data-control-bar .data-control-search {
+  width: var(--data-control-search);
+  max-width: 100%;
+}
+
+.data-control-count,
+.data-control-range {
+  color: var(--data-control-muted);
+  font-size: 0.875em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-control-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--data-control-bar-gap);
+}
+
+/* A filter is a chip holding two buttons: the one that opens its
+   editor, and the one that takes it off. */
+.data-control-filter {
+  gap: calc(0.25em * var(--scale));
+}
+
+.data-control-filter > button {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(0.25em * var(--scale));
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.data-control-filter-remove {
+  opacity: 0.6;
+}
+
+@media (hover: hover) {
+  .data-control-filter-remove:hover {
+    opacity: 1;
+  }
+}
+.data-control-filter > button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.data-control-editor {
+  display: flex;
+  flex-direction: column;
+  gap: calc(0.5em * var(--scale));
+  width: var(--data-control-editor);
+  padding: calc(0.5em * var(--scale));
+}
+
+.data-control-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--data-control-bar-gap);
+}
+
+.data-control-body {
+  min-width: 0;
+}
+
+/* ── Axis: size ── */
+.data-control-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.data-control-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.data-control-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.data-control-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.data-control-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+/* The UA hides a closed <dialog> with display: none; a display of
+   our own would undo that, so it is only ever set on an open one. */
+.dialog:not([open]) {
+  display: none;
+}
+
+.dialog {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: var(--dialog-margin);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  overflow: hidden;
+  overscroll-behavior: contain;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.dialog::backdrop {
+  background-color: var(--dialog-backdrop);
+}
+
+/* Opened with show(), the overlay must not swallow clicks meant for
+   the page: only the box takes them. */
+.dialog:not(:modal) {
+  pointer-events: none;
+}
+
+.dialog:not(:modal) > .dialog-box {
+  pointer-events: auto;
+}
+
+/* A modal dialog locks the page's scroll, as daisyUI's modal does, by
+   setting the page variables the root reads. */
+:root:has(.dialog:modal) {
+  --page-has-backdrop: 1;
+  --page-overflow: hidden;
+  --page-scroll-gutter: stable;
+}
+
+.dialog-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dialog-gap);
+  box-sizing: border-box;
+  width: var(--dialog-width);
+  max-width: 100%;
+  max-height: 100%;
+  padding: var(--dialog-p);
+  overflow-y: auto;
+  background-color: var(--dialog-bg);
+  color: var(--dialog-fg);
+  border: var(--dialog-border-width) solid var(--dialog-border);
+  border-radius: var(--dialog-radius);
+  box-shadow: var(--dialog-shadow);
+}
+
+.dialog-title {
+  margin: 0;
+  /* Room for the close button, which sits over the corner. */
+  padding-inline-end: var(--dialog-close-size);
+  font-size: var(--dialog-title-size);
+  font-weight: var(--dialog-title-weight);
+}
+
+.dialog-body {
+  min-height: 0;
+}
+
+/* The actions line up at the end of the row, so a confirmation button
+   lands on the right in a left-to-right document. */
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: calc(0.5em * var(--scale));
+  margin: 0;
+}
+
+.dialog-close {
+  position: absolute;
+  inset-block-start: calc(var(--dialog-p) / 2);
+  inset-inline-end: calc(var(--dialog-p) / 2);
+  display: inline-grid;
+  place-items: center;
+  width: var(--dialog-close-size);
+  height: var(--dialog-close-size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .dialog-close:hover {
+    background-color: var(--dialog-close-hover);
+  }
+}
+.dialog-close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* ── Axis: placement ── where the box sits; centred by default. */
+.dialog-top {
+  align-items: start;
+}
+
+.dialog-bottom {
+  align-items: end;
+}
+
+/* ── Axis: size ── */
+.dialog-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.dialog-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.dialog-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.dialog-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.dialog-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
 .dock {
   background-color: var(--color-base-100);
   position: fixed;
@@ -2483,6 +3008,108 @@ svg {
 }
 
 /* Active state */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+/* A <details> trigger loses its disclosure triangle. */
+.dropdown > summary {
+  list-style: none;
+}
+
+.dropdown > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dropdown-content {
+  position: absolute;
+  z-index: var(--dropdown-z);
+  inset-block-start: calc(100% + var(--dropdown-gap));
+  inset-inline-start: 0;
+  box-sizing: border-box;
+  min-width: max-content;
+  max-height: min(24em, 70dvh);
+  padding: var(--dropdown-p);
+  overflow-y: auto;
+  background-color: var(--dropdown-bg);
+  color: var(--dropdown-fg);
+  border: var(--dropdown-border-width) solid var(--dropdown-border);
+  border-radius: var(--dropdown-radius);
+  box-shadow: var(--dropdown-shadow);
+}
+
+/* Hidden until something opens it. */
+.dropdown:not(.dropdown-open, [open], :focus-within) > .dropdown-content {
+  display: none;
+}
+
+/* Driven by a script, focus is not an opener: the script decides. */
+.dropdown-fixed:not(.dropdown-open) > .dropdown-content {
+  display: none;
+}
+
+/* The script owns the coordinates. */
+.dropdown-fixed > .dropdown-content {
+  position: fixed;
+  inset: auto;
+}
+
+/* ── Axis: side ── which side of the trigger the box opens on. */
+.dropdown-top > .dropdown-content {
+  inset-block-start: auto;
+  inset-block-end: calc(100% + var(--dropdown-gap));
+}
+
+.dropdown-left > .dropdown-content {
+  inset-block-start: 0;
+  inset-inline-start: auto;
+  inset-inline-end: calc(100% + var(--dropdown-gap));
+}
+
+.dropdown-right > .dropdown-content {
+  inset-block-start: 0;
+  inset-inline-start: calc(100% + var(--dropdown-gap));
+}
+
+/* ── Axis: align ── where the box lines up along that side. */
+.dropdown-end:not(.dropdown-left, .dropdown-right) > .dropdown-content {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.dropdown-center:not(.dropdown-left, .dropdown-right) > .dropdown-content {
+  inset-inline-start: 50%;
+  translate: -50% 0;
+}
+
+.dropdown-end:is(.dropdown-left, .dropdown-right) > .dropdown-content {
+  inset-block-start: auto;
+  inset-block-end: 0;
+}
+
+/* ── Axis: size ── */
+.dropdown-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.dropdown-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.dropdown-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.dropdown-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.dropdown-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
 .fieldset {
   display: grid;
   grid-template-columns: 1fr;
@@ -2525,6 +3152,93 @@ svg {
 .floating-label:not(:has(input:placeholder-shown, textarea:placeholder-shown)) > span {
   pointer-events: auto;
   z-index: 2;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--grid-min), 100%), 1fr));
+  gap: var(--grid-gap);
+  align-items: stretch;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.grid-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: var(--grid-radius);
+}
+
+.grid-item > * {
+  flex: auto;
+}
+
+/* Masonry: the same columns, each holding one lane — a stack. The
+   wrapper reads how many columns the browser made and deals that many
+   lanes. */
+.grid-masonry {
+  align-items: start;
+}
+
+.grid-lane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--grid-gap);
+  min-width: 0;
+}
+
+.grid-empty {
+  grid-column: 1/-1;
+  text-align: center;
+}
+
+/* ── States ── */
+.grid-item-selected {
+  outline: var(--grid-selected);
+  outline-offset: 2px;
+}
+
+.grid-item-dirty::after {
+  content: "";
+  position: absolute;
+  inset-block-start: calc(0.5em * var(--scale));
+  inset-inline-end: calc(0.5em * var(--scale));
+  width: calc(0.5em * var(--scale));
+  height: calc(0.5em * var(--scale));
+  border-radius: 50%;
+  background-color: var(--grid-dirty);
+}
+
+/* ── Flag: loading ── */
+.grid-loading > :is(.grid-item, .grid-lane) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.grid-loading {
+  cursor: progress;
+}
+
+/* ── Axis: size ── */
+.grid-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.grid-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.grid-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.grid-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.grid-xl {
+  --fontsize: var(--xl, var(--default-xl));
 }
 
 .file-input {
@@ -2956,6 +3670,30 @@ fieldset:disabled .input {
 .list-col-wrap {
   grid-row-start: 2;
   grid-column: 1/-1;
+}
+
+/* Row states: a selected row is filled, a changed one marked at its
+   start edge. */
+.list-row-selected {
+  background-color: var(--list-selected);
+}
+
+.list-row-dirty {
+  box-shadow: inset calc(0.2em * var(--scale)) 0 0 var(--list-dirty);
+}
+
+/* Flag: loading — the rows fade while new ones are fetched. */
+.list-loading > .list-row {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.list-loading {
+  cursor: progress;
+}
+
+.list-empty {
+  text-align: center;
 }
 
 .loading {
@@ -3698,6 +4436,169 @@ input[type=color].swatch::-webkit-color-swatch {
 input[type=color].swatch::-moz-color-swatch {
   border: none;
   border-radius: inherit;
+}
+
+/* The frame is the scroll box's: it clips the table to its corners. */
+.table-scroll {
+  overflow: auto;
+  max-width: 100%;
+  border: var(--table-frame-width) solid var(--table-frame);
+  border-radius: var(--table-frame-radius);
+  box-shadow: var(--table-frame-shadow);
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: var(--table-bg);
+  color: var(--table-fg);
+  text-align: start;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  --table-row-bg: var(--table-bg);
+}
+
+.table :is(th, td) {
+  padding-block: var(--table-cell-py);
+  padding-inline: var(--table-cell-px);
+  text-align: start;
+  vertical-align: middle;
+  overflow-wrap: break-word;
+  background-color: var(--table-row-bg);
+  border-block-end: var(--border) solid var(--table-border);
+}
+
+.table > tbody > tr:last-child > :is(th, td) {
+  border-block-end-color: rgba(0, 0, 0, 0);
+}
+
+.table > thead > tr > th {
+  --table-row-bg: var(--table-head-bg);
+  color: var(--table-head-fg);
+  font-size: var(--table-head-size);
+  font-weight: var(--table-head-weight);
+  white-space: nowrap;
+}
+
+/* A sortable header: the whole cell's text is the button. */
+.table-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(0.25em * var(--scale));
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.table-sort::after {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  opacity: 0;
+  border-inline-end: 2px solid currentColor;
+  border-block-end: 2px solid currentColor;
+  rotate: 45deg;
+  translate: 0 -0.15em;
+}
+
+@media (hover: hover) {
+  .table-sort:hover::after {
+    opacity: 0.35;
+  }
+}
+[aria-sort=ascending] > .table-sort::after {
+  opacity: 1;
+  rotate: -135deg;
+  translate: 0 0.15em;
+}
+
+[aria-sort=descending] > .table-sort::after {
+  opacity: 1;
+}
+
+.table-sort:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* A sticky column: pinned to the start edge, above the cells that
+   scroll beneath it. Its offset comes inline from the wrapper. */
+.table-sticky {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+}
+
+.table-sticky-last {
+  box-shadow: var(--table-sticky-shadow);
+}
+
+/* ── Flag: pinned ── the head stays at the top of the scroll box. */
+.table-pinned > thead > tr > th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+}
+
+.table-pinned > thead > tr > th.table-sticky {
+  z-index: 3;
+}
+
+/* ── Row states ── */
+.table-zebra > tbody > tr:nth-child(even) {
+  --table-row-bg: var(--table-stripe);
+}
+
+@media (hover: hover) {
+  .table-hover > tbody > tr.table-row:hover {
+    --table-row-bg: var(--table-hover);
+  }
+}
+.table .table-row-selected {
+  --table-row-bg: var(--table-selected);
+}
+
+.table .table-row-dirty > :first-child {
+  box-shadow: inset calc(0.2em * var(--scale)) 0 0 var(--table-dirty);
+}
+
+/* ── Flag: loading ── the rows fade while new ones are fetched. */
+.table-loading > tbody {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.table-loading {
+  cursor: progress;
+}
+
+.table-empty {
+  text-align: center;
+}
+
+/* ── Axis: size ── */
+.table-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.table-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.table-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.table-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.table-xl {
+  --fontsize: var(--xl, var(--default-xl));
 }
 
 .tabs {
@@ -4990,6 +5891,54 @@ input[type=color].swatch::-moz-color-swatch {
   background-image: none;
 }
 
+.data-control {
+  --data-control-gap: calc(0.75em * var(--scale));
+  --data-control-bar-gap: calc(0.5em * var(--scale));
+  --data-control-bg: #0000;
+  --data-control-fg: var(--color-base-content);
+  --data-control-border: #0000;
+  --data-control-border-width: 0px;
+  --data-control-radius: 0px;
+  --data-control-shadow: none;
+  --data-control-p: 0px;
+  --data-control-muted: color-mix(in oklab, var(--color-base-content) 60%, #0000);
+  --data-control-search: calc(16em * var(--scale));
+  --data-control-editor: calc(16em * var(--scale));
+}
+
+/* ── Axis: variant ── a card around the controls and the view. */
+.data-control-boxed {
+  --data-control-bg: var(--color-base-100);
+  --data-control-border: var(--color-base-200);
+  --data-control-border-width: var(--border);
+  --data-control-radius: var(--radius-box);
+  --data-control-shadow: 0 1px 3px 0 oklch(0% 0 0 / 0.1), 0 1px 2px -1px oklch(0% 0 0 / 0.1);
+  --data-control-p: calc(1em * var(--scale));
+}
+
+.dialog {
+  --dialog-backdrop: oklch(0% 0 0 / 0.4);
+  --dialog-bg: var(--color-base-100);
+  --dialog-fg: var(--color-base-content);
+  --dialog-border: #0000;
+  --dialog-border-width: 0px;
+  --dialog-radius: var(--radius-box);
+  --dialog-shadow: 0 25px 50px -12px oklch(0% 0 0 / 0.25);
+  --dialog-p: calc(1.5em * var(--scale));
+  --dialog-gap: calc(1em * var(--scale));
+  --dialog-width: calc(32em * var(--scale));
+  --dialog-margin: calc(1em * var(--scale));
+  --dialog-title-size: 1.125em;
+  --dialog-title-weight: 700;
+  --dialog-close-size: calc(2em * var(--scale));
+  --dialog-close-hover: color-mix(in oklab, var(--color-base-content) 10%, #0000);
+}
+
+/* daisyUI's actions sit a step further from the body than the rest. */
+.dialog-actions {
+  margin-block-start: calc(0.5em * var(--scale));
+}
+
 .dock {
   right: 0;
   bottom: 0;
@@ -5111,6 +6060,25 @@ input[type=color].swatch::-moz-color-swatch {
   font-size: 0.75rem;
 }
 
+.dropdown {
+  --dropdown-bg: var(--color-base-100);
+  --dropdown-fg: var(--color-base-content);
+  --dropdown-border: color-mix(in oklab, var(--color-base-content) 10%, #0000);
+  --dropdown-border-width: var(--border);
+  --dropdown-radius: var(--radius-box);
+  --dropdown-shadow: 0 1px 3px 0 oklch(0% 0 0 / 0.1), 0 1px 2px -1px oklch(0% 0 0 / 0.1);
+  --dropdown-p: calc(0.25em * var(--scale));
+  --dropdown-gap: calc(0.25em * var(--scale));
+  --dropdown-z: 999;
+}
+
+/* A menu in the box is the box's content, not a second box. */
+.dropdown-content > .menu {
+  --menu-bg: #0000;
+  --menu-p: 0px;
+  width: 100%;
+}
+
 .fieldset {
   gap: calc(0.375em * var(--scale));
   padding-block: calc(0.25em * var(--scale));
@@ -5192,6 +6160,32 @@ input[type=color].swatch::-moz-color-swatch {
 .floating-label:has(.input-xl, .select-xl, .textarea-xl) span {
   font-size: 1.375rem;
   top: calc(var(--size-field, 0.25rem) * 14 / 2);
+}
+
+.grid {
+  --grid-min: calc(16em * var(--scale));
+  --grid-gap: calc(1em * var(--scale));
+  --grid-radius: var(--radius-box);
+  --grid-selected: 2px solid var(--color-primary);
+  --grid-dirty: var(--color-warning);
+}
+
+/* ── Axis: gap ── */
+.grid-nogap {
+  --grid-gap: 0px;
+}
+
+.grid-tight {
+  --grid-gap: calc(0.5em * var(--scale));
+}
+
+.grid-loose {
+  --grid-gap: calc(2em * var(--scale));
+}
+
+.grid-empty {
+  padding-block: calc(2em * var(--scale));
+  color: color-mix(in oklab, var(--color-base-content) 50%, rgba(0, 0, 0, 0));
 }
 
 .file-input {
@@ -5703,7 +6697,14 @@ fieldset:disabled .input::placeholder {
   }
 }
 .list {
+  --list-selected: color-mix(in oklab, var(--color-primary) 10%, #0000);
+  --list-dirty: var(--color-warning);
   font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.list-empty {
+  padding: calc(2em * var(--scale));
+  color: color-mix(in oklab, var(--color-base-content) 50%, rgba(0, 0, 0, 0));
 }
 
 .list-row {
@@ -6810,6 +7811,37 @@ fieldset:disabled .select {
 
 .swatch-xl {
   --fontsize: var(--xl, var(--default-xl));
+}
+
+.table-scroll {
+  --table-frame: #0000;
+  --table-frame-width: 0px;
+  --table-frame-radius: var(--radius-box);
+  --table-frame-shadow: none;
+}
+
+.table {
+  --table-bg: var(--color-base-100);
+  --table-fg: var(--color-base-content);
+  --table-cell-py: calc(0.75em * var(--scale));
+  --table-cell-px: calc(1em * var(--scale));
+  --table-head-fg: color-mix(in oklab, var(--color-base-content) 60%, #0000);
+  --table-head-size: 0.857em;
+  --table-head-weight: 600;
+  --table-head-bg: var(--color-base-100);
+  --table-border: color-mix(in oklab, var(--color-base-content) 5%, #0000);
+  --table-stripe: var(--color-base-200);
+  --table-hover: var(--color-base-200);
+  --table-selected: color-mix(in oklab, var(--color-primary) 10%, var(--color-base-100));
+  --table-dirty: var(--color-warning);
+  --table-sticky-shadow: 1px 0 0 0 var(--table-border);
+  /* daisyUI sets its tables at .875rem. */
+  font-size: var(--fontsize, var(--sm, var(--default-sm)));
+}
+
+.table-empty {
+  padding-block: calc(2em * var(--scale));
+  color: color-mix(in oklab, var(--color-base-content) 50%, rgba(0, 0, 0, 0));
 }
 
 .tabs {

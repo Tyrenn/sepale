@@ -19,7 +19,10 @@
 			"list-row": "One row. The component wraps each of your snippets in one.",
 			"list-col-grow": "Inside a row: the column that takes the leftover width.",
 			"list-col-wrap": "Inside a row: the column allowed to wrap onto several lines.",
-			"list-suggestions": "A floating list of things to pick from, rather than a block of rows."
+			"list-suggestions": "A floating list of things to pick from, rather than a block of rows.",
+			"list-row-selected": "A row whose key is in `selected`.",
+			"list-row-dirty": "A row whose key is in `dirty`: changed, not saved.",
+			"list-empty": "Drawn in place of the rows when there are none."
 		},
 		props: {
 			List: [
@@ -33,7 +36,11 @@
 					name: "row",
 					type: "Snippet<[Row]>",
 					description: "How to draw every row that is data. Written once for the whole list; an entry that is itself a snippet skips it."
-				}
+				},
+				{ name: "key", type: "(row, index) => string", default: "the index", description: "A row's identity, for selected, dirty and keyed rendering." },
+				{ name: "selected", type: "Iterable<string>", description: "Keys of the rows drawn as selected." },
+				{ name: "dirty", type: "Iterable<string>", description: "Keys of the rows drawn as changed and not saved." },
+				{ name: "empty", type: "Snippet", description: "Drawn in place of the rows when there are none." }
 			]
 		}
 	};
@@ -143,4 +150,23 @@
 		<li class="list-row" role="option" aria-selected="true">Lyon</li>
 		<li class="list-row" role="option" aria-selected="false">Marseille</li>
 	</ul>
+</Section>
+
+<Section
+	title="Selected, changed, loading"
+	subtitle="The same states a table has: selected and dirty take keys, loading fades the rows."
+	svelte={`<List rows={deployments} key={(d) => d.name} selected={['Build']} dirty={['Rollback']} {row} />`}
+>
+	<List
+		rows={[
+			{ name: 'Deployment', when: '2 min ago', state: 'live' },
+			{ name: 'Build', when: '11 min ago', state: 'queued' },
+			{ name: 'Rollback', when: 'yesterday', state: 'failed' }
+		]}
+		key={(d) => d.name}
+		selected={['Build']}
+		dirty={['Rollback']}
+		row={deployRow}
+		style="width:22rem; border:1px solid var(--app-bg-2);"
+	/>
 </Section>

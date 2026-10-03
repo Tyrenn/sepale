@@ -1,0 +1,205 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* dahlia — dialog.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   dialog.scss — .dialog (built on the <dialog> element)
+
+   The element covers the viewport and lays its box out on a grid;
+   whatever is not the box is the overlay, so a click there lands
+   on the <dialog> itself. Behind it, `::backdrop` is the browser's
+   own layer — opened with showModal(), it shades the page; opened
+   with show(), there is none and the page stays usable.
+
+	<dialog class="dialog">
+	  <div class="dialog-box">
+	    <form method="dialog"><button class="dialog-close" aria-label="Close">…</button></form>
+	    <h2 class="dialog-title">Delete 3 rows?</h2>
+	    <div class="dialog-body">…</div>
+	    <form method="dialog" class="dialog-actions">
+	      <button class="btn" value="cancel">Cancel</button>
+	      <button class="btn btn-error" value="delete">Delete</button>
+	    </form>
+	  </div>
+	</dialog>
+
+   Nothing here animates: opening and closing are instant in CSS.
+   The Svelte wrapper brings its own transitions.
+
+   Plumbing contract (the family fills these on `.dialog`):
+	--dialog-backdrop      the shade behind a modal dialog
+	--dialog-bg / --dialog-fg
+	--dialog-border / --dialog-border-width
+	--dialog-radius / --dialog-shadow
+	--dialog-p             box padding
+	--dialog-gap           space between title, body and actions
+	--dialog-width         the box's preferred width
+	--dialog-margin        room kept free around the box
+	--dialog-title-size / --dialog-title-weight
+	--dialog-close-size    the close button's side
+	--dialog-close-hover   its fill on hover
+	--fontsize             font size (set by size-variants classes)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — the overlay, the box, its parts and placements.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	/* The UA hides a closed <dialog> with display: none; a display of
+	   our own would undo that, so it is only ever set on an open one. */
+	.dialog:not([open]) {
+		display: none;
+	}
+	.dialog {
+		position: fixed;
+		inset: 0;
+		display: grid;
+		align-items: center;
+		justify-items: center;
+		width: 100%;
+		max-width: none;
+		height: 100%;
+		max-height: none;
+		margin: 0;
+		padding: var(--dialog-margin);
+		border: 0;
+		background: transparent;
+		color: inherit;
+		overflow: hidden;
+		overscroll-behavior: contain;
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.dialog::backdrop {
+		background-color: var(--dialog-backdrop);
+	}
+
+	/* Opened with show(), the overlay must not swallow clicks meant for
+	   the page: only the box takes them. */
+	.dialog:not(:modal) {
+		pointer-events: none;
+	}
+	.dialog:not(:modal) > .dialog-box {
+		pointer-events: auto;
+	}
+
+	/* A modal dialog locks the page's scroll, as daisyUI's modal does, by
+	   setting the page variables the root reads. */
+	:root:has(.dialog:modal) {
+		--page-has-backdrop: 1;
+		--page-overflow: hidden;
+		--page-scroll-gutter: stable;
+	}
+
+	.dialog-box {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		gap: var(--dialog-gap);
+		box-sizing: border-box;
+		width: var(--dialog-width);
+		max-width: 100%;
+		max-height: 100%;
+		padding: var(--dialog-p);
+		overflow-y: auto;
+		background-color: var(--dialog-bg);
+		color: var(--dialog-fg);
+		border: var(--dialog-border-width) solid var(--dialog-border);
+		border-radius: var(--dialog-radius);
+		box-shadow: var(--dialog-shadow);
+	}
+
+	.dialog-title {
+		margin: 0;
+		/* Room for the close button, which sits over the corner. */
+		padding-inline-end: var(--dialog-close-size);
+		font-size: var(--dialog-title-size);
+		font-weight: var(--dialog-title-weight);
+	}
+
+	.dialog-body {
+		min-height: 0;
+	}
+
+	/* The actions line up at the end of the row, so a confirmation button
+	   lands on the right in a left-to-right document. */
+	.dialog-actions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		gap: calc(0.5em * var(--scale));
+		margin: 0;
+	}
+
+	.dialog-close {
+		position: absolute;
+		inset-block-start: calc(var(--dialog-p) / 2);
+		inset-inline-end: calc(var(--dialog-p) / 2);
+		display: inline-grid;
+		place-items: center;
+		width: var(--dialog-close-size);
+		height: var(--dialog-close-size);
+		padding: 0;
+		border: 0;
+		border-radius: 50%;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+	}
+	@media (hover: hover) {
+		.dialog-close:hover {
+			background-color: var(--dialog-close-hover);
+		}
+	}
+	.dialog-close:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+
+	/* ── Axis: placement ── where the box sits; centred by default. */
+	.dialog-top {
+		align-items: start;
+	}
+	.dialog-bottom {
+		align-items: end;
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('dialog', c.$sizes-field);
+}
+
+/* ------------------------------------------------------------
+   look — Radix's dialog: a panel on the first ground, a hairline,
+   a long soft shadow, over a light shade.
+   ------------------------------------------------------------ */
+
+@mixin look {
+	.dialog {
+		--dialog-backdrop: oklch(0% 0 0 / 0.35);
+		--dialog-bg: var(--color-surface-1);
+		--dialog-fg: var(--color-on-surface);
+		--dialog-border: var(--color-border);
+		--dialog-border-width: 1px;
+		--dialog-radius: var(--radius-box);
+		--dialog-shadow: 0 12px 60px oklch(0% 0 0 / 0.12), 0 16px 64px -16px oklch(0% 0 0 / 0.2);
+		--dialog-p: calc(1.5em * var(--scale));
+		--dialog-gap: calc(0.75em * var(--scale));
+		--dialog-width: calc(28em * var(--scale));
+		--dialog-margin: calc(1em * var(--scale));
+		--dialog-title-size: 1.25em;
+		--dialog-title-weight: 700;
+		--dialog-close-size: calc(1.75em * var(--scale));
+		--dialog-close-hover: color-mix(in oklab, var(--color-primary) 8%, var(--color-surface-1));
+	}
+	.dialog-actions {
+		margin-block-start: calc(0.5em * var(--scale));
+	}
+}

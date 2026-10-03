@@ -14,8 +14,10 @@
 		variant: ['suggestions']
 	} as const;
 
-	export const FLAGS = {} as const;
-	export const PARTS = ['row', 'col-grow', 'col-wrap'] as const;
+	export const FLAGS = {
+		loading: 'Fade the rows while new ones are on their way.'
+	} as const;
+	export const PARTS = ['row', 'row-selected', 'row-dirty', 'col-grow', 'col-wrap', 'empty'] as const;
 </script>
 
 <script lang="ts" generics="Row">
@@ -34,10 +36,30 @@
 		 * an entry that is itself a snippet skips it.
 		 */
 		row?: Snippet<[Row]>;
+		/** A row's identity, for `selected`, `dirty` and keyed rendering. Defaults to its index. */
+		key?: (row: Row, index: number) => string;
+		/** Drawn in place of the rows when there are none. */
+		empty?: Snippet;
+		/** Keys of the rows to draw as selected. */
+		selected?: Iterable<string>;
+		/** Keys of the rows to draw as changed and not yet saved. */
+		dirty?: Iterable<string>;
 		class?: string;
 	}
 
-	let { rows = [], row, class: klass = '', ...axes }: Props = $props();
+	let {
+		rows = [],
+		row,
+		key = (_row: Row, i: number) => String(i),
+		empty,
+		selected,
+		dirty,
+		class: klass = '',
+		...axes
+	}: Props = $props();
+
+	let selectedSet = $derived(new Set(selected ?? []));
+	let dirtySet = $derived(new Set(dirty ?? []));
 
 	/* A snippet has no runtime marker — compiled, it is a plain function — so
 	   `typeof` is the only test. Fine as long as a row is never a function.
@@ -50,8 +72,15 @@
 </script>
 
 <ul {...applied.rest} class={classes}>
-	{#each rows as entry, i (i)}
-		<li class={`${PREFIX}-row`}>
+	{#each rows as entry, i (isSnippet(entry) ? `snippet-${i}` : key(entry, i))}
+		{@const k = isSnippet(entry) ? String(i) : key(entry, i)}
+		<li
+			class={cx(
+				`${PREFIX}-row`,
+				selectedSet.has(k) && `${PREFIX}-row-selected`,
+				dirtySet.has(k) && `${PREFIX}-row-dirty`
+			)}
+		>
 			{#if isSnippet(entry)}
 				{@render entry()}
 			{:else if row}
@@ -60,5 +89,7 @@
 				{entry}
 			{/if}
 		</li>
+	{:else}
+		{#if empty}<li class={`${PREFIX}-empty`}>{@render empty()}</li>{/if}
 	{/each}
 </ul>

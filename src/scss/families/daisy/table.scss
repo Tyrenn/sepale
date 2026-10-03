@@ -1,0 +1,237 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* daisy — table.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   table.scss — .table (a real <table>)
+
+	<div class="table-scroll">
+	  <table class="table">
+	    <thead>
+	      <tr class="table-head">
+	        <th class="table-cell table-sticky" aria-sort="ascending">
+	          <button class="table-sort">Name</button>
+	        </th>
+	        <th class="table-cell">Email</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr class="table-row table-row-selected">
+	        <td class="table-cell table-sticky">Ada</td>
+	        <td class="table-cell">ada@…</td>
+	      </tr>
+	      <tr><td class="table-empty" colspan="2">Nothing yet</td></tr>
+	    </tbody>
+	  </table>
+	</div>
+
+   A row paints through its cells, not on itself: the row sets
+   --table-row-bg and every cell fills with it. That is what lets a
+   sticky cell stay opaque while the others scroll under it, in
+   every state the row can take (zebra, hover, selected).
+
+   Columns are sized on their header cell: a width is honoured as a
+   minimum, and the text wraps inside it. Sticky columns are offset
+   by the wrapper (`inset-inline-start`, inline), which measures the
+   sticky columns before them.
+
+   Plumbing contract (the family fills these on `.table-scroll`):
+	--table-frame / --table-frame-width   the frame's line
+	--table-frame-radius / --table-frame-shadow
+
+   … and these on `.table`:
+	--table-bg / --table-fg
+	--table-cell-py / --table-cell-px
+	--table-head-fg / --table-head-size / --table-head-weight
+	--table-head-bg
+	--table-border          the line between rows
+	--table-stripe          the fill of every other row (zebra)
+	--table-hover           the fill of a hovered row
+	--table-selected        the fill of a selected row
+	--table-dirty           the mark of a row with unsaved changes
+	--table-sticky-shadow   the edge a sticky column casts
+	--fontsize              font size (set by size-variants classes)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — scrolling, cells, sticky columns and head, states.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	/* The frame is the scroll box's: it clips the table to its corners. */
+	.table-scroll {
+		overflow: auto;
+		max-width: 100%;
+		border: var(--table-frame-width) solid var(--table-frame);
+		border-radius: var(--table-frame-radius);
+		box-shadow: var(--table-frame-shadow);
+	}
+
+	.table {
+		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+		background-color: var(--table-bg);
+		color: var(--table-fg);
+		text-align: start;
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		--table-row-bg: var(--table-bg);
+	}
+
+	.table :is(th, td) {
+		padding-block: var(--table-cell-py);
+		padding-inline: var(--table-cell-px);
+		text-align: start;
+		vertical-align: middle;
+		overflow-wrap: break-word;
+		background-color: var(--table-row-bg);
+		border-block-end: var(--border) solid var(--table-border);
+	}
+	.table > tbody > tr:last-child > :is(th, td) {
+		border-block-end-color: #0000;
+	}
+
+	.table > thead > tr > th {
+		--table-row-bg: var(--table-head-bg);
+		color: var(--table-head-fg);
+		font-size: var(--table-head-size);
+		font-weight: var(--table-head-weight);
+		white-space: nowrap;
+	}
+
+	/* A sortable header: the whole cell's text is the button. */
+	.table-sort {
+		display: inline-flex;
+		align-items: center;
+		gap: calc(0.25em * var(--scale));
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-align: inherit;
+		cursor: pointer;
+	}
+	.table-sort::after {
+		content: "";
+		width: 0.5em;
+		height: 0.5em;
+		opacity: 0;
+		border-inline-end: 2px solid currentColor;
+		border-block-end: 2px solid currentColor;
+		rotate: 45deg;
+		translate: 0 -0.15em;
+	}
+	@media (hover: hover) {
+		.table-sort:hover::after {
+			opacity: 0.35;
+		}
+	}
+	[aria-sort="ascending"] > .table-sort::after {
+		opacity: 1;
+		rotate: -135deg;
+		translate: 0 0.15em;
+	}
+	[aria-sort="descending"] > .table-sort::after {
+		opacity: 1;
+	}
+	.table-sort:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+
+	/* A sticky column: pinned to the start edge, above the cells that
+	   scroll beneath it. Its offset comes inline from the wrapper. */
+	.table-sticky {
+		position: sticky;
+		inset-inline-start: 0;
+		z-index: 1;
+	}
+	.table-sticky-last {
+		box-shadow: var(--table-sticky-shadow);
+	}
+
+	/* ── Flag: pinned ── the head stays at the top of the scroll box. */
+	.table-pinned > thead > tr > th {
+		position: sticky;
+		inset-block-start: 0;
+		z-index: 2;
+	}
+	.table-pinned > thead > tr > th.table-sticky {
+		z-index: 3;
+	}
+
+	/* ── Row states ── */
+	.table-zebra > tbody > tr:nth-child(even) {
+		--table-row-bg: var(--table-stripe);
+	}
+	@media (hover: hover) {
+		.table-hover > tbody > tr.table-row:hover {
+			--table-row-bg: var(--table-hover);
+		}
+	}
+	.table .table-row-selected {
+		--table-row-bg: var(--table-selected);
+	}
+	.table .table-row-dirty > :first-child {
+		box-shadow: inset calc(0.2em * var(--scale)) 0 0 var(--table-dirty);
+	}
+
+	/* ── Flag: loading ── the rows fade while new ones are fetched. */
+	.table-loading > tbody {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+	.table-loading {
+		cursor: progress;
+	}
+
+	.table-empty {
+		text-align: center;
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('table', c.$sizes-field);
+}
+
+/* ------------------------------------------------------------
+   look — daisyUI's table: small text, faded head, hairlines.
+   ------------------------------------------------------------ */
+
+@mixin look {
+	.table-scroll {
+		--table-frame: #0000;
+		--table-frame-width: 0px;
+		--table-frame-radius: var(--radius-box);
+		--table-frame-shadow: none;
+	}
+	.table {
+		--table-bg: var(--color-base-100);
+		--table-fg: var(--color-base-content);
+		--table-cell-py: calc(0.75em * var(--scale));
+		--table-cell-px: calc(1em * var(--scale));
+		--table-head-fg: color-mix(in oklab, var(--color-base-content) 60%, #0000);
+		--table-head-size: 0.857em;
+		--table-head-weight: 600;
+		--table-head-bg: var(--color-base-100);
+		--table-border: color-mix(in oklab, var(--color-base-content) 5%, #0000);
+		--table-stripe: var(--color-base-200);
+		--table-hover: var(--color-base-200);
+		--table-selected: color-mix(in oklab, var(--color-primary) 10%, var(--color-base-100));
+		--table-dirty: var(--color-warning);
+		--table-sticky-shadow: 1px 0 0 0 var(--table-border);
+		/* daisyUI sets its tables at .875rem. */
+		font-size: var(--fontsize, var(--sm, var(--default-sm)));
+	}
+	.table-empty {
+		padding-block: calc(2em * var(--scale));
+		color: color-mix(in oklab, var(--color-base-content) 50%, #0000);
+	}
+}

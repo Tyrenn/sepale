@@ -83,6 +83,11 @@ in each compiled stylesheet.
 Both come out of one pass, deliberately: a page cannot describe a class the
 generated component does not offer, because the same code decides both.
 
+**A component with no namespace** — `DataHandler`, which draws nothing, so it
+has no `AXES` to narrow — is copied into every family's folder as it is, with
+the plain modules of `src/lib/components/` it imports (`data-handler.svelte.ts`).
+It still goes through the Svelte compiler first.
+
 **Vendored code** goes with its component. `Calendar` imports air-datepicker
 from `src/lib/vendor/air-datepicker/` (copied from its repository, see the
 README there). When a source imports `../vendor/…`, its family copies get the

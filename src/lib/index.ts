@@ -61,6 +61,40 @@ export { default as Pagination } from './components/Pagination.svelte';
 export { default as Dock } from './components/Dock.svelte';
 export { default as Tabs, type TabItem } from './components/Tabs.svelte';
 
+// Data
+export {
+	default as DataHandler,
+	DataHandlerState,
+	parseQuery,
+	parseFilterValues,
+	filterValuesToParams,
+	type DataHandlerOptions,
+	type DataHandlerMessages,
+	type DataRow,
+	type DiscardChoice,
+	type EntityValue,
+	type Filter,
+	type FilterValues,
+	type GetParams,
+	type GetResult,
+	type HandledFilter,
+	type Identifier,
+	type Navigation,
+	type Sort
+} from './components/DataHandler.svelte';
+export { default as DataControl, LABELS as DATA_CONTROL_LABELS, type DataControlLabels } from './components/DataControl.svelte';
+export {
+	default as Table,
+	type TableColumn,
+	type TableSort,
+	type TableSortDirection
+} from './components/Table.svelte';
+export { default as Grid } from './components/Grid.svelte';
+
+// Overlay
+export { default as Dialog } from './components/Dialog.svelte';
+export { default as Dropdown, type DropdownTrigger } from './components/Dropdown.svelte';
+
 // Other
 export { default as Join } from './components/Join.svelte';
 

@@ -10,10 +10,14 @@
 @use 'carousel';
 @use 'button';
 @use 'checkbox';
+@use 'data-control';
+@use 'dialog';
+@use 'dropdown';
 @use 'chip';
 @use 'dock';
 @use 'fieldset';
 @use 'floating-label';
+@use 'grid';
 @use 'file-input';
 @use 'input';
 @use 'join';
@@ -32,6 +36,7 @@
 @use 'skeleton';
 @use 'stat';
 @use 'swatch';
+@use 'table';
 @use 'tabs';
 @use 'text';
 @use 'textarea';
@@ -194,9 +199,13 @@ $params: map.merge(
 @include carousel.structure;
 @include checkbox.structure;
 @include chip.structure;
+@include data-control.structure;
+@include dialog.structure;
 @include dock.structure;
+@include dropdown.structure;
 @include fieldset.structure;
 @include floating-label.structure;
+@include grid.structure;
 @include file-input.structure;
 @include input.structure;
 @include join.structure;
@@ -215,6 +224,7 @@ $params: map.merge(
 @include skeleton.structure;
 @include stat.structure;
 @include swatch.structure;
+@include table.structure;
 @include tabs.structure;
 @include text.structure;
 @include textarea.structure;
@@ -233,9 +243,13 @@ $params: map.merge(
 @include button.look;
 @include checkbox.look;
 @include chip.look;
+@include data-control.look;
+@include dialog.look;
 @include dock.look;
+@include dropdown.look;
 @include fieldset.look;
 @include floating-label.look;
+@include grid.look;
 @include file-input.look;
 @include input.look;
 @include label.look;
@@ -253,6 +267,7 @@ $params: map.merge(
 @include skeleton.look;
 @include stat.look;
 @include swatch.look;
+@include table.look;
 @include tabs.look;
 @include text.look;
 @include textarea.look;

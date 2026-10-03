@@ -57,6 +57,8 @@ const GROUPS: { group: string; ids: string[] }[] = [
 			'swatch'
 		]
 	},
+	{ group: 'Data', ids: ['data-handler', 'data-control', 'table', 'grid', 'list'] },
+	{ group: 'Overlay', ids: ['dialog', 'dropdown'] },
 	{ group: 'Navigation', ids: ['breadcrumbs', 'menu', 'navbar', 'dock', 'pagination'] },
 	{ group: 'Other', ids: ['join', 'validator'] }
 ];

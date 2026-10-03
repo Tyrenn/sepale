@@ -1,0 +1,141 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* sunflower — grid.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   grid.scss — .grid (items in as many columns as fit)
+
+	<div class="grid">
+	  <div class="grid-item grid-item-selected"> <div class="card">…</div> </div>
+	  <div class="grid-item">…</div>
+	</div>
+
+   Intrinsic: a column is at least --grid-min wide, and as many as
+   fit share the width. No breakpoint — the item size is in em, so
+   a size variant changes how many columns there are.
+
+   Masonry is the Svelte wrapper's: it reads how many columns the
+   grid made, deals the items into that many `.grid-lane`s in turn,
+   and writes `.grid-masonry`. The reading order stays row by row.
+   Without a script there is no masonry.
+
+   Plumbing contract (the family fills these on `.grid`):
+	--grid-min            the narrowest a column may be
+	--grid-gap            space between items
+	--grid-radius         the corners the selection ring follows
+	--grid-selected       the selection ring
+	--grid-dirty          the mark of an item with unsaved changes
+	--fontsize            font size (set by size-variants classes)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — the auto-fill grid, the masonry lanes, states.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(var(--grid-min), 100%), 1fr));
+		gap: var(--grid-gap);
+		align-items: stretch;
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+
+	.grid-item {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		border-radius: var(--grid-radius);
+	}
+	.grid-item > * {
+		flex: auto;
+	}
+
+	/* Masonry: the same columns, each holding one lane — a stack. The
+	   wrapper reads how many columns the browser made and deals that many
+	   lanes. */
+	.grid-masonry {
+		align-items: start;
+	}
+	.grid-lane {
+		display: flex;
+		flex-direction: column;
+		gap: var(--grid-gap);
+		min-width: 0;
+	}
+
+	.grid-empty {
+		grid-column: 1 / -1;
+		text-align: center;
+	}
+
+	/* ── States ── */
+	.grid-item-selected {
+		outline: var(--grid-selected);
+		outline-offset: 2px;
+	}
+	.grid-item-dirty::after {
+		content: "";
+		position: absolute;
+		inset-block-start: calc(0.5em * var(--scale));
+		inset-inline-end: calc(0.5em * var(--scale));
+		width: calc(0.5em * var(--scale));
+		height: calc(0.5em * var(--scale));
+		border-radius: 50%;
+		background-color: var(--grid-dirty);
+	}
+
+	/* ── Flag: loading ── */
+	.grid-loading > :is(.grid-item, .grid-lane) {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+	.grid-loading {
+		cursor: progress;
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('grid', c.$sizes-field);
+}
+
+/* ------------------------------------------------------------
+   look — a selected item is ringed in ink, set off its edge.
+   ------------------------------------------------------------ */
+
+@mixin look {
+	.grid {
+		--grid-min: calc(16em * var(--scale));
+		--grid-gap: calc(1.25em * var(--scale));
+		--grid-radius: var(--radius-box);
+		--grid-selected: calc(var(--border) * 1.5) solid var(--color-border);
+		--grid-dirty: var(--color-primary);
+	}
+	.grid-item-selected {
+		outline-offset: calc(0.25em * var(--scale));
+	}
+	.grid-item-dirty::after {
+		outline: var(--border) solid var(--color-border);
+	}
+	/* ── Axis: gap ── */
+	.grid-nogap {
+		--grid-gap: 0px;
+	}
+	.grid-tight {
+		--grid-gap: calc(0.5em * var(--scale));
+	}
+	.grid-loose {
+		--grid-gap: calc(2em * var(--scale));
+	}
+	.grid-empty {
+		padding-block: calc(2em * var(--scale));
+		font-weight: 600;
+	}
+}

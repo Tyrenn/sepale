@@ -37,6 +37,11 @@
 @use 'textarea';
 @use 'toggle';
 @use 'validator';
+@use 'dialog';
+@use 'dropdown';
+@use 'table';
+@use 'grid';
+@use 'data-control';
 
 
 
@@ -168,6 +173,11 @@ $params: map.merge(
 @include textarea.structure;
 @include toggle.structure;
 @include validator.structure;
+@include dialog.structure;
+@include dropdown.structure;
+@include table.structure;
+@include grid.structure;
+@include data-control.structure;
 
 /* What dahlia decides, one file per component. */
 
@@ -206,3 +216,8 @@ $params: map.merge(
 @include textarea.look;
 @include toggle.look;
 @include validator.look;
+@include dialog.look;
+@include dropdown.look;
+@include table.look;
+@include grid.look;
+@include data-control.look;

@@ -289,6 +289,29 @@ for (const family of families) {
 	flagsByFamily[family] = famFlags;
 }
 
+/* Components with no namespace — the data handler draws nothing, so it has
+   no AXES to narrow — and the plain modules they import go into every
+   family's folder as they are. */
+const plain = readdirSync(srcDir)
+	.filter((f) => !f.startsWith('_'))
+	.filter((f) =>
+		f.endsWith('.ts')
+			? true
+			: f.endsWith('.svelte') && !readFileSync(join(srcDir, f), 'utf8').includes('export const AXES')
+	);
+for (const family of families) {
+	for (const file of plain) {
+		const src = readFileSync(join(srcDir, file), 'utf8');
+		try {
+			if (file.endsWith('.svelte')) compile(src, { filename: file, generate: false });
+			writeFileSync(join(outDir, family, file), src);
+			written++;
+		} catch (e) {
+			problems.push(`${family}/${file}: ${e.message.split(NL)[0]}`);
+		}
+	}
+}
+
 if (problems.length) {
 	console.error('components: unclassified classes — each one needs a human:');
 	for (const p of problems) console.error(`  ${p}`);
