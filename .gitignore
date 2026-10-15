@@ -15,6 +15,7 @@ node_modules
 /static/reset.css
 /src/lib/generated
 /src/generated
+/src/lib/families
 
 # OS
 .DS_Store

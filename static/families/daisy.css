@@ -434,35 +434,40 @@ svg {
 /* ============================================================
    carousel.scss — .carousel
 
-   A row of slides that scrolls and snaps — natively, so touch,
+   A row of items that scrolls and snaps — natively, so touch,
    trackpad and keyboard scrolling come for free — with optional
    arrows over it and an optional pagination under it.
 
    The root is a grid. The track sits in the first cell, and the two
    arrows are laid over that SAME cell, at its start and end, so they
-   are centred on the slides whatever sits under them. The pagination
+   are centred on the items whatever sits under them. The pagination
    takes the next row.
 
    Parts:   .carousel-track       the scrolling, snapping row
-            .carousel-item        one slide
+            .carousel-item        one item
             .carousel-prev/next   the cells the arrows are drawn in
             .carousel-pagination  the cell the pagination is drawn in
-   Axes:    align (where a slide snaps: start, center, end)
+            .carousel-upcoming    the row of upcoming items under the track
+            .carousel-upcoming-item  one of them, a button
+   Axes:    align (where an item snaps: start, center, end)
    Flags:   vertical
 
-   A slide is as wide as the track. Several at once: set
-   `--carousel-item-width` (a length or a percentage) on the root.
+   An item is as wide as the track. Several at once: set
+   `--carousel-item-width` (a length, a percentage, or `auto` to let
+   each item size itself) on the root.
 
    Plumbing contract (the family fills these on `.carousel`):
 	--carousel-gap          space between the track and the pagination
-	--carousel-item-gap     space between slides
-	--carousel-item-width   width of a slide (default 100%)
+	--carousel-item-gap     space between items
+	--carousel-item-width   width of an item (default 100%)
 	--carousel-height       height of a vertical carousel
 	--carousel-radius       corner radius of the track
 	--carousel-border       the track's border (a `border` value)
 	--carousel-shadow       the track's box-shadow
 	--carousel-rotate       resting angle of the track
 	--carousel-arrow-inset  distance of the arrows from the edges
+	--carousel-upcoming-gap   space between the upcoming items
+	--carousel-upcoming-size  font-size of an upcoming item (shrinks it)
    ============================================================ */
 /* ------------------------------------------------------------
    structure — the grid, the snapping track, the overlaid arrows.
@@ -1069,8 +1074,10 @@ svg {
 
    Parts:   .pagination-item   one page, or a previous / next control
             .pagination-gap    the "…" standing for skipped pages
+            .pagination-text   the "3 / 8" of the count variant
    Axes:    color (the current page), size, variant (dots: the
-            numbers become dots, as under a carousel)
+            numbers become dots, as under a carousel; bars: a
+            segment per page across the row; count: "3 / 8" alone)
 
    Plumbing contract (the family fills these on `.pagination`):
 	--pagination-color         fill of the current page
@@ -1084,6 +1091,10 @@ svg {
 	--pagination-shadow        box-shadow of a page
 	--pagination-size          height and minimum width of a page
 	--pagination-dot           diameter of a dot (variant dots)
+	--pagination-bar-width     minimum length of a segment (variant bars)
+	--pagination-bar-height    thickness of a segment (variant bars)
+	--pagination-bar-radius    corner radius of a segment (variant bars)
+	--pagination-bar-gap       space between segments (variant bars)
 	--pagination-gap           space between pages
 	--fontsize                 font size (set by size-variants classes)
    ============================================================ */
@@ -2498,7 +2509,7 @@ svg {
 
 .carousel-track {
   grid-area: 1/1;
-  /* The slides' offsets are measured from here (to scroll to one). */
+  /* The items' offsets are measured from here (to scroll to one). */
   position: relative;
   display: flex;
   gap: var(--carousel-item-gap);
@@ -2542,7 +2553,7 @@ svg {
 
 /* ── The arrows, over the track's cell ──
    The cell lets the pointer through; only what is drawn in it
-   catches it, so the slides stay draggable between the arrows. */
+   catches it, so the items stay draggable between the arrows. */
 .carousel-prev,
 .carousel-next {
   grid-area: 1/1;
@@ -2577,7 +2588,45 @@ svg {
   display: flex;
 }
 
-/* ── Axis: align ── where a slide comes to rest. */
+/* ── The upcoming items, a row under the track ──
+   Each one is the item drawn again at a smaller font-size: an
+   em-sized item shrinks whole. The gap is in the carousel's em,
+   set on the row, before the items shrink. */
+.carousel-upcoming {
+  display: flex;
+  gap: var(--carousel-upcoming-gap);
+  min-width: 0;
+}
+
+.carousel-upcoming-item {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  font-size: var(--carousel-upcoming-size);
+  color: inherit;
+  text-align: inherit;
+  background: none;
+  border: var(--carousel-border);
+  border-radius: var(--carousel-radius);
+  cursor: pointer;
+}
+
+.carousel-upcoming-item > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.carousel-upcoming-item:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* ── Axis: align ── where an item comes to rest. */
 .carousel-start .carousel-item {
   scroll-snap-align: start;
 }
@@ -2590,7 +2639,7 @@ svg {
   scroll-snap-align: end;
 }
 
-/* ── Flag: vertical ── slides go up and down; the arrows sit at the
+/* ── Flag: vertical ── items go up and down; the arrows sit at the
    top and the bottom, their chevrons turned. */
 .carousel-vertical .carousel-track {
   flex-direction: column;
@@ -3976,6 +4025,49 @@ fieldset:disabled .input {
   display: none;
 }
 
+/* ── Variant: bars ──
+   A segment per page, stretched across the row: the numbers stay in
+   the DOM and the accessible name, as with the dots. The row takes
+   the width it is given; a segment never shrinks below
+   --pagination-bar-width. */
+.pagination-bars {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--pagination-bar-gap);
+}
+
+.pagination-bars .pagination-item {
+  flex: 1 1 0;
+  min-width: var(--pagination-bar-width);
+  height: var(--pagination-bar-height);
+  padding: 0;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0);
+  border-radius: var(--pagination-bar-radius);
+}
+
+.pagination-bars .pagination-gap {
+  display: none;
+}
+
+/* ── Variant: count ──
+   No page drawn: "3 / 8" between previous and next, as tall as a
+   page so the row keeps its height. */
+.pagination-count {
+  flex-wrap: nowrap;
+}
+
+.pagination-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--pagination-size);
+  height: var(--pagination-size);
+  padding-inline: calc(var(--pagination-size) / 4);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /* ── Axis: size ── */
 .pagination-xs {
   --fontsize: var(--xs, var(--default-xs));
@@ -5289,7 +5381,7 @@ input[type=color].swatch::-moz-color-swatch {
   --card-title-weight: 600;
 }
 
-/* daisyUI's carousel draws nothing: the slides are the picture. */
+/* daisyUI's carousel draws nothing: the items are the picture. */
 .carousel {
   --carousel-gap: calc(0.75em * var(--scale));
   --carousel-item-gap: 0px;
@@ -5298,6 +5390,8 @@ input[type=color].swatch::-moz-color-swatch {
   --carousel-border: 0 solid #0000;
   --carousel-shadow: none;
   --carousel-arrow-inset: calc(0.75em * var(--scale));
+  --carousel-upcoming-gap: calc(0.5em * var(--scale));
+  --carousel-upcoming-size: 0.4em;
 }
 
 :where(.btn) {
@@ -6996,11 +7090,16 @@ fieldset:disabled .input::placeholder {
   --pagination-shadow: none;
   --pagination-size: calc(2.5em * var(--scale));
   --pagination-dot: calc(0.625em * var(--scale));
+  --pagination-bar-width: calc(1.5em * var(--scale));
+  --pagination-bar-height: calc(0.375em * var(--scale));
+  --pagination-bar-radius: 999px;
+  --pagination-bar-gap: calc(0.25em * var(--scale));
   --pagination-gap: calc(0.25em * var(--scale));
   font-weight: 600;
 }
 
-.pagination-dots {
+.pagination-dots,
+.pagination-bars {
   --pagination-item-bg: color-mix(in oklab, var(--color-base-content) 20%, #0000);
   --pagination-item-border: #0000;
   --pagination-hover-bg: color-mix(in oklab, var(--color-base-content) 40%, #0000);

@@ -1,5 +1,7 @@
 # Distribution is a downloadable bundle, not an npm package
 
+_Partly superseded by [0012](./0012-a-package-alongside-the-bundle.md): the bundle stays, a package is added._
+
 The kit is delivered by the app: you pick a family, tune its parameters, and
 download a zip of plain files you drop into your own project wherever you like.
 There is no published npm package, no `dist/`, and no `exports` map.

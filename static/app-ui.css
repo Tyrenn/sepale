@@ -1179,6 +1179,41 @@ svg {
 }
 
 
+.ui-carousel-upcoming {
+  display: flex;
+  gap: var(--ui-carousel-upcoming-gap);
+  min-width: 0;
+}
+
+.ui-carousel-upcoming-item {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  font-size: var(--ui-carousel-upcoming-size);
+  color: inherit;
+  text-align: inherit;
+  background: none;
+  border: var(--ui-carousel-border);
+  border-radius: var(--ui-carousel-radius);
+  cursor: pointer;
+}
+
+.ui-carousel-upcoming-item > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.ui-carousel-upcoming-item:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+
 .ui-carousel-start .ui-carousel-item {
   scroll-snap-align: start;
 }
@@ -2547,6 +2582,43 @@ fieldset:disabled .ui-input {
 }
 
 
+.ui-pagination-bars {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--ui-pagination-bar-gap);
+}
+
+.ui-pagination-bars .ui-pagination-item {
+  flex: 1 1 0;
+  min-width: var(--ui-pagination-bar-width);
+  height: var(--ui-pagination-bar-height);
+  padding: 0;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0);
+  border-radius: var(--ui-pagination-bar-radius);
+}
+
+.ui-pagination-bars .ui-pagination-gap {
+  display: none;
+}
+
+
+.ui-pagination-count {
+  flex-wrap: nowrap;
+}
+
+.ui-pagination-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--ui-pagination-size);
+  height: var(--ui-pagination-size);
+  padding-inline: calc(var(--ui-pagination-size) / 4);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+
 .ui-pagination-xs {
   --ui-fontsize: var(--ui-xs, var(--ui-default-xs));
 }
@@ -3854,6 +3926,8 @@ input[type=color].ui-swatch::-moz-color-swatch {
   --ui-carousel-border: 0 solid #0000;
   --ui-carousel-shadow: none;
   --ui-carousel-arrow-inset: calc(0.75em * var(--ui-scale));
+  --ui-carousel-upcoming-gap: calc(0.5em * var(--ui-scale));
+  --ui-carousel-upcoming-size: 0.4em;
 }
 
 :where(.ui-btn) {
@@ -5534,11 +5608,16 @@ fieldset:disabled .ui-input::placeholder {
   --ui-pagination-shadow: none;
   --ui-pagination-size: calc(2.5em * var(--ui-scale));
   --ui-pagination-dot: calc(0.625em * var(--ui-scale));
+  --ui-pagination-bar-width: calc(1.5em * var(--ui-scale));
+  --ui-pagination-bar-height: calc(0.375em * var(--ui-scale));
+  --ui-pagination-bar-radius: 999px;
+  --ui-pagination-bar-gap: calc(0.25em * var(--ui-scale));
   --ui-pagination-gap: calc(0.25em * var(--ui-scale));
   font-weight: 600;
 }
 
-.ui-pagination-dots {
+.ui-pagination-dots,
+.ui-pagination-bars {
   --ui-pagination-item-bg: color-mix(in oklab, var(--ui-color-base-content) 20%, #0000);
   --ui-pagination-item-border: #0000;
   --ui-pagination-hover-bg: color-mix(in oklab, var(--ui-color-base-content) 40%, #0000);

@@ -11,23 +11,32 @@
 	export const DOC: ComponentDoc = {
 		namespaces: ['pagination'],
 		description:
-			'A row of pages to jump between, with previous / next. The current page is marked by `aria-current="page"`, not by a class. Far pages fold into a gap.',
+			'A row of pages to jump between, with previous / next. The current page is marked by `aria-current="page"`, not by a class. Far pages fold into a gap. Three variants draw the same pages differently: dots, bars, count.',
 		classes: {
 			'pagination-item': 'One page, or a previous / next control.',
 			'pagination-gap': 'The “…” standing for pages that are not drawn.',
-			'pagination-dots': 'A dot per page instead of its number — as under a carousel.'
+			'pagination-text': 'The “3 / 8” of the count variant.',
+			'pagination-count': 'No page drawn: “3 / 8” between previous and next.',
+			'pagination-dots': 'A dot per page instead of its number — as under a carousel.',
+			'pagination-bars': 'A segment per page, stretched across the row.'
 		},
 		props: {
 			Pagination: [
 				{ name: 'count', type: 'number', description: 'How many pages there are.' },
 				{ name: 'page', type: 'number', default: '$bindable(1)', description: 'The current page, from 1.' },
 				{ name: 'siblings', type: 'number', default: '1', description: 'Pages kept on each side of the current one before a gap.' },
-				{ name: 'controls', type: 'boolean', default: 'true (false for dots)', description: 'Draw previous / next.' },
+				{ name: 'controls', type: 'boolean', default: 'true (false for dots, bars)', description: 'Draw previous / next.' },
+				{ name: 'variant', type: "'dots' | 'bars' | 'count'", description: 'How the pages are drawn: dots, segments, or only “3 / 8” between previous and next.' },
 				{ name: 'onpage', type: '(page) => void', description: 'Called with the new page after every change.' },
 				{
 					name: 'pageLabel / previousLabel / nextLabel',
 					type: '(page) => string / string',
 					description: 'Accessible names: `Page N`, `Previous page`, `Next page` by default.'
+				},
+				{
+					name: 'countLabel',
+					type: '(page, count) => string',
+					description: 'The text of the count variant: `3 / 8` by default.'
 				}
 			]
 		}
@@ -85,4 +94,31 @@
 </nav>`}
 >
 	<Pagination count={5} page={2} variant="dots" />
+</Section>
+
+<Section
+	title="Bars"
+	subtitle="A segment per page, stretched across the width it is given — as over a story."
+	svelte={`<Pagination count={5} page={2} variant="bars" />`}
+	html={`<nav class="pagination pagination-bars">
+	<button class="pagination-item">1</button>
+	<button class="pagination-item" aria-current="page">2</button>
+</nav>`}
+>
+	<div style="width:16rem;">
+		<Pagination count={5} page={2} variant="bars" />
+	</div>
+</Section>
+
+<Section
+	title="Count"
+	subtitle="No page drawn: where you are, between previous and next."
+	svelte={`<Pagination count={12} page={3} variant="count" />`}
+	html={`<nav class="pagination pagination-count">
+	<button class="pagination-item" aria-label="Previous page">‹</button>
+	<span class="pagination-text">3 / 12</span>
+	<button class="pagination-item" aria-label="Next page">›</button>
+</nav>`}
+>
+	<Pagination count={12} page={3} variant="count" />
 </Section>

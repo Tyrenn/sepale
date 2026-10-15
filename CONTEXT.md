@@ -1,4 +1,4 @@
-# u.u
+# Sepale
 
 A collection of components, each one a DOM structure and a set of well-defined
 classes — and, in Svelte, a wrapper that makes a functional piece (an input, a
@@ -6,8 +6,9 @@ menu, a carousel) quick to put in a page. The components come first; the CSS
 comes after.
 
 To style them you pick an opinionated **family**, then tune it lightly through
-its **parameters**. The web app is the distribution channel — it previews the
-result and hands you the files.
+its **parameters**. Two ways to get it: the `sepale` **package**, which
+follows the kit's evolution, or a **bundle** downloaded from the web app, a
+snapshot of the files.
 
 ## Language
 
@@ -123,6 +124,27 @@ A component laid over the page that asks for the user's attention — a
 confirmation, a form. Named after the HTML element it is built on.
 _Avoid_: modal, popup
 
+**Pagination**:
+The component that shows where one stands among numbered pages and moves
+between them — under a table, a grid, a carousel. Its kinds (numbers, dots,
+bars, a "3 / 8" count) are variants of one component, not components of their
+own: they share its parts and its props, and only the drawing changes. A kind
+that needed another structure would be another component.
+_Avoid_: pager, dots (a variant, not the component)
+
+### Carousel
+
+**Item**:
+One entry of a carousel, drawn in one `.carousel-item`. Several may be
+visible at once, and they need not share a size; the carousel snaps from item
+to item.
+_Avoid_: slide, page
+
+**Index**:
+The position of the item the carousel rests on, counted from 0 over the
+caller's items — duplicates drawn for an infinite carousel are never counted.
+_Avoid_: page, current slide
+
 ### Authoring
 
 **Structure** / **Look**:
@@ -143,5 +165,22 @@ stops offering it.
 
 **Bundle**:
 The zip the app produces: the chosen family's stylesheet, the generated `theme.css`, an optional `reset.css`, a README, and — in
-CSS + Svelte mode — the component wrappers.
-_Avoid_: package (there is no npm package), export, build
+CSS + Svelte mode — the component wrappers, rewritten for that family alone.
+A snapshot: it never updates. A bundle may also be just a `theme.css`, a
+custom theme laid over the package's family stylesheet.
+_Avoid_: export, build
+
+**Package**:
+`sepale` on npm — the kit for those who want its evolution (ADR 0012). Holds
+the generic components, one entry point per family, each family's stylesheet
+and its preset themes. A custom theme is not in it: it comes from the app, as
+a bundle. Its public API — parameters, classes, props — follows semver.
+_Avoid_: library, bundle
+
+**Entry point**:
+`sepale/<family>`: the generic components re-exported with their props
+narrowed, by type alone, to what that family ships. Switching family changes
+the types, never the runtime. The root `sepale` is the generic entry: every
+axis of every family, no guarantee any renders. Neither loads CSS:
+`sepale/<family>.css` is imported explicitly.
+_Avoid_: export, narrowed copy (that is the bundle's rewritten wrapper)

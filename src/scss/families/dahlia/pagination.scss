@@ -18,8 +18,10 @@
 
    Parts:   .pagination-item   one page, or a previous / next control
             .pagination-gap    the "…" standing for skipped pages
+            .pagination-text   the "3 / 8" of the count variant
    Axes:    color (the current page), size, variant (dots: the
-            numbers become dots, as under a carousel)
+            numbers become dots, as under a carousel; bars: a
+            segment per page across the row; count: "3 / 8" alone)
 
    Plumbing contract (the family fills these on `.pagination`):
 	--pagination-color         fill of the current page
@@ -33,6 +35,10 @@
 	--pagination-shadow        box-shadow of a page
 	--pagination-size          height and minimum width of a page
 	--pagination-dot           diameter of a dot (variant dots)
+	--pagination-bar-width     minimum length of a segment (variant bars)
+	--pagination-bar-height    thickness of a segment (variant bars)
+	--pagination-bar-radius    corner radius of a segment (variant bars)
+	--pagination-bar-gap       space between segments (variant bars)
 	--pagination-gap           space between pages
 	--fontsize                 font size (set by size-variants classes)
    ============================================================ */
@@ -129,6 +135,46 @@
 		display: none;
 	}
 
+	/* ── Variant: bars ──
+	   A segment per page, stretched across the row: the numbers stay in
+	   the DOM and the accessible name, as with the dots. The row takes
+	   the width it is given; a segment never shrinks below
+	   --pagination-bar-width. */
+	.pagination-bars {
+		display: flex;
+		flex-wrap: nowrap;
+		gap: var(--pagination-bar-gap);
+	}
+	.pagination-bars .pagination-item {
+		flex: 1 1 0;
+		min-width: var(--pagination-bar-width);
+		height: var(--pagination-bar-height);
+		padding: 0;
+		overflow: hidden;
+		color: #0000;
+		border-radius: var(--pagination-bar-radius);
+	}
+	.pagination-bars .pagination-gap {
+		display: none;
+	}
+
+	/* ── Variant: count ──
+	   No page drawn: "3 / 8" between previous and next, as tall as a
+	   page so the row keeps its height. */
+	.pagination-count {
+		flex-wrap: nowrap;
+	}
+	.pagination-text {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: var(--pagination-size);
+		height: var(--pagination-size);
+		padding-inline: calc(var(--pagination-size) / 4);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
 	/* ── Axis: size ── */
 	@include m.size-variants('pagination');
 }
@@ -148,10 +194,15 @@
 		--pagination-shadow: none;
 		--pagination-size: calc(2.25em * var(--scale));
 		--pagination-dot: calc(0.5em * var(--scale));
+		--pagination-bar-width: calc(1.5em * var(--scale));
+		--pagination-bar-height: calc(0.25em * var(--scale));
+		--pagination-bar-radius: 999px;
+		--pagination-bar-gap: calc(0.25em * var(--scale));
 		--pagination-gap: calc(0.25em * var(--scale));
 		font-weight: 500;
 	}
-	.pagination-dots {
+	.pagination-dots,
+	.pagination-bars {
 		--pagination-item-bg: color-mix(in oklab, var(--color-on-surface) 18%, #0000);
 		--pagination-item-border: #0000;
 		--pagination-hover-bg: color-mix(in oklab, var(--color-on-surface) 35%, #0000);

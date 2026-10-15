@@ -59,7 +59,7 @@
 		title="Navbar"
 		subtitle="A bar across the top. Placement only — what goes in it is a menu, or buttons."
 		svelte={`<Navbar>
-	{#snippet start()}<strong>u.u</strong>{/snippet}
+	{#snippet start()}<strong>Sepale</strong>{/snippet}
 	{#snippet center()}
 		<Menu
 			direction="horizontal"
@@ -71,7 +71,7 @@
 </Navbar>`}
 	>
 		<Navbar>
-			{#snippet start()}<strong>u.u</strong>{/snippet}
+			{#snippet start()}<strong>Sepale</strong>{/snippet}
 			{#snippet center()}
 				<Menu
 					direction="horizontal"
@@ -87,12 +87,12 @@
 		title="Zones are optional"
 		subtitle="With no zone, the children simply lay out in a row."
 		svelte={`<Navbar>
-	<strong>u.u</strong>
+	<strong>Sepale</strong>
 	<Button variant="ghost" size="sm">Docs</Button>
 </Navbar>`}
 	>
 		<Navbar>
-			<strong>u.u</strong>
+			<strong>Sepale</strong>
 			<Button variant="ghost" size="sm">Docs</Button>
 		</Navbar>
 	</Section>

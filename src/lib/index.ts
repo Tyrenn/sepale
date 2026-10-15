@@ -1,4 +1,4 @@
-// u.u — the Svelte layer.
+// Sepale — the Svelte layer.
 //
 // Every component emits the class names of whatever family stylesheet is
 // loaded; bring `families/<name>.css` and a theme alongside. A component
