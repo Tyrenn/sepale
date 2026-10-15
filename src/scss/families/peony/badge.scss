@@ -1,0 +1,102 @@
+/* peony — badge.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   badge.scss — .badge (badge overlay wrapper)
+
+   Internal variables (position control):
+	--badge-t    top offset (default: 0)
+	--badge-b    bottom offset (default: auto)
+	--badge-s    inset-inline-start offset (default: auto)
+	--badge-e    inset-inline-end offset (default: 0)
+	--badge-x    horizontal translate (default: 50%)
+	--badge-y    vertical translate (default: -50%)
+
+   Usage: combine the .badge wrapper with .badge-{position}
+   modifiers; the inner .chip is the positioned badge itself.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — wrapper + positioned inner chip.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.badge {
+		position: relative;
+		display: inline-flex;
+	}
+	.badge :where(.chip) {
+		z-index: 1;
+		position: absolute;
+		white-space: nowrap;
+		top: var(--badge-t, 0);
+		bottom: var(--badge-b, auto);
+		left: var(--badge-s, auto);
+		right: var(--badge-e, 0);
+		translate: var(--badge-x, 50%) var(--badge-y, -50%);
+	}
+}
+
+@mixin look {
+	.badge {
+		width: max-content;
+	}
+
+	/* position variants */
+	.badge-start {
+		--badge-s: 0;
+		--badge-e: auto;
+		--badge-x: -50%;
+	}
+
+	[dir="rtl"] .badge-start {
+		--badge-s: auto;
+		--badge-e: 0;
+		--badge-x: 50%;
+	}
+
+	.badge-center {
+		--badge-s: 50%;
+		--badge-e: 50%;
+		--badge-x: -50%;
+	}
+
+	[dir="rtl"] .badge-center {
+		--badge-x: 50%;
+	}
+
+	.badge-end {
+		--badge-s: auto;
+		--badge-e: 0;
+		--badge-x: 50%;
+	}
+
+	[dir="rtl"] .badge-end {
+		--badge-s: 0;
+		--badge-e: auto;
+		--badge-x: -50%;
+	}
+
+	.badge-top {
+		--badge-t: 0;
+		--badge-b: auto;
+		--badge-y: -50%;
+	}
+
+	.badge-middle {
+		--badge-t: 50%;
+		--badge-b: 50%;
+		--badge-y: -50%;
+	}
+
+	.badge-bottom {
+		--badge-t: auto;
+		--badge-b: 0;
+		--badge-y: 50%;
+	}
+}

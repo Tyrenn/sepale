@@ -147,6 +147,7 @@
    ------------------------------------------------------------ */
 $color-meta: (
 	/* Our own names: surfaces, plus inks a family usually derives. */
+	'color-page': ('Page', 'The page behind the objects, when a family tints it apart from them.', surface, 'color-on-surface'),
 	'color-surface-1': ('Surface 1', 'The ground: page background, and the inside of fields.', surface, 'color-on-surface'),
 	'color-surface-2': ('Surface 2', 'Objects resting on the ground: plain buttons, chips, skeletons.', surface, 'color-on-surface'),
 	'color-surface-3': ('Surface 3', 'Chrome pinned to the edge of the screen: dock, navbar.', surface, 'color-on-surface'),

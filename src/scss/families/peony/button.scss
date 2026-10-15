@@ -1,0 +1,385 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* peony — button.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   button.scss — .btn
+
+   Plumbing contract — custom properties painted by `structure`, assigned
+   by skins/variants (and overridable per family):
+	--btn-color    color seed — set by `color-variants`, drives bg/outline
+	--btn-bg       resolved background color
+	--btn-fg       resolved text color
+	--btn-border   resolved border color        (structure default: transparent)
+	--btn-shadow   box-shadow value             (structure default: var(--shadow-light))
+	--btn-p        inline padding
+	--size         button height
+	--fontsize     font size (set by `size-variants` classes)
+
+   External variables (theme / family):
+	--color-surface-2          default button background
+	--color-on-surface      default text color
+	--color-{variant} / --color-on-{variant}  semantic colors (primary, secondary, …)
+	--radius-field            corner radius
+	--border                  border width (px value)
+	--shadow-light            family shadow system (see _root.scss)
+
+   Join integration (set by join.scss when inside .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure —
+   Layout, intrinsic sizing, typography plumbing, paint plumbing
+   (background/border/shadow read the --btn-* variables), keyboard
+   focus, checkbox/radio-as-button behavior, disabled state.
+   No look decision: border/shadow resolve to transparent/family
+   shadow until a skin assigns them.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	/* Width reset in some contexts (e.g. join) */
+	/* btn links inside prose: no underline */
+	.btn {
+		/* Internal variables — neutral defaults, skins re-assign */
+		--btn-bg: var(--btn-color, var(--color-surface-2));
+		--btn-fg: var(--color-on-surface);
+		/* daisyUI ships 1rem — half of this was an outlier */
+		--btn-shadow: var(--shadow-light, );
+		/* Layout */
+		display: inline-flex;
+		flex-shrink: 0;
+		flex-wrap: nowrap;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		vertical-align: middle;
+		user-select: none;
+		touch-action: manipulation;
+		/* Dimensions */
+		height: var(--size);
+		padding-inline: var(--btn-p);
+		/* Typography */
+		color: var(--btn-fg);
+		/* Paint plumbing */
+		background-color: var(--btn-bg);
+		border-width: var(--border);
+		border-color: var(--btn-border);
+		box-shadow: var(--btn-shadow);
+		/* Corner radius (join-compatible) */
+		border-start-start-radius: var(--join-ss, var(--radius-field));
+		border-start-end-radius: var(--join-se, var(--radius-field));
+		border-end-start-radius: var(--join-es, var(--radius-field));
+		border-end-end-radius: var(--join-ee, var(--radius-field));
+		/* Outline */
+		outline-color: var(--btn-color, var(--color-on-surface));
+		/* Transition */
+		/* Other */
+		cursor: pointer;
+	}
+	/* Keyboard focus */
+	.btn:focus-visible,
+		.btn:has(:focus-visible) {
+		isolation: isolate;
+	}
+	/* Checkbox / radio styled as button */
+	.btn:is(input[type="checkbox"], input[type="radio"]) {
+		appearance: none;
+	}
+	.btn:is(input[type="checkbox"], input[type="radio"])[aria-label]::after {
+		content: attr(aria-label);
+	}
+	/* Checked checkbox/radio: seed the primary color */
+	.btn:where(input:checked) {
+		--btn-color: var(--color-primary);
+		--btn-fg: var(--color-on-primary);
+		isolation: isolate;
+	}
+	/* Disabled */
+	.btn-disabled,
+		.btn:disabled,
+		.btn[disabled] {
+		pointer-events: none;
+	}
+}
+
+@mixin look {
+	:where(.btn) {
+		width: unset;
+	}
+	.btn {
+		--size: calc(2.5em * var(--scale));
+		--btn-p: calc(1em * var(--scale));
+		--btn-border: transparent;
+		gap: calc(0.375em * var(--scale));
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		font-weight: 600;
+		border-style: solid;
+		outline-offset: 2px;
+		transition-property: color, background-color, border-color, box-shadow;
+		transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+		transition-duration: 0.2s;
+	}
+	.btn svg {
+		height: 1em;
+	}
+	.btn:focus-visible,
+		.btn:has(:focus-visible) {
+		outline-width: 2px;
+		outline-style: solid;
+	}
+	.btn-disabled,
+		.btn:disabled,
+		.btn[disabled] {
+		--btn-border: #0000;
+		--btn-fg: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+	}
+	.btn-disabled:not(.btn-link, .btn-ghost),
+		.btn:disabled:not(.btn-link, .btn-ghost),
+		.btn[disabled]:not(.btn-link, .btn-ghost) {
+		background-color: color-mix(in oklch, var(--color-on-surface) 10%, #0000);
+		box-shadow: none;
+	}
+
+	/* color variants */
+	@include m.seed-color-variants('btn', --btn-color, --btn-fg);
+
+	/* variant ghost */
+	.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked) {
+		--btn-shadow: ;
+		--btn-bg: #0000;
+		--btn-border: #0000;
+	}
+
+	.btn-ghost:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked):not(:disabled, [disabled], .btn-disabled) {
+		outline-color: currentColor;
+		--btn-fg: var(--btn-color, currentColor);
+	}
+
+	/* Ghost on touch screens */
+	@media (hover: none) {
+		.btn-ghost:not(.btn-active, :active, :focus-visible, input:checked):hover {
+			outline-color: currentColor;
+			--btn-shadow: ;
+			--btn-bg: #0000;
+			--btn-fg: var(--btn-color, currentColor);
+			--btn-border: #0000;
+		}
+	}
+
+	/* variant link */
+	.btn-link {
+		text-decoration: underline;
+		outline-color: currentColor;
+		--btn-border: #0000;
+		--btn-bg: #0000;
+		--btn-shadow: ;
+	}
+
+	.btn-link:not(.btn-disabled, .btn:disabled, .btn[disabled]) {
+		--btn-fg: var(--btn-color, var(--color-primary));
+	}
+
+	.btn-link:is(.btn-active, :hover, :active:focus, :focus-visible) {
+		--btn-border: #0000;
+		--btn-bg: #0000;
+	}
+
+	/* variant outline */
+	.btn-outline:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
+		--btn-shadow: ;
+		--btn-bg: #0000;
+		--btn-fg: var(--btn-color, var(--color-on-surface));
+		--btn-border: var(--btn-color, var(--color-on-surface));
+	}
+
+	@media (hover: none) {
+		.btn-outline:not(.btn-active, :active, :focus-visible, input:checked):hover {
+			--btn-shadow: ;
+			--btn-bg: #0000;
+			--btn-fg: var(--btn-color, var(--color-on-surface));
+			--btn-border: var(--btn-color, var(--color-on-surface));
+		}
+	}
+
+	/* variant dash */
+	.btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
+		--btn-shadow: ;
+		--btn-bg: #0000;
+		--btn-fg: var(--btn-color, var(--color-on-surface));
+		--btn-border: var(--btn-color, var(--color-on-surface));
+	}
+
+	.btn-dash {
+		border-style: dashed;
+	}
+
+	@media (hover: none) {
+		.btn-dash:not(.btn-active, :active, :focus-visible, input:checked):hover {
+			--btn-shadow: ;
+			--btn-bg: #0000;
+			--btn-fg: var(--btn-color, var(--color-on-surface));
+			--btn-border: var(--btn-color, var(--color-on-surface));
+		}
+	}
+
+	/* variant soft */
+	.btn-soft:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
+		--btn-shadow: ;
+		--btn-fg: var(--btn-color, var(--color-on-surface));
+		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+	}
+
+	@media (hover: none) {
+		.btn-soft:not(.btn-active, :active, :focus-visible, input:checked):hover {
+			--btn-shadow: ;
+			--btn-fg: var(--btn-color, var(--color-on-surface));
+			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+			--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+		}
+	}
+
+	/* size variants */
+	@include m.size-variants('btn', c.$sizes-all);
+
+	/* shape variants */
+	.btn-square {
+		padding-inline: 0;
+		width: var(--size);
+		height: var(--size);
+	}
+
+	.btn-circle {
+		padding-inline: 0;
+		width: var(--size);
+		height: var(--size);
+		border-radius: 9999px;
+	}
+
+	.btn-wide {
+		width: 100%;
+		max-width: 16rem;
+	}
+
+	.btn-block {
+		width: 100%;
+	}
+
+	/* ripple */
+	.btn-ripple {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.btn-ripple-wave {
+		position: absolute;
+		left: var(--ripple-x, 50%);
+		top: var(--ripple-y, 50%);
+		width: var(--ripple-size, 100%);
+		height: var(--ripple-size, 100%);
+		margin-left: calc(var(--ripple-size, 100%) / -2);
+		margin-top: calc(var(--ripple-size, 100%) / -2);
+		border-radius: 9999px;
+		background: currentColor;
+		opacity: 0.3;
+		transform: scale(0);
+		pointer-events: none;
+		animation: btn-ripple 0.55s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+	}
+
+	@keyframes btn-ripple {
+		to {
+			transform: scale(1);
+			opacity: 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.btn-ripple-wave {
+			display: none;
+		}
+	}
+
+	.btn {
+		--btn-bg: var(--btn-color, var(--color-surface-3));
+		--btn-fg: var(--color-on-surface);
+		--btn-border: transparent;
+		--btn-shadow: none;
+		font-weight: 500;
+		transition: background-color 0.12s, box-shadow 0.12s;
+	}
+
+	@media (hover: hover) {
+	.btn:not(:disabled, [disabled], .btn-disabled):hover {
+			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-3)), var(--color-on-surface) 8%);
+		}
+	}
+
+	.btn-surface {
+		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-neutral)) calc(var(--peony-tint, 1) * 6%), var(--color-surface-1));
+		--btn-fg: var(--btn-color, var(--color-on-surface));
+		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-neutral)) calc(var(--peony-tint, 1) * 22%), #0000);
+	}
+
+	.btn-classic {
+		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-neutral)) calc(var(--peony-tint, 1) * 10%), var(--color-surface-1));
+		--btn-fg: var(--btn-color, var(--color-on-surface));
+		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-neutral)) calc(var(--peony-tint, 1) * 20%), #0000);
+		box-shadow:
+			inset 0 -1px 0 0 color-mix(in oklab, var(--color-on-surface) 12%, #0000),
+			var(--shadow-light, );
+	}
+
+	/* peony: a plain button is a white object lifted off the page; a
+	   coloured one casts its own colour when --peony-glow allows it. */
+	.btn {
+		--shadow-tint: var(--btn-color);
+		--btn-bg: var(--btn-color, var(--color-surface-1));
+		--btn-shadow: var(--shadow-light, );
+		--light-depth: 0.6;
+		font-weight: 600;
+		transition: background-color 0.15s, box-shadow 0.2s, translate 0.2s;
+	}
+	@media (hover: hover) {
+		.btn:not(:disabled, [disabled], .btn-disabled, .btn-ghost, .btn-link):hover {
+			--light-depth: 1;
+			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-surface-1)), var(--color-on-surface) 6%);
+		}
+	}
+	.btn-soft:not(:disabled, [disabled], .btn-disabled) {
+		--btn-shadow: ;
+		--btn-fg: var(--btn-color, var(--color-on-surface));
+		--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) calc(var(--peony-tint, 1) * 14%), var(--color-surface-1));
+		--btn-border: #0000;
+	}
+	@media (hover: hover) {
+		.btn-soft:not(:disabled, [disabled], .btn-disabled):hover {
+			--btn-bg: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) calc(var(--peony-tint, 1) * 22%), var(--color-surface-1));
+		}
+	}
+	/* soft on a pastel: the pastel itself is too pale to read as ink */
+	.btn-soft:is(.btn-secondary, .btn-accent, .btn-info, .btn-success, .btn-warning) {
+		--btn-fg: color-mix(in oklab, var(--btn-color), var(--color-on-surface) 55%);
+	}
+	.btn-dash {
+		--btn-border: var(--color-border);
+		border-width: max(var(--border), 1.5px);
+	}
+	.btn-dash:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked, :disabled, [disabled], .btn-disabled) {
+		--btn-border: color-mix(in oklab, var(--btn-color, var(--color-on-surface)) 22%, #0000);
+	}
+	.btn-outline {
+		--btn-shadow: ;
+	}
+	/* re-seat the coloured inks after the plain-button reset above */
+	@include m.seed-color-variants('btn', --btn-color, --btn-fg);
+
+}

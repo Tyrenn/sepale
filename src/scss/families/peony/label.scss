@@ -1,0 +1,63 @@
+/* peony — label.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   label.scss — .label / .floating-label
+
+   External variables (theme / family):
+	--color-surface-1   floating label background (hides the field border)
+	--border           inline divider width inside .input / .select
+	--size-field       floating label vertical center position
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — inline label + prefix/suffix label inside fields.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.label {
+		display: inline-flex;
+		align-items: center;
+		white-space: nowrap;
+	}
+	.label:has(input) {
+		cursor: pointer;
+	}
+	/* Label inside .input or .select (prefix/suffix icon or text) */
+	.input > .label,
+		.select > .label {
+		display: flex;
+		align-items: center;
+		white-space: nowrap;
+	}
+}
+
+@mixin look {
+	.label {
+		gap: calc(0.375em * var(--scale));
+		color: color-mix(in oklch, currentColor 60%, #0000);
+	}
+	.input > .label,
+		.select > .label {
+		height: calc(100% - calc(0.5em * var(--scale)));
+		padding-inline: calc(0.75em * var(--scale));
+		font-size: inherit;
+	}
+	.input > .label:first-child,
+		.select > .label:first-child {
+		margin-inline-start: calc(-0.75em * var(--scale));
+		margin-inline-end: calc(0.75em * var(--scale));
+		border-inline-end: var(--border) solid color-mix(in oklab, currentColor 10%, #0000);
+	}
+	.input > .label:last-child,
+		.select > .label:last-child {
+		margin-inline-start: calc(0.75em * var(--scale));
+		margin-inline-end: calc(-0.75em * var(--scale));
+		border-inline-start: var(--border) solid color-mix(in oklab, currentColor 10%, #0000);
+	}
+}

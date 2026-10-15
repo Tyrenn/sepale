@@ -1,0 +1,144 @@
+@use '../../_mixins' as m;
+
+/* peony — textarea.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   textarea.scss — .textarea
+
+   Plumbing contract:
+	--input-color   resolved border/accent color (same as input.scss)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-{variant}       semantic accent (set by color-variants)
+	--border / --radius-field
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure: sizing, inner <textarea> handling, focus ring,
+   disabled state.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.textarea {
+		background-color: var(--color-surface-1);
+		border-radius: var(--radius-field);
+		flex-shrink: 1;
+		appearance: none;
+		vertical-align: middle;
+		touch-action: manipulation;
+		border-color: var(--input-color);
+		box-shadow: var(--shadow-light, );
+	}
+	.textarea textarea {
+		appearance: none;
+	}
+	.textarea:focus,
+		.textarea:focus-within {
+		--input-color: var(--color-on-surface);
+		isolation: isolate;
+	}
+	/* Increase font size on iOS to prevent auto-zoom on focus */
+	.textarea:has(> textarea[disabled]),
+		.textarea:is(:disabled, [disabled]) {
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
+		cursor: not-allowed;
+	}
+	.textarea:has(> textarea[disabled]) > textarea[disabled] {
+		cursor: not-allowed;
+	}
+}
+
+@mixin look {
+	.textarea {
+		/* The resting edge. Set here, before the colour variants, so they
+		   (and the validator) can still recolour it. */
+		--input-color: var(--color-border);
+		border: var(--border) solid var(--input-color, #0000);
+		min-height: calc(5em * var(--scale));
+		padding-block: calc(0.5em * var(--scale));
+		padding-inline-start: calc(0.75em * var(--scale));
+		padding-inline-end: calc(0.75em * var(--scale));
+		width: clamp(3rem, 20rem, 100%);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.textarea textarea {
+		background-color: transparent;
+		border: none;
+	}
+	.textarea textarea:focus,
+		.textarea textarea:focus-within {
+		outline: none;
+	}
+	.textarea:focus,
+		.textarea:focus-within {
+		outline: 2px solid var(--input-color);
+		outline-offset: 2px;
+	}
+	@media (pointer: coarse) {
+		@supports (-webkit-touch-callout: none) {
+		.textarea:focus,
+				.textarea:focus-within {
+		font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+	}
+	}
+	}
+	.textarea:has(> textarea[disabled]),
+		.textarea:is(:disabled, [disabled]) {
+		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
+		box-shadow: none;
+	}
+	.textarea:has(> textarea[disabled]) textarea::placeholder,
+		.textarea:is(:disabled, [disabled]) textarea::placeholder,
+		.textarea:has(> textarea[disabled])::placeholder,
+		.textarea:is(:disabled, [disabled])::placeholder {
+		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+	}
+
+	/* variant ghost */
+	.textarea-ghost {
+		background-color: transparent;
+		box-shadow: none;
+		border-color: #0000;
+	}
+
+	.textarea-ghost:focus,
+	.textarea-ghost:focus-within {
+		color: var(--color-on-surface);
+		background-color: var(--color-surface-1);
+		border-color: #0000;
+		box-shadow: none;
+	}
+
+	/* color variants */
+	@include m.field-color-variants('textarea');
+
+	/* size variants */
+	@include m.size-variants('textarea');
+
+	.textarea {
+		background-color: var(--color-surface-2);
+	}
+
+	.textarea:focus,
+	.textarea:focus-within {
+		--input-color: var(--color-primary);
+		box-shadow: 0 0 0 1px var(--color-primary);
+	}
+
+
+	/* peony: fields sit flat, edged by a hairline; only objects lift. */
+	:where(.input, .select, .textarea, .file-input) {
+		--light-intensity: 0;
+	}
+}

@@ -1,0 +1,25 @@
+/* Theme "cream" - warm paper page, white cards, a black button, pastel accents */
+:root {
+	color-scheme: light;
+	--color-page: #faf6f0;
+	--color-surface-1: #ffffff;
+	--color-surface-2: #f6f3ee;
+	--color-surface-3: #efebe5;
+	--color-surface-4: #e6e1da;
+	--color-border: #ece8e2;
+	--color-on-surface: #1d1d1f;
+	--color-primary: #161616;
+	--color-secondary: #f27ba5;
+	--color-accent: #fbc56c;
+	--color-neutral: #8b8681;
+	--color-info: #7fb8ec;
+	--color-success: #8fd16a;
+	--color-warning: #f8b84e;
+	--color-error: #ef5f78;
+	--radius-field: 0.625rem;
+	--radius-box: 1rem;
+	--radius-selector: 0.375rem;
+	--peony-shadow: 1;
+	--peony-glow: 0;
+	--peony-tint: 1;
+}

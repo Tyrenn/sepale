@@ -1,0 +1,117 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* peony — chip.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   chip.scss — .chip (small inline label)
+
+   Plumbing contract:
+	--chip-color  seed color (set by color-variants)
+	--chip-bg     resolved background color
+	--chip-fg     resolved text color
+	--size        chip height (1.6em, scales with font); padding derived
+	--fontsize    font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1 / --color-surface-2 / --color-on-surface
+	--color-{variant} / --color-on-{variant}  seed / text colors (color-variants)
+	--border / --radius-selector
+	--shadow-light          family shadow system
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure and paint plumbing (bg/fg/border from --chip-*).
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.chip {
+		--chip-bg: var(--chip-color, var(--color-surface-1));
+		--chip-fg: var(--color-on-surface);
+		border-radius: var(--radius-selector);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		vertical-align: middle;
+		color: var(--chip-fg);
+		background-color: var(--chip-bg);
+		height: var(--size);
+		box-shadow: var(--shadow-light, );
+	}
+}
+
+@mixin look {
+	.chip {
+		--size: calc(1.6em * var(--scale));
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		gap: calc(0.5em * var(--scale));
+		border: var(--border) solid var(--chip-color, var(--color-surface-2));
+		width: fit-content;
+		padding-inline: calc(var(--size) / 2 - var(--border));
+	}
+	.chip svg {
+		height: 1em;
+	}
+
+	/* variant outline */
+	.chip-outline {
+		color: var(--chip-color);
+		--chip-bg: #0000;
+		background-image: none;
+		border-color: currentColor;
+	}
+
+	/* variant dash */
+	.chip-dash {
+		color: var(--chip-color);
+		--chip-bg: #0000;
+		background-image: none;
+		border-color: currentColor;
+		border-style: dashed;
+	}
+
+	/* variant soft */
+	.chip-soft {
+		color: var(--chip-color, var(--color-on-surface));
+		background-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 8%, var(--color-surface-1));
+		border-color: color-mix(in oklab, var(--chip-color, var(--color-on-surface)) 10%, var(--color-surface-1));
+		background-image: none;
+	}
+
+	/* variant ghost */
+	.chip-ghost {
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
+		color: var(--color-on-surface);
+		background-image: none;
+	}
+
+	/* color variants */
+	@include m.seed-color-variants('chip', --chip-color, --chip-fg);
+
+	/* size variants */
+	@include m.size-variants('chip');
+
+	.chip {
+		background-color: color-mix(in oklab, var(--chip-color, var(--color-neutral)) calc(var(--peony-tint, 1) * 12%), var(--color-surface-1));
+		color: var(--chip-color, var(--color-on-surface));
+		border-color: transparent;
+		border-radius: var(--radius-selector);
+		font-weight: 500;
+	}
+
+
+	.chip {
+		--light-intensity: 0;
+		border-radius: 9999px;
+	}
+	.chip:is(.chip-secondary, .chip-accent, .chip-info, .chip-success, .chip-warning) {
+		color: color-mix(in oklab, var(--chip-color), var(--color-on-surface) 55%);
+	}
+}

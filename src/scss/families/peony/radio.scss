@@ -1,0 +1,147 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* peony — radio.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   radio.scss — .radio
+
+   Note: .radio does not consume --shadow-light — families that need
+   a shadow skin it directly.
+
+   Plumbing contract:
+	--input-color   border + dot color (set by color-variants)
+	--size          circle dimensions (1.5em × 1.5em, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        background when checked
+	--color-{variant}       accent color (color-variants)
+	--border
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure: circle, inner dot, focus ring, checked state,
+   forced-colors/print fallbacks, disabled, check animation.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.radio {
+		position: relative;
+		display: inline-block;
+		flex-shrink: 0;
+		cursor: pointer;
+		appearance: none;
+		vertical-align: middle;
+		width: var(--size);
+		height: var(--size);
+		color: var(--input-color, currentColor);
+	}
+	.radio::before {
+		--radio-mark: "";
+		content: var(--radio-mark);
+		display: block;
+		/* rounded-full */
+	}
+	.radio:checked,
+		.radio[aria-checked="true"] {
+		background-color: var(--color-surface-1);
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.radio:checked,
+			.radio[aria-checked="true"] {
+		animation: radio 0.2s ease-out;
+	}
+	}
+	.radio:disabled {
+		cursor: not-allowed;
+	}
+}
+
+@mixin look {
+	.radio {
+		--size: calc(1em * var(--scale)); /* Radix --checkbox-size size-2 is var(--space-4) = 16px. */
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		border-radius: 9999px;
+		padding: calc(0.15em * var(--scale));
+		border: var(--border) solid var(--input-color, color-mix(in srgb, currentColor 20%, #0000));
+	}
+	.radio::before {
+		width: 100%;
+		height: 100%;
+		border-radius: 9999px;
+	}
+	.radio:focus-visible {
+		outline: 2px solid currentColor;
+	}
+	.radio:checked,
+		.radio[aria-checked="true"] {
+		border-color: currentColor;
+	}
+	.radio:checked::before,
+		.radio[aria-checked="true"]::before {
+		background-color: currentColor;
+	}
+	@media (forced-colors: active) {
+		.radio:checked::before,
+			.radio[aria-checked="true"]::before {
+		outline-style: solid;
+		outline-offset: -0.25rem;
+	}
+	}
+	@media print {
+		.radio:checked::before,
+			.radio[aria-checked="true"]::before {
+		outline: 0.25rem solid;
+		outline-offset: -1rem;
+	}
+	}
+	.radio:disabled {
+		opacity: 0.2;
+	}
+	@keyframes radio {
+		0% {
+		padding: 5px;
+	}
+		50% {
+		padding: 3px;
+	}
+	}
+
+	/* variant square */
+	.radio-square {
+		border-radius: 0;
+	}
+
+	.radio-square::before {
+		border-radius: 0;
+	}
+
+	/* color variants */
+	@each $color in c.$color-list {
+		.radio-#{$color} { --input-color: var(--color-#{$color}); }
+	}
+
+	/* size variants */
+	@include m.size-variants('radio');
+
+	.radio-xl:is([type="radio"]) {
+		--size: calc(2em * var(--scale));
+	}
+
+	.radio {
+		--input-color: var(--color-border);
+	}
+
+	.radio:checked,
+	.radio[aria-checked='true'] {
+		--input-color: var(--color-primary);
+	}
+
+}

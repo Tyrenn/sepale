@@ -1,0 +1,300 @@
+@use '../../_mixins' as m;
+
+/* peony — select.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   select.scss — .select
+
+   Plumbing contract:
+	--input-color   resolved border/accent color (same as input.scss)
+	--size          field height (2.5em × --scale, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        field background
+	--color-surface-2        disabled background and border
+	--color-on-surface    default text color
+	--color-neutral / --color-on-neutral   active option highlight
+	--color-{variant}       semantic accent (set by color-variants)
+	--border                border width
+	--radius-field          field corner radius
+	--radius-box            picker dropdown corner radius
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure: layout, chevron, native <select> nesting,
+   picker dropdown (base-select), options, focus ring, disabled.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.select {
+		background-color: var(--color-surface-1);
+		position: relative;
+		display: inline-flex;
+		flex-shrink: 1;
+		appearance: none;
+		align-items: center;
+		vertical-align: middle;
+		height: var(--size);
+		touch-action: manipulation;
+		border-start-start-radius: var(--join-ss, var(--radius-field));
+		border-start-end-radius: var(--join-se, var(--radius-field));
+		border-end-start-radius: var(--join-es, var(--radius-field));
+		border-end-end-radius: var(--join-ee, var(--radius-field));
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		border-color: var(--input-color);
+		box-shadow: var(--shadow-light, );
+	}
+	.select[multiple] {
+		overflow: auto;
+	}
+	/* Native <select> nested inside the .select wrapper */
+	.select select {
+		appearance: none;
+		align-items: center;
+	}
+	.select:focus,
+		.select:focus-within {
+		--input-color: var(--color-on-surface);
+		isolation: isolate;
+	}
+	.select:has(> select[disabled]),
+		.select:is(:disabled, [disabled]),
+		fieldset:disabled .select {
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
+		cursor: not-allowed;
+	}
+	.select:has(> select[disabled]) > select[disabled] {
+		cursor: not-allowed;
+	}
+	/* base-select appearance support (modern browsers) */
+	.select,
+		.select select {
+		@supports (appearance: base-select) {
+		appearance: base-select;
+	}
+	}
+	.select::picker(select),
+		.select select::picker(select) {
+		border-radius: var(--radius-box);
+	}
+	@supports (appearance: base-select) {
+		.select::picker(select),
+			.select select::picker(select) {
+		appearance: base-select;
+	}
+	}
+	.select::picker-icon,
+		.select select::picker-icon {
+		display: none;
+	}
+	.select option,
+		.select select option {
+		border-radius: var(--radius-field);
+		white-space: normal;
+	}
+	.select option:not(:disabled):hover,
+		.select option:not(:disabled):focus-visible,
+		.select select option:not(:disabled):hover,
+		.select select option:not(:disabled):focus-visible {
+		cursor: pointer;
+	}
+	.select option:not(:disabled):active,
+		.select select option:not(:disabled):active {
+		background-color: var(--color-neutral);
+		color: var(--color-on-neutral);
+	}
+
+	/* ── Multiple choice ──
+	   A Select with `multiple` is drawn as a .select frame that opens a
+	   .list-suggestions of checkable rows (a native multi-select is a
+	   tall listbox). The list is `list`'s to paint; this only places it,
+	   and lets it out of the frame's clipping while it is open. */
+	.select:has(> .list-suggestions) {
+		overflow: visible;
+	}
+	.select > .list-suggestions {
+		position: absolute;
+		z-index: 10;
+		top: calc(100% + 0.25em);
+		left: 0;
+		min-width: 100%;
+		width: max-content;
+		max-width: max(100%, 40ch);
+		white-space: normal;
+		cursor: default;
+	}
+	.select > .list-suggestions > .list-row {
+		gap: 0.75em;
+	}
+}
+
+@mixin look {
+	:where(.select) {
+		width: unset;
+	}
+	.select {
+		--size: calc(2.5em * var(--scale));
+		/* The resting edge. Set here, before the colour variants, so they
+		   (and the validator) can still recolour it. */
+		--input-color: var(--color-border);
+		border: var(--border) solid var(--input-color, #0000);
+		gap: calc(0.375em * var(--scale));
+		padding-inline-start: calc(0.75em * var(--scale));
+		padding-inline-end: calc(1.75em * var(--scale));
+		width: clamp(3rem, 20rem, 100%);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		background-image: linear-gradient(45deg, #0000 50%, currentColor 50%),
+				linear-gradient(135deg, currentColor 50%, #0000 50%);
+		background-position: calc(100% - 20px) calc(1px + 50%),
+				calc(100% - 16.1px) calc(1px + 50%);
+		background-size: 4px 4px,
+				4px 4px;
+		background-repeat: no-repeat;
+	}
+	[dir="rtl"] .select {
+		background-position: calc(0% + 12px) calc(1px + 50%),
+				calc(0% + 16px) calc(1px + 50%);
+	}
+	.select[multiple] {
+		height: auto;
+		padding-block: calc(0.75em * var(--scale));
+		padding-inline-end: calc(0.75em * var(--scale));
+		background-image: none;
+	}
+	.select select {
+		margin-inline-start: calc(-0.75em * var(--scale));
+		margin-inline-end: calc(-1.75em * var(--scale));
+		width: calc(100% + 2.5em * var(--scale));
+		padding-inline-start: calc(0.75em * var(--scale));
+		padding-inline-end: calc(1.75em * var(--scale));
+		height: calc(100% - calc(var(--border) * 2));
+		background: inherit;
+		border-radius: inherit;
+		border-style: none;
+	}
+	.select select:focus,
+		.select select:focus-within {
+		outline: none;
+	}
+	.select select:not(:last-child) {
+		margin-inline-end: calc(-1.375em * var(--scale));
+		background-image: none;
+	}
+	.select:focus,
+		.select:focus-within {
+		outline: 2px solid var(--input-color);
+		outline-offset: 2px;
+	}
+	.select:has(> select[disabled]),
+		.select:is(:disabled, [disabled]),
+		fieldset:disabled .select {
+		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
+	}
+	.select:has(> select[disabled]) select::placeholder,
+		.select:is(:disabled, [disabled]) select::placeholder {
+		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+	}
+	.select::picker(select),
+		.select select::picker(select) {
+		color: inherit;
+		max-height: min(24rem, 70dvh);
+		margin-inline: calc(0.5em * var(--scale));
+		translate: calc(-0.5em * var(--scale)) 0;
+		border: var(--border) solid var(--color-surface-2);
+		margin-block: calc(0.5em * var(--scale));
+		padding: calc(0.5em * var(--scale));
+		background-color: inherit;
+		box-shadow: 0 20px 25px -5px rgb(0 0 0 / calc(var(--depth) * 0.1)),
+				0 8px 10px -6px rgb(0 0 0 / calc(var(--depth) * 0.1));
+	}
+	[dir="rtl"] .select::picker(select),
+		[dir="rtl"] .select select::picker(select) {
+		translate: calc(0.5em * var(--scale)) 0;
+	}
+	.select optgroup,
+		.select select optgroup {
+		padding-top: calc(0.5em * var(--scale));
+	}
+	.select optgroup option:nth-child(1),
+		.select select optgroup option:nth-child(1) {
+		margin-top: calc(0.5em * var(--scale));
+	}
+	.select option,
+		.select select option {
+		padding-inline: calc(0.75em * var(--scale));
+		padding-block: calc(0.375em * var(--scale));
+		transition-property: color, background-color;
+		transition-duration: 0.2s;
+		transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+	}
+	.select option:not(:disabled):hover,
+		.select option:not(:disabled):focus-visible,
+		.select select option:not(:disabled):hover,
+		.select select option:not(:disabled):focus-visible {
+		background-color: color-mix(in oklch, var(--color-on-surface) 10%, #0000);
+		outline: none;
+	}
+	.select option:not(:disabled):active,
+		.select select option:not(:disabled):active {
+		box-shadow: 0 2px calc(var(--depth) * 3px) -2px var(--color-neutral);
+	}
+
+	/* variant ghost */
+	.select-ghost {
+		background-color: transparent;
+		transition: background-color 0.2s;
+		box-shadow: none;
+		border-color: #0000;
+	}
+
+	.select-ghost:focus,
+	.select-ghost:focus-within {
+		color: var(--color-on-surface);
+		background-color: var(--color-surface-1);
+		border-color: #0000;
+		box-shadow: none;
+	}
+
+	/* color variants */
+	@include m.field-color-variants('select');
+
+	/* size variants */
+	@include m.size-variants('select');
+
+	.select-xl option,
+	.select-xl select option {
+		padding-inline: calc(1.25em * var(--scale));
+		padding-block: calc(0.375em * var(--scale));
+	}
+
+	.select {
+		background-color: var(--color-surface-2);
+	}
+
+	.select:focus,
+	.select:focus-within {
+		--input-color: var(--color-primary);
+		box-shadow: 0 0 0 1px var(--color-primary);
+	}
+
+
+	/* peony: fields sit flat, edged by a hairline; only objects lift. */
+	:where(.input, .select, .textarea, .file-input) {
+		--light-intensity: 0;
+	}
+}

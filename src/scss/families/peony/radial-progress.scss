@@ -1,0 +1,111 @@
+@use '../../_mixins' as m;
+
+/* peony — radial-progress.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   radial-progress.scss — .radial-progress
+
+   User-set variables (provided in HTML style or CSS):
+	--value       progress value 0–100 (required)
+	--size        ring diameter (default: 5em, scales with font)
+	--thickness   ring stroke width (default: --size / 10)
+
+   Internal variables:
+	--radialprogress   computed from --value (animated CSS property)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — conic ring + rounded cap.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.radial-progress {
+		position: relative;
+		display: inline-grid;
+		height: var(--size);
+		width: var(--size);
+		place-content: center;
+		vertical-align: middle;
+		box-sizing: content-box;
+	}
+	.radial-progress::before {
+		content: "";
+		position: absolute;
+		-webkit-mask: radial-gradient(
+				farthest-side,
+				#0000 calc(100% - var(--thickness)),
+				#000 calc(100% + 0.5px - var(--thickness))
+			);
+		mask: radial-gradient(
+				farthest-side,
+				#0000 calc(100% - var(--thickness)),
+				#000 calc(100% + 0.5px - var(--thickness))
+			);
+	}
+	.radial-progress::after {
+		content: "";
+		position: absolute;
+		transform: rotate(calc(var(--value) * 3.6deg - 90deg)) translate(calc(var(--size) / 2 - 50%));
+	}
+}
+
+@mixin look {
+	.radial-progress {
+		--value: 0;
+		--size: calc(5em * var(--scale));
+		--thickness: calc(var(--size) / 10);
+		--radialprogress: calc(var(--value) * 1%);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		border-radius: 9999px;
+		background-color: transparent;
+		transition: --radialprogress 0.3s linear;
+	}
+	.radial-progress::before {
+		inset: 0;
+		border-radius: 9999px;
+		background: radial-gradient(farthest-side, currentColor 98%, #0000) top / var(--thickness) var(--thickness) no-repeat,
+				conic-gradient(var(--ring) var(--radialprogress), #0000 0);
+	}
+	.radial-progress::after {
+		border-radius: 9999px;
+		background-color: currentColor;
+		inset: calc(50% - var(--thickness) / 2);
+		transition: transform 0.3s linear;
+	}
+
+	/* size variants */
+	@include m.size-variants('radial-progress');
+
+	.radial-progress {
+		/* The ring is painted from --ring so the label keeps a readable
+		   colour of its own. */
+		--ring: var(--color-primary);
+		color: var(--color-on-surface);
+	}
+
+	/* The ring is this family's progress bar bent into a circle: same track,
+	   same fill, same thickness (progress.scss holds the flat version). */
+	.radial-progress {
+		--thickness: calc(0.5em * var(--scale));
+		/* The ring is painted from --ring so the label keeps a readable
+		   colour of its own. */
+		--ring: var(--color-primary);
+		color: var(--color-on-surface);
+	}
+
+	.radial-progress::before {
+		background: radial-gradient(farthest-side, var(--ring) 98%, #0000) top / var(--thickness)
+				var(--thickness) no-repeat,
+			conic-gradient(var(--ring) var(--radialprogress), var(--color-surface-4) 0);
+	}
+
+	.radial-progress::after {
+		background-color: var(--ring);
+	}
+}

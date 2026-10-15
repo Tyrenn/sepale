@@ -1,0 +1,156 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* peony — swatch.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   swatch.scss — .swatch (a sample of one colour)
+
+   A swatch shows a colour, and optionally a letter or a short label
+   drawn on it. The colour is DATA, not a theme value: the author
+   passes it at the call site, the family never writes it.
+
+	<span class="swatch" style="--swatch-color:#1677ff">A</span>
+	<button class="swatch swatch-active" style="--swatch-color:#0000"></button>
+
+   A transparent colour must read as transparent, so the sample is
+   painted as a flat layer over a checkerboard the family supplies in
+   `--swatch-checks`.
+
+   What is written on it is an on-color: a family derives
+   `--swatch-on-color` from `--swatch-color` the same way
+   `--color-on-*` is derived from a surface, so a letter stays legible
+   on a colour nobody knew at authoring time.
+
+   Plumbing contract:
+	--swatch-color        the sample itself (author-set, required)
+	--swatch-on-color     what is drawn on it (family-derived)
+	--swatch-size         width and height
+	--swatch-radius       corner radius
+	--swatch-border / --swatch-border-width
+	--swatch-shadow
+	--swatch-checks       the transparency checkerboard behind the colour —
+	                      the family writes the image AND its background-size,
+	                      since one layer of it is one value
+	--fontsize            font size (set by size-variants classes)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — the sample, its label, and the interactive states.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.swatch {
+		display: inline-grid;
+		place-items: center;
+		box-sizing: border-box;
+		width: var(--swatch-size);
+		height: var(--swatch-size);
+		padding: 0;
+		border: var(--swatch-border-width) solid var(--swatch-border);
+		border-radius: var(--swatch-radius);
+		box-shadow: var(--swatch-shadow);
+		color: var(--swatch-on-color);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		line-height: 1;
+		vertical-align: middle;
+		user-select: none;
+		overflow: hidden;
+		/* The colour is a flat layer of its own so the checkerboard below it
+		   shows through exactly as much as the colour is transparent. */
+		background-color: transparent;
+		background-image: linear-gradient(var(--swatch-color), var(--swatch-color)),
+			var(--swatch-checks);
+		transition: var(--swatch-transition);
+	}
+
+	:is(a, button, label).swatch,
+	.swatch:is([role="button"], [tabindex]) {
+		cursor: pointer;
+	}
+
+	.swatch:focus-visible {
+		outline: var(--swatch-focus-outline);
+		outline-offset: var(--swatch-focus-offset);
+	}
+
+	.swatch:is(:disabled, [disabled], .swatch-disabled) {
+		pointer-events: none;
+		opacity: var(--swatch-disabled-opacity);
+	}
+
+	/* An <input type="color"> can be a swatch too: its own chrome is removed
+	   so the element paints from the slots like any other. */
+	input[type="color"].swatch {
+		appearance: none;
+		-webkit-appearance: none;
+	}
+	input[type="color"].swatch::-webkit-color-swatch-wrapper {
+		padding: 0;
+	}
+	input[type="color"].swatch::-webkit-color-swatch {
+		border: none;
+		border-radius: inherit;
+	}
+	input[type="color"].swatch::-moz-color-swatch {
+		border: none;
+		border-radius: inherit;
+	}
+}
+
+@mixin look {
+	.swatch {
+		--swatch-color: var(--color-surface-1);
+		--swatch-size: calc(2em * var(--scale));
+		--swatch-disabled-opacity: 0.4;
+		--swatch-focus-outline: 2px solid currentColor;
+		--swatch-focus-offset: 2px;
+
+		/* Same flip as --color-on-*: a light sample gets near-black, a dark one
+		   near-white, keeping a whisper of the sample's own hue. */
+		--swatch-on-color: oklch(
+			from var(--swatch-color) clamp(0.145, (0.66 - l) * 999, 0.97) min(c, 0.03) h
+		);
+
+		/* Two crossed quarters make the checkerboard; the colour layer sits on
+		   top, so a semi-transparent sample lets it through. */
+		--swatch-checks: conic-gradient(
+			from 90deg,
+			var(--color-surface-3) 25%,
+			var(--color-surface-2) 0 50%,
+			var(--color-surface-3) 0 75%,
+			var(--color-surface-2) 0
+		);
+		background-size: auto, calc(0.5em * var(--scale)) calc(0.5em * var(--scale));
+		font-weight: 600;
+		--swatch-radius: var(--radius-field);
+		--swatch-border-width: 0;
+		--swatch-border: #0000;
+		--swatch-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-on-surface) 12%, #0000);
+		--swatch-transition: box-shadow 0.12s;
+	}
+
+	.swatch-active {
+		--swatch-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-on-surface) 12%, #0000),
+			0 0 0 2px var(--color-surface-1), 0 0 0 4px var(--color-primary);
+	}
+
+	.swatch-circle {
+		--swatch-radius: 999px;
+	}
+
+	@each $color in c.$color-list {
+		.swatch-#{$color} {
+			--swatch-color: var(--color-#{$color});
+		}
+	}
+
+	/* size variants */
+	@include m.size-variants('swatch');
+}

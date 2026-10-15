@@ -1,0 +1,242 @@
+@use '../../_mixins' as m;
+
+/* peony — input.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   input.scss — .input
+
+   Plumbing contract:
+	--input-color   resolved border/accent color — structure defaults it to a
+	                faint on-surface mix, color-variants override it,
+	                focus resets it to on-surface
+	--size          field height (2.5em × --scale, scales with font)
+	--fontsize      font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        field background
+	--color-surface-2        disabled background and border
+	--color-on-surface    default text color
+	--color-{variant}       semantic accent (set by color-variants)
+	--border                border width
+	--radius-field          field corner radius
+	--depth                 flat-skin inset intensity (skin-flat only)
+	--shadow-light          family shadow system
+
+   Join integration (set by join.scss when nested in .join):
+	--join-ss / --join-se / --join-es / --join-ee  per-corner radii
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — structure shared by all families: layout, intrinsic
+   sizing, border/outline plumbing, inner <input> handling, focus
+   ring, disabled state. Box-shadow defaults to the family shadow;
+   skins provide the actual surface recipe.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.input {
+		cursor: text;
+		display: inline-flex;
+		flex-shrink: 1;
+		appearance: none;
+		align-items: center;
+		vertical-align: middle;
+		white-space: nowrap;
+		position: relative;
+		background-color: var(--color-surface-1);
+		height: var(--size);
+		touch-action: manipulation;
+		border-start-start-radius: var(--join-ss, var(--radius-field));
+		border-start-end-radius: var(--join-se, var(--radius-field));
+		border-end-start-radius: var(--join-es, var(--radius-field));
+		border-end-end-radius: var(--join-ee, var(--radius-field));
+		border-color: var(--input-color);
+		box-shadow: var(--shadow-light, );
+	}
+	.input:where(input) {
+		display: inline-flex;
+	}
+	.input :where(input) {
+		display: inline-flex;
+		appearance: none;
+	}
+	.input :where(input[type="url"]),
+		.input :where(input[type="email"]) {
+		direction: ltr;
+	}
+	.input :where(input[type="date"]) {
+		display: inline-flex;
+	}
+	.input:focus,
+		.input:focus-within {
+		--input-color: var(--color-on-surface);
+		isolation: isolate;
+	}
+	/* Increase font size on iOS to prevent auto-zoom on focus */
+	.input:has(> input[disabled]),
+		.input:is(:disabled, [disabled]),
+		fieldset:disabled .input {
+		border-color: var(--color-surface-2);
+		background-color: var(--color-surface-2);
+		cursor: not-allowed;
+	}
+	.input:has(> input[disabled]) > input[disabled] {
+		cursor: not-allowed;
+	}
+	.input::-webkit-date-and-time-value {
+		text-align: inherit;
+	}
+	.input::-webkit-calendar-picker-indicator {
+		position: absolute;
+	}
+	.input:has(> input[type="date"]) :where(input[type="date"]) {
+		display: inline-flex;
+		-webkit-appearance: none;
+		appearance: none;
+	}
+	.input:has(> input[type="date"]) input[type="date"]::-webkit-calendar-picker-indicator {
+		position: absolute;
+		cursor: pointer;
+	}
+
+	/* ── Suggestions ──
+	   The Input wrapper's `suggest` hangs a .list-suggestions under the
+	   field. The list is `list`'s to paint; this only places it, inside
+	   the frame (.input is already position: relative). A floating list
+	   is placed by the component instead, with inline fixed coordinates. */
+	.input > .list-suggestions {
+		position: absolute;
+		z-index: 10;
+		top: calc(100% + 0.25em);
+		left: 0;
+		min-width: 100%;
+		width: max-content;
+		max-width: max(100%, 40ch);
+		white-space: normal;
+		overflow-wrap: anywhere;
+		cursor: default;
+	}
+
+	/* ── Flag: nospinner ── a number field without its step arrows. */
+	.input-nospinner:is([type="number"]),
+	.input-nospinner input[type="number"] {
+		appearance: textfield;
+		-moz-appearance: textfield;
+	}
+	.input-nospinner:is([type="number"])::-webkit-inner-spin-button,
+	.input-nospinner:is([type="number"])::-webkit-outer-spin-button,
+	.input-nospinner input[type="number"]::-webkit-inner-spin-button,
+	.input-nospinner input[type="number"]::-webkit-outer-spin-button {
+		appearance: none;
+		margin: 0;
+	}
+}
+
+@mixin look {
+	:where(.input) {
+		width: unset;
+	}
+	.input {
+		--size: calc(2.5em * var(--scale));
+		/* The resting edge. Set here, before the colour variants, so they
+		   (and the validator) can still recolour it. */
+		--input-color: var(--color-border);
+		gap: calc(0.5em * var(--scale));
+		padding-inline: calc(0.5em * var(--scale)); /* Radix --text-field-padding: var(--space-2) */
+		width: clamp(3rem, 20rem, 100%);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		border: var(--border) solid var(--input-color, #0000);
+	}
+	.input :where(input) {
+		height: 100%;
+		width: 100%;
+		background-color: transparent;
+		border: none;
+	}
+	.input :where(input):focus,
+		.input :where(input):focus-within {
+		outline: none;
+	}
+	.input:focus,
+		.input:focus-within {
+		outline: 2px solid var(--input-color);
+		outline-offset: 2px;
+	}
+	@media (pointer: coarse) {
+		@supports (-webkit-touch-callout: none) {
+		.input:focus,
+				.input:focus-within {
+		font-size: max(var(--fontsize, var(--base, var(--default-base))), 1rem);
+	}
+	}
+	}
+	.input:has(> input[disabled]),
+		.input:is(:disabled, [disabled]),
+		fieldset:disabled .input {
+		color: color-mix(in oklch, var(--color-on-surface) 40%, #0000);
+		box-shadow: none;
+	}
+	.input:has(> input[disabled]) input::placeholder,
+		.input:is(:disabled, [disabled]) input::placeholder,
+		fieldset:disabled .input input::placeholder,
+		.input:has(> input[disabled])::placeholder,
+		.input:is(:disabled, [disabled])::placeholder,
+		fieldset:disabled .input::placeholder {
+		color: color-mix(in oklch, var(--color-on-surface) 20%, #0000);
+	}
+	.input[type="number"]::-webkit-inner-spin-button {
+		margin-block: calc(-0.75em * var(--scale));
+		margin-inline-end: calc(-0.75em * var(--scale));
+	}
+	.input::-webkit-calendar-picker-indicator {
+		inset-inline-end: calc(0.75em * var(--scale));
+	}
+	.input:has(> input[type="date"]) input[type="date"]::-webkit-calendar-picker-indicator {
+		inset-inline-end: calc(0.75em * var(--scale));
+		width: 1em;
+		height: 1em;
+	}
+
+	/* variant ghost */
+	.input-ghost {
+		background-color: transparent;
+		box-shadow: none;
+		border-color: #0000;
+	}
+
+	.input-ghost:focus,
+	.input-ghost:focus-within {
+		color: var(--color-on-surface);
+		background-color: var(--color-surface-1);
+		border-color: #0000;
+		box-shadow: none;
+	}
+
+	/* color variants */
+	@include m.field-color-variants('input');
+
+	/* size variants */
+	@include m.size-variants('input');
+
+	.input {
+		background-color: var(--color-surface-2);
+	}
+
+	.input:focus,
+	.input:focus-within {
+		--input-color: var(--color-primary);
+		box-shadow: 0 0 0 1px var(--color-primary);
+	}
+
+
+	/* peony: fields sit flat, edged by a hairline; only objects lift. */
+	:where(.input, .select, .textarea, .file-input) {
+		--light-intensity: 0;
+	}
+}

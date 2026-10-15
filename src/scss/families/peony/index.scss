@@ -1,0 +1,237 @@
+@use 'sass:map';
+@use '../../params';
+@use 'root';
+@use 'avatar';
+@use 'badge';
+@use 'bubble';
+@use 'breadcrumbs';
+@use 'calendar';
+@use 'card';
+@use 'carousel';
+@use 'button';
+@use 'checkbox';
+@use 'chip';
+@use 'dock';
+@use 'fieldset';
+@use 'floating-label';
+@use 'file-input';
+@use 'input';
+@use 'join';
+@use 'label';
+@use 'link';
+@use 'list';
+@use 'loading';
+@use 'menu';
+@use 'navbar';
+@use 'pagination';
+@use 'progress';
+@use 'radial-progress';
+@use 'radio';
+@use 'range';
+@use 'select';
+@use 'skeleton';
+@use 'stat';
+@use 'swatch';
+@use 'tabs';
+@use 'text';
+@use 'textarea';
+@use 'toggle';
+@use 'validator';
+@use 'dialog';
+@use 'dropdown';
+@use 'table';
+@use 'grid';
+@use 'data-control';
+
+
+
+/* ============================================================
+   STYLE FAMILY — « peony »  (soft SaaS dashboard)
+
+   A peony is a heavy, rounded flower that sits in a vase on a
+   desk. The look is the friendly dashboard of the 2020s: a warm
+   tinted page, white cards floating on it, no hairlines but a
+   wide diffuse shadow, generous corners, muted secondary text,
+   and colour used in pale washes — the icon on a tinted disc,
+   the active tab on a soft pill, the status as a dot.
+
+   What it departs from:
+     - dahlia separates by stacking grounds; peony separates by
+       LIFTING: a card is white on a tinted page and its edge is a
+       shadow, not a border.
+     - The page has its own colour, `--color-page`, distinct from
+       the white of the objects resting on it. Fields, cards and
+       menus stay on `--color-surface-1`.
+     - The primary is a colour like any other; the default theme
+       makes it near-black, the way these dashboards draw their one
+       loud button.
+
+   Own parameters:
+     - `peony-shadow`  how far the shadow spreads (0 = flat).
+     - `peony-glow`    how much the shadow takes the element's own
+                       colour instead of grey (0 grey, 1 coloured).
+     - `peony-tint`    strength of the pale washes (soft variants,
+                       active tabs and menu items, chips).
+
+   Build: static/families/peony.css via `npm run build:css`.
+   ============================================================ */
+
+
+$params: map.merge(
+	params.colors((
+		'color-page': #faf6f0,
+		'color-surface-1': #ffffff,
+		'color-surface-2': #f6f3ee,
+		'color-surface-3': #efebe5,
+		'color-surface-4': #e6e1da,
+		'color-border': #ece8e2,
+		'color-on-surface': #1d1d1f,
+		'color-primary': #161616,
+		'color-secondary': #f27ba5,
+		'color-accent': #fbc56c,
+		'color-neutral': #8b8681,
+		'color-info': #7fb8ec,
+		'color-success': #8fd16a,
+		'color-warning': #f8b84e,
+		'color-error': #ef5f78
+	)),
+	(
+		'radius-field': (
+			label: 'Field radius', group: 'Shape', type: length,
+			default: 0.625rem, min: 0, max: 1.5, step: 0.025, unit: rem, units: (px rem em),
+			help: 'Buttons, inputs, selects. Soft, never sharp.'
+		),
+		'radius-box': (
+			label: 'Box radius', group: 'Shape', type: length,
+			default: 1rem, min: 0, max: 2.5, step: 0.05, unit: rem, units: (px rem em),
+			help: 'Cards, menus, dialogs — the big rounded panels.'
+		),
+		'radius-selector': (
+			label: 'Selector radius', group: 'Shape', type: length,
+			default: 0.375rem, min: 0, max: 1.5, step: 0.025, unit: rem, units: (px rem em),
+			help: 'Checkboxes, toggles, chips and tabs.'
+		),
+		'border': (
+			label: 'Hairline width', group: 'Shape', type: length,
+			default: 1px, min: 0, max: 3, step: 0.5, unit: px, units: (px rem em),
+			help: 'Field outlines. Cards draw none: their edge is the shadow.'
+		),
+		'scale': (
+			label: 'Element size', group: 'Size', type: number,
+			default: 1, min: 0.75, max: 2, step: 0.05,
+			help: 'Grows every frame — paddings, heights, spacing. Text is unaffected.'
+		),
+		'peony-shadow': (
+			label: 'Shadow spread', group: 'Effects', type: number,
+			default: 1, min: 0, max: 3, step: 0.1,
+			help: 'How wide and soft the lift is. 0 flattens everything onto the page.'
+		),
+		'peony-glow': (
+			label: 'Coloured shadow', group: 'Effects', type: number,
+			default: 0, min: 0, max: 1, step: 0.05,
+			help: 'How much a coloured element casts its own colour instead of grey.'
+		),
+		'peony-tint': (
+			label: 'Wash strength', group: 'Effects', type: number,
+			default: 1, min: 0, max: 3, step: 0.1,
+			help: 'How strong the pale washes are: soft buttons, chips, active tabs.'
+		)
+	)
+);
+
+@include params.emit($params);
+
+/* Family-owned: separation by lifting, not by stacking. */
+:root {
+	--depth: 0;
+	--light-intensity: 1;
+	--light-depth: 1;
+}
+
+/* The structure of every component first, then the look of every
+   component: a look always comes later in the cascade than any
+   structure, whichever file it sits in. */
+@include avatar.structure;
+@include badge.structure;
+@include bubble.structure;
+@include breadcrumbs.structure;
+@include button.structure;
+@include calendar.structure;
+@include card.structure;
+@include carousel.structure;
+@include checkbox.structure;
+@include chip.structure;
+@include dock.structure;
+@include fieldset.structure;
+@include floating-label.structure;
+@include file-input.structure;
+@include input.structure;
+@include join.structure;
+@include label.structure;
+@include link.structure;
+@include list.structure;
+@include loading.structure;
+@include menu.structure;
+@include navbar.structure;
+@include pagination.structure;
+@include progress.structure;
+@include radial-progress.structure;
+@include radio.structure;
+@include range.structure;
+@include select.structure;
+@include skeleton.structure;
+@include stat.structure;
+@include swatch.structure;
+@include tabs.structure;
+@include text.structure;
+@include textarea.structure;
+@include toggle.structure;
+@include validator.structure;
+@include dialog.structure;
+@include dropdown.structure;
+@include table.structure;
+@include grid.structure;
+@include data-control.structure;
+
+/* What peony decides, one file per component. */
+
+@include avatar.look;
+@include badge.look;
+@include bubble.look;
+@include breadcrumbs.look;
+@include calendar.look;
+@include card.look;
+@include carousel.look;
+@include button.look;
+@include checkbox.look;
+@include chip.look;
+@include dock.look;
+@include fieldset.look;
+@include floating-label.look;
+@include file-input.look;
+@include input.look;
+@include label.look;
+@include link.look;
+@include list.look;
+@include loading.look;
+@include menu.look;
+@include navbar.look;
+@include pagination.look;
+@include progress.look;
+@include radial-progress.look;
+@include radio.look;
+@include range.look;
+@include select.look;
+@include skeleton.look;
+@include stat.look;
+@include swatch.look;
+@include tabs.look;
+@include text.look;
+@include textarea.look;
+@include toggle.look;
+@include validator.look;
+@include dialog.look;
+@include dropdown.look;
+@include table.look;
+@include grid.look;
+@include data-control.look;

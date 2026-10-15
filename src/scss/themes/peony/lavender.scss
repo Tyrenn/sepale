@@ -1,0 +1,25 @@
+/* Theme "lavender" - lilac page, violet primary, orange accent, coloured shadows */
+:root {
+	color-scheme: light;
+	--color-page: #f3eefc;
+	--color-surface-1: #ffffff;
+	--color-surface-2: #f7f4fd;
+	--color-surface-3: #eee8fa;
+	--color-surface-4: #e3dbf5;
+	--color-border: #ebe5f7;
+	--color-on-surface: #1f1b2d;
+	--color-primary: #9b6fd6;
+	--color-secondary: #c69cf0;
+	--color-accent: #f5873a;
+	--color-neutral: #8c86a0;
+	--color-info: #6fa8f5;
+	--color-success: #5cc98a;
+	--color-warning: #f5a43a;
+	--color-error: #ee5d6c;
+	--radius-field: 0.75rem;
+	--radius-box: 1.25rem;
+	--radius-selector: 0.5rem;
+	--peony-shadow: 1.3;
+	--peony-glow: 0.8;
+	--peony-tint: 1.2;
+}

@@ -1,0 +1,213 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* peony — range.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   range.scss — .range (slider input)
+
+   Note: the thumb box-shadow recipe stays in `structure` — it implements
+   the track-fill trick (a 100cqw shadow cast from the thumb) and
+   cannot be split from the look. Its depth-gated lines are inert
+   when the family sets --depth: 0.
+
+   Plumbing contract:
+	--range-thumb         thumb background color
+	--range-thumb-size    thumb diameter (1.5em, scales with font)
+	--range-progress      track fill color (currentColor by default)
+	--range-fill          1 = fill track before thumb, 0 = no fill
+	--range-p             thumb border / padding (0.25em)
+	--range-bg            empty track color
+	--range-dir           RTL direction multiplier (-1 when [dir="rtl"])
+	--radius-selector-max workaround for PostCSS/Nuxt calc(min(calc())) error
+	--fontsize            font size (set by size-variants classes)
+
+   External variables (theme / family):
+	--color-surface-1        default thumb background
+	--color-{variant} / --color-on-{variant}  track / thumb colors (color-variants)
+	--radius-selector       thumb and track corner radius
+	--depth                 shadow intensity multiplier
+	--shadow-light          family shadow system
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — the whole slider: track, thumb (with the fill-shadow
+   trick), focus, disabled.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.range {
+		--range-thumb: var(--color-surface-1);
+		/* Separate variable to avoid PostCSS/Nuxt build error with calc(min(calc())) */
+		appearance: none;
+		-webkit-appearance: none;
+		cursor: pointer;
+		overflow: hidden;
+		vertical-align: middle;
+		height: var(--range-thumb-size);
+	}
+	/* Track — WebKit */
+	.range::-webkit-slider-runnable-track {
+		background-color: var(--range-bg);
+		border-radius: var(--radius-selector);
+	}
+	/* Thumb — WebKit */
+	.range::-webkit-slider-thumb {
+		position: relative;
+		box-sizing: border-box;
+		background-color: var(--range-thumb);
+		height: var(--range-thumb-size);
+		width: var(--range-thumb-size);
+		appearance: none;
+		-webkit-appearance: none;
+		color: var(--range-progress);
+		transform: translateY(-50%);
+	}
+	/* Track — Firefox */
+	.range::-moz-range-track {
+		background-color: var(--range-bg);
+		border-radius: var(--radius-selector);
+	}
+	/* Thumb — Firefox */
+	.range::-moz-range-thumb {
+		position: relative;
+		box-sizing: border-box;
+		height: var(--range-thumb-size);
+		width: var(--range-thumb-size);
+		color: var(--range-progress);
+	}
+	.range:disabled {
+		cursor: not-allowed;
+	}
+}
+
+@mixin look {
+	.range {
+		--range-thumb-size: calc(1.5em * var(--scale));
+		--range-progress: currentColor;
+		--range-fill: 1;
+		--range-p: calc(0.25em * var(--scale));
+		--range-bg: color-mix(in oklab, currentColor 10%, #0000);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		--radius-selector-max: calc(
+				var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
+			);
+		background-color: transparent;
+		width: clamp(3rem, 20rem, 100%);
+		border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+		border: none;
+	}
+	[dir="rtl"] .range {
+		--range-dir: -1;
+	}
+	.range:focus {
+		outline: none;
+	}
+	.range:focus-visible {
+		outline: 2px solid;
+		outline-offset: 2px;
+	}
+	.range::-webkit-slider-runnable-track {
+		width: 100%;
+		height: calc(var(--range-thumb-size) * 0.5);
+	}
+	@media (forced-colors: active) {
+		.range::-webkit-slider-runnable-track {
+		border: 1px solid;
+	}
+	}
+	.range::-webkit-slider-thumb {
+		border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+		border: var(--range-p) solid;
+		top: 50%;
+		box-shadow: 0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset,
+				0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+				0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000),
+				0 0 0 2rem var(--range-thumb) inset,
+				calc((var(--range-dir, 1) * -100cqw) - (var(--range-dir, 1) * (var(--range-thumb-size) + var(--range-halo, 0px))))
+					0 0 calc(100cqw * var(--range-fill)),
+				var(--shadow-light, );
+	}
+	.range::-moz-range-track {
+		width: 100%;
+		height: calc(var(--range-thumb-size) * 0.5);
+	}
+	@media (forced-colors: active) {
+		.range::-moz-range-track {
+		border: 1px solid;
+	}
+	}
+	.range::-moz-range-thumb {
+		border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
+		background-color: currentColor;
+		border: var(--range-p) solid;
+		top: 50%;
+		box-shadow: 0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset,
+				0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset,
+				0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000),
+				0 0 0 2rem var(--range-thumb) inset,
+				calc((var(--range-dir, 1) * -100cqw) - (var(--range-dir, 1) * (var(--range-thumb-size) + var(--range-halo, 0px))))
+					0 0 calc(100cqw * var(--range-fill)),
+				var(--shadow-light, );
+	}
+	.range:disabled {
+		opacity: 0.3;
+	}
+
+	/* color variants */
+	@each $color in c.$color-list {
+		.range-#{$color} {
+			color: var(--color-#{$color});
+			--range-thumb: var(--color-on-#{$color});
+		}
+	}
+
+	/* size variants */
+	@include m.size-variants('range');
+
+	.range {
+		--rail: calc(0.5em * var(--scale));
+		--range-thumb-size: calc(0.75em * var(--scale));
+		--range-fill: 1;
+		--range-p: 0px;
+		--range-thumb: #fff;
+		--range-bg: var(--color-surface-4);
+		--range-progress: var(--color-primary);
+		color: var(--color-primary);
+	}
+
+	.range::-webkit-slider-runnable-track {
+		height: var(--rail);
+		border-radius: 999px;
+	}
+
+	.range::-moz-range-track {
+		height: var(--rail);
+		border-radius: 999px;
+	}
+
+	.range::-webkit-slider-thumb {
+		@include m.railed-fill;
+		border-radius: 999px;
+		border: none;
+		--shadow-light:
+			0 0 0 1px color-mix(in oklab, var(--color-on-surface) 22%, #0000),
+			0 1px 3px color-mix(in oklab, var(--color-on-surface) 18%, #0000);
+	}
+
+	.range::-moz-range-thumb {
+		@include m.railed-fill;
+		border-radius: 999px;
+		border: none;
+		--shadow-light:
+			0 0 0 1px color-mix(in oklab, var(--color-on-surface) 22%, #0000),
+			0 1px 3px color-mix(in oklab, var(--color-on-surface) 18%, #0000);
+	}
+
+}

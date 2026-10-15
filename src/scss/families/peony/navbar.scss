@@ -1,0 +1,113 @@
+@use '../../_mixins' as m;
+
+/* peony — navbar.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   navbar.scss — .navbar (a bar across the top)
+
+   Markup:
+
+	<nav class="navbar">
+	  <div class="navbar-start">…</div>
+	  <div class="navbar-center">…</div>
+	  <div class="navbar-end">…</div>
+	</nav>
+
+   The three zones are optional. With none of them the children
+   simply lay out in a row; with them, start and end share the
+   leftover space and center keeps its own width, which is what
+   lets a centred logo stay centred while the two sides grow.
+
+   navbar is PLACEMENT, not navigation — it says "across the top",
+   it does not say what goes in it. A set of links inside one is a
+   `menu`; a row of actions is a row of buttons. Compare `dock`,
+   which is the same idea pinned to the bottom of the viewport.
+
+   Plumbing contract — a family fills these:
+	--navbar-bg / --navbar-fg     the bar's ground and ink
+	--navbar-border               divider colour
+	--navbar-border-width         divider thickness (0 to remove it)
+	--navbar-shadow               cast shadow, if the family has any
+	--navbar-h                    minimum height; content may exceed it
+	--navbar-px / --navbar-py     padding
+	--navbar-gap                  space between zones and between children
+	--navbar-sticky-top           where a sticky bar comes to rest
+	--fontsize                    set by the size variants
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — the bar, its three zones, and the sticky flag.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.navbar {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: var(--navbar-gap);
+		box-sizing: border-box;
+		width: 100%;
+		min-height: var(--navbar-h);
+		padding-block: var(--navbar-py);
+		padding-inline: var(--navbar-px);
+		background-color: var(--navbar-bg);
+		color: var(--navbar-fg);
+		border-block-end: var(--navbar-border-width) solid var(--navbar-border);
+		box-shadow: var(--navbar-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+
+	/* The zones. start and end absorb the slack so that center — which
+	   keeps its intrinsic width — stays put when either side grows. */
+	.navbar-start,
+	.navbar-center,
+	.navbar-end {
+		display: flex;
+		align-items: center;
+		gap: var(--navbar-gap);
+		min-width: 0;
+	}
+	.navbar-start {
+		flex: 1 1 0;
+		justify-content: flex-start;
+	}
+	.navbar-center {
+		flex: 0 0 auto;
+		justify-content: center;
+	}
+	.navbar-end {
+		flex: 1 1 0;
+		justify-content: flex-end;
+	}
+
+	/* A bar that follows the page. Absolute, because it answers to the
+	   viewport rather than to its content (see CLAUDE.md). */
+	.navbar-sticky {
+		position: sticky;
+		top: var(--navbar-sticky-top, 0);
+		z-index: 1;
+	}
+}
+
+@mixin look {
+	.navbar {
+		--navbar-bg: var(--color-surface-1);
+		--navbar-fg: var(--color-on-surface);
+		--navbar-border: var(--color-border);
+		--navbar-border-width: 1px;
+		--navbar-shadow: var(--shadow-light, none);
+		--navbar-h: calc(3.5em * var(--scale));
+		--navbar-px: calc(1em * var(--scale));
+		--navbar-py: calc(0.375em * var(--scale));
+		--navbar-gap: calc(0.5em * var(--scale));
+	}
+
+	/* size variants */
+	@include m.size-variants('navbar');
+}
