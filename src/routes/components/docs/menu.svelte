@@ -38,7 +38,7 @@
 					description: "How to draw the inside of every row. Written once for the whole menu; a node whose own `label` is a snippet skips it."
 				},
 				{
-					name: "onselect",
+					name: "onSelect",
 					type: "(node: MenuNode) => void",
 					description: "Called when a row without an href is chosen."
 				}

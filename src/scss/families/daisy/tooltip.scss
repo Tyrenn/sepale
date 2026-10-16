@@ -1,0 +1,171 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* daisy — tooltip.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   tooltip.scss — .tooltip (a hint shown on hover and focus)
+   
+   	<span class="tooltip tooltip-top">
+   	  <button class="btn" aria-describedby="tip-1">Save</button>
+   	  <span class="tooltip-content" role="tooltip" id="tip-1">Ctrl + S</span>
+   	</span>
+   
+      Pure CSS: the bubble is absolutely placed on one side of the
+      trigger and shown by :hover / :focus-within. It does not move to
+      stay on screen (anchor positioning is under the 90 % bar).
+   
+      Plumbing contract:
+   	--tooltip-bg / --tooltip-fg / --tooltip-border
+   	--tooltip-radius / --tooltip-shadow
+   	--tooltip-p            bubble padding
+   	--tooltip-gap          distance from the trigger
+   	--tooltip-arrow        arrow size (0 hides it)
+   	--tooltip-max          maximum width
+   ============================================================ */
+
+@mixin structure {
+	.tooltip {
+		position: relative;
+		display: inline-flex;
+		--tooltip-x: -50%;
+		--tooltip-y: 0;
+	}
+	.tooltip-content {
+		position: absolute;
+		z-index: 50;
+		inset: auto auto calc(100% + var(--tooltip-gap)) 50%;
+		width: max-content;
+		max-width: var(--tooltip-max);
+		padding: var(--tooltip-p);
+		border: var(--tooltip-border-width, 0px) solid var(--tooltip-border, transparent);
+		border-radius: var(--tooltip-radius);
+		background-color: var(--tooltip-bg);
+		color: var(--tooltip-fg);
+		box-shadow: var(--tooltip-shadow);
+		font-size: 0.8125em;
+		font-weight: 500;
+		line-height: 1.35;
+		text-align: center;
+		white-space: normal;
+		pointer-events: none;
+		opacity: 0;
+		visibility: hidden;
+		translate: var(--tooltip-x) var(--tooltip-y);
+		transition: opacity 0.12s ease, visibility 0.12s;
+	}
+	/* The arrow: a square turned 45deg, half hidden under the bubble. */
+	.tooltip-content::after {
+		content: '';
+		position: absolute;
+		inset: 100% auto auto 50%;
+		width: var(--tooltip-arrow);
+		height: var(--tooltip-arrow);
+		background: inherit;
+		translate: -50% -50%;
+		rotate: 45deg;
+		z-index: -1;
+	}
+	.tooltip:hover > .tooltip-content,
+	.tooltip:focus-within > .tooltip-content,
+	.tooltip-open > .tooltip-content {
+		opacity: 1;
+		visibility: visible;
+	}
+	.tooltip-top > .tooltip-content {
+		inset: auto auto calc(100% + var(--tooltip-gap)) 50%;
+	}
+	.tooltip-bottom > .tooltip-content {
+		inset: calc(100% + var(--tooltip-gap)) auto auto 50%;
+	}
+	.tooltip-bottom > .tooltip-content::after {
+		inset: 0 auto auto 50%;
+	}
+	.tooltip-left > .tooltip-content,
+	.tooltip-right > .tooltip-content {
+		--tooltip-x: 0;
+		--tooltip-y: -50%;
+	}
+	.tooltip-left > .tooltip-content {
+		inset: 50% calc(100% + var(--tooltip-gap)) auto auto;
+	}
+	.tooltip-left > .tooltip-content::after {
+		inset: 50% auto auto 100%;
+	}
+	.tooltip-right > .tooltip-content {
+		inset: 50% auto auto calc(100% + var(--tooltip-gap));
+	}
+	.tooltip-right > .tooltip-content::after {
+		inset: 50% auto auto 0;
+	}
+
+	/* Flag float — progressive enhancement. Where anchor positioning exists
+	   (under the 90 % bar, so never required), the bubble leaves the flow:
+	   fixed to its trigger, out of any ancestor's overflow, and flipped to
+	   the other side when its own has no room. The flip cannot move the
+	   arrow, so a floating bubble has none. Elsewhere it behaves as above.
+	   The wrapper names the anchor (--tooltip-anchor) per instance. */
+	@supports (anchor-name: --a) {
+		.tooltip-float {
+			anchor-name: var(--tooltip-anchor);
+		}
+		.tooltip-float > .tooltip-content {
+			position: fixed;
+			position-anchor: var(--tooltip-anchor);
+			inset: auto;
+			bottom: anchor(top);
+			left: anchor(center);
+			margin: 0 0 var(--tooltip-gap);
+			position-try-fallbacks: flip-block;
+		}
+		.tooltip-float > .tooltip-content::after {
+			content: none;
+		}
+		.tooltip-float.tooltip-bottom > .tooltip-content {
+			inset: auto;
+			top: anchor(bottom);
+			left: anchor(center);
+			margin: var(--tooltip-gap) 0 0;
+		}
+		.tooltip-float.tooltip-left > .tooltip-content {
+			inset: auto;
+			right: anchor(left);
+			top: anchor(center);
+			margin: 0 var(--tooltip-gap) 0 0;
+			position-try-fallbacks: flip-inline;
+		}
+		.tooltip-float.tooltip-right > .tooltip-content {
+			inset: auto;
+			left: anchor(right);
+			top: anchor(center);
+			margin: 0 0 0 var(--tooltip-gap);
+			position-try-fallbacks: flip-inline;
+		}
+	}
+}
+
+@mixin look {
+	.tooltip {
+		
+		--tooltip-bg: var(--color-base-content);
+		--tooltip-fg: var(--color-base-100);
+		--tooltip-border: transparent;
+		--tooltip-border-width: 0px;
+		--tooltip-radius: var(--radius-field);
+		--tooltip-shadow: none;
+		--tooltip-p: 0.35em 0.65em;
+		--tooltip-gap: calc(0.5em * var(--scale));
+		--tooltip-arrow: 0.5em;
+		--tooltip-max: 20em;
+	}
+	/* colour variants */
+	@each $color in c.$color-list {
+		.tooltip-#{$color} {
+			--tooltip-bg: var(--color-#{$color});
+			--tooltip-fg: var(--color-#{$color}-content);
+		}
+	}
+}

@@ -1,0 +1,375 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* sunflower — file-explorer.
+   Everything sunflower draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   file-explorer.scss — .file-explorer (files and folders, Drive-like)
+   
+   	<div class="file-explorer">
+   	  <div class="file-explorer-toolbar">
+   	    <nav class="breadcrumbs file-explorer-path">…</nav>
+   	    <div class="file-explorer-actions">…</div>
+   	    <div class="file-explorer-views"><button class="file-explorer-view" aria-pressed="true">…</button>…</div>
+   	  </div>
+   	  <div class="file-explorer-main">
+   	    <nav class="file-explorer-tree"><ul role="tree"><li role="treeitem">
+   	      <button class="file-explorer-tree-item"><span class="file-explorer-twisty"></span>…</button>
+   	    </li></ul></nav>
+   	    <div class="file-explorer-content">
+   	      <table class="file-explorer-table">… <tr class="file-explorer-item" aria-selected="true">…</tr></table>
+   	      <!-- or --> <ul class="file-explorer-grid"><li class="file-explorer-item">…</li></ul>
+   	    </div>
+   	    <aside class="file-explorer-details">…</aside>
+   	  </div>
+   	</div>
+   
+      Three zones — the folder tree, the current folder's content (a list
+      or a grid), the details of the selection — under a toolbar holding the
+      path (the family's .breadcrumbs), the caller's actions and the view
+      toggle. Selection is aria-selected; a drop target carries data-drop.
+   
+      Plumbing contract:
+   	--file-explorer-bg / --file-explorer-fg / --file-explorer-muted
+   	--file-explorer-border / --file-explorer-border-width / --file-explorer-radius
+   	--file-explorer-pane      the tree and toolbar ground
+   	--file-explorer-hover / --file-explorer-selected / --file-explorer-selected-fg
+   	--file-explorer-folder    the folder icon's colour
+   	--file-explorer-drop      the outline of a drop target
+   	--file-explorer-height / --file-explorer-tree-width / --file-explorer-details-width
+   	--file-explorer-shadow    the context menu's shadow
+   ============================================================ */
+
+@mixin structure {
+	.file-explorer {
+		display: flex;
+		flex-direction: column;
+		height: var(--file-explorer-height);
+		min-height: 0;
+		border: var(--file-explorer-border-width) solid var(--file-explorer-border);
+		border-radius: var(--file-explorer-radius);
+		background-color: var(--file-explorer-bg);
+		color: var(--file-explorer-fg);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		overflow: hidden;
+	}
+	.file-explorer-toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5em 0.75em;
+		padding: 0.5em 0.75em;
+		border-bottom: var(--file-explorer-border-width) solid var(--file-explorer-border);
+		background-color: var(--file-explorer-pane);
+	}
+	.file-explorer-path {
+		flex: 1 1 12em;
+		min-width: 0;
+	}
+	.file-explorer-path button {
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+	}
+	.file-explorer-path li:last-child button {
+		font-weight: 600;
+	}
+	.file-explorer-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4em;
+	}
+	.file-explorer-views {
+		display: inline-flex;
+		border: var(--file-explorer-border-width) solid var(--file-explorer-border);
+		border-radius: calc(var(--file-explorer-radius) / 1.5);
+		overflow: hidden;
+	}
+	.file-explorer-view {
+		display: inline-grid;
+		place-items: center;
+		width: 2em;
+		height: 1.85em;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--file-explorer-muted);
+		cursor: pointer;
+	}
+	.file-explorer-view[aria-pressed='true'] {
+		background-color: var(--file-explorer-selected);
+		color: var(--file-explorer-selected-fg);
+	}
+	.file-explorer-view svg {
+		width: 1.1em;
+		height: 1.1em;
+	}
+	.file-explorer-main {
+		display: flex;
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+	.file-explorer-tree {
+		flex: none;
+		width: var(--file-explorer-tree-width);
+		padding: 0.4em;
+		border-right: var(--file-explorer-border-width) solid var(--file-explorer-border);
+		background-color: var(--file-explorer-pane);
+		overflow: auto;
+	}
+	.file-explorer-tree ul {
+		margin: 0;
+		padding: 0 0 0 0.9em;
+		list-style: none;
+	}
+	.file-explorer-tree > ul {
+		padding-left: 0;
+	}
+	.file-explorer-tree-item {
+		display: flex;
+		align-items: center;
+		gap: 0.35em;
+		width: 100%;
+		padding: 0.3em 0.4em;
+		border: 0;
+		border-radius: calc(var(--file-explorer-radius) / 1.5);
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		text-align: start;
+		white-space: nowrap;
+		cursor: pointer;
+	}
+	.file-explorer-tree-item > span:last-child {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.file-explorer-tree-item:hover {
+		background-color: var(--file-explorer-hover);
+	}
+	.file-explorer-tree-item[aria-current='true'] {
+		background-color: var(--file-explorer-selected);
+		color: var(--file-explorer-selected-fg);
+		font-weight: 600;
+	}
+	.file-explorer-twisty {
+		display: inline-grid;
+		flex: none;
+		place-items: center;
+		width: 1em;
+		height: 1em;
+		transition: rotate 0.15s;
+	}
+	.file-explorer-twisty::before {
+		content: '';
+		width: 0.35em;
+		height: 0.35em;
+		border-right: 1.5px solid currentColor;
+		border-bottom: 1.5px solid currentColor;
+		rotate: -45deg;
+	}
+	.file-explorer-twisty:empty:not([data-leaf])::before {
+		opacity: 0.7;
+	}
+	.file-explorer-twisty[data-leaf]::before {
+		content: none;
+	}
+	[aria-expanded='true'] > .file-explorer-tree-item > .file-explorer-twisty {
+		rotate: 90deg;
+	}
+	.file-explorer-content {
+		position: relative;
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow: auto;
+		outline: none;
+	}
+	.file-explorer-content:focus-visible {
+		box-shadow: inset 0 0 0 2px var(--file-explorer-drop);
+	}
+	.file-explorer-table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+	.file-explorer-table th {
+		position: sticky;
+		z-index: 1;
+		top: 0;
+		padding: 0.45em 0.75em;
+		border-bottom: var(--file-explorer-border-width) solid var(--file-explorer-border);
+		background-color: var(--file-explorer-bg);
+		color: var(--file-explorer-muted);
+		font-size: 0.85em;
+		font-weight: 600;
+		text-align: start;
+		white-space: nowrap;
+	}
+	.file-explorer-table th button {
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+	}
+	.file-explorer-table th[aria-sort] {
+		color: var(--file-explorer-fg);
+	}
+	.file-explorer-table td {
+		padding: 0.4em 0.75em;
+		white-space: nowrap;
+	}
+	.file-explorer-table td:first-child {
+		width: 100%;
+		max-width: 0;
+	}
+	.file-explorer-item {
+		cursor: default;
+		user-select: none;
+	}
+	.file-explorer-item:hover {
+		background-color: var(--file-explorer-hover);
+	}
+	.file-explorer-item[aria-selected='true'] {
+		background-color: var(--file-explorer-selected);
+		color: var(--file-explorer-selected-fg);
+	}
+	.file-explorer-item[data-drop],
+	.file-explorer-tree-item[data-drop] {
+		outline: 2px dashed var(--file-explorer-drop);
+		outline-offset: -2px;
+	}
+	.file-explorer-content:focus-visible .file-explorer-item[data-focus] {
+		outline: 2px solid var(--file-explorer-drop);
+		outline-offset: -2px;
+	}
+	.file-explorer-content[data-drop] {
+		box-shadow: inset 0 0 0 2px var(--file-explorer-drop);
+	}
+	.file-explorer-entry {
+		display: flex;
+		align-items: center;
+		gap: 0.6em;
+		min-width: 0;
+	}
+	.file-explorer-icon {
+		display: inline-grid;
+		flex: none;
+		place-items: center;
+		width: 1.25em;
+		height: 1.25em;
+		color: var(--file-explorer-muted);
+	}
+	.file-explorer-icon svg {
+		width: 100%;
+		height: 100%;
+	}
+	.file-explorer-icon[data-kind='folder'] {
+		color: var(--file-explorer-folder);
+	}
+	.file-explorer-name {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.file-explorer-meta {
+		color: var(--file-explorer-muted);
+		font-size: 0.875em;
+		font-variant-numeric: tabular-nums;
+	}
+	[aria-selected='true'] .file-explorer-meta,
+	[aria-selected='true'] .file-explorer-icon {
+		color: inherit;
+	}
+	.file-explorer-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(7.5em, 1fr));
+		gap: 0.5em;
+		margin: 0;
+		padding: 0.75em;
+		list-style: none;
+	}
+	.file-explorer-grid > .file-explorer-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.4em;
+		padding: 0.85em 0.5em 0.6em;
+		border-radius: var(--file-explorer-radius);
+		text-align: center;
+	}
+	.file-explorer-grid .file-explorer-icon {
+		width: 2.75em;
+		height: 2.75em;
+	}
+	.file-explorer-grid .file-explorer-name {
+		display: -webkit-box;
+		max-width: 100%;
+		white-space: normal;
+		overflow-wrap: anywhere;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		line-clamp: 2;
+	}
+	.file-explorer-empty {
+		display: grid;
+		place-items: center;
+		height: 100%;
+		padding: 2em;
+		color: var(--file-explorer-muted);
+	}
+	.file-explorer-details {
+		flex: none;
+		width: var(--file-explorer-details-width);
+		padding: 1em;
+		border-left: var(--file-explorer-border-width) solid var(--file-explorer-border);
+		overflow: auto;
+	}
+	.file-explorer-menu {
+		position: fixed;
+		z-index: 1000;
+		min-width: 12em;
+		padding: 0.25em;
+		border: var(--file-explorer-border-width) solid var(--file-explorer-border);
+		border-radius: var(--file-explorer-radius);
+		background-color: var(--file-explorer-bg);
+		color: var(--file-explorer-fg);
+		box-shadow: var(--file-explorer-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+}
+
+@mixin look {
+	.file-explorer,
+	.file-explorer-menu {
+		
+		--file-explorer-bg: var(--color-surface-2);
+		--file-explorer-fg: var(--color-on-surface);
+		--file-explorer-muted: color-mix(in oklab, var(--color-on-surface) 60%, #0000);
+		--file-explorer-border: var(--color-border);
+		--file-explorer-border-width: var(--border);
+		--file-explorer-radius: var(--radius-box);
+		--file-explorer-pane: var(--color-surface-2);
+		--file-explorer-hover: color-mix(in oklab, var(--color-on-surface) 6%, #0000);
+		--file-explorer-selected: var(--color-primary);
+		--file-explorer-selected-fg: var(--color-on-surface);
+		--file-explorer-folder: var(--color-on-surface);
+		--file-explorer-drop: var(--color-primary);
+		--file-explorer-height: 28em;
+		--file-explorer-tree-width: 13em;
+		--file-explorer-details-width: 17em;
+		--file-explorer-shadow: var(--sf-shadow);
+	}
+	.file-explorer {
+		box-shadow: var(--sf-shadow);
+	}
+
+	@include m.size-variants('file-explorer');
+}

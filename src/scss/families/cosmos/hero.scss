@@ -1,0 +1,121 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* cosmos — hero.
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   hero.scss — .hero (the large opening block of a page)
+   
+   	<section class="hero">
+   	  <div class="hero-content">
+   	    <h1 class="hero-title">Build faster</h1>
+   	    <p class="hero-body">…</p>
+   	    <div class="hero-actions">…</div>
+   	  </div>
+   	  <div class="hero-media"><img …></div>
+   	</section>
+   
+      Text and media side by side when there is room, stacked when there
+      is not: a wrapping flex row with minimum widths, no breakpoint.
+   
+      Plumbing contract:
+   	--hero-bg / --hero-fg / --hero-muted
+   	--hero-p / --hero-gap
+   	--hero-title-size / --hero-title-weight
+   	--hero-radius / --hero-media-radius
+   ============================================================ */
+
+@mixin structure {
+	.hero {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--hero-gap);
+		padding: var(--hero-p);
+		border-radius: var(--hero-radius);
+		background: var(--hero-bg);
+		color: var(--hero-fg);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.hero-content {
+		display: flex;
+		flex: 1 1 20em;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: calc(var(--hero-gap) / 2.5);
+		min-width: 0;
+	}
+	.hero-title {
+		margin: 0;
+		font-size: var(--hero-title-size);
+		font-weight: var(--hero-title-weight);
+		line-height: 1.1;
+		text-wrap: balance;
+	}
+	.hero-body {
+		max-width: 36em;
+		margin: 0;
+		color: var(--hero-muted);
+		font-size: 1.125em;
+		text-wrap: pretty;
+	}
+	.hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75em;
+		margin-top: 0.5em;
+	}
+	.hero-media {
+		flex: 1 1 18em;
+		min-width: 0;
+	}
+	.hero-media > :is(img, video, svg) {
+		display: block;
+		width: 100%;
+		height: auto;
+		border-radius: var(--hero-media-radius, 0);
+	}
+	.hero-center {
+		justify-content: center;
+		text-align: center;
+	}
+	.hero-center > .hero-content {
+		align-items: center;
+	}
+	.hero-center .hero-body {
+		margin-inline: auto;
+	}
+	.hero-reverse {
+		flex-direction: row-reverse;
+	}
+}
+
+@mixin look {
+	.hero {
+		--cw: var(--cosmos-wobble-box, 0.2);
+		--hero-bg: var(--color-surface-2);
+		--hero-fg: var(--color-on-surface);
+		--hero-muted: color-mix(in oklab, var(--color-on-surface) 70%, #0000);
+		--hero-p: calc(3em * var(--scale)) calc(2em * var(--scale));
+		--hero-gap: calc(2.5em * var(--scale));
+		--hero-title-size: 2.75em;
+		--hero-title-weight: 800;
+		--hero-radius: var(--c2);
+		--hero-media-radius: var(--c2);
+	}
+
+
+	/* colour variants: the whole block takes the colour. */
+	@each $color in c.$color-list {
+		.hero-#{$color} {
+			--hero-bg: var(--color-#{$color});
+			--hero-fg: var(--color-on-#{$color});
+			--hero-muted: color-mix(in oklab, var(--color-on-#{$color}) 80%, #0000);
+		}
+	}
+
+	@include m.size-variants('hero');
+}

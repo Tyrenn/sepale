@@ -1,0 +1,133 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* daisy — collapse.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   collapse.scss — .collapse (a panel that folds under its trigger)
+   
+   	<div class="collapse collapse-arrow">
+   	  <button class="collapse-trigger" aria-expanded="true" aria-controls="p1">Shipping</button>
+   	  <div class="collapse-panel" id="p1" role="region">
+   	    <div class="collapse-inner">…</div>
+   	  </div>
+   	</div>
+   
+      Not <details>: a button and a region, so the height can animate
+      (grid rows 0fr -> 1fr) and any element can be the trigger. The
+      closed panel is `inert` (set by the wrapper).
+   
+      Plumbing contract:
+   	--collapse-bg / --collapse-fg / --collapse-border / --collapse-border-width
+   	--collapse-radius / --collapse-shadow
+   	--collapse-p           trigger and content padding
+   	--collapse-hover       trigger fill on hover
+   	--collapse-speed       the fold's duration
+   ============================================================ */
+
+@mixin structure {
+	.collapse {
+		display: grid;
+		grid-template-rows: auto 0fr;
+		border: var(--collapse-border-width) solid var(--collapse-border);
+		border-radius: var(--collapse-radius);
+		background-color: var(--collapse-bg);
+		color: var(--collapse-fg);
+		box-shadow: var(--collapse-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		transition: grid-template-rows var(--collapse-speed) ease;
+	}
+	.collapse:has(> .collapse-trigger[aria-expanded='true']) {
+		grid-template-rows: auto 1fr;
+	}
+	.collapse-trigger {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1em;
+		width: 100%;
+		margin: 0;
+		padding: var(--collapse-p);
+		border: 0;
+		border-radius: inherit;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		font-weight: 600;
+		text-align: start;
+		cursor: pointer;
+	}
+	.collapse-trigger:hover {
+		background-color: var(--collapse-hover);
+	}
+	.collapse-trigger:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: -2px;
+	}
+	.collapse-panel {
+		min-height: 0;
+		overflow: hidden;
+	}
+	.collapse-inner {
+		padding: 0 var(--collapse-px, 1em) var(--collapse-py, 1em);
+	}
+	/* A chevron that turns when open. */
+	.collapse-arrow > .collapse-trigger::after {
+		content: '';
+		flex: none;
+		width: 0.45em;
+		height: 0.45em;
+		border-right: 2px solid currentColor;
+		border-bottom: 2px solid currentColor;
+		rotate: 45deg;
+		translate: 0 -0.15em;
+		transition: rotate var(--collapse-speed) ease, translate var(--collapse-speed) ease;
+	}
+	.collapse-arrow > .collapse-trigger[aria-expanded='true']::after {
+		rotate: 225deg;
+		translate: 0 0.1em;
+	}
+	/* A plus that becomes a minus. */
+	.collapse-plus > .collapse-trigger::after {
+		content: '+';
+		flex: none;
+		font-size: 1.25em;
+		line-height: 1;
+		font-weight: 400;
+	}
+	.collapse-plus > .collapse-trigger[aria-expanded='true']::after {
+		content: '−';
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.collapse,
+		.collapse-trigger::after {
+			transition: none;
+		}
+	}
+}
+
+@mixin look {
+	.collapse {
+		
+		--collapse-bg: var(--color-base-100);
+		--collapse-fg: var(--color-base-content);
+		--collapse-border: var(--color-base-300);
+		--collapse-border-width: var(--border);
+		--collapse-radius: var(--radius-box);
+		--collapse-shadow: none;
+		--collapse-px: calc(1em * var(--scale));
+		--collapse-py: calc(0.85em * var(--scale));
+		--collapse-p: var(--collapse-py) var(--collapse-px);
+		--collapse-hover: color-mix(in oklab, var(--color-base-content) 5%, #0000);
+		--collapse-speed: 0.2s;
+	}
+	/* variant ghost: no frame — after the defaults above, so it wins. */
+	.collapse-ghost {
+		--collapse-bg: transparent;
+		--collapse-border-width: 0px;
+		--collapse-shadow: none;
+	}
+}

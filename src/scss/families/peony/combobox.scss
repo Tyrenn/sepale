@@ -1,0 +1,83 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* peony — combobox.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   combobox.scss — .combobox (a field that looks its value up in a list)
+   
+   	<div class="combobox">
+   	  <label class="input">
+   	    <input role="combobox" aria-expanded="true" aria-controls="l1" aria-autocomplete="list">
+   	    <ul id="l1" class="list list-suggestions" role="listbox">
+   	      <li class="list-row combobox-option" role="option" aria-selected="false">France</li>
+   	    </ul>
+   	  </label>
+   	  <select name="country" hidden><option value="fr" selected>France</option></select>
+   	</div>
+   
+      Integration, not a new field: the frame is the family's .input and the
+      list its .list-suggestions (ADR 0009 — a file may reference another
+      namespace). This file adds what those do not draw: the check of a
+      multiple combobox, the keyboard-active row of a multiple list (whose
+      aria-selected means "checked"), and the size scale.
+   
+      Plumbing contract:
+   	--combobox-check          the check box's colour when ticked
+   	--combobox-check-fg       the tick
+   	--combobox-check-border   the empty box
+   	--combobox-active         the keyboard row of a multiple list
+   ============================================================ */
+
+@mixin structure {
+	.combobox {
+		display: inline-flex;
+		flex-direction: column;
+		vertical-align: middle;
+		min-width: 0;
+	}
+	.combobox > .input {
+		width: 100%;
+	}
+	.combobox-option {
+		gap: 0.6em;
+	}
+	/* Multiple: each option carries a box, ticked when picked. */
+	.combobox-multiple .combobox-option::before {
+		content: '';
+		display: grid;
+		flex: none;
+		place-items: center;
+		width: 1em;
+		height: 1em;
+		box-sizing: border-box;
+		border: 1.5px solid var(--combobox-check-border);
+		border-radius: 0.25em;
+	}
+	.combobox-multiple .combobox-option[aria-selected='true']::before {
+		content: '✓';
+		border-color: var(--combobox-check);
+		background-color: var(--combobox-check);
+		color: var(--combobox-check-fg);
+		font-size: 0.85em;
+		font-weight: 700;
+		line-height: 1;
+	}
+	.combobox-multiple .combobox-option[data-active] {
+		background-color: var(--combobox-active);
+	}
+}
+
+@mixin look {
+	.combobox {
+		--combobox-check: var(--color-primary);
+		--combobox-check-fg: var(--color-on-primary);
+		--combobox-check-border: color-mix(in oklab, var(--color-on-surface) 35%, #0000);
+		--combobox-active: color-mix(in oklab, var(--color-on-surface) 9%, #0000);
+	}
+
+	@include m.size-variants('combobox');
+}

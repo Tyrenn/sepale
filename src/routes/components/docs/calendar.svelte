@@ -28,7 +28,7 @@
 				{ name: 'buttons', type: "('today' | 'clear')[]", description: 'Buttons under the calendar.' },
 				{ name: 'dateFormat', type: 'string', description: 'How the field writes a date (air-datepicker tokens).' },
 				{ name: 'options', type: 'AirDatepickerOptions', description: 'Anything else air-datepicker accepts. Applied last.' },
-				{ name: 'onchange', type: '(value) => void', description: 'Called after every pick.' },
+				{ name: 'onChange', type: '(value) => void', description: 'Called after every pick.' },
 				{ name: 'picker', type: 'AirDatepicker', default: '$bindable()', description: 'The instance, for what no prop covers.' }
 			]
 		}

@@ -1,0 +1,102 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* daisy — chips-input.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   chips-input.scss — .chips-input (several values, each a chip)
+   
+   	<div class="input chips-input">
+   	  <span class="chip">Lyon<button class="chips-input-remove" aria-label="Remove Lyon">×</button></span>
+   	  <input class="chips-input-field" placeholder="Add a city">
+   	  <input type="hidden" name="cities[]" value="Lyon">
+   	</div>
+   
+      An accumulator around a field: the frame is the family's .input, made
+      to grow and wrap; each value is the family's .chip. The field may be
+      any other component — an Input, a Select, a Combobox — whose own frame
+      is folded into this one (ADR 0009: integration).
+   
+      Plumbing contract:
+   	--chips-input-gap   space between chips and field
+   	--chips-input-py    vertical padding of the grown frame
+   	--chips-input-min   the field's minimum width
+   ============================================================ */
+
+@mixin structure {
+	.chips-input {
+		flex-wrap: wrap;
+		align-items: center;
+		height: auto;
+		min-height: var(--size);
+		cursor: text;
+	}
+	.chips-input > .chip {
+		flex: none;
+		max-width: 100%;
+	}
+	.chips-input-remove {
+		display: inline-grid;
+		flex: none;
+		place-items: center;
+		width: 1.2em;
+		height: 1.2em;
+		margin: 0 -0.4em 0 0.1em;
+		padding: 0;
+		border: 0;
+		border-radius: 50%;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		line-height: 1;
+		opacity: 0.6;
+		cursor: pointer;
+	}
+	.chips-input-remove:hover,
+	.chips-input-remove:focus-visible {
+		opacity: 1;
+		background-color: color-mix(in oklab, currentColor 15%, #0000);
+	}
+}
+
+@mixin look {
+	.chips-input {
+		--chips-input-gap: calc(0.35em * var(--scale));
+		--chips-input-py: calc(0.3em * var(--scale));
+		--chips-input-min: 6em;
+		gap: var(--chips-input-gap);
+		width: 100%;
+		padding-block: var(--chips-input-py);
+	}
+	.chips-input > .chip {
+		font-size: 0.875em;
+	}
+	/* The field: the plain one, or another component's, folded into the frame. */
+	.chips-input .chips-input-field,
+	.chips-input :is(.input, .select, .combobox) {
+		flex: 1 1 var(--chips-input-min);
+		width: auto;
+		min-width: var(--chips-input-min);
+		height: calc(var(--size) - 2 * var(--chips-input-py) - 2 * var(--border));
+		min-height: 0;
+		padding-inline: 0;
+		border: 0;
+		outline: 0;
+		background: transparent;
+		box-shadow: none;
+		color: inherit;
+		font: inherit;
+	}
+	.chips-input .combobox > .input {
+		height: 100%;
+		border: 0;
+		outline: 0;
+		background: transparent;
+		box-shadow: none;
+	}
+
+	@include m.size-variants('chips-input');
+}

@@ -24,18 +24,19 @@
 	 *
 	 * The actions sit in a `<form method="dialog">`: a button closes the
 	 * dialog and its `value` becomes the dialog's return value, handed to
-	 * `onclose`. The opening and closing are animated here, not in the CSS.
+	 * `onClose`. The opening and closing are animated here, not in the CSS.
 	 */
 	import type { Snippet } from 'svelte';
 	import type { HTMLDialogAttributes } from 'svelte/elements';
 	import { scale } from 'svelte/transition';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	// `open`, `title` and `onclose` are ours: the first is driven through the
-	// element's methods, the second is a heading, the third carries a value.
+	// `open` and `title` are ours: the first is driven through the element's
+	// methods, the second is a heading. Component events are `onXxx`; the
+	// native lowercase ones still pass through.
 	interface Props
 		extends AxisProps<typeof AXES, typeof FLAGS>,
-			Omit<HTMLDialogAttributes, 'open' | 'title' | 'onclose'> {
+			Omit<HTMLDialogAttributes, 'open' | 'title'> {
 		/** Whether it is shown. Bindable: closing from inside sets it back. */
 		open?: boolean;
 		/** Block the page behind it (`showModal`). Default true. */
@@ -51,7 +52,7 @@
 		/** Buttons, inside the `<form method="dialog">`: each one closes with its `value`. */
 		actions?: Snippet;
 		/** After it closed, with the value of the button that closed it ('' otherwise). */
-		onclose?: (value: string) => void;
+		onClose?: (value: string) => void;
 		/** The accessible name of the close button. */
 		closeLabel?: string;
 		/** The `<dialog>` itself. Bindable. */
@@ -68,7 +69,7 @@
 		animated = true,
 		title,
 		actions,
-		onclose,
+		onClose,
 		closeLabel = 'Close',
 		element = $bindable(),
 		class: klass = '',
@@ -122,7 +123,7 @@
 		shown = false;
 		open = false;
 		if (element) element.returnValue = '';
-		onclose?.(value);
+		onClose?.(value);
 	}
 
 	/* Escape: the browser would close at once, skipping the transition. */

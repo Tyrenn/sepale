@@ -24,8 +24,11 @@ export { default as Button } from './components/Button.svelte';
 export { default as Input } from './components/Input.svelte';
 export { default as Textarea } from './components/Textarea.svelte';
 export { default as Select } from './components/Select.svelte';
+export { default as Combobox, type ComboboxSource } from './components/Combobox.svelte';
+export { default as ChipsInput, type ChipsInputField } from './components/ChipsInput.svelte';
 export { default as FileInput } from './components/FileInput.svelte';
 export { default as Calendar } from './components/Calendar.svelte';
+export { default as DatePicker } from './components/DatePicker.svelte';
 export { default as Checkbox } from './components/Checkbox.svelte';
 export { default as Radio } from './components/Radio.svelte';
 export { default as Toggle } from './components/Toggle.svelte';
@@ -33,6 +36,8 @@ export { default as Range } from './components/Range.svelte';
 export { default as Fieldset } from './components/Fieldset.svelte';
 export { default as Label } from './components/Label.svelte';
 export { default as FloatingLabel } from './components/FloatingLabel.svelte';
+export { default as Segmented } from './components/Segmented.svelte';
+export { default as NumberInput } from './components/NumberInput.svelte';
 
 // Display
 export { default as Avatar } from './components/Avatar.svelte';
@@ -52,12 +57,28 @@ export { default as Carousel } from './components/Carousel.svelte';
 export { default as Text } from './components/Text.svelte';
 export { default as Title } from './components/Title.svelte';
 export { default as Subtitle } from './components/Subtitle.svelte';
+export { default as Divider } from './components/Divider.svelte';
+export { default as Alert } from './components/Alert.svelte';
+export { default as Toaster } from './components/Toaster.svelte';
+export { default as Tooltip } from './components/Tooltip.svelte';
+export { default as Collapse } from './components/Collapse.svelte';
+export { default as Accordion } from './components/Accordion.svelte';
+export { default as Rating } from './components/Rating.svelte';
+export { default as EmptyState } from './components/EmptyState.svelte';
+export { default as Hero } from './components/Hero.svelte';
+export { default as Footer, type FooterSection } from './components/Footer.svelte';
+export { default as MobileFrame } from './components/MobileFrame.svelte';
+export { default as WindowFrame } from './components/WindowFrame.svelte';
+export { default as LaptopFrame } from './components/LaptopFrame.svelte';
+export { default as Drawer, type DrawerState } from './components/Drawer.svelte';
+export { toast, dismissToast, toasts, type ToastOptions } from './components/toast.svelte.js';
 
 // Navigation
 export { default as Menu, type MenuNode } from './components/Menu.svelte';
 export { default as Navbar } from './components/Navbar.svelte';
 export { default as Breadcrumbs } from './components/Breadcrumbs.svelte';
 export { default as Pagination } from './components/Pagination.svelte';
+export { default as Steps, type Step, type StepState } from './components/Steps.svelte';
 export { default as Dock } from './components/Dock.svelte';
 export { default as Tabs, type TabItem } from './components/Tabs.svelte';
 
@@ -90,6 +111,7 @@ export {
 	type TableSortDirection
 } from './components/Table.svelte';
 export { default as Grid } from './components/Grid.svelte';
+export { default as FileExplorer, type FileNode, type FileDrop } from './components/FileExplorer.svelte';
 
 // Overlay
 export { default as Dialog } from './components/Dialog.svelte';

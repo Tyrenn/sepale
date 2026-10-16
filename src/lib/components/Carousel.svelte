@@ -540,7 +540,7 @@
 					variant="dots"
 					{count}
 					page={current + 1}
-					onpage={(p) => goto(p - 1)}
+					onPage={(p) => goto(p - 1)}
 					pageLabel={(p) => itemLabel(p - 1, count)}
 					aria-label="Items"
 				/>

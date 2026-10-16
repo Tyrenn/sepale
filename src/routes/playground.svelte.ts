@@ -33,7 +33,13 @@ const GROUPS: { group: string; ids: string[] }[] = [
 			'calendar',
 			'fieldset',
 			'label',
-			'floating-label'
+			'floating-label',
+			'number-input',
+			'rating',
+			'segmented',
+			'date-picker',
+			'combobox',
+			'chips-input'
 		]
 	},
 	{
@@ -57,9 +63,11 @@ const GROUPS: { group: string; ids: string[] }[] = [
 			'swatch'
 		]
 	},
-	{ group: 'Data', ids: ['data-handler', 'data-control', 'table', 'grid', 'list'] },
+	{ group: 'Data', ids: ['data-handler', 'data-control', 'table', 'grid', 'list', 'file-explorer'] },
+	{ group: 'Feedback', ids: ['alert', 'toast', 'tooltip', 'empty-state'] },
+	{ group: 'Layout', ids: ['divider', 'collapse', 'accordion', 'drawer', 'hero', 'footer', 'mobile-frame', 'window-frame', 'laptop-frame'] },
 	{ group: 'Overlay', ids: ['dialog', 'dropdown'] },
-	{ group: 'Navigation', ids: ['breadcrumbs', 'menu', 'navbar', 'dock', 'pagination'] },
+	{ group: 'Navigation', ids: ['breadcrumbs', 'menu', 'navbar', 'dock', 'pagination', 'steps'] },
 	{ group: 'Other', ids: ['join', 'validator'] }
 ];
 

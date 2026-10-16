@@ -70,7 +70,7 @@
 		/** The text of a multiple field with several choices. Default `N selected`. */
 		summary?: (chosen: any[]) => string;
 		/** Called with the new value after every change. */
-		onvalue?: (value: any) => void;
+		onValue?: (value: any) => void;
 		/** The native `<select>`. Bindable. */
 		element?: HTMLSelectElement;
 		class?: string;
@@ -93,7 +93,7 @@
 		nullable = false,
 		multiple = false,
 		summary = (chosen: any[]) => `${chosen.length} selected`,
-		onvalue,
+		onValue,
 		element = $bindable(),
 		value = $bindable(),
 		class: klass = '',
@@ -130,7 +130,7 @@
 
 	function changed() {
 		if (invalid) isValid();
-		onvalue?.(value);
+		onValue?.(value);
 	}
 
 	function handleChange(e: Event & { currentTarget: EventTarget & HTMLSelectElement }) {

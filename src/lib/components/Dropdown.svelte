@@ -43,7 +43,7 @@
 	import { fly } from 'svelte/transition';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'ontoggle'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** Whether the box is shown. Bindable. */
 		open?: boolean;
 		/** The element that opens it. Spread `props` on it. */
@@ -53,7 +53,7 @@
 		/** Animate the box. Ignored when the visitor asks for reduced motion. */
 		animated?: boolean;
 		/** Called after every change of `open`. */
-		ontoggle?: (open: boolean) => void;
+		onToggle?: (open: boolean) => void;
 		class?: string;
 	}
 
@@ -62,7 +62,7 @@
 		trigger,
 		children,
 		animated = true,
-		ontoggle,
+		onToggle,
 		side,
 		align,
 		class: klass = '',
@@ -83,7 +83,7 @@
 	function set(value: boolean) {
 		if (value === open) return;
 		open = value;
-		ontoggle?.(value);
+		onToggle?.(value);
 	}
 	const toggle = () => set(!open);
 	const close = () => set(false);

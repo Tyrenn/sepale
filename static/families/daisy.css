@@ -1541,6 +1541,515 @@ svg {
 /* ------------------------------------------------------------
    structure — valid/invalid color driving + error hint.
    ------------------------------------------------------------ */
+/* daisy — divider.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   divider.scss — .divider (a rule, with or without content)
+
+   	<hr class="divider">
+   	<div class="divider" role="separator"><span class="divider-content">or</span></div>
+
+      Two lines drawn by ::before / ::after around the content; an
+      empty divider (and every <hr>) drops the second one.
+
+      Plumbing contract:
+   	--divider-color       the line's colour
+   	--divider-line        the paint of the first line (a colour or a gradient)
+   	--divider-line-end    the paint of the second line
+   	--divider-dir         gradient direction (90deg, 180deg when vertical)
+   	--divider-thickness   line thickness
+   	--divider-gap         space between a line and the content
+   	--divider-stub        length of the short line when aligned start / end
+   	--divider-m           margin on the axis across the line
+   	--divider-fg          the content's ink
+   ============================================================ */
+/* daisy — alert.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   alert.scss — .alert (an inline message: info, success, warning, error)
+
+   	<div class="alert alert-info" role="status">
+   	  <span class="alert-icon">…</span>
+   	  <div class="alert-body"><p class="alert-title">Saved</p>Your changes are live.</div>
+   	  <div class="alert-actions">…</div>
+   	  <button class="alert-close" aria-label="Dismiss">×</button>
+   	</div>
+
+      Default: a soft tint of the colour. `alert-outline` keeps the page
+      behind it, `alert-solid` fills with the colour itself.
+
+      Plumbing contract:
+   	--alert-color          seed colour (colour variants)
+   	--alert-bg / --alert-fg / --alert-border
+   	--alert-accent         icon and title ink
+   	--alert-radius / --alert-shadow / --alert-border-width
+   	--alert-p / --alert-gap
+   	--fontsize             font size (size variants)
+   ============================================================ */
+/* daisy — toaster.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   toaster.scss — .toaster (the stack toasts float in)
+
+   	<section class="toaster toaster-bottom toaster-end" aria-live="polite">
+   	  <div class="alert alert-success">…</div>
+   	</section>
+
+      Fixed to a corner of the viewport; each toast is an .alert. The
+      stack lets clicks through everywhere but on the toasts themselves.
+
+      Plumbing contract:
+   	--toaster-gap     space between toasts
+   	--toaster-m       distance from the viewport's edges
+   	--toaster-width   the toasts' width
+   	--toaster-shadow  the shadow a floating toast casts
+   ============================================================ */
+/* daisy — tooltip.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   tooltip.scss — .tooltip (a hint shown on hover and focus)
+
+   	<span class="tooltip tooltip-top">
+   	  <button class="btn" aria-describedby="tip-1">Save</button>
+   	  <span class="tooltip-content" role="tooltip" id="tip-1">Ctrl + S</span>
+   	</span>
+
+      Pure CSS: the bubble is absolutely placed on one side of the
+      trigger and shown by :hover / :focus-within. It does not move to
+      stay on screen (anchor positioning is under the 90 % bar).
+
+      Plumbing contract:
+   	--tooltip-bg / --tooltip-fg / --tooltip-border
+   	--tooltip-radius / --tooltip-shadow
+   	--tooltip-p            bubble padding
+   	--tooltip-gap          distance from the trigger
+   	--tooltip-arrow        arrow size (0 hides it)
+   	--tooltip-max          maximum width
+   ============================================================ */
+/* daisy — collapse.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   collapse.scss — .collapse (a panel that folds under its trigger)
+
+   	<div class="collapse collapse-arrow">
+   	  <button class="collapse-trigger" aria-expanded="true" aria-controls="p1">Shipping</button>
+   	  <div class="collapse-panel" id="p1" role="region">
+   	    <div class="collapse-inner">…</div>
+   	  </div>
+   	</div>
+
+      Not <details>: a button and a region, so the height can animate
+      (grid rows 0fr -> 1fr) and any element can be the trigger. The
+      closed panel is `inert` (set by the wrapper).
+
+      Plumbing contract:
+   	--collapse-bg / --collapse-fg / --collapse-border / --collapse-border-width
+   	--collapse-radius / --collapse-shadow
+   	--collapse-p           trigger and content padding
+   	--collapse-hover       trigger fill on hover
+   	--collapse-speed       the fold's duration
+   ============================================================ */
+/* daisy — accordion.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   accordion.scss — .accordion (a stack of collapses)
+
+   	<div class="accordion">
+   	  <div class="collapse">…</div>
+   	  <div class="collapse">…</div>
+   	</div>
+
+      Joined by default: the collapses share their edges and only the
+      outer corners are rounded. `accordion-separate` keeps them apart.
+      Opening one closing the others is the wrapper's job (`exclusive`).
+
+      Plumbing contract:
+   	--accordion-gap   space between separate collapses
+   ============================================================ */
+/* daisy — rating.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   rating.scss — .rating (a score picked from a row of icons)
+
+   	<div class="rating" role="radiogroup" aria-label="Rating">
+   	  <input type="radio" class="rating-item" name="r" value="1" aria-label="1 star">
+   	  <input type="radio" class="rating-item" name="r" value="2" aria-label="2 stars" checked>
+   	  …
+   	</div>
+
+      Real radios, each drawn as an icon through a mask. Every item up to
+      the checked one is filled; hovering previews the score.
+
+      Plumbing contract:
+   	--rating-on / --rating-off   filled and empty icon colours
+   	--rating-size                one icon's side
+   	--rating-gap                 space between icons
+   	--rating-mask                the icon (a mask image; a star by default)
+   ============================================================ */
+/* daisy — segmented.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   segmented.scss — .segmented (one choice among a few, as a pill track)
+
+   	<div class="segmented" role="radiogroup" aria-label="View">
+   	  <label class="segmented-item"><input type="radio" class="segmented-input" name="v" value="list" checked>List</label>
+   	  <label class="segmented-item"><input type="radio" class="segmented-input" name="v" value="grid">Grid</label>
+   	</div>
+
+      Real radios laid invisibly over their labels: keyboard, forms and
+      screen readers work as for any radio group.
+
+      Plumbing contract:
+   	--segmented-bg / --segmented-border / --segmented-border-width
+   	--segmented-radius / --segmented-item-radius
+   	--segmented-pad          the track's inner padding
+   	--segmented-fg           an idle item's ink
+   	--segmented-active-bg / --segmented-active-fg / --segmented-active-shadow
+   	--size                   an item's height
+   ============================================================ */
+/* daisy — number-input.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   number-input.scss — .number-input (a number with − and + beside it)
+
+   	<div class="number-input">
+   	  <button type="button" class="number-input-dec" aria-label="Decrease">−</button>
+   	  <input type="number" class="number-input-field" value="2">
+   	  <button type="button" class="number-input-inc" aria-label="Increase">+</button>
+   	</div>
+
+      One field-shaped frame: the native spinners are hidden, the two
+      buttons step the value.
+
+      Plumbing contract:
+   	--number-input-bg / --number-input-fg / --number-input-border
+   	--number-input-border-width / --number-input-radius
+   	--number-input-btn-bg / --number-input-btn-hover
+   	--number-input-width   the field's width
+   	--number-input-focus   the ring around the frame when focused
+   	--size                 height
+   ============================================================ */
+/* daisy — empty-state.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   empty-state.scss — .empty-state (what to show when there is nothing)
+
+   	<div class="empty-state">
+   	  <div class="empty-state-icon">…</div>
+   	  <p class="empty-state-title">No results</p>
+   	  <p class="empty-state-body">Try another search.</p>
+   	  <div class="empty-state-actions"><button class="btn">Clear filters</button></div>
+   	</div>
+
+      A centred column. Made to sit in the `empty` slot of a Table, a
+      Grid or a List, or anywhere a collection has nothing to show.
+
+      Plumbing contract:
+   	--empty-state-fg / --empty-state-muted   title ink and body ink
+   	--empty-state-icon-bg / --empty-state-icon-fg / --empty-state-icon-size
+   	--empty-state-p / --empty-state-gap
+   	--empty-state-border / --empty-state-radius   the dashed frame
+   ============================================================ */
+/* daisy — hero.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   hero.scss — .hero (the large opening block of a page)
+
+   	<section class="hero">
+   	  <div class="hero-content">
+   	    <h1 class="hero-title">Build faster</h1>
+   	    <p class="hero-body">…</p>
+   	    <div class="hero-actions">…</div>
+   	  </div>
+   	  <div class="hero-media"><img …></div>
+   	</section>
+
+      Text and media side by side when there is room, stacked when there
+      is not: a wrapping flex row with minimum widths, no breakpoint.
+
+      Plumbing contract:
+   	--hero-bg / --hero-fg / --hero-muted
+   	--hero-p / --hero-gap
+   	--hero-title-size / --hero-title-weight
+   	--hero-radius / --hero-media-radius
+   ============================================================ */
+/* daisy — footer.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   footer.scss — .footer (the closing block of a page)
+
+   	<footer class="footer">
+   	  <div class="footer-sections">
+   	    <nav class="footer-section">
+   	      <h2 class="footer-title">Product</h2>
+   	      <a href="…">Pricing</a>
+   	    </nav>
+   	  </div>
+   	  <div class="footer-bottom">© 2026 …</div>
+   	</footer>
+
+      Columns fill the width as room allows (auto-fit grid), no breakpoint.
+
+      Plumbing contract:
+   	--footer-bg / --footer-fg / --footer-muted / --footer-border
+   	--footer-p / --footer-gap
+   	--footer-col     minimum column width
+   ============================================================ */
+/* daisy — mobile-frame.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   mobile-frame.scss — .mobile-frame (a phone drawn around content)
+
+   	<div class="mobile-frame">
+   	  <div class="mobile-frame-screen">…</div>
+   	</div>
+
+      A drawing, not a device emulator: a rounded body, an island at the
+      top, a side button. The screen scrolls its own content.
+
+      Plumbing contract:
+   	--mobile-frame-width     the phone's width (its height follows, 9 / 19.5)
+   	--mobile-frame-body      the body's colour
+   	--mobile-frame-bezel     the band around the screen
+   	--mobile-frame-radius    the body's corners
+   	--mobile-frame-screen-bg / --mobile-frame-screen-fg
+   	--mobile-frame-shadow
+   ============================================================ */
+/* daisy — window-frame.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   window-frame.scss — .window-frame (an application window drawn around content)
+
+   	<div class="window-frame">
+   	  <div class="window-frame-bar">
+   	    <span class="window-frame-controls"><span></span><span></span><span></span></span>
+   	    <span class="window-frame-title">Settings</span>
+   	    <span class="window-frame-actions">…</span>
+   	  </div>
+   	  <div class="window-frame-body">…</div>
+   	</div>
+
+      A title bar with three window controls, a centred title and room for
+      actions on the right, above a body that scrolls.
+
+      Plumbing contract:
+   	--window-frame-bg / --window-frame-fg       the body
+   	--window-frame-bar-bg / --window-frame-bar-fg
+   	--window-frame-border / --window-frame-border-width
+   	--window-frame-radius / --window-frame-shadow
+   	--window-frame-dot-1 / -2 / -3              the three controls
+   ============================================================ */
+/* daisy — laptop-frame.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   laptop-frame.scss — .laptop-frame (a laptop drawn around content)
+
+   	<div class="laptop-frame">
+   	  <div class="laptop-frame-lid"><div class="laptop-frame-screen">…</div></div>
+   	  <div class="laptop-frame-base"></div>
+   	</div>
+
+      The lid holds a 16:10 screen that scrolls its own content; the base
+      is wider than the lid, with the opening notch at its front edge.
+
+      Plumbing contract:
+   	--laptop-frame-width     the base's width (the lid is 84 % of it)
+   	--laptop-frame-body / --laptop-frame-base   lid and base colours
+   	--laptop-frame-bezel     the band around the screen
+   	--laptop-frame-screen-bg / --laptop-frame-screen-fg
+   	--laptop-frame-shadow
+   ============================================================ */
+/* daisy — drawer.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   drawer.scss — .drawer (a panel sliding in from a side)
+
+   	<aside class="drawer drawer-left" data-state="peek">
+   	  <div class="drawer-content">…</div>
+   	  <button class="drawer-handle" aria-label="Open"></button>
+   	</aside>
+
+      Three states, written as data-state: hidden (out of view), peek (the
+      last --drawer-peek of it in view) and open (all --drawer-size of it).
+      Any side; left by default. Fixed to the viewport by default —
+      --drawer-position: absolute keeps it inside a positioned container.
+
+      It may be a <dialog>: opened modal it gets the browser's backdrop.
+      A dialog's own UA box (margins, max sizes) is reset here.
+
+      Plumbing contract:
+   	--drawer-size / --drawer-peek     open extent and peeking extent
+   	--drawer-position                 fixed (default) or absolute
+   	--drawer-bg / --drawer-fg / --drawer-border / --drawer-shadow
+   	--drawer-radius                   the inner corners
+   	--drawer-p                        content padding
+   	--drawer-backdrop                 the shade behind a modal drawer
+   	--drawer-speed                    the slide's duration
+   	--drawer-handle-bg / --drawer-handle-w / --drawer-handle-l
+   ============================================================ */
+/* daisy — steps.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   steps.scss — .steps (where the user is in a journey)
+
+   	<nav class="steps" aria-label="Progress">
+   	  <ol class="steps-list">
+   	    <li class="steps-item" data-state="complete">
+   	      <div class="steps-track">
+   	        <button class="steps-marker">✓</button>
+   	        <button class="steps-segment" data-state="complete"><span></span></button>
+   	        <button class="steps-segment" data-state="complete"><span></span></button>
+   	      </div>
+   	      <p class="steps-label"><span>Basics</span></p>
+   	    </li>
+   	    <li class="steps-item" data-state="current">…
+   	      <p class="steps-sublabel">Pricing</p>
+   	    </li>
+   	  </ol>
+   	</nav>
+
+      One column per step, one bar per sub-step (a step with none has one
+      bar). States are data-state attributes: current, visited, complete,
+      unknown; data-issue="error|warning" flags a bar that needs looking at.
+      `steps-compact` drops markers and labels for a heading above.
+
+      Plumbing contract:
+   	--steps-color            the journey's colour
+   	--steps-off              an unreached bar or ring
+   	--steps-visited          a visited bar
+   	--steps-warning / --steps-error
+   	--steps-bar              bar thickness
+   	--steps-marker           the disc's side
+   	--steps-marker-bg / --steps-marker-fg
+   	--steps-gap / --steps-seg-gap
+   	--steps-fg / --steps-muted
+   ============================================================ */
+/* daisy — combobox.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   combobox.scss — .combobox (a field that looks its value up in a list)
+
+   	<div class="combobox">
+   	  <label class="input">
+   	    <input role="combobox" aria-expanded="true" aria-controls="l1" aria-autocomplete="list">
+   	    <ul id="l1" class="list list-suggestions" role="listbox">
+   	      <li class="list-row combobox-option" role="option" aria-selected="false">France</li>
+   	    </ul>
+   	  </label>
+   	  <select name="country" hidden><option value="fr" selected>France</option></select>
+   	</div>
+
+      Integration, not a new field: the frame is the family's .input and the
+      list its .list-suggestions (ADR 0009 — a file may reference another
+      namespace). This file adds what those do not draw: the check of a
+      multiple combobox, the keyboard-active row of a multiple list (whose
+      aria-selected means "checked"), and the size scale.
+
+      Plumbing contract:
+   	--combobox-check          the check box's colour when ticked
+   	--combobox-check-fg       the tick
+   	--combobox-check-border   the empty box
+   	--combobox-active         the keyboard row of a multiple list
+   ============================================================ */
+/* daisy — chips-input.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   chips-input.scss — .chips-input (several values, each a chip)
+
+   	<div class="input chips-input">
+   	  <span class="chip">Lyon<button class="chips-input-remove" aria-label="Remove Lyon">×</button></span>
+   	  <input class="chips-input-field" placeholder="Add a city">
+   	  <input type="hidden" name="cities[]" value="Lyon">
+   	</div>
+
+      An accumulator around a field: the frame is the family's .input, made
+      to grow and wrap; each value is the family's .chip. The field may be
+      any other component — an Input, a Select, a Combobox — whose own frame
+      is folded into this one (ADR 0009: integration).
+
+      Plumbing contract:
+   	--chips-input-gap   space between chips and field
+   	--chips-input-py    vertical padding of the grown frame
+   	--chips-input-min   the field's minimum width
+   ============================================================ */
+/* daisy — file-explorer.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   file-explorer.scss — .file-explorer (files and folders, Drive-like)
+
+   	<div class="file-explorer">
+   	  <div class="file-explorer-toolbar">
+   	    <nav class="breadcrumbs file-explorer-path">…</nav>
+   	    <div class="file-explorer-actions">…</div>
+   	    <div class="file-explorer-views"><button class="file-explorer-view" aria-pressed="true">…</button>…</div>
+   	  </div>
+   	  <div class="file-explorer-main">
+   	    <nav class="file-explorer-tree"><ul role="tree"><li role="treeitem">
+   	      <button class="file-explorer-tree-item"><span class="file-explorer-twisty"></span>…</button>
+   	    </li></ul></nav>
+   	    <div class="file-explorer-content">
+   	      <table class="file-explorer-table">… <tr class="file-explorer-item" aria-selected="true">…</tr></table>
+   	      <!-- or --> <ul class="file-explorer-grid"><li class="file-explorer-item">…</li></ul>
+   	    </div>
+   	    <aside class="file-explorer-details">…</aside>
+   	  </div>
+   	</div>
+
+      Three zones — the folder tree, the current folder's content (a list
+      or a grid), the details of the selection — under a toolbar holding the
+      path (the family's .breadcrumbs), the caller's actions and the view
+      toggle. Selection is aria-selected; a drop target carries data-drop.
+
+      Plumbing contract:
+   	--file-explorer-bg / --file-explorer-fg / --file-explorer-muted
+   	--file-explorer-border / --file-explorer-border-width / --file-explorer-radius
+   	--file-explorer-pane      the tree and toolbar ground
+   	--file-explorer-hover / --file-explorer-selected / --file-explorer-selected-fg
+   	--file-explorer-folder    the folder icon's colour
+   	--file-explorer-drop      the outline of a drop target
+   	--file-explorer-height / --file-explorer-tree-width / --file-explorer-details-width
+   	--file-explorer-shadow    the context menu's shadow
+   ============================================================ */
 /* ============================================================
    STYLE FAMILY — « daisy »  (after DaisyUI 5)
    ============================================================
@@ -3414,8 +3923,8 @@ fieldset:disabled .input {
 }
 
 /* ── Suggestions ──
-   The Input wrapper's `suggest` hangs a .list-suggestions under the
-   field. The list is `list`'s to paint; this only places it, inside
+   The Combobox hangs a .list-suggestions under its .input
+   frame. The list is `list`'s to paint; this only places it, inside
    the frame (.input is already position: relative). A floating list
    is placed by the component instead, with inline fixed coordinates. */
 .input > .list-suggestions {
@@ -4993,6 +5502,1851 @@ input[type=color].swatch::-moz-color-swatch {
 .validator-hint {
   visibility: hidden;
   font-size: var(--xs, var(--default-xs));
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  gap: var(--divider-gap);
+  height: auto;
+  margin: var(--divider-m) 0;
+  padding: 0;
+  border: 0;
+  color: var(--divider-fg);
+  background: none;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  white-space: nowrap;
+  --divider-dir: 90deg;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1 1 0;
+  height: var(--divider-thickness);
+  background: var(--divider-line, var(--divider-color));
+}
+
+.divider::after {
+  background: var(--divider-line-end, var(--divider-line, var(--divider-color)));
+}
+
+/* No content: one line, not two halves around a gap. */
+.divider:empty {
+  gap: 0;
+}
+
+.divider:empty::after {
+  display: none;
+}
+
+.divider-start::before,
+.divider-end::after {
+  flex: 0 0 var(--divider-stub);
+}
+
+.divider-content {
+  min-width: 0;
+}
+
+.divider-horizontal {
+  flex-direction: row;
+}
+
+.divider-center::before,
+.divider-center::after {
+  flex: 1 1 0;
+}
+
+.divider-vertical {
+  flex-direction: column;
+  margin: 0 var(--divider-m);
+  min-height: 1em;
+  --divider-dir: 180deg;
+}
+
+.divider-vertical::before,
+.divider-vertical::after {
+  width: var(--divider-thickness);
+  height: auto;
+}
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--alert-gap);
+  padding: var(--alert-p);
+  border: var(--alert-border-width) solid var(--alert-border);
+  border-radius: var(--alert-radius);
+  background-color: var(--alert-bg);
+  color: var(--alert-fg);
+  box-shadow: var(--alert-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  line-height: 1.45;
+}
+
+.alert-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: 1.45em;
+  color: var(--alert-accent);
+}
+
+.alert-icon svg {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.alert-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.alert-title {
+  margin: 0;
+  color: var(--alert-accent);
+  font-weight: 600;
+}
+
+.alert-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-self: center;
+  gap: calc(0.5em * var(--scale));
+}
+
+.alert-close {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  margin: -0.1em -0.25em 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1em;
+  line-height: 1;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.alert-close:hover,
+.alert-close:focus-visible {
+  opacity: 1;
+  background-color: color-mix(in oklab, currentColor 12%, rgba(0, 0, 0, 0));
+}
+
+.toaster {
+  position: fixed;
+  z-index: 1000;
+  inset-block-end: var(--toaster-m);
+  inset-inline-end: var(--toaster-m);
+  display: flex;
+  flex-direction: column;
+  gap: var(--toaster-gap);
+  width: min(var(--toaster-width), 100vw - 2 * var(--toaster-m));
+  pointer-events: none;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.toaster > * {
+  pointer-events: auto;
+}
+
+.toaster .alert {
+  box-shadow: var(--toaster-shadow);
+}
+
+.toaster-top {
+  inset-block: var(--toaster-m) auto;
+  flex-direction: column-reverse;
+}
+
+.toaster-bottom {
+  inset-block: auto var(--toaster-m);
+}
+
+.toaster-start {
+  inset-inline: var(--toaster-m) auto;
+}
+
+.toaster-center {
+  inset-inline: 0;
+  margin-inline: auto;
+}
+
+.toaster-end {
+  inset-inline: auto var(--toaster-m);
+}
+
+.tooltip {
+  position: relative;
+  display: inline-flex;
+  --tooltip-x: -50%;
+  --tooltip-y: 0;
+}
+
+.tooltip-content {
+  position: absolute;
+  z-index: 50;
+  inset: auto auto calc(100% + var(--tooltip-gap)) 50%;
+  width: max-content;
+  max-width: var(--tooltip-max);
+  padding: var(--tooltip-p);
+  border: var(--tooltip-border-width, 0px) solid var(--tooltip-border, transparent);
+  border-radius: var(--tooltip-radius);
+  background-color: var(--tooltip-bg);
+  color: var(--tooltip-fg);
+  box-shadow: var(--tooltip-shadow);
+  font-size: 0.8125em;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  translate: var(--tooltip-x) var(--tooltip-y);
+  transition: opacity 0.12s ease, visibility 0.12s;
+}
+
+/* The arrow: a square turned 45deg, half hidden under the bubble. */
+.tooltip-content::after {
+  content: "";
+  position: absolute;
+  inset: 100% auto auto 50%;
+  width: var(--tooltip-arrow);
+  height: var(--tooltip-arrow);
+  background: inherit;
+  translate: -50% -50%;
+  rotate: 45deg;
+  z-index: -1;
+}
+
+.tooltip:hover > .tooltip-content,
+.tooltip:focus-within > .tooltip-content,
+.tooltip-open > .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tooltip-top > .tooltip-content {
+  inset: auto auto calc(100% + var(--tooltip-gap)) 50%;
+}
+
+.tooltip-bottom > .tooltip-content {
+  inset: calc(100% + var(--tooltip-gap)) auto auto 50%;
+}
+
+.tooltip-bottom > .tooltip-content::after {
+  inset: 0 auto auto 50%;
+}
+
+.tooltip-left > .tooltip-content,
+.tooltip-right > .tooltip-content {
+  --tooltip-x: 0;
+  --tooltip-y: -50%;
+}
+
+.tooltip-left > .tooltip-content {
+  inset: 50% calc(100% + var(--tooltip-gap)) auto auto;
+}
+
+.tooltip-left > .tooltip-content::after {
+  inset: 50% auto auto 100%;
+}
+
+.tooltip-right > .tooltip-content {
+  inset: 50% auto auto calc(100% + var(--tooltip-gap));
+}
+
+.tooltip-right > .tooltip-content::after {
+  inset: 50% auto auto 0;
+}
+
+/* Flag float — progressive enhancement. Where anchor positioning exists
+   (under the 90 % bar, so never required), the bubble leaves the flow:
+   fixed to its trigger, out of any ancestor's overflow, and flipped to
+   the other side when its own has no room. The flip cannot move the
+   arrow, so a floating bubble has none. Elsewhere it behaves as above.
+   The wrapper names the anchor (--tooltip-anchor) per instance. */
+@supports (anchor-name: --a) {
+  .tooltip-float {
+    anchor-name: var(--tooltip-anchor);
+  }
+  .tooltip-float > .tooltip-content {
+    position: fixed;
+    position-anchor: var(--tooltip-anchor);
+    inset: auto;
+    bottom: anchor(top);
+    left: anchor(center);
+    margin: 0 0 var(--tooltip-gap);
+    position-try-fallbacks: flip-block;
+  }
+  .tooltip-float > .tooltip-content::after {
+    content: none;
+  }
+  .tooltip-float.tooltip-bottom > .tooltip-content {
+    inset: auto;
+    top: anchor(bottom);
+    left: anchor(center);
+    margin: var(--tooltip-gap) 0 0;
+  }
+  .tooltip-float.tooltip-left > .tooltip-content {
+    inset: auto;
+    right: anchor(left);
+    top: anchor(center);
+    margin: 0 var(--tooltip-gap) 0 0;
+    position-try-fallbacks: flip-inline;
+  }
+  .tooltip-float.tooltip-right > .tooltip-content {
+    inset: auto;
+    left: anchor(right);
+    top: anchor(center);
+    margin: 0 0 0 var(--tooltip-gap);
+    position-try-fallbacks: flip-inline;
+  }
+}
+.collapse {
+  display: grid;
+  grid-template-rows: auto 0fr;
+  border: var(--collapse-border-width) solid var(--collapse-border);
+  border-radius: var(--collapse-radius);
+  background-color: var(--collapse-bg);
+  color: var(--collapse-fg);
+  box-shadow: var(--collapse-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  transition: grid-template-rows var(--collapse-speed) ease;
+}
+
+.collapse:has(> .collapse-trigger[aria-expanded=true]) {
+  grid-template-rows: auto 1fr;
+}
+
+.collapse-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  width: 100%;
+  margin: 0;
+  padding: var(--collapse-p);
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+.collapse-trigger:hover {
+  background-color: var(--collapse-hover);
+}
+
+.collapse-trigger:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.collapse-panel {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.collapse-inner {
+  padding: 0 var(--collapse-px, 1em) var(--collapse-py, 1em);
+}
+
+/* A chevron that turns when open. */
+.collapse-arrow > .collapse-trigger::after {
+  content: "";
+  flex: none;
+  width: 0.45em;
+  height: 0.45em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  rotate: 45deg;
+  translate: 0 -0.15em;
+  transition: rotate var(--collapse-speed) ease, translate var(--collapse-speed) ease;
+}
+
+.collapse-arrow > .collapse-trigger[aria-expanded=true]::after {
+  rotate: 225deg;
+  translate: 0 0.1em;
+}
+
+/* A plus that becomes a minus. */
+.collapse-plus > .collapse-trigger::after {
+  content: "+";
+  flex: none;
+  font-size: 1.25em;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.collapse-plus > .collapse-trigger[aria-expanded=true]::after {
+  content: "−";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapse,
+  .collapse-trigger::after {
+    transition: none;
+  }
+}
+.accordion {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.accordion:not(.accordion-separate) > .collapse:not(:first-child) {
+  margin-top: calc(var(--collapse-border-width) * -1);
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+.accordion:not(.accordion-separate) > .collapse:not(:last-child) {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.accordion-separate {
+  gap: var(--accordion-gap);
+}
+
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rating-gap);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  --rating-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5l2.94 6.1 6.56.86-4.8 4.6 1.2 6.54L12 17.4l-5.9 3.2 1.2-6.54-4.8-4.6 6.56-.86z'/%3E%3C/svg%3E");
+}
+
+.rating-item {
+  appearance: none;
+  flex: none;
+  width: var(--rating-size);
+  height: var(--rating-size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: var(--rating-off);
+  -webkit-mask: var(--rating-mask) center/contain no-repeat;
+  mask: var(--rating-mask) center/contain no-repeat;
+  cursor: pointer;
+  transition: background-color 0.1s, scale 0.1s;
+}
+
+.rating-item:checked,
+.rating-item:has(~ .rating-item:checked) {
+  background-color: var(--rating-on);
+}
+
+/* Hover previews: everything off, then up to the hovered item on. */
+.rating:hover .rating-item {
+  background-color: var(--rating-off);
+}
+
+.rating .rating-item:hover,
+.rating .rating-item:has(~ .rating-item:hover) {
+  background-color: var(--rating-on);
+}
+
+.rating-item:hover {
+  scale: 1.12;
+}
+
+.rating-item:focus-visible {
+  outline: 2px solid var(--rating-on);
+  outline-offset: 2px;
+}
+
+.rating-item:disabled,
+.rating-readonly .rating-item {
+  cursor: default;
+  pointer-events: none;
+}
+
+.segmented {
+  display: inline-flex;
+  gap: var(--segmented-pad);
+  padding: var(--segmented-pad);
+  border: var(--segmented-border-width) solid var(--segmented-border);
+  border-radius: var(--segmented-radius);
+  background-color: var(--segmented-bg);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.segmented-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  height: var(--size);
+  padding-inline: calc(var(--size) / 2.5);
+  border-radius: var(--segmented-item-radius);
+  color: var(--segmented-fg);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.segmented-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmented-item:hover {
+  color: var(--segmented-active-fg);
+}
+
+.segmented-item:has(.segmented-input:checked) {
+  background-color: var(--segmented-active-bg);
+  color: var(--segmented-active-fg);
+  box-shadow: var(--segmented-active-shadow);
+}
+
+.segmented-item:has(.segmented-input:focus-visible) {
+  outline: 2px solid var(--segmented-active-fg);
+  outline-offset: 1px;
+}
+
+.segmented-item:has(.segmented-input:disabled) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.segmented-block {
+  display: flex;
+}
+
+.segmented-block > .segmented-item {
+  flex: 1 1 0;
+}
+
+.number-input {
+  display: inline-flex;
+  align-items: stretch;
+  height: var(--size);
+  border: var(--number-input-border-width) solid var(--number-input-border);
+  border-radius: var(--number-input-radius);
+  background-color: var(--number-input-bg);
+  color: var(--number-input-fg);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.number-input:focus-within {
+  box-shadow: var(--number-input-focus);
+}
+
+.number-input-field {
+  width: var(--number-input-width);
+  min-width: 0;
+  margin: 0;
+  padding: 0 0.25em;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.number-input-field:focus {
+  outline: none;
+}
+
+.number-input-field::-webkit-inner-spin-button,
+.number-input-field::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.number-input-dec,
+.number-input-inc {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: var(--number-input-btn-bg);
+  color: inherit;
+  font: inherit;
+  font-size: 1.15em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.number-input-dec:hover,
+.number-input-inc:hover {
+  background-color: var(--number-input-btn-hover);
+}
+
+.number-input-dec:disabled,
+.number-input-inc:disabled {
+  opacity: 0.4;
+  cursor: default;
+  background-color: var(--number-input-btn-bg);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--empty-state-gap);
+  padding: var(--empty-state-p);
+  border: var(--empty-state-border, 0 solid transparent);
+  border-radius: var(--empty-state-radius, 0);
+  color: var(--empty-state-fg);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  text-align: center;
+}
+
+.empty-state-icon {
+  display: grid;
+  place-items: center;
+  width: var(--empty-state-icon-size);
+  height: var(--empty-state-icon-size);
+  margin-bottom: 0.25em;
+  border-radius: 999px;
+  background-color: var(--empty-state-icon-bg);
+  color: var(--empty-state-icon-fg);
+}
+
+.empty-state-icon svg {
+  width: 50%;
+  height: 50%;
+}
+
+.empty-state-title {
+  margin: 0;
+  font-size: 1.125em;
+  font-weight: 600;
+}
+
+.empty-state-body {
+  max-width: 32em;
+  margin: 0;
+  color: var(--empty-state-muted);
+}
+
+.empty-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em;
+  margin-top: 0.5em;
+}
+
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hero-gap);
+  padding: var(--hero-p);
+  border-radius: var(--hero-radius);
+  background: var(--hero-bg);
+  color: var(--hero-fg);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.hero-content {
+  display: flex;
+  flex: 1 1 20em;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--hero-gap) / 2.5);
+  min-width: 0;
+}
+
+.hero-title {
+  margin: 0;
+  font-size: var(--hero-title-size);
+  font-weight: var(--hero-title-weight);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.hero-body {
+  max-width: 36em;
+  margin: 0;
+  color: var(--hero-muted);
+  font-size: 1.125em;
+  text-wrap: pretty;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75em;
+  margin-top: 0.5em;
+}
+
+.hero-media {
+  flex: 1 1 18em;
+  min-width: 0;
+}
+
+.hero-media > :is(img, video, svg) {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--hero-media-radius, 0);
+}
+
+.hero-center {
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-center > .hero-content {
+  align-items: center;
+}
+
+.hero-center .hero-body {
+  margin-inline: auto;
+}
+
+.hero-reverse {
+  flex-direction: row-reverse;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--footer-gap);
+  padding: var(--footer-p);
+  background-color: var(--footer-bg);
+  color: var(--footer-fg);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.footer-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--footer-col), 1fr));
+  gap: var(--footer-gap);
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5em;
+  min-width: 0;
+}
+
+.footer-section a {
+  color: var(--footer-muted);
+  text-decoration: none;
+}
+
+.footer-section a:hover {
+  color: var(--footer-fg);
+  text-decoration: underline;
+}
+
+.footer-title {
+  margin: 0 0 0.25em;
+  font-size: 0.8125em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  padding-top: var(--footer-gap);
+  border-top: var(--footer-rule, 1px) solid var(--footer-border);
+  color: var(--footer-muted);
+  font-size: 0.875em;
+}
+
+.footer-center {
+  text-align: center;
+}
+
+.footer-center .footer-section {
+  align-items: center;
+}
+
+.footer-center .footer-bottom {
+  justify-content: center;
+}
+
+.mobile-frame {
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  width: var(--mobile-frame-width);
+  aspect-ratio: 9/19.5;
+  padding: var(--mobile-frame-bezel);
+  border-radius: var(--mobile-frame-radius);
+  background-color: var(--mobile-frame-body);
+  box-shadow: var(--mobile-frame-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  vertical-align: top;
+}
+
+/* The island. */
+.mobile-frame::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: calc(var(--mobile-frame-bezel) + 0.55em);
+  left: 50%;
+  width: 30%;
+  height: 1.5em;
+  border-radius: 999px;
+  background-color: var(--mobile-frame-body);
+  translate: -50% 0;
+}
+
+/* The side button. */
+.mobile-frame::after {
+  content: "";
+  position: absolute;
+  top: 24%;
+  right: -0.22em;
+  width: 0.22em;
+  height: 11%;
+  border-radius: 0 0.2em 0.2em 0;
+  background-color: var(--mobile-frame-body);
+}
+
+.mobile-frame-screen {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border-radius: calc(var(--mobile-frame-radius) - var(--mobile-frame-bezel));
+  background-color: var(--mobile-frame-screen-bg);
+  color: var(--mobile-frame-screen-fg);
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.window-frame {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: var(--window-frame-border-width) solid var(--window-frame-border);
+  border-radius: var(--window-frame-radius);
+  background-color: var(--window-frame-bg);
+  color: var(--window-frame-fg);
+  box-shadow: var(--window-frame-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  overflow: hidden;
+}
+
+.window-frame-bar {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, auto) 1fr;
+  align-items: center;
+  gap: 0.75em;
+  min-height: 2.4em;
+  padding: 0.3em 0.9em;
+  border-bottom: var(--window-frame-border-width) solid var(--window-frame-border);
+  background-color: var(--window-frame-bar-bg);
+  color: var(--window-frame-bar-fg);
+}
+
+.window-frame-controls {
+  display: flex;
+  gap: 0.45em;
+}
+
+.window-frame-controls > span {
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: 50%;
+  background-color: var(--window-frame-dot-1);
+}
+
+.window-frame-controls > span:nth-child(2) {
+  background-color: var(--window-frame-dot-2);
+}
+
+.window-frame-controls > span:nth-child(3) {
+  background-color: var(--window-frame-dot-3);
+}
+
+.window-frame-title {
+  overflow: hidden;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.window-frame-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4em;
+}
+
+.window-frame-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.laptop-frame {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--laptop-frame-width);
+  max-width: 100%;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  vertical-align: top;
+}
+
+.laptop-frame-lid {
+  position: relative;
+  box-sizing: border-box;
+  width: 84%;
+  padding: var(--laptop-frame-bezel);
+  padding-top: calc(var(--laptop-frame-bezel) * 1.6);
+  border-radius: 0.9em 0.9em 0 0;
+  background-color: var(--laptop-frame-body);
+  box-shadow: var(--laptop-frame-shadow);
+}
+
+/* The camera. */
+.laptop-frame-lid::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--laptop-frame-bezel) * 0.55);
+  left: 50%;
+  width: 0.35em;
+  height: 0.35em;
+  border-radius: 50%;
+  background-color: color-mix(in oklab, var(--laptop-frame-screen-bg) 35%, var(--laptop-frame-body));
+  translate: -50% 0;
+}
+
+.laptop-frame-screen {
+  aspect-ratio: 16/10;
+  background-color: var(--laptop-frame-screen-bg);
+  color: var(--laptop-frame-screen-fg);
+  overflow: auto;
+}
+
+.laptop-frame-base {
+  position: relative;
+  width: 100%;
+  height: 0.9em;
+  border-radius: 0 0 1.2em 1.2em/0 0 0.9em 0.9em;
+  background-color: var(--laptop-frame-base);
+  box-shadow: var(--laptop-frame-shadow);
+}
+
+/* The notch to lift the lid. */
+.laptop-frame-base::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 16%;
+  height: 0.3em;
+  border-radius: 0 0 0.4em 0.4em;
+  background-color: color-mix(in oklab, var(--laptop-frame-base) 70%, #000);
+  translate: -50% 0;
+}
+
+.drawer {
+  position: var(--drawer-position, fixed);
+  z-index: 900;
+  flex-direction: column;
+  box-sizing: border-box;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0 solid var(--drawer-border);
+  background-color: var(--drawer-bg);
+  color: var(--drawer-fg);
+  box-shadow: var(--drawer-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  overflow: visible;
+  transition: translate var(--drawer-speed) ease;
+}
+
+.drawer:not(dialog),
+dialog.drawer[open] {
+  display: flex;
+}
+
+.drawer {
+  inset: 0 auto 0 0;
+  width: var(--drawer-size);
+  height: auto;
+  max-width: 100%;
+}
+
+.drawer[data-state=hidden] {
+  translate: -100% 0;
+}
+
+.drawer[data-state=peek] {
+  translate: calc(-100% + var(--drawer-peek)) 0;
+}
+
+.drawer,
+.drawer-left {
+  border-inline-end-width: var(--drawer-border-width);
+  border-radius: 0 var(--drawer-radius) var(--drawer-radius) 0;
+}
+
+.drawer-left {
+  inset: 0 auto 0 0;
+  width: var(--drawer-size);
+  height: auto;
+  max-width: 100%;
+}
+
+.drawer-left[data-state=hidden] {
+  translate: -100% 0;
+}
+
+.drawer-left[data-state=peek] {
+  translate: calc(-100% + var(--drawer-peek)) 0;
+}
+
+.drawer-right {
+  inset: 0 0 0 auto;
+  width: var(--drawer-size);
+  height: auto;
+  max-width: 100%;
+}
+
+.drawer-right[data-state=hidden] {
+  translate: 100% 0;
+}
+
+.drawer-right[data-state=peek] {
+  translate: calc(100% - var(--drawer-peek)) 0;
+}
+
+.drawer-right {
+  border-width: 0;
+  border-inline-start-width: var(--drawer-border-width);
+  border-radius: var(--drawer-radius) 0 0 var(--drawer-radius);
+}
+
+.drawer-top {
+  inset: 0 0 auto 0;
+  height: var(--drawer-size);
+  width: auto;
+  max-height: 100%;
+}
+
+.drawer-top[data-state=hidden] {
+  translate: 0 -100%;
+}
+
+.drawer-top[data-state=peek] {
+  translate: 0 calc(-100% + var(--drawer-peek));
+}
+
+.drawer-top {
+  border-width: 0;
+  border-bottom-width: var(--drawer-border-width);
+  border-radius: 0 0 var(--drawer-radius) var(--drawer-radius);
+}
+
+.drawer-bottom {
+  inset: auto 0 0 0;
+  height: var(--drawer-size);
+  width: auto;
+  max-height: 100%;
+}
+
+.drawer-bottom[data-state=hidden] {
+  translate: 0 100%;
+}
+
+.drawer-bottom[data-state=peek] {
+  translate: 0 calc(100% - var(--drawer-peek));
+}
+
+.drawer-bottom {
+  border-width: 0;
+  border-top-width: var(--drawer-border-width);
+  border-radius: var(--drawer-radius) var(--drawer-radius) 0 0;
+}
+
+.drawer[data-state=hidden] {
+  box-shadow: none;
+}
+
+.drawer::backdrop {
+  background-color: var(--drawer-backdrop);
+}
+
+.drawer-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--drawer-p);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.drawer-handle {
+  position: absolute;
+  inset: 50% 0 auto auto;
+  translate: 0 -50%;
+  width: var(--drawer-handle-w);
+  height: var(--drawer-handle-l);
+  margin: calc(var(--drawer-handle-w) * 1.5);
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background-color: var(--drawer-handle-bg);
+  cursor: pointer;
+}
+
+.drawer-left > .drawer-handle {
+  inset: 50% 0 auto auto;
+  translate: 0 -50%;
+  width: var(--drawer-handle-w);
+  height: var(--drawer-handle-l);
+}
+
+.drawer-right > .drawer-handle {
+  inset: 50% auto auto 0;
+  translate: 0 -50%;
+  width: var(--drawer-handle-w);
+  height: var(--drawer-handle-l);
+}
+
+.drawer-top > .drawer-handle {
+  inset: auto auto 0 50%;
+  translate: -50% 0;
+  width: var(--drawer-handle-l);
+  height: var(--drawer-handle-w);
+}
+
+.drawer-bottom > .drawer-handle {
+  inset: 0 auto auto 50%;
+  translate: -50% 0;
+  width: var(--drawer-handle-l);
+  height: var(--drawer-handle-w);
+}
+
+/* A larger hit area than the grip it draws. */
+.drawer-handle::before {
+  content: "";
+  position: absolute;
+  inset: -0.75em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer {
+    transition: none;
+  }
+}
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  width: 100%;
+  color: var(--steps-fg);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+.steps-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75em;
+  font-size: 0.85em;
+  font-weight: 700;
+}
+
+.steps-heading > :last-child {
+  flex: none;
+  color: var(--steps-muted);
+  font-weight: 600;
+}
+
+.steps-list {
+  display: flex;
+  gap: var(--steps-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps-item {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 0.5em;
+  min-width: 0;
+}
+
+.steps-track {
+  display: flex;
+  align-items: center;
+  gap: var(--steps-seg-gap);
+}
+
+.steps-marker,
+.steps-segment {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.steps-marker:disabled,
+.steps-segment:disabled {
+  cursor: default;
+}
+
+.steps-marker {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--steps-marker);
+  height: var(--steps-marker);
+  border: 2px solid var(--steps-off);
+  border-radius: 50%;
+  background-color: var(--steps-marker-bg);
+  color: var(--steps-marker-fg);
+}
+
+.steps-marker svg {
+  width: 65%;
+  height: 65%;
+  visibility: hidden;
+}
+
+.steps-item[data-state=current] > .steps-track > .steps-marker,
+.steps-item[data-state=visited] > .steps-track > .steps-marker {
+  border-color: var(--steps-color);
+}
+
+.steps-item[data-state=complete] > .steps-track > .steps-marker {
+  border-color: var(--steps-color);
+  background-color: var(--steps-color);
+}
+
+.steps-item[data-state=complete] > .steps-track > .steps-marker svg {
+  visibility: visible;
+}
+
+.steps-segment {
+  flex: 1 1 0;
+  padding-block: 0.3em;
+}
+
+.steps-segment > span {
+  display: block;
+  height: var(--steps-bar);
+  border-radius: var(--steps-bar);
+  background: var(--steps-off);
+  transition: transform 0.1s ease;
+}
+
+.steps-segment[data-state=visited] > span {
+  background: var(--steps-visited);
+}
+
+.steps-segment[data-state=complete] > span {
+  background: var(--steps-color);
+}
+
+.steps-segment[data-state=current] > span {
+  background: repeating-linear-gradient(var(--steps-dir, 90deg), var(--steps-color) 0 0.9em, var(--steps-off) 0 1.8em);
+}
+
+.steps-segment[data-issue=warning]:not([data-state=current]) > span {
+  background: var(--steps-warning);
+}
+
+.steps-segment[data-issue=error]:not([data-state=current]) > span {
+  background: var(--steps-error);
+}
+
+.steps-segment:not(:disabled):hover > span {
+  transform: scale(1, 1.6);
+}
+
+.steps-segment:focus-visible,
+.steps-marker:focus-visible {
+  outline: 2px solid var(--steps-color);
+  outline-offset: 2px;
+  border-radius: 0.25em;
+}
+
+.steps-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  min-width: 0;
+  margin: 0;
+  color: var(--steps-muted);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.steps-label > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.steps-item:not([data-state=unknown]) > .steps-label {
+  color: var(--steps-fg);
+}
+
+.steps-item[data-state=current] > .steps-label {
+  font-weight: 700;
+}
+
+.steps-issue {
+  display: inline-flex;
+  flex: none;
+  color: var(--steps-error);
+}
+
+.steps-issue[data-issue=warning] {
+  color: var(--steps-warning);
+}
+
+.steps-issue svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.steps-sublabel {
+  margin: -0.35em 0 0;
+  color: var(--steps-muted);
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.steps-horizontal .steps-list {
+  flex-direction: row;
+}
+
+/* Vertical: the track becomes a column on the left of the labels. */
+.steps-vertical .steps-list {
+  flex-direction: column;
+}
+
+.steps-vertical .steps-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  column-gap: 0.75em;
+  row-gap: 0.1em;
+  align-items: start;
+}
+
+.steps-vertical .steps-track {
+  flex-direction: column;
+  grid-row: 1/span 3;
+  align-self: stretch;
+  min-height: 3em;
+  --steps-dir: 180deg;
+}
+
+.steps-vertical .steps-segment {
+  display: flex;
+  justify-content: center;
+  padding: 0 0.3em;
+  min-height: 1.5em;
+}
+
+.steps-vertical .steps-segment > span {
+  width: var(--steps-bar);
+  height: auto;
+}
+
+.steps-vertical .steps-segment:not(:disabled):hover > span {
+  transform: scale(1.6, 1);
+}
+
+.steps-vertical .steps-label {
+  padding-top: calc((var(--steps-marker) - 1.2em) / 2);
+}
+
+.steps-vertical .steps-sublabel {
+  margin: 0;
+}
+
+.steps-compact .steps-list {
+  gap: calc(var(--steps-gap) * 0.6);
+}
+
+.steps-compact .steps-track {
+  gap: calc(var(--steps-seg-gap) / 2);
+}
+
+.steps-compact .steps-segment {
+  padding-block: 0.5em;
+}
+
+.combobox {
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: middle;
+  min-width: 0;
+}
+
+.combobox > .input {
+  width: 100%;
+}
+
+.combobox-option {
+  gap: 0.6em;
+}
+
+/* Multiple: each option carries a box, ticked when picked. */
+.combobox-multiple .combobox-option::before {
+  content: "";
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1em;
+  height: 1em;
+  box-sizing: border-box;
+  border: 1.5px solid var(--combobox-check-border);
+  border-radius: 0.25em;
+}
+
+.combobox-multiple .combobox-option[aria-selected=true]::before {
+  content: "✓";
+  border-color: var(--combobox-check);
+  background-color: var(--combobox-check);
+  color: var(--combobox-check-fg);
+  font-size: 0.85em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.combobox-multiple .combobox-option[data-active] {
+  background-color: var(--combobox-active);
+}
+
+.chips-input {
+  flex-wrap: wrap;
+  align-items: center;
+  height: auto;
+  min-height: var(--size);
+  cursor: text;
+}
+
+.chips-input > .chip {
+  flex: none;
+  max-width: 100%;
+}
+
+.chips-input-remove {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.2em;
+  height: 1.2em;
+  margin: 0 -0.4em 0 0.1em;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.chips-input-remove:hover,
+.chips-input-remove:focus-visible {
+  opacity: 1;
+  background-color: color-mix(in oklab, currentColor 15%, rgba(0, 0, 0, 0));
+}
+
+.file-explorer {
+  display: flex;
+  flex-direction: column;
+  height: var(--file-explorer-height);
+  min-height: 0;
+  border: var(--file-explorer-border-width) solid var(--file-explorer-border);
+  border-radius: var(--file-explorer-radius);
+  background-color: var(--file-explorer-bg);
+  color: var(--file-explorer-fg);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  overflow: hidden;
+}
+
+.file-explorer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em 0.75em;
+  padding: 0.5em 0.75em;
+  border-bottom: var(--file-explorer-border-width) solid var(--file-explorer-border);
+  background-color: var(--file-explorer-pane);
+}
+
+.file-explorer-path {
+  flex: 1 1 12em;
+  min-width: 0;
+}
+
+.file-explorer-path button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.file-explorer-path li:last-child button {
+  font-weight: 600;
+}
+
+.file-explorer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+}
+
+.file-explorer-views {
+  display: inline-flex;
+  border: var(--file-explorer-border-width) solid var(--file-explorer-border);
+  border-radius: calc(var(--file-explorer-radius) / 1.5);
+  overflow: hidden;
+}
+
+.file-explorer-view {
+  display: inline-grid;
+  place-items: center;
+  width: 2em;
+  height: 1.85em;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--file-explorer-muted);
+  cursor: pointer;
+}
+
+.file-explorer-view[aria-pressed=true] {
+  background-color: var(--file-explorer-selected);
+  color: var(--file-explorer-selected-fg);
+}
+
+.file-explorer-view svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.file-explorer-main {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.file-explorer-tree {
+  flex: none;
+  width: var(--file-explorer-tree-width);
+  padding: 0.4em;
+  border-right: var(--file-explorer-border-width) solid var(--file-explorer-border);
+  background-color: var(--file-explorer-pane);
+  overflow: auto;
+}
+
+.file-explorer-tree ul {
+  margin: 0;
+  padding: 0 0 0 0.9em;
+  list-style: none;
+}
+
+.file-explorer-tree > ul {
+  padding-left: 0;
+}
+
+.file-explorer-tree-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  width: 100%;
+  padding: 0.3em 0.4em;
+  border: 0;
+  border-radius: calc(var(--file-explorer-radius) / 1.5);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.file-explorer-tree-item > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-explorer-tree-item:hover {
+  background-color: var(--file-explorer-hover);
+}
+
+.file-explorer-tree-item[aria-current=true] {
+  background-color: var(--file-explorer-selected);
+  color: var(--file-explorer-selected-fg);
+  font-weight: 600;
+}
+
+.file-explorer-twisty {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1em;
+  height: 1em;
+  transition: rotate 0.15s;
+}
+
+.file-explorer-twisty::before {
+  content: "";
+  width: 0.35em;
+  height: 0.35em;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  rotate: -45deg;
+}
+
+.file-explorer-twisty:empty:not([data-leaf])::before {
+  opacity: 0.7;
+}
+
+.file-explorer-twisty[data-leaf]::before {
+  content: none;
+}
+
+[aria-expanded=true] > .file-explorer-tree-item > .file-explorer-twisty {
+  rotate: 90deg;
+}
+
+.file-explorer-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: auto;
+  outline: none;
+}
+
+.file-explorer-content:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--file-explorer-drop);
+}
+
+.file-explorer-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.file-explorer-table th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  padding: 0.45em 0.75em;
+  border-bottom: var(--file-explorer-border-width) solid var(--file-explorer-border);
+  background-color: var(--file-explorer-bg);
+  color: var(--file-explorer-muted);
+  font-size: 0.85em;
+  font-weight: 600;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.file-explorer-table th button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.file-explorer-table th[aria-sort] {
+  color: var(--file-explorer-fg);
+}
+
+.file-explorer-table td {
+  padding: 0.4em 0.75em;
+  white-space: nowrap;
+}
+
+.file-explorer-table td:first-child {
+  width: 100%;
+  max-width: 0;
+}
+
+.file-explorer-item {
+  cursor: default;
+  user-select: none;
+}
+
+.file-explorer-item:hover {
+  background-color: var(--file-explorer-hover);
+}
+
+.file-explorer-item[aria-selected=true] {
+  background-color: var(--file-explorer-selected);
+  color: var(--file-explorer-selected-fg);
+}
+
+.file-explorer-item[data-drop],
+.file-explorer-tree-item[data-drop] {
+  outline: 2px dashed var(--file-explorer-drop);
+  outline-offset: -2px;
+}
+
+.file-explorer-content:focus-visible .file-explorer-item[data-focus] {
+  outline: 2px solid var(--file-explorer-drop);
+  outline-offset: -2px;
+}
+
+.file-explorer-content[data-drop] {
+  box-shadow: inset 0 0 0 2px var(--file-explorer-drop);
+}
+
+.file-explorer-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  min-width: 0;
+}
+
+.file-explorer-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.25em;
+  height: 1.25em;
+  color: var(--file-explorer-muted);
+}
+
+.file-explorer-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.file-explorer-icon[data-kind=folder] {
+  color: var(--file-explorer-folder);
+}
+
+.file-explorer-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-explorer-meta {
+  color: var(--file-explorer-muted);
+  font-size: 0.875em;
+  font-variant-numeric: tabular-nums;
+}
+
+[aria-selected=true] .file-explorer-meta,
+[aria-selected=true] .file-explorer-icon {
+  color: inherit;
+}
+
+.file-explorer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5em, 1fr));
+  gap: 0.5em;
+  margin: 0;
+  padding: 0.75em;
+  list-style: none;
+}
+
+.file-explorer-grid > .file-explorer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.85em 0.5em 0.6em;
+  border-radius: var(--file-explorer-radius);
+  text-align: center;
+}
+
+.file-explorer-grid .file-explorer-icon {
+  width: 2.75em;
+  height: 2.75em;
+}
+
+.file-explorer-grid .file-explorer-name {
+  display: -webkit-box;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+}
+
+.file-explorer-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 2em;
+  color: var(--file-explorer-muted);
+}
+
+.file-explorer-details {
+  flex: none;
+  width: var(--file-explorer-details-width);
+  padding: 1em;
+  border-left: var(--file-explorer-border-width) solid var(--file-explorer-border);
+  overflow: auto;
+}
+
+.file-explorer-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 12em;
+  padding: 0.25em;
+  border: var(--file-explorer-border-width) solid var(--file-explorer-border);
+  border-radius: var(--file-explorer-radius);
+  background-color: var(--file-explorer-bg);
+  color: var(--file-explorer-fg);
+  box-shadow: var(--file-explorer-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
 }
 
 /* What daisy decides, one file per component. */
@@ -8664,4 +11018,857 @@ label:has(:checked),
 
 .validator-hint {
   margin-top: 0.5em;
+}
+
+.divider {
+  --divider-color: color-mix(in oklab, var(--color-base-content) 10%, #0000);
+  --divider-thickness: 1px;
+  --divider-gap: calc(1em * var(--scale));
+  --divider-stub: calc(1.5em * var(--scale));
+  --divider-m: calc(1em * var(--scale));
+  --divider-fg: color-mix(in oklab, var(--color-base-content) 65%, #0000);
+  font-size: var(--fontsize, 0.875em);
+}
+
+/* colour variants: the line takes the colour, the content keeps its ink. */
+.divider-primary {
+  --divider-color: var(--color-primary);
+}
+
+.divider-secondary {
+  --divider-color: var(--color-secondary);
+}
+
+.divider-accent {
+  --divider-color: var(--color-accent);
+}
+
+.divider-neutral {
+  --divider-color: var(--color-neutral);
+}
+
+.divider-info {
+  --divider-color: var(--color-info);
+}
+
+.divider-success {
+  --divider-color: var(--color-success);
+}
+
+.divider-warning {
+  --divider-color: var(--color-warning);
+}
+
+.divider-error {
+  --divider-color: var(--color-error);
+}
+
+.alert {
+  --alert-color: var(--color-base-content);
+  --alert-bg: color-mix(in oklab, var(--alert-color) 10%, var(--color-base-100));
+  --alert-fg: var(--color-base-content);
+  --alert-border: color-mix(in oklab, var(--alert-color) 25%, var(--color-base-100));
+  --alert-accent: var(--alert-color);
+  --alert-border-width: var(--border);
+  --alert-radius: var(--radius-box);
+  --alert-shadow: none;
+  --alert-p: calc(0.85em * var(--scale)) calc(1em * var(--scale));
+  --alert-gap: calc(0.75em * var(--scale));
+}
+
+/* colour variants */
+.alert-primary {
+  --alert-color: var(--color-primary);
+}
+
+.alert-secondary {
+  --alert-color: var(--color-secondary);
+}
+
+.alert-accent {
+  --alert-color: var(--color-accent);
+}
+
+.alert-neutral {
+  --alert-color: var(--color-neutral);
+}
+
+.alert-info {
+  --alert-color: var(--color-info);
+}
+
+.alert-success {
+  --alert-color: var(--color-success);
+}
+
+.alert-warning {
+  --alert-color: var(--color-warning);
+}
+
+.alert-error {
+  --alert-color: var(--color-error);
+}
+
+/* variant outline: the page shows through. */
+.alert-outline {
+  --alert-bg: transparent;
+  --alert-border: var(--alert-color);
+}
+
+/* variant solid: the colour itself, with its own ink. */
+.alert-solid {
+  --alert-bg: var(--alert-color);
+  --alert-fg: var(--alert-on, var(--color-base-100));
+  --alert-accent: var(--alert-fg);
+  --alert-border: var(--alert-color);
+}
+
+.alert-solid.alert-primary {
+  --alert-on: var(--color-primary-content);
+}
+
+.alert-solid.alert-secondary {
+  --alert-on: var(--color-secondary-content);
+}
+
+.alert-solid.alert-accent {
+  --alert-on: var(--color-accent-content);
+}
+
+.alert-solid.alert-neutral {
+  --alert-on: var(--color-neutral-content);
+}
+
+.alert-solid.alert-info {
+  --alert-on: var(--color-info-content);
+}
+
+.alert-solid.alert-success {
+  --alert-on: var(--color-success-content);
+}
+
+.alert-solid.alert-warning {
+  --alert-on: var(--color-warning-content);
+}
+
+.alert-solid.alert-error {
+  --alert-on: var(--color-error-content);
+}
+
+.alert-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.alert-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.alert-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.alert-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.alert-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.toaster {
+  --toaster-gap: calc(0.6em * var(--scale));
+  --toaster-m: calc(1em * var(--scale));
+  --toaster-width: 24em;
+  --toaster-shadow: 0 0.4em 1.4em -0.4em color-mix(in oklab, #000 35%, #0000);
+}
+
+/* A floating toast needs an opaque ground: the page must not show through. */
+.toaster .alert {
+  background-image: linear-gradient(var(--alert-bg), var(--alert-bg));
+  background-color: var(--color-base-100);
+}
+
+.tooltip {
+  --tooltip-bg: var(--color-base-content);
+  --tooltip-fg: var(--color-base-100);
+  --tooltip-border: transparent;
+  --tooltip-border-width: 0px;
+  --tooltip-radius: var(--radius-field);
+  --tooltip-shadow: none;
+  --tooltip-p: 0.35em 0.65em;
+  --tooltip-gap: calc(0.5em * var(--scale));
+  --tooltip-arrow: 0.5em;
+  --tooltip-max: 20em;
+}
+
+/* colour variants */
+.tooltip-primary {
+  --tooltip-bg: var(--color-primary);
+  --tooltip-fg: var(--color-primary-content);
+}
+
+.tooltip-secondary {
+  --tooltip-bg: var(--color-secondary);
+  --tooltip-fg: var(--color-secondary-content);
+}
+
+.tooltip-accent {
+  --tooltip-bg: var(--color-accent);
+  --tooltip-fg: var(--color-accent-content);
+}
+
+.tooltip-neutral {
+  --tooltip-bg: var(--color-neutral);
+  --tooltip-fg: var(--color-neutral-content);
+}
+
+.tooltip-info {
+  --tooltip-bg: var(--color-info);
+  --tooltip-fg: var(--color-info-content);
+}
+
+.tooltip-success {
+  --tooltip-bg: var(--color-success);
+  --tooltip-fg: var(--color-success-content);
+}
+
+.tooltip-warning {
+  --tooltip-bg: var(--color-warning);
+  --tooltip-fg: var(--color-warning-content);
+}
+
+.tooltip-error {
+  --tooltip-bg: var(--color-error);
+  --tooltip-fg: var(--color-error-content);
+}
+
+.collapse {
+  --collapse-bg: var(--color-base-100);
+  --collapse-fg: var(--color-base-content);
+  --collapse-border: var(--color-base-300);
+  --collapse-border-width: var(--border);
+  --collapse-radius: var(--radius-box);
+  --collapse-shadow: none;
+  --collapse-px: calc(1em * var(--scale));
+  --collapse-py: calc(0.85em * var(--scale));
+  --collapse-p: var(--collapse-py) var(--collapse-px);
+  --collapse-hover: color-mix(in oklab, var(--color-base-content) 5%, #0000);
+  --collapse-speed: 0.2s;
+}
+
+/* variant ghost: no frame — after the defaults above, so it wins. */
+.collapse-ghost {
+  --collapse-bg: transparent;
+  --collapse-border-width: 0px;
+  --collapse-shadow: none;
+}
+
+.accordion {
+  --accordion-gap: calc(0.5em * var(--scale));
+}
+
+.rating {
+  --rating-on: var(--color-warning, var(--color-primary));
+  --rating-off: color-mix(in oklab, var(--color-base-content) 18%, #0000);
+  --rating-size: calc(1.5em * var(--scale));
+  --rating-gap: calc(0.15em * var(--scale));
+}
+
+/* colour variants */
+.rating-primary {
+  --rating-on: var(--color-primary);
+}
+
+.rating-secondary {
+  --rating-on: var(--color-secondary);
+}
+
+.rating-accent {
+  --rating-on: var(--color-accent);
+}
+
+.rating-neutral {
+  --rating-on: var(--color-neutral);
+}
+
+.rating-info {
+  --rating-on: var(--color-info);
+}
+
+.rating-success {
+  --rating-on: var(--color-success);
+}
+
+.rating-warning {
+  --rating-on: var(--color-warning);
+}
+
+.rating-error {
+  --rating-on: var(--color-error);
+}
+
+.rating-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.rating-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.rating-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.rating-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.rating-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.segmented {
+  --size: calc(2.1em * var(--scale));
+  --segmented-bg: var(--color-base-200);
+  --segmented-border: var(--color-base-300);
+  --segmented-border-width: 0px;
+  --segmented-radius: var(--radius-field);
+  --segmented-item-radius: calc(var(--radius-field) - var(--segmented-pad) / 2);
+  --segmented-pad: calc(0.2em * var(--scale));
+  --segmented-fg: color-mix(in oklab, var(--color-base-content) 65%, #0000);
+  --segmented-active-bg: var(--color-base-100);
+  --segmented-active-fg: var(--color-base-content);
+  --segmented-active-shadow: 0 1px 3px color-mix(in oklab, #000 18%, #0000);
+}
+
+/* colour variants: the checked item takes the colour. */
+.segmented-primary {
+  --segmented-active-bg: var(--color-primary);
+  --segmented-active-fg: var(--color-primary-content);
+}
+
+.segmented-secondary {
+  --segmented-active-bg: var(--color-secondary);
+  --segmented-active-fg: var(--color-secondary-content);
+}
+
+.segmented-accent {
+  --segmented-active-bg: var(--color-accent);
+  --segmented-active-fg: var(--color-accent-content);
+}
+
+.segmented-neutral {
+  --segmented-active-bg: var(--color-neutral);
+  --segmented-active-fg: var(--color-neutral-content);
+}
+
+.segmented-info {
+  --segmented-active-bg: var(--color-info);
+  --segmented-active-fg: var(--color-info-content);
+}
+
+.segmented-success {
+  --segmented-active-bg: var(--color-success);
+  --segmented-active-fg: var(--color-success-content);
+}
+
+.segmented-warning {
+  --segmented-active-bg: var(--color-warning);
+  --segmented-active-fg: var(--color-warning-content);
+}
+
+.segmented-error {
+  --segmented-active-bg: var(--color-error);
+  --segmented-active-fg: var(--color-error-content);
+}
+
+.segmented-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.segmented-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.segmented-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.segmented-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.segmented-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.number-input {
+  --size: calc(2.5em * var(--scale));
+  --number-input-bg: var(--color-base-100);
+  --number-input-fg: var(--color-base-content);
+  --number-input-border: color-mix(in oklab, var(--color-base-content) 20%, #0000);
+  --number-input-border-width: var(--border);
+  --number-input-radius: var(--radius-field);
+  --number-input-btn-bg: transparent;
+  --number-input-btn-hover: color-mix(in oklab, var(--color-base-content) 8%, #0000);
+  --number-input-width: 4em;
+  --number-input-focus: 0 0 0 2px color-mix(in oklab, var(--color-primary) 45%, #0000);
+}
+
+.number-input-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.number-input-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.number-input-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.number-input-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.number-input-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.empty-state {
+  --empty-state-fg: var(--color-base-content);
+  --empty-state-muted: color-mix(in oklab, var(--color-base-content) 60%, #0000);
+  --empty-state-icon-bg: var(--color-base-200);
+  --empty-state-icon-fg: color-mix(in oklab, var(--color-base-content) 55%, #0000);
+  --empty-state-icon-size: calc(3.5em * var(--scale));
+  --empty-state-p: calc(2.5em * var(--scale)) calc(1.5em * var(--scale));
+  --empty-state-gap: calc(0.4em * var(--scale));
+}
+
+/* variant dashed: a drop-zone-like frame. */
+.empty-state-dashed {
+  --empty-state-border: max(var(--border), 1px) dashed color-mix(in oklab, var(--color-base-content) 25%, #0000);
+  --empty-state-radius: var(--radius-box);
+}
+
+.empty-state-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.empty-state-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.empty-state-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.empty-state-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.empty-state-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.hero {
+  --hero-bg: var(--color-base-200);
+  --hero-fg: var(--color-base-content);
+  --hero-muted: color-mix(in oklab, var(--color-base-content) 70%, #0000);
+  --hero-p: calc(3em * var(--scale)) calc(2em * var(--scale));
+  --hero-gap: calc(2.5em * var(--scale));
+  --hero-title-size: 2.75em;
+  --hero-title-weight: 800;
+  --hero-radius: var(--radius-box);
+  --hero-media-radius: var(--radius-box);
+}
+
+/* colour variants: the whole block takes the colour. */
+.hero-primary {
+  --hero-bg: var(--color-primary);
+  --hero-fg: var(--color-primary-content);
+  --hero-muted: color-mix(in oklab, var(--color-primary-content) 80%, #0000);
+}
+
+.hero-secondary {
+  --hero-bg: var(--color-secondary);
+  --hero-fg: var(--color-secondary-content);
+  --hero-muted: color-mix(in oklab, var(--color-secondary-content) 80%, #0000);
+}
+
+.hero-accent {
+  --hero-bg: var(--color-accent);
+  --hero-fg: var(--color-accent-content);
+  --hero-muted: color-mix(in oklab, var(--color-accent-content) 80%, #0000);
+}
+
+.hero-neutral {
+  --hero-bg: var(--color-neutral);
+  --hero-fg: var(--color-neutral-content);
+  --hero-muted: color-mix(in oklab, var(--color-neutral-content) 80%, #0000);
+}
+
+.hero-info {
+  --hero-bg: var(--color-info);
+  --hero-fg: var(--color-info-content);
+  --hero-muted: color-mix(in oklab, var(--color-info-content) 80%, #0000);
+}
+
+.hero-success {
+  --hero-bg: var(--color-success);
+  --hero-fg: var(--color-success-content);
+  --hero-muted: color-mix(in oklab, var(--color-success-content) 80%, #0000);
+}
+
+.hero-warning {
+  --hero-bg: var(--color-warning);
+  --hero-fg: var(--color-warning-content);
+  --hero-muted: color-mix(in oklab, var(--color-warning-content) 80%, #0000);
+}
+
+.hero-error {
+  --hero-bg: var(--color-error);
+  --hero-fg: var(--color-error-content);
+  --hero-muted: color-mix(in oklab, var(--color-error-content) 80%, #0000);
+}
+
+.hero-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.hero-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.hero-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.hero-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.hero-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.footer {
+  --footer-bg: var(--color-base-200);
+  --footer-fg: var(--color-base-content);
+  --footer-muted: color-mix(in oklab, var(--color-base-content) 65%, #0000);
+  --footer-border: var(--color-base-300);
+  --footer-rule: 1px;
+  --footer-p: calc(2.5em * var(--scale)) calc(2em * var(--scale)) calc(1.5em * var(--scale));
+  --footer-gap: calc(1.75em * var(--scale));
+  --footer-col: 10em;
+}
+
+/* colour variants */
+.footer-primary {
+  --footer-bg: var(--color-primary);
+  --footer-fg: var(--color-primary-content);
+  --footer-muted: color-mix(in oklab, var(--color-primary-content) 75%, #0000);
+  --footer-border: color-mix(in oklab, var(--color-primary-content) 25%, #0000);
+}
+
+.footer-secondary {
+  --footer-bg: var(--color-secondary);
+  --footer-fg: var(--color-secondary-content);
+  --footer-muted: color-mix(in oklab, var(--color-secondary-content) 75%, #0000);
+  --footer-border: color-mix(in oklab, var(--color-secondary-content) 25%, #0000);
+}
+
+.footer-accent {
+  --footer-bg: var(--color-accent);
+  --footer-fg: var(--color-accent-content);
+  --footer-muted: color-mix(in oklab, var(--color-accent-content) 75%, #0000);
+  --footer-border: color-mix(in oklab, var(--color-accent-content) 25%, #0000);
+}
+
+.footer-neutral {
+  --footer-bg: var(--color-neutral);
+  --footer-fg: var(--color-neutral-content);
+  --footer-muted: color-mix(in oklab, var(--color-neutral-content) 75%, #0000);
+  --footer-border: color-mix(in oklab, var(--color-neutral-content) 25%, #0000);
+}
+
+.footer-info {
+  --footer-bg: var(--color-info);
+  --footer-fg: var(--color-info-content);
+  --footer-muted: color-mix(in oklab, var(--color-info-content) 75%, #0000);
+  --footer-border: color-mix(in oklab, var(--color-info-content) 25%, #0000);
+}
+
+.footer-success {
+  --footer-bg: var(--color-success);
+  --footer-fg: var(--color-success-content);
+  --footer-muted: color-mix(in oklab, var(--color-success-content) 75%, #0000);
+  --footer-border: color-mix(in oklab, var(--color-success-content) 25%, #0000);
+}
+
+.footer-warning {
+  --footer-bg: var(--color-warning);
+  --footer-fg: var(--color-warning-content);
+  --footer-muted: color-mix(in oklab, var(--color-warning-content) 75%, #0000);
+  --footer-border: color-mix(in oklab, var(--color-warning-content) 25%, #0000);
+}
+
+.footer-error {
+  --footer-bg: var(--color-error);
+  --footer-fg: var(--color-error-content);
+  --footer-muted: color-mix(in oklab, var(--color-error-content) 75%, #0000);
+  --footer-border: color-mix(in oklab, var(--color-error-content) 25%, #0000);
+}
+
+.mobile-frame {
+  --mobile-frame-width: 18em;
+  --mobile-frame-body: color-mix(in oklab, var(--color-base-content) 88%, var(--color-base-100));
+  --mobile-frame-bezel: 0.6em;
+  --mobile-frame-radius: 2.6em;
+  --mobile-frame-screen-bg: var(--color-base-100);
+  --mobile-frame-screen-fg: var(--color-base-content);
+  --mobile-frame-shadow: 0 1.5em 3em -1em color-mix(in oklab, #000 35%, #0000);
+}
+
+.window-frame {
+  --window-frame-bg: var(--color-base-100);
+  --window-frame-fg: var(--color-base-content);
+  --window-frame-bar-bg: var(--color-base-200);
+  --window-frame-bar-fg: color-mix(in oklab, var(--color-base-content) 75%, #0000);
+  --window-frame-border: var(--color-base-300);
+  --window-frame-border-width: var(--border);
+  --window-frame-radius: max(var(--radius-box), 0.5em);
+  --window-frame-shadow: 0 1.25em 3em -1em color-mix(in oklab, #000 30%, #0000);
+  --window-frame-dot-1: #ff5f57;
+  --window-frame-dot-2: #febc2e;
+  --window-frame-dot-3: #28c840;
+}
+
+.laptop-frame {
+  --laptop-frame-width: 40em;
+  --laptop-frame-body: color-mix(in oklab, var(--color-base-content) 88%, var(--color-base-100));
+  --laptop-frame-base: color-mix(in oklab, var(--color-base-content) 30%, var(--color-base-100));
+  --laptop-frame-bezel: 0.8em;
+  --laptop-frame-screen-bg: var(--color-base-100);
+  --laptop-frame-screen-fg: var(--color-base-content);
+  --laptop-frame-shadow: none;
+}
+
+.drawer {
+  --drawer-size: 20em;
+  --drawer-peek: 3em;
+  --drawer-bg: var(--color-base-100);
+  --drawer-fg: var(--color-base-content);
+  --drawer-border: var(--color-base-300);
+  --drawer-border-width: var(--border);
+  --drawer-shadow: 0 0 2.5em -0.5em color-mix(in oklab, #000 35%, #0000);
+  --drawer-radius: var(--radius-box);
+  --drawer-p: calc(1.25em * var(--scale));
+  --drawer-backdrop: color-mix(in oklab, #000 40%, #0000);
+  --drawer-speed: 0.25s;
+  --drawer-handle-bg: color-mix(in oklab, var(--color-base-content) 30%, #0000);
+  --drawer-handle-w: 0.3em;
+  --drawer-handle-l: 2.5em;
+}
+
+.steps {
+  --steps-color: var(--color-primary);
+  --steps-off: color-mix(in oklab, var(--color-base-content) 14%, #0000);
+  --steps-visited: color-mix(in oklab, var(--steps-color) 45%, var(--color-base-100));
+  --steps-warning: var(--color-warning);
+  --steps-error: var(--color-error);
+  --steps-bar: 0.25em;
+  --steps-marker: 1.35em;
+  --steps-marker-bg: var(--color-base-100);
+  --steps-marker-fg: var(--color-primary-content);
+  --steps-gap: calc(0.75em * var(--scale));
+  --steps-seg-gap: calc(0.35em * var(--scale));
+  --steps-fg: var(--color-base-content);
+  --steps-muted: color-mix(in oklab, var(--color-base-content) 60%, #0000);
+}
+
+/* colour variants: the journey takes the colour. */
+.steps-primary {
+  --steps-color: var(--color-primary);
+  --steps-marker-fg: var(--color-primary-content);
+}
+
+.steps-secondary {
+  --steps-color: var(--color-secondary);
+  --steps-marker-fg: var(--color-secondary-content);
+}
+
+.steps-accent {
+  --steps-color: var(--color-accent);
+  --steps-marker-fg: var(--color-accent-content);
+}
+
+.steps-neutral {
+  --steps-color: var(--color-neutral);
+  --steps-marker-fg: var(--color-neutral-content);
+}
+
+.steps-info {
+  --steps-color: var(--color-info);
+  --steps-marker-fg: var(--color-info-content);
+}
+
+.steps-success {
+  --steps-color: var(--color-success);
+  --steps-marker-fg: var(--color-success-content);
+}
+
+.steps-warning {
+  --steps-color: var(--color-warning);
+  --steps-marker-fg: var(--color-warning-content);
+}
+
+.steps-error {
+  --steps-color: var(--color-error);
+  --steps-marker-fg: var(--color-error-content);
+}
+
+.steps-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.steps-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.steps-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.steps-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.steps-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.combobox {
+  --combobox-check: var(--color-primary);
+  --combobox-check-fg: var(--color-primary-content);
+  --combobox-check-border: color-mix(in oklab, var(--color-base-content) 35%, #0000);
+  --combobox-active: color-mix(in oklab, var(--color-base-content) 9%, #0000);
+}
+
+.combobox-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.combobox-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.combobox-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.combobox-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.combobox-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.chips-input {
+  --chips-input-gap: calc(0.35em * var(--scale));
+  --chips-input-py: calc(0.3em * var(--scale));
+  --chips-input-min: 6em;
+  gap: var(--chips-input-gap);
+  width: 100%;
+  padding-block: var(--chips-input-py);
+}
+
+.chips-input > .chip {
+  font-size: 0.875em;
+}
+
+/* The field: the plain one, or another component's, folded into the frame. */
+.chips-input .chips-input-field,
+.chips-input :is(.input, .select, .combobox) {
+  flex: 1 1 var(--chips-input-min);
+  width: auto;
+  min-width: var(--chips-input-min);
+  height: calc(var(--size) - 2 * var(--chips-input-py) - 2 * var(--border));
+  min-height: 0;
+  padding-inline: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+}
+
+.chips-input .combobox > .input {
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.chips-input-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.chips-input-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.chips-input-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.chips-input-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.chips-input-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
+.file-explorer,
+.file-explorer-menu {
+  --file-explorer-bg: var(--color-base-100);
+  --file-explorer-fg: var(--color-base-content);
+  --file-explorer-muted: color-mix(in oklab, var(--color-base-content) 60%, #0000);
+  --file-explorer-border: color-mix(in oklab, var(--color-base-content) 12%, #0000);
+  --file-explorer-border-width: 1px;
+  --file-explorer-radius: var(--radius-box);
+  --file-explorer-pane: color-mix(in oklab, var(--color-base-200) 60%, var(--color-base-100));
+  --file-explorer-hover: color-mix(in oklab, var(--color-base-content) 6%, #0000);
+  --file-explorer-selected: color-mix(in oklab, var(--color-primary) 16%, var(--color-base-100));
+  --file-explorer-selected-fg: var(--color-base-content);
+  --file-explorer-folder: var(--color-primary);
+  --file-explorer-drop: var(--color-primary);
+  --file-explorer-height: 28em;
+  --file-explorer-tree-width: 13em;
+  --file-explorer-details-width: 17em;
+  --file-explorer-shadow: 0 0.5em 1.5em -0.4em color-mix(in oklab, #000 35%, #0000);
+}
+
+.file-explorer-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.file-explorer-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.file-explorer-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.file-explorer-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.file-explorer-xl {
+  --fontsize: var(--xl, var(--default-xl));
 }

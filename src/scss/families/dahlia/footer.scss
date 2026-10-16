@@ -1,0 +1,111 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* dahlia — footer.
+   Everything dahlia draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   footer.scss — .footer (the closing block of a page)
+   
+   	<footer class="footer">
+   	  <div class="footer-sections">
+   	    <nav class="footer-section">
+   	      <h2 class="footer-title">Product</h2>
+   	      <a href="…">Pricing</a>
+   	    </nav>
+   	  </div>
+   	  <div class="footer-bottom">© 2026 …</div>
+   	</footer>
+   
+      Columns fill the width as room allows (auto-fit grid), no breakpoint.
+   
+      Plumbing contract:
+   	--footer-bg / --footer-fg / --footer-muted / --footer-border
+   	--footer-p / --footer-gap
+   	--footer-col     minimum column width
+   ============================================================ */
+
+@mixin structure {
+	.footer {
+		display: flex;
+		flex-direction: column;
+		gap: var(--footer-gap);
+		padding: var(--footer-p);
+		background-color: var(--footer-bg);
+		color: var(--footer-fg);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.footer-sections {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(var(--footer-col), 1fr));
+		gap: var(--footer-gap);
+	}
+	.footer-section {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5em;
+		min-width: 0;
+	}
+	.footer-section a {
+		color: var(--footer-muted);
+		text-decoration: none;
+	}
+	.footer-section a:hover {
+		color: var(--footer-fg);
+		text-decoration: underline;
+	}
+	.footer-title {
+		margin: 0 0 0.25em;
+		font-size: 0.8125em;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+	.footer-bottom {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1em;
+		padding-top: var(--footer-gap);
+		border-top: var(--footer-rule, 1px) solid var(--footer-border);
+		color: var(--footer-muted);
+		font-size: 0.875em;
+	}
+	.footer-center {
+		text-align: center;
+	}
+	.footer-center .footer-section {
+		align-items: center;
+	}
+	.footer-center .footer-bottom {
+		justify-content: center;
+	}
+}
+
+@mixin look {
+	.footer {
+		--footer-bg: var(--color-surface-2);
+		--footer-fg: var(--color-on-surface);
+		--footer-muted: color-mix(in oklab, var(--color-on-surface) 65%, #0000);
+		--footer-border: var(--color-border);
+		--footer-rule: 1px;
+		--footer-p: calc(2.5em * var(--scale)) calc(2em * var(--scale)) calc(1.5em * var(--scale));
+		--footer-gap: calc(1.75em * var(--scale));
+		--footer-col: 10em;
+	}
+
+
+	/* colour variants */
+	@each $color in c.$color-list {
+		.footer-#{$color} {
+			--footer-bg: var(--color-#{$color});
+			--footer-fg: var(--color-on-#{$color});
+			--footer-muted: color-mix(in oklab, var(--color-on-#{$color}) 75%, #0000);
+			--footer-border: color-mix(in oklab, var(--color-on-#{$color}) 25%, #0000);
+		}
+	}
+}

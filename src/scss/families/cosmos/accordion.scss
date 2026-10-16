@@ -1,0 +1,49 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* cosmos — accordion.
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   accordion.scss — .accordion (a stack of collapses)
+   
+   	<div class="accordion">
+   	  <div class="collapse">…</div>
+   	  <div class="collapse">…</div>
+   	</div>
+   
+      Joined by default: the collapses share their edges and only the
+      outer corners are rounded. `accordion-separate` keeps them apart.
+      Opening one closing the others is the wrapper's job (`exclusive`).
+   
+      Plumbing contract:
+   	--accordion-gap   space between separate collapses
+   ============================================================ */
+
+@mixin structure {
+	.accordion {
+		display: flex;
+		flex-direction: column;
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.accordion:not(.accordion-separate) > .collapse:not(:first-child) {
+		margin-top: calc(var(--collapse-border-width) * -1);
+		border-start-start-radius: 0;
+		border-start-end-radius: 0;
+	}
+	.accordion:not(.accordion-separate) > .collapse:not(:last-child) {
+		border-end-start-radius: 0;
+		border-end-end-radius: 0;
+	}
+	.accordion-separate {
+		gap: var(--accordion-gap);
+	}
+}
+
+@mixin look {
+	.accordion {
+		--accordion-gap: calc(0.5em * var(--scale));
+	}
+}

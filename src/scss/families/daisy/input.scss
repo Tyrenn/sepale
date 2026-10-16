@@ -106,8 +106,8 @@
 	}
 
 	/* ── Suggestions ──
-	   The Input wrapper's `suggest` hangs a .list-suggestions under the
-	   field. The list is `list`'s to paint; this only places it, inside
+	   The Combobox hangs a .list-suggestions under its .input
+	   frame. The list is `list`'s to paint; this only places it, inside
 	   the frame (.input is already position: relative). A floating list
 	   is placed by the component instead, with inline fixed coordinates. */
 	.input > .list-suggestions {

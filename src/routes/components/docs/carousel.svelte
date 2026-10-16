@@ -187,7 +187,7 @@
 		<button class="btn btn-sm" onclick={go}>{direction}</button>
 	{/snippet}
 	{#snippet pagination({ count, index, goto })}
-		<Pagination {count} page={index + 1} onpage={(p) => goto(p - 1)} size="sm" />
+		<Pagination {count} page={index + 1} onPage={(p) => goto(p - 1)} size="sm" />
 	{/snippet}
 </Carousel>`}
 >
@@ -198,7 +198,7 @@
 				<button type="button" class="btn btn-sm" onclick={go}>{direction}</button>
 			{/snippet}
 			{#snippet pagination({ count, index, goto })}
-				<Pagination {count} page={index + 1} onpage={(p) => goto(p - 1)} size="sm" />
+				<Pagination {count} page={index + 1} onPage={(p) => goto(p - 1)} size="sm" />
 			{/snippet}
 		</Carousel>
 	</div>
@@ -208,13 +208,13 @@
 	title="Driven from outside"
 	subtitle="No binding: a reference through `bind:this`, `goto` to move, `onIndex` to follow."
 	svelte={`<Carousel bind:this={remote} items={SLIDES} onIndex={(i) => (remoteIndex = i)}>…</Carousel>
-<Pagination count={SLIDES.length} page={remoteIndex + 1} onpage={(p) => remote?.goto(p - 1)} />`}
+<Pagination count={SLIDES.length} page={remoteIndex + 1} onPage={(p) => remote?.goto(p - 1)} />`}
 >
 	<div style="width:28rem; display:flex; flex-direction:column; gap:.5rem; align-items:center;">
 		<Carousel bind:this={remote} items={SLIDES} onIndex={(i) => (remoteIndex = i)} style="width:100%">
 			{#snippet children(s, i)}{@render slide(s, i)}{/snippet}
 		</Carousel>
-		<Pagination count={SLIDES.length} page={remoteIndex + 1} onpage={(p) => remote?.goto(p - 1)} size="sm" />
+		<Pagination count={SLIDES.length} page={remoteIndex + 1} onPage={(p) => remote?.goto(p - 1)} size="sm" />
 	</div>
 </Section>
 

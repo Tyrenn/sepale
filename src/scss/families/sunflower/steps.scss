@@ -1,0 +1,285 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* sunflower — steps.
+   Everything sunflower draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   steps.scss — .steps (where the user is in a journey)
+   
+   	<nav class="steps" aria-label="Progress">
+   	  <ol class="steps-list">
+   	    <li class="steps-item" data-state="complete">
+   	      <div class="steps-track">
+   	        <button class="steps-marker">✓</button>
+   	        <button class="steps-segment" data-state="complete"><span></span></button>
+   	        <button class="steps-segment" data-state="complete"><span></span></button>
+   	      </div>
+   	      <p class="steps-label"><span>Basics</span></p>
+   	    </li>
+   	    <li class="steps-item" data-state="current">…
+   	      <p class="steps-sublabel">Pricing</p>
+   	    </li>
+   	  </ol>
+   	</nav>
+   
+      One column per step, one bar per sub-step (a step with none has one
+      bar). States are data-state attributes: current, visited, complete,
+      unknown; data-issue="error|warning" flags a bar that needs looking at.
+      `steps-compact` drops markers and labels for a heading above.
+   
+      Plumbing contract:
+   	--steps-color            the journey's colour
+   	--steps-off              an unreached bar or ring
+   	--steps-visited          a visited bar
+   	--steps-warning / --steps-error
+   	--steps-bar              bar thickness
+   	--steps-marker           the disc's side
+   	--steps-marker-bg / --steps-marker-fg
+   	--steps-gap / --steps-seg-gap
+   	--steps-fg / --steps-muted
+   ============================================================ */
+
+@mixin structure {
+	.steps {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6em;
+		width: 100%;
+		color: var(--steps-fg);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.steps-heading {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.75em;
+		font-size: 0.85em;
+		font-weight: 700;
+	}
+	.steps-heading > :last-child {
+		flex: none;
+		color: var(--steps-muted);
+		font-weight: 600;
+	}
+	.steps-list {
+		display: flex;
+		gap: var(--steps-gap);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.steps-item {
+		display: flex;
+		flex: 1 1 0;
+		flex-direction: column;
+		gap: 0.5em;
+		min-width: 0;
+	}
+	.steps-track {
+		display: flex;
+		align-items: center;
+		gap: var(--steps-seg-gap);
+	}
+	.steps-marker,
+	.steps-segment {
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+	}
+	.steps-marker:disabled,
+	.steps-segment:disabled {
+		cursor: default;
+	}
+	.steps-marker {
+		display: grid;
+		flex: none;
+		place-items: center;
+		width: var(--steps-marker);
+		height: var(--steps-marker);
+		border: 2px solid var(--steps-off);
+		border-radius: 50%;
+		background-color: var(--steps-marker-bg);
+		color: var(--steps-marker-fg);
+	}
+	.steps-marker svg {
+		width: 65%;
+		height: 65%;
+		visibility: hidden;
+	}
+	.steps-item[data-state='current'] > .steps-track > .steps-marker,
+	.steps-item[data-state='visited'] > .steps-track > .steps-marker {
+		border-color: var(--steps-color);
+	}
+	.steps-item[data-state='complete'] > .steps-track > .steps-marker {
+		border-color: var(--steps-color);
+		background-color: var(--steps-color);
+	}
+	.steps-item[data-state='complete'] > .steps-track > .steps-marker svg {
+		visibility: visible;
+	}
+	.steps-segment {
+		flex: 1 1 0;
+		padding-block: 0.3em;
+	}
+	.steps-segment > span {
+		display: block;
+		height: var(--steps-bar);
+		border-radius: var(--steps-bar);
+		background: var(--steps-off);
+		transition: transform 0.1s ease;
+	}
+	.steps-segment[data-state='visited'] > span {
+		background: var(--steps-visited);
+	}
+	.steps-segment[data-state='complete'] > span {
+		background: var(--steps-color);
+	}
+	.steps-segment[data-state='current'] > span {
+		background: repeating-linear-gradient(var(--steps-dir, 90deg), var(--steps-color) 0 0.9em, var(--steps-off) 0 1.8em);
+	}
+	.steps-segment[data-issue='warning']:not([data-state='current']) > span {
+		background: var(--steps-warning);
+	}
+	.steps-segment[data-issue='error']:not([data-state='current']) > span {
+		background: var(--steps-error);
+	}
+	.steps-segment:not(:disabled):hover > span {
+		transform: scale(1, 1.6);
+	}
+	.steps-segment:focus-visible,
+	.steps-marker:focus-visible {
+		outline: 2px solid var(--steps-color);
+		outline-offset: 2px;
+		border-radius: 0.25em;
+	}
+	.steps-label {
+		display: flex;
+		align-items: center;
+		gap: 0.4em;
+		min-width: 0;
+		margin: 0;
+		color: var(--steps-muted);
+		font-size: 0.85em;
+		font-weight: 600;
+	}
+	.steps-label > span:first-child {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.steps-item:not([data-state='unknown']) > .steps-label {
+		color: var(--steps-fg);
+	}
+	.steps-item[data-state='current'] > .steps-label {
+		font-weight: 700;
+	}
+	.steps-issue {
+		display: inline-flex;
+		flex: none;
+		color: var(--steps-error);
+	}
+	.steps-issue[data-issue='warning'] {
+		color: var(--steps-warning);
+	}
+	.steps-issue svg {
+		width: 1.1em;
+		height: 1.1em;
+	}
+	.steps-sublabel {
+		margin: -0.35em 0 0;
+		color: var(--steps-muted);
+		font-size: 0.8em;
+		font-weight: 500;
+	}
+	.steps-horizontal .steps-list {
+		flex-direction: row;
+	}
+	/* Vertical: the track becomes a column on the left of the labels. */
+	.steps-vertical .steps-list {
+		flex-direction: column;
+	}
+	.steps-vertical .steps-item {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		grid-template-rows: auto 1fr;
+		column-gap: 0.75em;
+		row-gap: 0.1em;
+		align-items: start;
+	}
+	.steps-vertical .steps-track {
+		flex-direction: column;
+		grid-row: 1 / span 3;
+		align-self: stretch;
+		min-height: 3em;
+		--steps-dir: 180deg;
+	}
+	.steps-vertical .steps-segment {
+		display: flex;
+		justify-content: center;
+		padding: 0 0.3em;
+		min-height: 1.5em;
+	}
+	.steps-vertical .steps-segment > span {
+		width: var(--steps-bar);
+		height: auto;
+	}
+	.steps-vertical .steps-segment:not(:disabled):hover > span {
+		transform: scale(1.6, 1);
+	}
+	.steps-vertical .steps-label {
+		padding-top: calc((var(--steps-marker) - 1.2em) / 2);
+	}
+	.steps-vertical .steps-sublabel {
+		margin: 0;
+	}
+	.steps-compact .steps-list {
+		gap: calc(var(--steps-gap) * 0.6);
+	}
+	.steps-compact .steps-track {
+		gap: calc(var(--steps-seg-gap) / 2);
+	}
+	.steps-compact .steps-segment {
+		padding-block: 0.5em;
+	}
+}
+
+@mixin look {
+	.steps {
+		--steps-color: var(--color-primary);
+		--steps-off: color-mix(in oklab, var(--color-on-surface) 18%, var(--color-surface-2));
+		--steps-visited: color-mix(in oklab, var(--steps-color) 45%, var(--color-surface-2));
+		--steps-warning: color-mix(in oklab, var(--color-error) 40%, var(--color-surface-2));
+		--steps-error: var(--color-error);
+		--steps-bar: 0.4em;
+		--steps-marker: 1.35em;
+		--steps-marker-bg: var(--color-surface-2);
+		--steps-marker-fg: var(--color-on-surface);
+		--steps-gap: calc(0.75em * var(--scale));
+		--steps-seg-gap: calc(0.35em * var(--scale));
+		--steps-fg: var(--color-on-surface);
+		--steps-muted: color-mix(in oklab, var(--color-on-surface) 60%, #0000);
+	}
+	.steps-segment > span {
+		box-shadow: inset 0 0 0 var(--border) var(--color-border);
+	}
+	.steps-marker {
+		border-color: var(--color-border);
+	}
+
+	/* colour variants: the journey takes the colour. */
+	@each $color in c.$color-list {
+		.steps-#{$color} {
+			--steps-color: var(--color-#{$color});
+			--steps-marker-fg: var(--color-on-surface);
+		}
+	}
+
+	@include m.size-variants('steps');
+}

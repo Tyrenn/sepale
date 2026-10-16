@@ -48,7 +48,7 @@
 	// `color` is ours — the HTML attribute of the same name is long obsolete.
 	interface Props
 		extends AxisProps<typeof AXES, typeof FLAGS>,
-			Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'onchange'> {
+			Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
 		/** The picked date, or dates with `range` / `multiple`. Bindable. */
 		value?: Value;
 		/** Pick a start and an end. */
@@ -81,7 +81,7 @@
 		/** Anything else air-datepicker accepts. Applied last. */
 		options?: AirDatepickerOptions<HTMLElement>;
 		/** Called with the new value after every pick. */
-		onchange?: (value: Value) => void;
+		onChange?: (value: Value) => void;
 		/** The air-datepicker instance, for what no prop covers. Bindable. */
 		picker?: AirDatepicker<HTMLElement>;
 		class?: string;
@@ -107,7 +107,7 @@
 		buttons,
 		dateFormat,
 		options,
-		onchange,
+		onChange,
 		picker = $bindable(),
 		class: klass = '',
 		...axes
@@ -146,7 +146,7 @@
 		const next: Value = range || multiple ? asList(date as Value) : ((date as Date | undefined) ?? null);
 		if (same(asList(next), asList(value))) return;
 		value = next;
-		onchange?.(next);
+		onChange?.(next);
 	}
 
 	// One instance per element: built when the element is there, rebuilt only

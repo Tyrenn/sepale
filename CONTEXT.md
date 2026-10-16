@@ -145,6 +145,43 @@ The position of the item the carousel rests on, counted from 0 over the
 caller's items — duplicates drawn for an infinite carousel are never counted.
 _Avoid_: page, current slide
 
+### Fields that pick
+
+**Combobox**:
+A text field whose value comes from a list of options it looks up while
+typing — a fixed list, a function, or an address answering JSON. **Strict**:
+the value is a picked option, never the typed text. **Free**: the value is the
+text, the options only complete it (autocompletion). Only a combobox suggests;
+an input does not.
+_Avoid_: autocomplete, suggest input
+
+**Chips input**:
+An accumulator: it collects several values, each shown as a chip, from a field
+it is given — an input, a select or a combobox. The field picks one value; the
+chips input keeps them.
+_Avoid_: tags input, multi-combobox
+
+### Drawer
+
+**Drawer state**:
+One of three: **hidden** (out of view), **peek** (overflowing into view by a
+set amount) and **open** (fully in view by a set size). A drawer sits on one
+of the four sides.
+_Avoid_: collapsed, expanded
+
+### Steps
+
+**Step** / **Sub-step**:
+A stage of a journey. A step may hold sub-steps, one level deep only; a step
+without sub-steps is a stage of its own. Each has an optional label.
+
+**Step state**:
+One of four: **current** (where the user is), **visited** (reached before),
+**complete** (declared done by the app — visiting is not completing) and
+**unknown** (not reached). A step is current when one of its sub-steps is, and
+complete when all of them are.
+_Avoid_: done, active
+
 ### Authoring
 
 **Structure** / **Look**:

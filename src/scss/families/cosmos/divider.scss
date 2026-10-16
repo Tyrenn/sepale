@@ -1,0 +1,113 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* cosmos — divider.
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   divider.scss — .divider (a rule, with or without content)
+   
+   	<hr class="divider">
+   	<div class="divider" role="separator"><span class="divider-content">or</span></div>
+   
+      Two lines drawn by ::before / ::after around the content; an
+      empty divider (and every <hr>) drops the second one.
+   
+      Plumbing contract:
+   	--divider-color       the line's colour
+   	--divider-line        the paint of the first line (a colour or a gradient)
+   	--divider-line-end    the paint of the second line
+   	--divider-dir         gradient direction (90deg, 180deg when vertical)
+   	--divider-thickness   line thickness
+   	--divider-gap         space between a line and the content
+   	--divider-stub        length of the short line when aligned start / end
+   	--divider-m           margin on the axis across the line
+   	--divider-fg          the content's ink
+   ============================================================ */
+
+@mixin structure {
+	.divider {
+		display: flex;
+		align-items: center;
+		align-self: stretch;
+		gap: var(--divider-gap);
+		height: auto;
+		margin: var(--divider-m) 0;
+		padding: 0;
+		border: 0;
+		color: var(--divider-fg);
+		background: none;
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		white-space: nowrap;
+		--divider-dir: 90deg;
+	}
+	.divider::before,
+	.divider::after {
+		content: '';
+		flex: 1 1 0;
+		height: var(--divider-thickness);
+		background: var(--divider-line, var(--divider-color));
+	}
+	.divider::after {
+		background: var(--divider-line-end, var(--divider-line, var(--divider-color)));
+	}
+	/* No content: one line, not two halves around a gap. */
+	.divider:empty {
+		gap: 0;
+	}
+	.divider:empty::after {
+		display: none;
+	}
+	.divider-start::before,
+	.divider-end::after {
+		flex: 0 0 var(--divider-stub);
+	}
+	.divider-content {
+		min-width: 0;
+	}
+	.divider-horizontal {
+		flex-direction: row;
+	}
+	.divider-center::before,
+	.divider-center::after {
+		flex: 1 1 0;
+	}
+	.divider-vertical {
+		flex-direction: column;
+		margin: 0 var(--divider-m);
+		min-height: 1em;
+		--divider-dir: 180deg;
+	}
+	.divider-vertical::before,
+	.divider-vertical::after {
+		width: var(--divider-thickness);
+		height: auto;
+	}
+}
+
+@mixin look {
+	.divider {
+		--divider-color: var(--color-border);
+		--divider-thickness: 1px;
+		--divider-gap: calc(1em * var(--scale));
+		--divider-stub: calc(1.5em * var(--scale));
+		--divider-m: calc(1em * var(--scale));
+		--divider-fg: color-mix(in oklab, var(--color-on-surface) 65%, #0000);
+		font-size: var(--fontsize, 0.875em);
+	}
+
+	/* colour variants: the line takes the colour, the content keeps its ink. */
+	@each $color in c.$color-list {
+		.divider-#{$color} {
+			--divider-color: var(--color-#{$color});
+		}
+	}
+
+	/* variant dashed: pencil strokes. */
+	.divider-dashed {
+		--divider-line: repeating-linear-gradient(var(--divider-dir), var(--divider-color) 0 0.7em, #0000 0 1em);
+		--divider-line-end: var(--divider-line);
+	}
+}

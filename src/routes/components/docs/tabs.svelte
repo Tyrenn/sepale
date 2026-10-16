@@ -41,7 +41,7 @@
 					description: "Index of the selected tab. Bindable, so a parent can drive it."
 				},
 				{
-					name: "onselect",
+					name: "onSelect",
 					type: "(index: number) => void",
 					description: "Called with the new index when a tab is chosen."
 				}

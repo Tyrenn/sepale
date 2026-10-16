@@ -28,7 +28,7 @@
 				{ name: 'selected', type: 'Iterable<string>', description: 'Keys of the rows drawn as selected.' },
 				{ name: 'dirty', type: 'Iterable<string>', description: 'Keys of the rows drawn as changed and not saved.' },
 				{ name: 'sort', type: '{ key, direction }', description: 'The current sort, drawn on its header.' },
-				{ name: 'onsort', type: '(sort | undefined) => void', description: 'A sortable header was clicked: ascending, then descending, then none.' },
+				{ name: 'onSort', type: '(sort | undefined) => void', description: 'A sortable header was clicked: ascending, then descending, then none.' },
 				{ name: 'maxHeight', type: 'string', description: 'The scroll box’s maximum height — for a pinned head.' }
 			]
 		}
@@ -115,7 +115,7 @@
 		{ key: 'radius', label: 'Radius (km)', width: '10em', align: 'end', sortable: true },
 		…
 	]}
-	{sort} onsort={(s) => (sort = s)} selected={picked} zebra hover>
+	{sort} onSort={(s) => (sort = s)} selected={picked} zebra hover>
 	{#snippet cell(p, column)}
 		{#if column.key === 'pick'}
 			<Checkbox checked={picked.includes(p.name)} onchange={() => toggle(p.name)} />
@@ -131,7 +131,7 @@
 			key={(p) => p.name}
 			columns={wide}
 			{sort}
-			onsort={(s) => (sort = s)}
+			onSort={(s) => (sort = s)}
 			selected={picked}
 			zebra
 			hover

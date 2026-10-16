@@ -45,7 +45,7 @@
 		/** Draw previous / next. Default: yes, except in the dots and bars variants. */
 		controls?: boolean;
 		/** Called with the new page after every change. */
-		onpage?: (page: number) => void;
+		onPage?: (page: number) => void;
 		/** The accessible name of a page. Default `Page N`. */
 		pageLabel?: (page: number) => string;
 		/** The text of the count variant. Default `3 / 8`. */
@@ -63,7 +63,7 @@
 		page = $bindable(1),
 		siblings = 1,
 		controls,
-		onpage,
+		onPage,
 		pageLabel = (p: number) => `Page ${p}`,
 		countLabel = (p: number, n: number) => `${p} / ${n}`,
 		previousLabel = 'Previous page',
@@ -101,7 +101,7 @@
 		const next = Math.min(Math.max(1, p), count);
 		if (next === page) return;
 		page = next;
-		onpage?.(next);
+		onPage?.(next);
 	}
 </script>
 

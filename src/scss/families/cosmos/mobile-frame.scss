@@ -1,0 +1,88 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* cosmos — mobile-frame.
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   mobile-frame.scss — .mobile-frame (a phone drawn around content)
+   
+   	<div class="mobile-frame">
+   	  <div class="mobile-frame-screen">…</div>
+   	</div>
+   
+      A drawing, not a device emulator: a rounded body, an island at the
+      top, a side button. The screen scrolls its own content.
+   
+      Plumbing contract:
+   	--mobile-frame-width     the phone's width (its height follows, 9 / 19.5)
+   	--mobile-frame-body      the body's colour
+   	--mobile-frame-bezel     the band around the screen
+   	--mobile-frame-radius    the body's corners
+   	--mobile-frame-screen-bg / --mobile-frame-screen-fg
+   	--mobile-frame-shadow
+   ============================================================ */
+
+@mixin structure {
+	.mobile-frame {
+		position: relative;
+		display: inline-block;
+		box-sizing: border-box;
+		width: var(--mobile-frame-width);
+		aspect-ratio: 9 / 19.5;
+		padding: var(--mobile-frame-bezel);
+		border-radius: var(--mobile-frame-radius);
+		background-color: var(--mobile-frame-body);
+		box-shadow: var(--mobile-frame-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		vertical-align: top;
+	}
+	/* The island. */
+	.mobile-frame::before {
+		content: '';
+		position: absolute;
+		z-index: 1;
+		top: calc(var(--mobile-frame-bezel) + 0.55em);
+		left: 50%;
+		width: 30%;
+		height: 1.5em;
+		border-radius: 999px;
+		background-color: var(--mobile-frame-body);
+		translate: -50% 0;
+	}
+	/* The side button. */
+	.mobile-frame::after {
+		content: '';
+		position: absolute;
+		top: 24%;
+		right: -0.22em;
+		width: 0.22em;
+		height: 11%;
+		border-radius: 0 0.2em 0.2em 0;
+		background-color: var(--mobile-frame-body);
+	}
+	.mobile-frame-screen {
+		box-sizing: border-box;
+		width: 100%;
+		height: 100%;
+		border-radius: calc(var(--mobile-frame-radius) - var(--mobile-frame-bezel));
+		background-color: var(--mobile-frame-screen-bg);
+		color: var(--mobile-frame-screen-fg);
+		overflow: auto;
+		scrollbar-width: none;
+	}
+}
+
+@mixin look {
+	.mobile-frame {
+		--mobile-frame-width: 18em;
+		--mobile-frame-body: color-mix(in oklab, var(--color-on-surface) 88%, var(--color-surface-1));
+		--mobile-frame-bezel: 0.6em;
+		--mobile-frame-radius: 2.6em;
+		--mobile-frame-screen-bg: var(--color-surface-1);
+		--mobile-frame-screen-fg: var(--color-on-surface);
+		--mobile-frame-shadow: 0 1.5em 3em -1em color-mix(in oklab, #000 35%, #0000);
+	}
+}

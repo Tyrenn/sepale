@@ -70,30 +70,9 @@
 					description: "The field grows with its text. A number adds that many characters of room."
 				},
 				{
-					name: "suggest",
-					type: "Suggest",
-					description: "Turns on suggestions: `{ items: (text) => list | Promise<list> }` or `{ uri, options? }` answering JSON, plus `then`, `show`, `wait`, `strict`, `eager`, `float` and `add` (a last \"create what is typed\" row). Arrow keys, Enter and Escape walk the list."
-				},
-				{
-					name: "selected / onselect",
-					type: "any / (s) => void",
-					description: "The pick the field starts with, and the callback for every change. With `suggest.strict`, only a picked suggestion is a value: typing drops the pick, leaving a search unfinished brings the last one back."
-				},
-				{
-					name: "suggestion",
-					type: "Snippet<[any]>",
-					description: "How one suggestion is drawn in the list."
-				},
-				{
-					name: "noresult",
-					type: "string",
-					default: "'No results'",
-					description: "What the list says when nothing matches."
-				},
-				{
 					name: "isValid() / focus() / clear()",
 					type: "methods",
-					description: "Through `bind:this`: check the field now, focus it, empty it (and drop the pick)."
+					description: "Through `bind:this`: check the field now, focus it, empty it. Suggestions moved to Combobox."
 				}
 			]
 		}
@@ -106,18 +85,6 @@
 		Input
 	} from '$lib/index.js';
 
-	const FRUITS = ['Apple', 'Apricot', 'Banana', 'Blueberry', 'Cherry', 'Grape', 'Lemon', 'Mango', 'Orange', 'Peach', 'Pear', 'Plum'];
-	const COUNTRIES = [
-		{ code: 'FR', name: 'France' },
-		{ code: 'DE', name: 'Germany' },
-		{ code: 'ES', name: 'Spain' },
-		{ code: 'IT', name: 'Italy' },
-		{ code: 'PT', name: 'Portugal' }
-	];
-
-	let picked: string | undefined = $state();
-	let created: string | undefined = $state();
-	let country: { code: string; name: string } | undefined = $state();
 </script>
 
 	<Section
@@ -214,60 +181,4 @@
 		</div>
 	</Section>
 
-	<Section
-		title="Suggestions"
-		subtitle="Type a fruit. Arrows, Enter and Escape work; the last row creates what is typed."
-		svelte={`<Input
-	placeholder="Fruit"
-	suggest={{
-		items: (text) => FRUITS.filter((f) => f.toLowerCase().includes(text.toLowerCase())),
-		add: { max: 3, onadd: (v) => (created = v) }
-	}}
-	onselect={(s) => (picked = s)}
-/>`}
-		html={`<label class="input">
-	<input role="combobox" aria-expanded="true" … />
-	<ul class="list list-suggestions" role="listbox">
-		<li class="list-row" role="option" aria-selected="true">Apple</li>
-		<li class="list-row" role="option">Apricot</li>
-	</ul>
-</label>`}
-	>
-		<div style="display:flex; flex-direction:column; gap:.5rem; min-height:14rem;">
-			<Input
-				placeholder="Fruit"
-				suggest={{
-					items: (text: string) => FRUITS.filter((f) => f.toLowerCase().includes(text.toLowerCase())),
-					add: { max: 3, onadd: (v: string) => (created = v) }
-				}}
-				onselect={(s) => (picked = s)}
-			/>
-			<small>picked: {picked ?? '—'} · created: {created ?? '—'}</small>
-		</div>
-	</Section>
 
-	<Section
-		title="Strict suggestions"
-		subtitle="Only a picked suggestion is a value: type, then leave the field without picking."
-		svelte={`<Input
-	placeholder="Country"
-	suggest={{ items: (t) => COUNTRIES.filter(…), show: (c) => c.name, strict: true, eager: true }}
-	selected={country}
-	onselect={(c) => (country = c)}
-/>`}
-	>
-		<div style="display:flex; flex-direction:column; gap:.5rem; min-height:14rem;">
-			<Input
-				placeholder="Country"
-				suggest={{
-					items: (t: string) => COUNTRIES.filter((c) => c.name.toLowerCase().includes(t.toLowerCase())),
-					show: (c: { name: string }) => c.name,
-					strict: true,
-					eager: true
-				}}
-				selected={country}
-				onselect={(c) => (country = c)}
-			/>
-			<small>value: {country ? JSON.stringify(country) : '—'}</small>
-		</div>
-	</Section>

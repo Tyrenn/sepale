@@ -31,7 +31,7 @@
 				{ name: 'editing', type: 'boolean', default: 'true', description: 'Draw undo, redo, discard and save — when the handler can update.' },
 				{ name: 'removable', type: 'boolean', default: 'true', description: 'Draw delete and the selection count — when the handler can delete.' },
 				{ name: 'exportable', type: 'boolean | ExportOptions', default: 'false', description: 'Draw export, which runs handler.export() with these options.' },
-				{ name: 'onadd', type: '() => void', description: 'Draw an add button calling this.' },
+				{ name: 'onAdd', type: '() => void', description: 'Draw an add button calling this.' },
 				{ name: 'confirm', type: 'boolean', default: 'true', description: 'Confirm deletions and dropped changes in a dialog, unless the handler has its own confirmDelete / confirmDiscard.' },
 				{ name: 'leftActions', type: 'Snippet<[handler]>', description: 'Drawn at the start of the bar, after the filters and the sort.' },
 				{ name: 'rightActions', type: 'Snippet<[handler]>', description: 'Drawn at the end of the bar, after the built-in actions.' },
@@ -85,18 +85,18 @@
 	svelte={`<DataHandler identifier="id" get={getPeople} update={updatePerson} delete={deletePeople}
 	filters={FILTERS} sorts={SORTS}>
 	{#snippet children(handler)}
-		<DataControl {handler} exportable onadd={() => …}>
+		<DataControl {handler} exportable onAdd={() => …}>
 			{#snippet children(handler)}
 				<Table rows={handler.rows} key={(r) => r.id} {columns}
 					selected={handler.selection} dirty={handler.changed} loading={handler.loading}
 					sort={handler.sort && { key: handler.sort.id, direction: handler.sort.value }}
-					onsort={(s) => handler.changeSort(s && { id: s.key, name: s.key, value: s.direction })}>
+					onSort={(s) => handler.changeSort(s && { id: s.key, name: s.key, value: s.direction })}>
 					{#snippet cell(row, column)}
 						{#if column.key === 'pick'}
 							<Checkbox checked={row.selected} onchange={() => row.toggle()} />
 						{:else if column.key === 'role'}
 							<Select options={ROLES} value={row.value.role}
-								onvalue={(role) => row.update({ role })} />
+								onValue={(role) => row.update({ role })} />
 						{:else}
 							{row.value[column.key]}
 						{/if}
@@ -117,7 +117,7 @@
 			sorts={SORTS}
 		>
 			{#snippet children(handler)}
-				<DataControl {handler} exportable={{ name: 'people.csv' }} onadd={() => alert('Add a person')}>
+				<DataControl {handler} exportable={{ name: 'people.csv' }} onAdd={() => alert('Add a person')}>
 					{#snippet children(handler)}
 						<Table
 							rows={handler.rows}
@@ -127,7 +127,7 @@
 							dirty={handler.changed}
 							loading={handler.loading}
 							sort={handler.sort && { key: handler.sort.id, direction: handler.sort.value }}
-							onsort={(s) =>
+							onSort={(s) =>
 								handler.changeSort(
 									s && { id: s.key, name: `${s.key} ${s.direction}`, value: s.direction }
 								)}
@@ -150,7 +150,7 @@
 										size="sm"
 										options={ROLES}
 										value={row.value.role}
-										onvalue={(role) => row.update({ role })}
+										onValue={(role) => row.update({ role })}
 									/>
 								{:else if column.key === 'team'}
 									{row.value.team.name}

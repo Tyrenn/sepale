@@ -66,7 +66,7 @@
 	 * table's business.
 	 *
 	 * Selection, sorting and loading are states every table has, so they are
-	 * here as plain props — `selected`, `sort` / `onsort`, `loading` — and the
+	 * here as plain props — `selected`, `sort` / `onSort`, `loading` — and the
 	 * table only draws them.
 	 */
 	import type { HTMLTableAttributes } from 'svelte/elements';
@@ -95,7 +95,7 @@
 		/** The current sort, drawn on its header. */
 		sort?: TableSort;
 		/** A sortable header was clicked: ascending, then descending, then none. */
-		onsort?: (sort: TableSort | undefined) => void;
+		onSort?: (sort: TableSort | undefined) => void;
 		/** The scroll box's maximum height, for a long table with a pinned head. */
 		maxHeight?: string;
 		class?: string;
@@ -111,7 +111,7 @@
 		selected,
 		dirty,
 		sort,
-		onsort,
+		onSort,
 		maxHeight,
 		class: klass = '',
 		...axes
@@ -158,9 +158,9 @@
 		sort?.key === c.key ? (sort.direction === 'asc' ? 'ascending' : 'descending') : undefined;
 
 	function next(c: TableColumn<Row>) {
-		if (sort?.key !== c.key) return onsort?.({ key: c.key, direction: 'asc' });
-		if (sort.direction === 'asc') return onsort?.({ key: c.key, direction: 'desc' });
-		onsort?.(undefined);
+		if (sort?.key !== c.key) return onSort?.({ key: c.key, direction: 'asc' });
+		if (sort.direction === 'asc') return onSort?.({ key: c.key, direction: 'desc' });
+		onSort?.(undefined);
 	}
 
 	const text = (r: Row, c: TableColumn<Row>) => {

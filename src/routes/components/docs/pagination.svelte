@@ -27,7 +27,7 @@
 				{ name: 'siblings', type: 'number', default: '1', description: 'Pages kept on each side of the current one before a gap.' },
 				{ name: 'controls', type: 'boolean', default: 'true (false for dots, bars)', description: 'Draw previous / next.' },
 				{ name: 'variant', type: "'dots' | 'bars' | 'count'", description: 'How the pages are drawn: dots, segments, or only “3 / 8” between previous and next.' },
-				{ name: 'onpage', type: '(page) => void', description: 'Called with the new page after every change.' },
+				{ name: 'onPage', type: '(page) => void', description: 'Called with the new page after every change.' },
 				{
 					name: 'pageLabel / previousLabel / nextLabel',
 					type: '(page) => string / string',

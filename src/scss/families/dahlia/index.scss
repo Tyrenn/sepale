@@ -42,6 +42,26 @@
 @use 'table';
 @use 'grid';
 @use 'data-control';
+@use 'divider';
+@use 'alert';
+@use 'toaster';
+@use 'tooltip';
+@use 'collapse';
+@use 'accordion';
+@use 'rating';
+@use 'segmented';
+@use 'number-input';
+@use 'empty-state';
+@use 'hero';
+@use 'footer';
+@use 'mobile-frame';
+@use 'window-frame';
+@use 'laptop-frame';
+@use 'drawer';
+@use 'steps';
+@use 'combobox';
+@use 'chips-input';
+@use 'file-explorer';
 
 
 
@@ -178,6 +198,26 @@ $params: map.merge(
 @include table.structure;
 @include grid.structure;
 @include data-control.structure;
+@include divider.structure;
+@include alert.structure;
+@include toaster.structure;
+@include tooltip.structure;
+@include collapse.structure;
+@include accordion.structure;
+@include rating.structure;
+@include segmented.structure;
+@include number-input.structure;
+@include empty-state.structure;
+@include hero.structure;
+@include footer.structure;
+@include mobile-frame.structure;
+@include window-frame.structure;
+@include laptop-frame.structure;
+@include drawer.structure;
+@include steps.structure;
+@include combobox.structure;
+@include chips-input.structure;
+@include file-explorer.structure;
 
 /* What dahlia decides, one file per component. */
 
@@ -221,3 +261,23 @@ $params: map.merge(
 @include table.look;
 @include grid.look;
 @include data-control.look;
+@include divider.look;
+@include alert.look;
+@include toaster.look;
+@include tooltip.look;
+@include collapse.look;
+@include accordion.look;
+@include rating.look;
+@include segmented.look;
+@include number-input.look;
+@include empty-state.look;
+@include hero.look;
+@include footer.look;
+@include mobile-frame.look;
+@include window-frame.look;
+@include laptop-frame.look;
+@include drawer.look;
+@include steps.look;
+@include combobox.look;
+@include chips-input.look;
+@include file-explorer.look;

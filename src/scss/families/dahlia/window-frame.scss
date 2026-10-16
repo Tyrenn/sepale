@@ -1,0 +1,107 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* dahlia — window-frame.
+   Everything dahlia draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   window-frame.scss — .window-frame (an application window drawn around content)
+   
+   	<div class="window-frame">
+   	  <div class="window-frame-bar">
+   	    <span class="window-frame-controls"><span></span><span></span><span></span></span>
+   	    <span class="window-frame-title">Settings</span>
+   	    <span class="window-frame-actions">…</span>
+   	  </div>
+   	  <div class="window-frame-body">…</div>
+   	</div>
+   
+      A title bar with three window controls, a centred title and room for
+      actions on the right, above a body that scrolls.
+   
+      Plumbing contract:
+   	--window-frame-bg / --window-frame-fg       the body
+   	--window-frame-bar-bg / --window-frame-bar-fg
+   	--window-frame-border / --window-frame-border-width
+   	--window-frame-radius / --window-frame-shadow
+   	--window-frame-dot-1 / -2 / -3              the three controls
+   ============================================================ */
+
+@mixin structure {
+	.window-frame {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		border: var(--window-frame-border-width) solid var(--window-frame-border);
+		border-radius: var(--window-frame-radius);
+		background-color: var(--window-frame-bg);
+		color: var(--window-frame-fg);
+		box-shadow: var(--window-frame-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		overflow: hidden;
+	}
+	.window-frame-bar {
+		display: grid;
+		grid-template-columns: 1fr minmax(0, auto) 1fr;
+		align-items: center;
+		gap: 0.75em;
+		min-height: 2.4em;
+		padding: 0.3em 0.9em;
+		border-bottom: var(--window-frame-border-width) solid var(--window-frame-border);
+		background-color: var(--window-frame-bar-bg);
+		color: var(--window-frame-bar-fg);
+	}
+	.window-frame-controls {
+		display: flex;
+		gap: 0.45em;
+	}
+	.window-frame-controls > span {
+		width: 0.75em;
+		height: 0.75em;
+		border-radius: 50%;
+		background-color: var(--window-frame-dot-1);
+	}
+	.window-frame-controls > span:nth-child(2) {
+		background-color: var(--window-frame-dot-2);
+	}
+	.window-frame-controls > span:nth-child(3) {
+		background-color: var(--window-frame-dot-3);
+	}
+	.window-frame-title {
+		overflow: hidden;
+		font-size: 0.85em;
+		font-weight: 600;
+		text-align: center;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.window-frame-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.4em;
+	}
+	.window-frame-body {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow: auto;
+	}
+}
+
+@mixin look {
+	.window-frame {
+		
+		--window-frame-bg: var(--color-surface-1);
+		--window-frame-fg: var(--color-on-surface);
+		--window-frame-bar-bg: var(--color-surface-2);
+		--window-frame-bar-fg: color-mix(in oklab, var(--color-on-surface) 75%, #0000);
+		--window-frame-border: var(--color-border);
+		--window-frame-border-width: var(--border);
+		--window-frame-radius: max(var(--radius-box), 0.5em);
+		--window-frame-shadow: 0 1.25em 3em -1em color-mix(in oklab, #000 30%, #0000);
+		--window-frame-dot-1: #ff5f57;
+		--window-frame-dot-2: #febc2e;
+		--window-frame-dot-3: #28c840;
+	}
+}

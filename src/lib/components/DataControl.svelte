@@ -106,6 +106,7 @@
 	import Dialog from './Dialog.svelte';
 	import Dropdown from './Dropdown.svelte';
 	import Input from './Input.svelte';
+	import Combobox from './Combobox.svelte';
 	import Menu from './Menu.svelte';
 	import Pagination from './Pagination.svelte';
 	import Select from './Select.svelte';
@@ -136,7 +137,7 @@
 		/** Draw export: `true`, or the options the export runs with. */
 		exportable?: boolean | ExportOptions;
 		/** Draw an add button calling this. */
-		onadd?: () => void;
+		onAdd?: () => void;
 		/** Confirm deletions and discarded changes in a dialog. Default true. */
 		confirm?: boolean;
 		/** Drawn at the start of the bar, after the filters and the sort. */
@@ -163,7 +164,7 @@
 		editing = true,
 		removable = true,
 		exportable = false,
-		onadd,
+		onAdd,
 		confirm = true,
 		leftActions,
 		rightActions,
@@ -273,7 +274,7 @@
 		<div class={`${PREFIX}-pagination`}>
 			<span class={`${PREFIX}-range`}>{t.range(from, to, handler.total)}</span>
 			{#if (handler.pages ?? 1) > 1}
-				<Pagination count={handler.pages ?? 1} page={handler.page} onpage={(p) => handler.changePage(p)} />
+				<Pagination count={handler.pages ?? 1} page={handler.page} onPage={(p) => handler.changePage(p)} />
 			{/if}
 		</div>
 	{/if}
@@ -315,7 +316,7 @@
 				nullable={f.nullable ?? true}
 				placeholder={t.any}
 				value={f.multiple ? ((valueOf(f) as string[]) ?? []) : ((valueOf(f) as string[] | undefined)?.[0] ?? '')}
-				onvalue={(v) => {
+				onValue={(v) => {
 					const list = Array.isArray(v) ? v : v ? [v] : [];
 					set(f, list.length ? list : undefined);
 				}}
@@ -326,17 +327,14 @@
 				{f.title}
 			</label>
 		{:else if f.type === 'entity'}
-			<Input
+			<Combobox
 				placeholder={f.title}
-				selected={valueOf(f)}
-				suggest={{
-					items: (q: string) => Promise.resolve(f.items(q)),
-					show: (s: EntityValue) => (f.show ? f.show(s) : (s.name ?? s.id)),
-					wait: f.wait,
-					strict: true,
-					eager: true
-				}}
-				onselect={(s) => set(f, s ?? undefined)}
+				value={valueOf(f)}
+				options={(q: string) => Promise.resolve(f.items(q))}
+				show={(s: EntityValue) => (f.show ? f.show(s) : (s.name ?? s.id))}
+				wait={f.wait}
+				eager
+				onSelect={(s) => set(f, s ?? undefined)}
 			/>
 		{/if}
 	</div>
@@ -356,7 +354,7 @@
 					{#snippet children({ close })}
 						<Menu
 							items={handler.availableFilters.map((f) => ({ label: f.title }))}
-							onselect={(node) => {
+							onSelect={(node) => {
 								const f = handler.availableFilters.find((x) => x.title === node.label);
 								close();
 								if (f) add(f);
@@ -383,7 +381,7 @@
 									active: !!handler.sort && sortKey(handler.sort) === sortKey(s)
 								}))
 							]}
-							onselect={(node) => {
+							onSelect={(node) => {
 								close();
 								handler.changeSort(handler.sorts.find((s) => s.name === node.label));
 							}}
@@ -414,7 +412,7 @@
 					aria-label={t.perPage(handler.limit)}
 					options={limits.map((n) => ({ value: String(n), name: t.perPage(n) }))}
 					value={String(handler.limit)}
-					onvalue={(v) => handler.changeLimit(Number(v))}
+					onValue={(v) => handler.changeLimit(Number(v))}
 				/>
 			{/if}
 
@@ -443,8 +441,8 @@
 				</Button>
 			{/if}
 
-			{#if onadd}
-				<Button variant="soft" shape="square" title={t.add} aria-label={t.add} onclick={() => onadd()}>
+			{#if onAdd}
+				<Button variant="soft" shape="square" title={t.add} aria-label={t.add} onclick={() => onAdd()}>
 					{@render icon('M12 5v14M5 12h14')}
 				</Button>
 			{/if}
@@ -471,7 +469,7 @@
 			{#each handler.shownFilters as f (f.id)}
 				<Dropdown
 					open={openFilter === f.id}
-					ontoggle={(open) => (openFilter = open ? f.id : openFilter === f.id ? undefined : openFilter)}
+					onToggle={(open) => (openFilter = open ? f.id : openFilter === f.id ? undefined : openFilter)}
 				>
 					{#snippet trigger({ props })}
 						<Chip variant="soft" class={`${PREFIX}-filter`}>
@@ -508,7 +506,7 @@
 			bind:open={dialogOpen}
 			size="sm"
 			title={asking?.kind === 'delete' ? t.confirmDeleteTitle(asking.count) : asking ? t.confirmDiscardTitle(asking.count) : ''}
-			onclose={answered}
+			onClose={answered}
 		>
 			{asking?.kind === 'delete' ? t.confirmDeleteText : t.confirmDiscardText}
 			{#snippet actions()}

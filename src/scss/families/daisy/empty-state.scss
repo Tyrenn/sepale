@@ -1,0 +1,94 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* daisy — empty-state.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   empty-state.scss — .empty-state (what to show when there is nothing)
+   
+   	<div class="empty-state">
+   	  <div class="empty-state-icon">…</div>
+   	  <p class="empty-state-title">No results</p>
+   	  <p class="empty-state-body">Try another search.</p>
+   	  <div class="empty-state-actions"><button class="btn">Clear filters</button></div>
+   	</div>
+   
+      A centred column. Made to sit in the `empty` slot of a Table, a
+      Grid or a List, or anywhere a collection has nothing to show.
+   
+      Plumbing contract:
+   	--empty-state-fg / --empty-state-muted   title ink and body ink
+   	--empty-state-icon-bg / --empty-state-icon-fg / --empty-state-icon-size
+   	--empty-state-p / --empty-state-gap
+   	--empty-state-border / --empty-state-radius   the dashed frame
+   ============================================================ */
+
+@mixin structure {
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--empty-state-gap);
+		padding: var(--empty-state-p);
+		border: var(--empty-state-border, 0 solid transparent);
+		border-radius: var(--empty-state-radius, 0);
+		color: var(--empty-state-fg);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		text-align: center;
+	}
+	.empty-state-icon {
+		display: grid;
+		place-items: center;
+		width: var(--empty-state-icon-size);
+		height: var(--empty-state-icon-size);
+		margin-bottom: 0.25em;
+		border-radius: 999px;
+		background-color: var(--empty-state-icon-bg);
+		color: var(--empty-state-icon-fg);
+	}
+	.empty-state-icon svg {
+		width: 50%;
+		height: 50%;
+	}
+	.empty-state-title {
+		margin: 0;
+		font-size: 1.125em;
+		font-weight: 600;
+	}
+	.empty-state-body {
+		max-width: 32em;
+		margin: 0;
+		color: var(--empty-state-muted);
+	}
+	.empty-state-actions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.5em;
+		margin-top: 0.5em;
+	}
+}
+
+@mixin look {
+	.empty-state {
+		
+		--empty-state-fg: var(--color-base-content);
+		--empty-state-muted: color-mix(in oklab, var(--color-base-content) 60%, #0000);
+		--empty-state-icon-bg: var(--color-base-200);
+		--empty-state-icon-fg: color-mix(in oklab, var(--color-base-content) 55%, #0000);
+		--empty-state-icon-size: calc(3.5em * var(--scale));
+		--empty-state-p: calc(2.5em * var(--scale)) calc(1.5em * var(--scale));
+		--empty-state-gap: calc(0.4em * var(--scale));
+	}
+
+	/* variant dashed: a drop-zone-like frame. */
+	.empty-state-dashed {
+		--empty-state-border: max(var(--border), 1px) dashed color-mix(in oklab, var(--color-base-content) 25%, #0000);
+		--empty-state-radius: var(--radius-box);
+	}
+
+	@include m.size-variants('empty-state');
+}

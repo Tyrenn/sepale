@@ -1,0 +1,92 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* daisy — rating.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   rating.scss — .rating (a score picked from a row of icons)
+   
+   	<div class="rating" role="radiogroup" aria-label="Rating">
+   	  <input type="radio" class="rating-item" name="r" value="1" aria-label="1 star">
+   	  <input type="radio" class="rating-item" name="r" value="2" aria-label="2 stars" checked>
+   	  …
+   	</div>
+   
+      Real radios, each drawn as an icon through a mask. Every item up to
+      the checked one is filled; hovering previews the score.
+   
+      Plumbing contract:
+   	--rating-on / --rating-off   filled and empty icon colours
+   	--rating-size                one icon's side
+   	--rating-gap                 space between icons
+   	--rating-mask                the icon (a mask image; a star by default)
+   ============================================================ */
+
+@mixin structure {
+	.rating {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--rating-gap);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		--rating-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5l2.94 6.1 6.56.86-4.8 4.6 1.2 6.54L12 17.4l-5.9 3.2 1.2-6.54-4.8-4.6 6.56-.86z'/%3E%3C/svg%3E");
+	}
+	.rating-item {
+		appearance: none;
+		flex: none;
+		width: var(--rating-size);
+		height: var(--rating-size);
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background-color: var(--rating-off);
+		-webkit-mask: var(--rating-mask) center / contain no-repeat;
+		mask: var(--rating-mask) center / contain no-repeat;
+		cursor: pointer;
+		transition: background-color 0.1s, scale 0.1s;
+	}
+	.rating-item:checked,
+	.rating-item:has(~ .rating-item:checked) {
+		background-color: var(--rating-on);
+	}
+	/* Hover previews: everything off, then up to the hovered item on. */
+	.rating:hover .rating-item {
+		background-color: var(--rating-off);
+	}
+	.rating .rating-item:hover,
+	.rating .rating-item:has(~ .rating-item:hover) {
+		background-color: var(--rating-on);
+	}
+	.rating-item:hover {
+		scale: 1.12;
+	}
+	.rating-item:focus-visible {
+		outline: 2px solid var(--rating-on);
+		outline-offset: 2px;
+	}
+	.rating-item:disabled,
+	.rating-readonly .rating-item {
+		cursor: default;
+		pointer-events: none;
+	}
+}
+
+@mixin look {
+	.rating {
+		--rating-on: var(--color-warning, var(--color-primary));
+		--rating-off: color-mix(in oklab, var(--color-base-content) 18%, #0000);
+		--rating-size: calc(1.5em * var(--scale));
+		--rating-gap: calc(0.15em * var(--scale));
+	}
+
+	/* colour variants */
+	@each $color in c.$color-list {
+		.rating-#{$color} {
+			--rating-on: var(--color-#{$color});
+		}
+	}
+
+	@include m.size-variants('rating');
+}

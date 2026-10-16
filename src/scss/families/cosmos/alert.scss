@@ -1,0 +1,139 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* cosmos — alert.
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   alert.scss — .alert (an inline message: info, success, warning, error)
+   
+   	<div class="alert alert-info" role="status">
+   	  <span class="alert-icon">…</span>
+   	  <div class="alert-body"><p class="alert-title">Saved</p>Your changes are live.</div>
+   	  <div class="alert-actions">…</div>
+   	  <button class="alert-close" aria-label="Dismiss">×</button>
+   	</div>
+   
+      Default: a soft tint of the colour. `alert-outline` keeps the page
+      behind it, `alert-solid` fills with the colour itself.
+   
+      Plumbing contract:
+   	--alert-color          seed colour (colour variants)
+   	--alert-bg / --alert-fg / --alert-border
+   	--alert-accent         icon and title ink
+   	--alert-radius / --alert-shadow / --alert-border-width
+   	--alert-p / --alert-gap
+   	--fontsize             font size (size variants)
+   ============================================================ */
+
+@mixin structure {
+	.alert {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--alert-gap);
+		padding: var(--alert-p);
+		border: var(--alert-border-width) solid var(--alert-border);
+		border-radius: var(--alert-radius);
+		background-color: var(--alert-bg);
+		color: var(--alert-fg);
+		box-shadow: var(--alert-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		line-height: 1.45;
+	}
+	.alert-icon {
+		display: inline-flex;
+		flex: none;
+		align-items: center;
+		height: 1.45em;
+		color: var(--alert-accent);
+	}
+	.alert-icon svg {
+		width: 1.2em;
+		height: 1.2em;
+	}
+	.alert-body {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+	.alert-title {
+		margin: 0;
+		color: var(--alert-accent);
+		font-weight: 600;
+	}
+	.alert-actions {
+		display: flex;
+		flex: none;
+		flex-wrap: wrap;
+		align-self: center;
+		gap: calc(0.5em * var(--scale));
+	}
+	.alert-close {
+		display: inline-grid;
+		flex: none;
+		place-items: center;
+		width: 1.6em;
+		height: 1.6em;
+		margin: -0.1em -0.25em 0 0;
+		padding: 0;
+		border: 0;
+		border-radius: 999px;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		font-size: 1em;
+		line-height: 1;
+		opacity: 0.6;
+		cursor: pointer;
+	}
+	.alert-close:hover,
+	.alert-close:focus-visible {
+		opacity: 1;
+		background-color: color-mix(in oklab, currentColor 12%, #0000);
+	}
+}
+
+@mixin look {
+	.alert {
+		--cw: var(--cosmos-wobble-box, 0.2);
+		--alert-color: var(--color-on-surface);
+		--alert-bg: color-mix(in oklab, var(--alert-color) 10%, var(--color-surface-1));
+		--alert-fg: var(--color-on-surface);
+		--alert-border: color-mix(in oklab, var(--alert-color) 25%, var(--color-surface-1));
+		--alert-accent: var(--alert-color);
+		--alert-border-width: var(--border);
+		--alert-radius: var(--c2);
+		--alert-shadow: none;
+		--alert-p: calc(0.85em * var(--scale)) calc(1em * var(--scale));
+		--alert-gap: calc(0.75em * var(--scale));
+	}
+
+	/* colour variants */
+	@each $color in c.$color-list {
+		.alert-#{$color} {
+			--alert-color: var(--color-#{$color});
+		}
+	}
+
+	/* variant outline: the page shows through. */
+	.alert-outline {
+		--alert-bg: transparent;
+		--alert-border: var(--alert-color);
+	}
+
+	/* variant solid: the colour itself, with its own ink. */
+	.alert-solid {
+		--alert-bg: var(--alert-color);
+		--alert-fg: var(--alert-on, var(--color-surface-1));
+		--alert-accent: var(--alert-fg);
+		--alert-border: var(--alert-color);
+	}
+	@each $color in c.$color-list {
+		.alert-solid.alert-#{$color} {
+			--alert-on: var(--color-on-#{$color});
+		}
+	}
+
+	@include m.size-variants('alert');
+}

@@ -1,0 +1,114 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* dahlia — number-input.
+   Everything dahlia draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   number-input.scss — .number-input (a number with − and + beside it)
+   
+   	<div class="number-input">
+   	  <button type="button" class="number-input-dec" aria-label="Decrease">−</button>
+   	  <input type="number" class="number-input-field" value="2">
+   	  <button type="button" class="number-input-inc" aria-label="Increase">+</button>
+   	</div>
+   
+      One field-shaped frame: the native spinners are hidden, the two
+      buttons step the value.
+   
+      Plumbing contract:
+   	--number-input-bg / --number-input-fg / --number-input-border
+   	--number-input-border-width / --number-input-radius
+   	--number-input-btn-bg / --number-input-btn-hover
+   	--number-input-width   the field's width
+   	--number-input-focus   the ring around the frame when focused
+   	--size                 height
+   ============================================================ */
+
+@mixin structure {
+	.number-input {
+		display: inline-flex;
+		align-items: stretch;
+		height: var(--size);
+		border: var(--number-input-border-width) solid var(--number-input-border);
+		border-radius: var(--number-input-radius);
+		background-color: var(--number-input-bg);
+		color: var(--number-input-fg);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		overflow: hidden;
+		vertical-align: middle;
+	}
+	.number-input:focus-within {
+		box-shadow: var(--number-input-focus);
+	}
+	.number-input-field {
+		width: var(--number-input-width);
+		min-width: 0;
+		margin: 0;
+		padding: 0 0.25em;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		text-align: center;
+		font-variant-numeric: tabular-nums;
+		-moz-appearance: textfield;
+		appearance: textfield;
+	}
+	.number-input-field:focus {
+		outline: none;
+	}
+	.number-input-field::-webkit-inner-spin-button,
+	.number-input-field::-webkit-outer-spin-button {
+		margin: 0;
+		-webkit-appearance: none;
+		appearance: none;
+	}
+	.number-input-dec,
+	.number-input-inc {
+		display: inline-grid;
+		flex: none;
+		place-items: center;
+		width: var(--size);
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background-color: var(--number-input-btn-bg);
+		color: inherit;
+		font: inherit;
+		font-size: 1.15em;
+		line-height: 1;
+		cursor: pointer;
+	}
+	.number-input-dec:hover,
+	.number-input-inc:hover {
+		background-color: var(--number-input-btn-hover);
+	}
+	.number-input-dec:disabled,
+	.number-input-inc:disabled {
+		opacity: 0.4;
+		cursor: default;
+		background-color: var(--number-input-btn-bg);
+	}
+}
+
+@mixin look {
+	.number-input {
+		
+		--size: calc(2.5em * var(--scale));
+		--number-input-bg: var(--color-surface-1);
+		--number-input-fg: var(--color-on-surface);
+		--number-input-border: var(--color-border);
+		--number-input-border-width: var(--border);
+		--number-input-radius: var(--radius-field);
+		--number-input-btn-bg: transparent;
+		--number-input-btn-hover: color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+		--number-input-width: 4em;
+		--number-input-focus: 0 0 0 2px color-mix(in oklab, var(--color-primary) 45%, #0000);
+	}
+
+
+	@include m.size-variants('number-input');
+}

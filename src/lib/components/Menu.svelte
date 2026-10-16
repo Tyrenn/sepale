@@ -43,12 +43,9 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	// `onselect` is ours: the native event of that name fires on text
-	// selection and means nothing on a <ul>, so the attribute is Omitted
-	// rather than the prop renamed.
 	interface Props
 		extends AxisProps<typeof AXES, typeof FLAGS>,
-			Omit<HTMLAttributes<HTMLUListElement>, 'onselect'> {
+			HTMLAttributes<HTMLUListElement> {
 		/**
 		 * The rows, nested as deep as needed. A node's `label` and `title` take
 		 * a snippet as readily as a string, for the one row that differs.
@@ -60,11 +57,11 @@
 		 */
 		row?: Snippet<[MenuNode]>;
 		/** Called when a row without an href is chosen. */
-		onselect?: (node: MenuNode) => void;
+		onSelect?: (node: MenuNode) => void;
 		class?: string;
 	}
 
-	let { items = [], row, onselect, class: klass = '', ...axes }: Props = $props();
+	let { items = [], row, onSelect, class: klass = '', ...axes }: Props = $props();
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
@@ -72,6 +69,7 @@
 	// Open/closed lives here, keyed by the row's path, so the caller can hand
 	// over plain data and still get a working disclosure. `node.open` is the
 	// starting point; once a row is clicked, this map wins.
+	const uid = $props.id();
 	let toggled = $state<Record<string, boolean>>({});
 	const isOpen = (key: string, node: MenuNode) => toggled[key] ?? node.open ?? true;
 
@@ -109,9 +107,15 @@
 					class={rowClass(node, true)}
 					disabled={node.disabled}
 					aria-expanded={isOpen(key, node)}
+					aria-controls="{uid}-{key}"
 					onclick={() => (toggled[key] = !isOpen(key, node))}
 				>{@render inside(node)}</button>
-				<ul class={cx(`${PREFIX}-sub`, !isOpen(key, node) && `${PREFIX}-sub-closed`)}>
+				<!-- As in Collapse: a closed sub-menu is inert, so Tab skips its rows. -->
+				<ul
+					id="{uid}-{key}"
+					class={cx(`${PREFIX}-sub`, !isOpen(key, node) && `${PREFIX}-sub-closed`)}
+					inert={!isOpen(key, node)}
+				>
 					{@render rows(node.items, key + '.')}
 				</ul>
 			</li>
@@ -130,7 +134,7 @@
 					type="button"
 					class={rowClass(node, false)}
 					disabled={node.disabled}
-					onclick={() => onselect?.(node)}
+					onclick={() => onSelect?.(node)}
 				>{@render inside(node)}</button>
 			</li>
 		{/if}

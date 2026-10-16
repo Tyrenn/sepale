@@ -1,0 +1,98 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* peony — laptop-frame.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   laptop-frame.scss — .laptop-frame (a laptop drawn around content)
+   
+   	<div class="laptop-frame">
+   	  <div class="laptop-frame-lid"><div class="laptop-frame-screen">…</div></div>
+   	  <div class="laptop-frame-base"></div>
+   	</div>
+   
+      The lid holds a 16:10 screen that scrolls its own content; the base
+      is wider than the lid, with the opening notch at its front edge.
+   
+      Plumbing contract:
+   	--laptop-frame-width     the base's width (the lid is 84 % of it)
+   	--laptop-frame-body / --laptop-frame-base   lid and base colours
+   	--laptop-frame-bezel     the band around the screen
+   	--laptop-frame-screen-bg / --laptop-frame-screen-fg
+   	--laptop-frame-shadow
+   ============================================================ */
+
+@mixin structure {
+	.laptop-frame {
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		width: var(--laptop-frame-width);
+		max-width: 100%;
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		vertical-align: top;
+	}
+	.laptop-frame-lid {
+		position: relative;
+		box-sizing: border-box;
+		width: 84%;
+		padding: var(--laptop-frame-bezel);
+		padding-top: calc(var(--laptop-frame-bezel) * 1.6);
+		border-radius: 0.9em 0.9em 0 0;
+		background-color: var(--laptop-frame-body);
+		box-shadow: var(--laptop-frame-shadow);
+	}
+	/* The camera. */
+	.laptop-frame-lid::before {
+		content: '';
+		position: absolute;
+		top: calc(var(--laptop-frame-bezel) * 0.55);
+		left: 50%;
+		width: 0.35em;
+		height: 0.35em;
+		border-radius: 50%;
+		background-color: color-mix(in oklab, var(--laptop-frame-screen-bg) 35%, var(--laptop-frame-body));
+		translate: -50% 0;
+	}
+	.laptop-frame-screen {
+		aspect-ratio: 16 / 10;
+		background-color: var(--laptop-frame-screen-bg);
+		color: var(--laptop-frame-screen-fg);
+		overflow: auto;
+	}
+	.laptop-frame-base {
+		position: relative;
+		width: 100%;
+		height: 0.9em;
+		border-radius: 0 0 1.2em 1.2em / 0 0 0.9em 0.9em;
+		background-color: var(--laptop-frame-base);
+		box-shadow: var(--laptop-frame-shadow);
+	}
+	/* The notch to lift the lid. */
+	.laptop-frame-base::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 50%;
+		width: 16%;
+		height: 0.3em;
+		border-radius: 0 0 0.4em 0.4em;
+		background-color: color-mix(in oklab, var(--laptop-frame-base) 70%, #000);
+		translate: -50% 0;
+	}
+}
+
+@mixin look {
+	.laptop-frame {
+		--laptop-frame-width: 40em;
+		--laptop-frame-body: color-mix(in oklab, var(--color-on-surface) 88%, var(--color-surface-1));
+		--laptop-frame-base: color-mix(in oklab, var(--color-on-surface) 30%, var(--color-surface-1));
+		--laptop-frame-bezel: 0.8em;
+		--laptop-frame-screen-bg: var(--color-surface-1);
+		--laptop-frame-screen-fg: var(--color-on-surface);
+		--laptop-frame-shadow: none;
+	}
+}

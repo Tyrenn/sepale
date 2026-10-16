@@ -1,0 +1,208 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* daisy — drawer.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   drawer.scss — .drawer (a panel sliding in from a side)
+   
+   	<aside class="drawer drawer-left" data-state="peek">
+   	  <div class="drawer-content">…</div>
+   	  <button class="drawer-handle" aria-label="Open"></button>
+   	</aside>
+   
+      Three states, written as data-state: hidden (out of view), peek (the
+      last --drawer-peek of it in view) and open (all --drawer-size of it).
+      Any side; left by default. Fixed to the viewport by default —
+      --drawer-position: absolute keeps it inside a positioned container.
+   
+      It may be a <dialog>: opened modal it gets the browser's backdrop.
+      A dialog's own UA box (margins, max sizes) is reset here.
+   
+      Plumbing contract:
+   	--drawer-size / --drawer-peek     open extent and peeking extent
+   	--drawer-position                 fixed (default) or absolute
+   	--drawer-bg / --drawer-fg / --drawer-border / --drawer-shadow
+   	--drawer-radius                   the inner corners
+   	--drawer-p                        content padding
+   	--drawer-backdrop                 the shade behind a modal drawer
+   	--drawer-speed                    the slide's duration
+   	--drawer-handle-bg / --drawer-handle-w / --drawer-handle-l
+   ============================================================ */
+
+@mixin structure {
+	.drawer {
+		position: var(--drawer-position, fixed);
+		z-index: 900;
+		flex-direction: column;
+		box-sizing: border-box;
+		max-width: none;
+		max-height: none;
+		margin: 0;
+		padding: 0;
+		border: 0 solid var(--drawer-border);
+		background-color: var(--drawer-bg);
+		color: var(--drawer-fg);
+		box-shadow: var(--drawer-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		overflow: visible;
+		transition: translate var(--drawer-speed) ease;
+	}
+	.drawer:not(dialog),
+	dialog.drawer[open] {
+		display: flex;
+	}
+
+	.drawer {
+		inset: 0 auto 0 0;
+		width: var(--drawer-size);
+		height: auto;
+		max-width: 100%;
+	}
+	.drawer[data-state='hidden'] {
+		translate: -100% 0;
+	}
+	.drawer[data-state='peek'] {
+		translate: calc(-100% + var(--drawer-peek)) 0;
+	}
+	.drawer,
+	.drawer-left {
+		border-inline-end-width: var(--drawer-border-width);
+		border-radius: 0 var(--drawer-radius) var(--drawer-radius) 0;
+	}
+
+	.drawer-left {
+		inset: 0 auto 0 0;
+		width: var(--drawer-size);
+		height: auto;
+		max-width: 100%;
+	}
+	.drawer-left[data-state='hidden'] {
+		translate: -100% 0;
+	}
+	.drawer-left[data-state='peek'] {
+		translate: calc(-100% + var(--drawer-peek)) 0;
+	}
+
+	.drawer-right {
+		inset: 0 0 0 auto;
+		width: var(--drawer-size);
+		height: auto;
+		max-width: 100%;
+	}
+	.drawer-right[data-state='hidden'] {
+		translate: 100% 0;
+	}
+	.drawer-right[data-state='peek'] {
+		translate: calc(100% - var(--drawer-peek)) 0;
+	}
+	.drawer-right {
+		border-width: 0;
+		border-inline-start-width: var(--drawer-border-width);
+		border-radius: var(--drawer-radius) 0 0 var(--drawer-radius);
+	}
+
+	.drawer-top {
+		inset: 0 0 auto 0;
+		height: var(--drawer-size);
+		width: auto;
+		max-height: 100%;
+	}
+	.drawer-top[data-state='hidden'] {
+		translate: 0 -100%;
+	}
+	.drawer-top[data-state='peek'] {
+		translate: 0 calc(-100% + var(--drawer-peek));
+	}
+	.drawer-top {
+		border-width: 0;
+		border-bottom-width: var(--drawer-border-width);
+		border-radius: 0 0 var(--drawer-radius) var(--drawer-radius);
+	}
+
+	.drawer-bottom {
+		inset: auto 0 0 0;
+		height: var(--drawer-size);
+		width: auto;
+		max-height: 100%;
+	}
+	.drawer-bottom[data-state='hidden'] {
+		translate: 0 100%;
+	}
+	.drawer-bottom[data-state='peek'] {
+		translate: 0 calc(100% - var(--drawer-peek));
+	}
+	.drawer-bottom {
+		border-width: 0;
+		border-top-width: var(--drawer-border-width);
+		border-radius: var(--drawer-radius) var(--drawer-radius) 0 0;
+	}
+	.drawer[data-state='hidden'] {
+		box-shadow: none;
+	}
+	.drawer::backdrop {
+		background-color: var(--drawer-backdrop);
+	}
+	.drawer-content {
+		flex: 1 1 auto;
+		min-height: 0;
+		padding: var(--drawer-p);
+		overflow: auto;
+		overscroll-behavior: contain;
+	}
+	.drawer-handle {
+		position: absolute;
+		inset: 50% 0 auto auto; translate: 0 -50%; width: var(--drawer-handle-w); height: var(--drawer-handle-l);
+		margin: calc(var(--drawer-handle-w) * 1.5);
+		padding: 0;
+		border: 0;
+		border-radius: 999px;
+		background-color: var(--drawer-handle-bg);
+		cursor: pointer;
+	}
+	.drawer-left > .drawer-handle {
+		inset: 50% 0 auto auto; translate: 0 -50%; width: var(--drawer-handle-w); height: var(--drawer-handle-l);
+	}
+	.drawer-right > .drawer-handle {
+		inset: 50% auto auto 0; translate: 0 -50%; width: var(--drawer-handle-w); height: var(--drawer-handle-l);
+	}
+	.drawer-top > .drawer-handle {
+		inset: auto auto 0 50%; translate: -50% 0; width: var(--drawer-handle-l); height: var(--drawer-handle-w);
+	}
+	.drawer-bottom > .drawer-handle {
+		inset: 0 auto auto 50%; translate: -50% 0; width: var(--drawer-handle-l); height: var(--drawer-handle-w);
+	}
+	/* A larger hit area than the grip it draws. */
+	.drawer-handle::before {
+		content: '';
+		position: absolute;
+		inset: -0.75em;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.drawer {
+			transition: none;
+		}
+	}
+}
+
+@mixin look {
+	.drawer {
+		--drawer-size: 20em;
+		--drawer-peek: 3em;
+		--drawer-bg: var(--color-base-100);
+		--drawer-fg: var(--color-base-content);
+		--drawer-border: var(--color-base-300);
+		--drawer-border-width: var(--border);
+		--drawer-shadow: 0 0 2.5em -0.5em color-mix(in oklab, #000 35%, #0000);
+		--drawer-radius: var(--radius-box);
+		--drawer-p: calc(1.25em * var(--scale));
+		--drawer-backdrop: color-mix(in oklab, #000 40%, #0000);
+		--drawer-speed: 0.25s;
+		--drawer-handle-bg: color-mix(in oklab, var(--color-base-content) 30%, #0000);
+		--drawer-handle-w: 0.3em;
+		--drawer-handle-l: 2.5em;
+	}
+}

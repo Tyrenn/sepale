@@ -36,12 +36,9 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	// `onselect` is ours: the native event of that name fires on text
-	// selection and means nothing on the strip, so the attribute is Omitted
-	// rather than the prop renamed.
 	interface Props
 		extends AxisProps<typeof AXES, typeof FLAGS>,
-			Omit<HTMLAttributes<HTMLDivElement>, 'onselect'> {
+			HTMLAttributes<HTMLDivElement> {
 		/**
 		 * The tabs, in order. A tab's `label` takes a snippet as readily as a
 		 * string, for the one tab that carries an icon or a count.
@@ -55,7 +52,7 @@
 		/** Index of the selected tab. Bindable, so a parent can drive it. */
 		active?: number;
 		/** Called with the new index when a tab is chosen. */
-		onselect?: (index: number) => void;
+		onSelect?: (index: number) => void;
 		class?: string;
 	}
 
@@ -63,7 +60,7 @@
 		tabs = [],
 		tab,
 		active = $bindable(0),
-		onselect,
+		onSelect,
 		class: klass = '',
 		...axes
 	}: Props = $props();
@@ -73,7 +70,7 @@
 
 	function select(i: number) {
 		active = i;
-		onselect?.(i);
+		onSelect?.(i);
 	}
 </script>
 
