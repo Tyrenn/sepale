@@ -4,29 +4,33 @@
 	export const PREFIX = 'chips-input';
 
 	export const AXES = {
-		size: ['xs', 'sm', 'md', 'lg', 'xl']
+		size: ['xs', 'sm', 'md', 'lg', 'xl'],
+		/* Where the list sits next to the field. Below by default. */
+		side: ['top', 'bottom', 'start', 'end']
 	} as const;
 
 	export const FLAGS = {} as const;
-	export const PARTS = ['remove', 'field'] as const;
+	export const PARTS = ['list', 'remove'] as const;
 
 	/** What the `field` snippet receives: call `add` when the field commits a value. */
 	export interface ChipsInputField {
 		add: (value: string) => void;
+		/** Whether a value is already in the list. */
+		has: (value: string) => boolean;
 	}
 </script>
 
 <script lang="ts">
 	/**
-	 * An accumulator: several values, each a chip, collected from a field.
+	 * A field that feeds a list of chips. A utility: the field is any
+	 * component — an Input, a Select, a Combobox — given `add` and calling it
+	 * when it commits a value; the values pile up as chips in a list next to
+	 * it (`side`), never inside it.
 	 *
-	 * The field is not this component's business. Without one, a plain input
-	 * adds on Enter or a comma. With `field`, any component goes in — an Input,
-	 * a Select, a Combobox — and calls `add(value)` when it commits one.
-	 * Backspace in an empty field removes the last chip.
+	 * Without `field`, a plain `.input` adds on Enter or a comma.
 	 *
-	 * `values` is bindable: the component stores them. Each one is also a
-	 * hidden `name[]` input, so a form submits them.
+	 * `values` is bindable. Each one is also a hidden `name[]` input, so a
+	 * form submits them.
 	 */
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -50,6 +54,8 @@
 		onChange?: (values: string[]) => void;
 		/** A remove button's accessible name. */
 		removeLabel?: (value: string) => string;
+		/** The list's accessible name. */
+		listLabel?: string;
 		/** Classes on each chip: `chip-primary`, `chip-soft`… */
 		chipClass?: string;
 		class?: string;
@@ -67,16 +73,16 @@
 		chip,
 		onChange,
 		removeLabel = (v: string) => `Remove ${v}`,
+		listLabel,
 		chipClass = '',
 		class: klass = '',
 		...axes
 	}: Props = $props();
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
-	let classes = $derived(cx('input', PREFIX, applied.classes, klass));
+	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
 	let draft = $state('');
-	let root: HTMLDivElement | undefined = $state();
 
 	function add(value: string) {
 		const v = `${value ?? ''}`.trim();
@@ -84,18 +90,11 @@
 		values = [...values, v];
 		onChange?.(values);
 	}
+	const has = (value: string) => values.includes(`${value ?? ''}`.trim());
 
 	function remove(i: number) {
 		values = values.filter((_, n) => n !== i);
 		onChange?.(values);
-	}
-
-	/* Backspace in any empty field inside: the last chip goes. */
-	function keydown(e: KeyboardEvent) {
-		const t = e.target as HTMLInputElement;
-		if (e.key === 'Backspace' && t instanceof HTMLInputElement && t.value === '' && values.length && !disabled) {
-			remove(values.length - 1);
-		}
 	}
 
 	function draftKeydown(e: KeyboardEvent) {
@@ -103,31 +102,42 @@
 			e.preventDefault();
 			add(draft);
 			draft = '';
+		} else if (e.key === 'Backspace' && draft === '' && values.length && !disabled) {
+			/* Backspace in the empty default field: the last chip goes. */
+			remove(values.length - 1);
 		}
-	}
-
-	/* A click on the frame's empty space focuses the field. */
-	function focusField(e: MouseEvent) {
-		if (e.target === root) root?.querySelector<HTMLElement>('input:not([type=hidden]), select')?.focus();
 	}
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div {...applied.rest} bind:this={root} class={classes} onkeydown={keydown} onclick={focusField}>
-	{#each values as v, i (v + i)}
-		<span class={cx('chip', chipClass)}>
-			{#if chip}{@render chip(v)}{:else}{v}{/if}
-			<button type="button" class="chips-input-remove" aria-label={removeLabel(v)} {disabled} onclick={() => remove(i)}>
-				<svg viewBox="0 0 24 24" width="0.9em" height="0.9em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18" /></svg>
-			</button>
-		</span>
-	{/each}
+<div {...applied.rest} class={classes}>
 	{#if field}
-		{@render field({ add })}
+		{@render field({ add, has })}
 	{:else}
-		<input class="chips-input-field" bind:value={draft} {placeholder} {disabled} onkeydown={draftKeydown} onblur={() => (add(draft), (draft = ''))} />
+		<input
+			class="input"
+			bind:value={draft}
+			{placeholder}
+			{disabled}
+			onkeydown={draftKeydown}
+			onblur={() => (add(draft), (draft = ''))}
+		/>
 	{/if}
+	<ul class="chips-input-list" aria-label={listLabel}>
+		{#each values as v, i (v + i)}
+			<li class={cx('chip', chipClass)}>
+				{#if chip}{@render chip(v)}{:else}{v}{/if}
+				<button
+					type="button"
+					class="chips-input-remove"
+					aria-label={removeLabel(v)}
+					{disabled}
+					onclick={() => remove(i)}
+				>
+					<svg viewBox="0 0 24 24" width="0.9em" height="0.9em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18" /></svg>
+				</button>
+			</li>
+		{/each}
+	</ul>
 	{#if name}
 		{#each values as v, i (v + i)}<input type="hidden" name="{name}[]" value={v} />{/each}
 	{/if}

@@ -1,0 +1,173 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* cosmos — sidebar.
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   sidebar.scss — .sidebar (an app's side column, folding to a rail)
+
+	<div class="sidebar-layout">
+	  <aside class="sidebar">
+	    <div class="sidebar-head">… <button class="sidebar-toggle" aria-expanded="true">…</button></div>
+	    <div class="sidebar-body"> <ul class="menu">…</ul> </div>
+	    <div class="sidebar-foot">…</div>
+	  </aside>
+	  <main>…</main>
+	</div>
+
+   In the flow, unlike a drawer: the page beside it gets narrower or
+   wider, it never covers it. `.sidebar-collapsed` folds it to a rail
+   (--sidebar-rail) where only the toggle — and whatever the author
+   marks `.sidebar-keep` — stays; the rest fades out as it closes.
+   `.sidebar-end` puts it on the other side. `.sidebar-layout` is the
+   optional row it sits in: the sidebar, then the page filling the
+   rest, both as tall as the viewport.
+
+   Plumbing contract:
+	--sidebar-width / --sidebar-rail   open and folded widths
+	--sidebar-bg / --sidebar-fg
+	--sidebar-border / --sidebar-border-width / --sidebar-shadow
+	--sidebar-p / --sidebar-gap
+	--sidebar-speed                    the fold's timing
+   ============================================================ */
+
+@mixin structure {
+	.sidebar-layout {
+		display: flex;
+		height: 100dvh;
+		overflow: hidden;
+	}
+	.sidebar-layout > :not(.sidebar) {
+		flex: 1;
+		min-width: 0;
+		overflow-y: auto;
+	}
+
+	.sidebar {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex: none;
+		flex-direction: column;
+		box-sizing: border-box;
+		width: var(--sidebar-width);
+		height: 100%;
+		overflow: hidden;
+		background-color: var(--sidebar-bg);
+		color: var(--sidebar-fg);
+		border-inline-end: var(--sidebar-border-width) solid var(--sidebar-border);
+		box-shadow: var(--sidebar-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+		transition: width var(--sidebar-speed);
+	}
+	.sidebar-end {
+		order: 1;
+		border-inline-end: 0;
+		border-inline-start: var(--sidebar-border-width) solid var(--sidebar-border);
+	}
+	.sidebar-head,
+	.sidebar-foot {
+		display: flex;
+		flex: none;
+		align-items: center;
+		gap: var(--sidebar-gap);
+		padding: var(--sidebar-p);
+	}
+	.sidebar-body {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		padding: 0 var(--sidebar-p) var(--sidebar-p);
+		scrollbar-width: thin;
+	}
+	/* Laid out at the open width whatever the sidebar's width: folding
+	   clips the content instead of reflowing it on every frame. */
+	.sidebar > * {
+		min-width: calc(var(--sidebar-width) - var(--sidebar-border-width));
+		box-sizing: border-box;
+		transition: opacity var(--sidebar-speed);
+	}
+	.sidebar-toggle {
+		display: inline-grid;
+		flex: none;
+		place-items: center;
+		width: calc(var(--sidebar-rail) - 2 * var(--sidebar-p));
+		aspect-ratio: 1;
+		margin-inline-start: auto;
+		padding: 0;
+		border: 0;
+		border-radius: 0.5em;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+	}
+	.sidebar-toggle:hover {
+		background-color: color-mix(in oklab, currentColor 8%, #0000);
+	}
+	.sidebar-toggle:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 1px;
+	}
+	.sidebar-toggle svg {
+		width: 1.1em;
+		height: 1.1em;
+		transition: rotate var(--sidebar-speed);
+	}
+
+	/* ── Folded: a rail. The head stays, everything else fades. ── */
+	.sidebar-collapsed {
+		width: var(--sidebar-rail);
+	}
+	.sidebar-collapsed > :not(.sidebar-head) {
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity var(--sidebar-speed), visibility 0s var(--sidebar-speed);
+	}
+	.sidebar-collapsed > .sidebar-head {
+		min-width: var(--sidebar-rail);
+		justify-content: center;
+	}
+	.sidebar-collapsed > .sidebar-head > :not(.sidebar-toggle, .sidebar-keep) {
+		display: none;
+	}
+	.sidebar-collapsed .sidebar-toggle {
+		margin-inline: 0;
+	}
+	.sidebar-collapsed .sidebar-toggle svg {
+		rotate: 180deg;
+	}
+	.sidebar-end .sidebar-toggle svg,
+	[dir='rtl'] .sidebar-toggle svg {
+		scale: -1 1;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.sidebar,
+		.sidebar > *,
+		.sidebar-toggle svg {
+			transition: none;
+		}
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('sidebar', c.$sizes-field);
+}
+
+@mixin look {
+	.sidebar {
+		--sidebar-width: 15rem;
+		--sidebar-rail: 3.5rem;
+		--sidebar-bg: var(--color-surface-1);
+		--sidebar-fg: var(--color-on-surface);
+		--sidebar-border: var(--color-border);
+		--sidebar-border-width: var(--border);
+		--sidebar-shadow: none;
+		--sidebar-p: calc(0.6em * var(--scale));
+		--sidebar-gap: calc(0.5em * var(--scale));
+		--sidebar-speed: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+}

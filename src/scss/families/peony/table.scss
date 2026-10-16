@@ -234,4 +234,26 @@
 		padding-block: calc(2em * var(--scale));
 		color: color-mix(in oklab, var(--color-on-surface) 55%, #0000);
 	}
+
+	/* ── peony signature: the dashboard table ──
+	   No frame line: the table is a white tile on a soft shadow. The
+	   head is small, muted, spaced capitals on no ground; rows are
+	   parted by the faintest line and washed by the accent under the
+	   pointer. */
+	.table {
+		--table-frame-width: 0px;
+		--table-frame-shadow:
+			0 0.1em 0.25em color-mix(in oklab, var(--color-on-surface) 5%, #0000),
+			0 1em 2.5em -1.25em color-mix(in oklab, var(--color-on-surface) 22%, #0000);
+		--table-head-bg: var(--color-surface-1);
+		--table-head-fg: color-mix(in oklab, var(--color-on-surface) 55%, #0000);
+		--table-head-size: 0.75em;
+		--table-head-weight: 600;
+		--table-border: color-mix(in oklab, var(--color-on-surface) 6%, #0000);
+		--table-hover: color-mix(in oklab, var(--color-primary) 6%, var(--color-surface-1));
+	}
+	.table-head .table-cell {
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
 }

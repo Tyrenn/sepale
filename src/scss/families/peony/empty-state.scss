@@ -91,4 +91,12 @@
 	}
 
 	@include m.size-variants('empty-state');
+
+	/* ── peony signature: the soft badge ──
+	   The icon sits on a pale disc of the accent; no dashed frame. */
+	.empty-state {
+		--empty-state-icon-bg: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface-1));
+		--empty-state-icon-fg: var(--color-primary);
+		--empty-state-border: transparent;
+	}
 }

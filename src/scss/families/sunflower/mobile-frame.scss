@@ -63,7 +63,9 @@
 		border-radius: 0 0.2em 0.2em 0;
 		background-color: var(--mobile-frame-body);
 	}
+	/* A screen is where page chrome (a dock, a toast) is placed against. */
 	.mobile-frame-screen {
+		position: relative;
 		box-sizing: border-box;
 		width: 100%;
 		height: 100%;

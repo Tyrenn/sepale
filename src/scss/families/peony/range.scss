@@ -210,4 +210,94 @@
 			0 1px 3px color-mix(in oklab, var(--color-on-surface) 18%, #0000);
 	}
 
+	/* ── peony signature: the bead on a glowing rail ──
+	   A thick rounded rail on a pale wash of its colour. Where the
+	   wrapper says how far the value is (`data-fill`, --range-pct), the
+	   walked part is painted with the progress bar's gradient — pale to
+	   full — and the thumb is a white bead ringed by the colour, whose
+	   ring thickens under the pointer and that swells under the finger.
+	   (A glow around it would be cropped square: the browser clips what
+	   a thumb paints to its box.) Without it, the
+	   thumb's shadow fills the rail in the plain colour. */
+	.range {
+		--range-thumb: #fff;
+		--range-p: calc(0.17em * var(--scale));
+		--range-bg: color-mix(in oklab, currentColor 16%, var(--color-surface-3));
+		--range-thumb-size: calc(1.35em * var(--scale));
+		--radius-selector: 999px;
+	}
+	@each $color in c.$color-list {
+		.range-#{$color} {
+			--range-thumb: #fff;
+		}
+	}
+	.range::-webkit-slider-runnable-track {
+		height: calc(var(--range-thumb-size) * 0.42);
+		border-radius: 999px;
+	}
+	.range::-moz-range-track {
+		height: calc(var(--range-thumb-size) * 0.42);
+		border-radius: 999px;
+	}
+	.range::-webkit-slider-thumb {
+		border-radius: 50%;
+	}
+	.range::-moz-range-thumb {
+		border-radius: 50%;
+	}
+
+	.range[data-fill] {
+		--range-fill: 0;
+		--peony-rail: linear-gradient(90deg, color-mix(in oklab, currentColor 45%, #fff), currentColor) 0 0 / var(--range-pct, 0%) 100% no-repeat,
+			var(--range-bg);
+		overflow: visible;
+		padding-block: 0.35em;
+		height: calc(var(--range-thumb-size) + 0.7em);
+	}
+	[dir='rtl'] .range[data-fill] {
+		--peony-rail: linear-gradient(270deg, color-mix(in oklab, currentColor 45%, #fff), currentColor) 100% 0 / var(--range-pct, 0%) 100% no-repeat,
+			var(--range-bg);
+	}
+	.range[data-fill]::-webkit-slider-runnable-track {
+		background: var(--peony-rail);
+		box-shadow: 0 0.2em 0.5em -0.15em color-mix(in oklab, currentColor 30%, #0000);
+	}
+	.range[data-fill]::-moz-range-track {
+		background: var(--peony-rail);
+	}
+	.range[data-fill]::-webkit-slider-thumb {
+		border: 0;
+		box-shadow:
+			0 0 0 var(--range-p) currentColor inset,
+			0 0 0 2rem var(--range-thumb) inset;
+		transition: scale 0.15s ease, box-shadow 0.2s ease;
+	}
+	.range[data-fill]::-moz-range-thumb {
+		border: 0;
+		box-shadow:
+			0 0 0 var(--range-p) currentColor inset,
+			0 0 0 2rem var(--range-thumb) inset;
+		transition: scale 0.15s ease, box-shadow 0.2s ease;
+	}
+	.range[data-fill]:hover::-webkit-slider-thumb,
+	.range[data-fill]:focus-visible::-webkit-slider-thumb {
+		box-shadow:
+			0 0 0 calc(var(--range-p) * 1.6) currentColor inset,
+			0 0 0 2rem var(--range-thumb) inset;
+	}
+	.range[data-fill]:hover::-moz-range-thumb,
+	.range[data-fill]:focus-visible::-moz-range-thumb {
+		box-shadow:
+			0 0 0 calc(var(--range-p) * 1.6) currentColor inset,
+			0 0 0 2rem var(--range-thumb) inset;
+	}
+	.range[data-fill]:active::-webkit-slider-thumb {
+		scale: 1.15;
+	}
+	.range[data-fill]:active::-moz-range-thumb {
+		scale: 1.15;
+	}
+	.range[data-fill]:focus-visible {
+		outline: none;
+	}
 }

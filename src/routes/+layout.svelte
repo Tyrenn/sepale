@@ -1,6 +1,7 @@
 <script lang="ts">
 	import './app.css';
 	import { page } from '$app/state';
+	import { afterNavigate } from '$app/navigation';
 	import { tokensToInlineStyle } from '$lib/theme.js';
 	import {
 		playground,
@@ -15,7 +16,27 @@
 
 	let { children }: { children: Snippet } = $props();
 
+	/* The page scrolls inside .content, not the window, so SvelteKit's own
+	   scroll reset does not reach it: a new page starts at its top. */
+	afterNavigate(({ from, to }) => {
+		if (from?.url.pathname === to?.url.pathname) return;
+		document.querySelector('.content')?.scrollTo({ top: 0 });
+	});
+
 	let themes = $derived(themesFor(playground.family));
+
+	/* The whole menu folds to a rail too, remembered across visits. */
+	let collapsed = $state(false);
+	$effect(() => {
+		try {
+			collapsed = localStorage.getItem('uu-nav-collapsed') === '1';
+		} catch {}
+	});
+	$effect(() => {
+		try {
+			localStorage.setItem('uu-nav-collapsed', collapsed ? '1' : '0');
+		} catch {}
+	});
 
 	/* Groups of the nav fold: open until folded by hand. */
 	let folded = $state<Record<string, boolean>>({});
@@ -44,7 +65,22 @@
 <div class="shell app-ui">
 	<!-- The sidebar lives in the layout: it is the same on the theme page and
 	     on every component page. -->
-	<aside class="side">
+	<!-- The kit's own Sidebar, in the chrome's ui- space: it folds to a rail. -->
+	<aside class="ui-sidebar side" class:ui-sidebar-collapsed={collapsed}>
+		<div class="ui-sidebar-head">
+			<a class="side-brand ui-sidebar-keep" href="/"><span class="side-brand-mark">S</span><span class="side-brand-name">Sepale</span></a>
+			<button
+				type="button"
+				class="ui-sidebar-toggle"
+				aria-expanded={!collapsed}
+				aria-label={collapsed ? 'Expand the menu' : 'Collapse the menu'}
+				title={collapsed ? 'Expand the menu' : 'Collapse the menu'}
+				onclick={() => (collapsed = !collapsed)}
+			>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M9 4v16M15.5 10l-2 2 2 2" /></svg>
+			</button>
+		</div>
+		<div class="ui-sidebar-body side-body" inert={collapsed}>
 		<div class="side-head">
 			<label class="side-select">
 				<span>Family</span>
@@ -109,6 +145,7 @@
 				{/each}
 			</ul>
 		</nav>
+		</div>
 	</aside>
 
 	{@render children()}

@@ -16,7 +16,7 @@
 	 * this colour legible?" — the question a palette actually has.
 	 */
 	import { slide } from 'svelte/transition';
-	import { colorToHex, contrastRatio, oklchToCss, toOklch, type Oklch } from './color.js';
+	import { colorToHex, contrastRatio, oklchToCss, toOklch, type Oklch } from '$lib/components/color.js';
 
 	let {
 		value,

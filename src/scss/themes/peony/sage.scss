@@ -1,0 +1,26 @@
+/* Theme "sage" - a sage-tinted page, white cards, a deep green button,
+   mint and apricot accents. The app's own chrome wears it. */
+:root {
+	color-scheme: light;
+	--color-page: #eef3ee;
+	--color-surface-1: #ffffff;
+	--color-surface-2: #f3f7f3;
+	--color-surface-3: #e7efe8;
+	--color-surface-4: #d9e5db;
+	--color-border: #e1eae2;
+	--color-on-surface: #1b2a22;
+	--color-primary: #2f7d57;
+	--color-secondary: #7cc6a4;
+	--color-accent: #f4b183;
+	--color-neutral: #6f8478;
+	--color-info: #6fb3d9;
+	--color-success: #5cb87a;
+	--color-warning: #eeb54f;
+	--color-error: #e36a6a;
+	--radius-field: 0.625rem;
+	--radius-box: 1rem;
+	--radius-selector: 0.375rem;
+	--peony-shadow: 1;
+	--peony-glow: 0.6;
+	--peony-tint: 1;
+}

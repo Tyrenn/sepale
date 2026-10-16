@@ -7,37 +7,72 @@
    the variants (ADR 0010). */
 
 /* ============================================================
-   chips-input.scss — .chips-input (several values, each a chip)
-   
-   	<div class="input chips-input">
-   	  <span class="chip">Lyon<button class="chips-input-remove" aria-label="Remove Lyon">×</button></span>
-   	  <input class="chips-input-field" placeholder="Add a city">
-   	  <input type="hidden" name="cities[]" value="Lyon">
-   	</div>
-   
-      An accumulator around a field: the frame is the family's .input, made
-      to grow and wrap; each value is the family's .chip. The field may be
-      any other component — an Input, a Select, a Combobox — whose own frame
-      is folded into this one (ADR 0009: integration).
-   
-      Plumbing contract:
-   	--chips-input-gap   space between chips and field
-   	--chips-input-py    vertical padding of the grown frame
-   	--chips-input-min   the field's minimum width
+   chips-input.scss — .chips-input (a field that feeds a list of chips)
+
+	<div class="chips-input">
+	  <input class="input" placeholder="Add a city">
+	  <ul class="chips-input-list">
+	    <li class="chip">Lyon<button class="chips-input-remove" aria-label="Remove Lyon">×</button></li>
+	  </ul>
+	</div>
+
+   A utility, not a field: the field is any component — an Input, a
+   Select, a Combobox — and keeps its own frame; the values it commits
+   pile up as the family's .chip in a list BESIDE it, never inside.
+   `.chips-input-top|start|end` moves the list (below by default).
+
+   Plumbing contract:
+	--chips-input-gap        between the field and the list
+	--chips-input-list-gap   between two chips
+	--chips-input-side-min   the field's minimum width when side by side
    ============================================================ */
 
 @mixin structure {
 	.chips-input {
+		display: flex;
+		flex-direction: column;
+		gap: var(--chips-input-gap);
+		min-width: 0;
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.chips-input-list {
+		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		height: auto;
-		min-height: var(--size);
-		cursor: text;
+		gap: var(--chips-input-list-gap);
+		margin: 0;
+		padding: 0;
+		list-style: none;
 	}
-	.chips-input > .chip {
-		flex: none;
+	/* An empty list takes no room: no gap under a lone field. */
+	.chips-input-list:empty {
+		display: none;
+	}
+	.chips-input-list > .chip {
 		max-width: 100%;
 	}
+
+	/* ── Axis: side ── where the list sits. */
+	.chips-input-top {
+		flex-direction: column-reverse;
+	}
+	.chips-input-start,
+	.chips-input-end {
+		flex-direction: row;
+		align-items: flex-start;
+	}
+	.chips-input-start {
+		flex-direction: row-reverse;
+	}
+	.chips-input:is(.chips-input-start, .chips-input-end) > :not(.chips-input-list) {
+		flex: 1 1 var(--chips-input-side-min);
+		min-width: var(--chips-input-side-min);
+	}
+	.chips-input:is(.chips-input-start, .chips-input-end) > .chips-input-list {
+		flex: 0 1 auto;
+		align-self: center;
+	}
+
 	.chips-input-remove {
 		display: inline-grid;
 		flex: none;
@@ -60,43 +95,18 @@
 		opacity: 1;
 		background-color: color-mix(in oklab, currentColor 15%, #0000);
 	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('chips-input', c.$sizes-field);
 }
 
 @mixin look {
 	.chips-input {
-		--chips-input-gap: calc(0.35em * var(--scale));
-		--chips-input-py: calc(0.3em * var(--scale));
-		--chips-input-min: 6em;
-		gap: var(--chips-input-gap);
-		width: 100%;
-		padding-block: var(--chips-input-py);
+		--chips-input-gap: calc(0.5em * var(--scale));
+		--chips-input-list-gap: calc(0.35em * var(--scale));
+		--chips-input-side-min: 12em;
 	}
-	.chips-input > .chip {
+	.chips-input-list > .chip {
 		font-size: 0.875em;
 	}
-	/* The field: the plain one, or another component's, folded into the frame. */
-	.chips-input .chips-input-field,
-	.chips-input :is(.input, .select, .combobox) {
-		flex: 1 1 var(--chips-input-min);
-		width: auto;
-		min-width: var(--chips-input-min);
-		height: calc(var(--size) - 2 * var(--chips-input-py) - 2 * var(--border));
-		min-height: 0;
-		padding-inline: 0;
-		border: 0;
-		outline: 0;
-		background: transparent;
-		box-shadow: none;
-		color: inherit;
-		font: inherit;
-	}
-	.chips-input .combobox > .input {
-		height: 100%;
-		border: 0;
-		outline: 0;
-		background: transparent;
-		box-shadow: none;
-	}
-
-	@include m.size-variants('chips-input');
 }

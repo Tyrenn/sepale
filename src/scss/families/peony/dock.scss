@@ -1,3 +1,4 @@
+@use '../../_config' as c;
 /* peony — dock.
    Everything peony draws for this component, and nothing another
    family reads: `structure` is the mechanism (layout, states,
@@ -182,4 +183,23 @@
 		border-color: var(--color-border);
 	}
 
+	/* ── peony signature: the floating tab bar ──
+	   The current item is a pale pill of the accent written in it,
+	   not an underline. */
+	.dock {
+		border-top: 0;
+		box-shadow: 0 -0.5em 1.5em -1em color-mix(in oklab, var(--color-on-surface) 25%, #0000);
+	}
+	.dock > * {
+		border-radius: var(--radius-box);
+		transition: background-color 0.2s ease, color 0.2s ease;
+	}
+	.dock > .dock-active {
+		background-color: color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-1));
+		color: var(--color-primary);
+	}
+	.dock-active::after {
+		width: 0;
+		background-color: transparent;
+	}
 }

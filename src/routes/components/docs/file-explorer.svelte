@@ -32,7 +32,9 @@
 				{ name: 'toolbar', type: 'Snippet<[{ folder, selection }]>', description: 'Your actions.' },
 				{ name: 'details', type: 'Snippet<[FileNode[]]>', description: 'The details pane.' },
 				{ name: 'menu', type: 'Snippet<[{ items, close }]>', description: 'The context menu (right-click).' },
-				{ name: 'icon / empty', type: 'Snippet', description: 'A node icon; an empty folder.' },
+				{ name: 'icons', type: 'Record<string, FileIcon> | false', description: 'Icons by extension ({ glyph, color, bare? }), merged over FILE_ICONS, the default table. false: every file is a page.' },
+				{ name: 'preview', type: '(node) => string | undefined | false', description: "A picture for a file. Defaults to node.thumbnail, else node.url for an image's extension." },
+				{ name: 'icon / empty', type: 'Snippet', description: 'A node icon, drawn by you (wins over icons and preview); an empty folder.' },
 				{ name: 'onOpen / onSelect / onNavigate', type: 'callbacks', description: 'A file opened; the selection changed; another folder shown.' },
 				{ name: 'onDrag', type: '(items, event) => boolean | void', description: 'A drag starts; false refuses it.' },
 				{ name: 'onDrop', type: '(items | File[], target, event) => void', description: 'Something dropped on a folder (null: the top).' },
@@ -62,8 +64,18 @@
 	put('docs', { id: 'cv', name: 'resume.pdf', kind: 'file', size: 184_220, modified: day(1) });
 	put('docs', { id: 'plan', name: 'plan-2027.xlsx', kind: 'file', size: 48_900, modified: day(12) });
 	put('invoices', { id: 'inv1', name: 'invoice-0193.pdf', kind: 'file', size: 92_004, modified: day(5) });
-	put('pics', { id: 'p1', name: 'lake.jpg', kind: 'file', size: 3_402_118, modified: day(8) });
-	put('pics', { id: 'p2', name: 'mountains.jpg', kind: 'file', size: 2_874_512, modified: day(8) });
+	/* "Photos": inline SVG landscapes, so the page stays offline. */
+	const photo = (sky: string, hill: string) =>
+		`data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="160" height="120"><rect width="160" height="120" fill="${sky}"/><circle cx="118" cy="34" r="14" fill="#fff8"/><path d="M0 120V78l40-30 34 26 30-22 56 40v28z" fill="${hill}"/></svg>`)}`;
+	put('pics', { id: 'p1', name: 'lake.jpg', kind: 'file', size: 3_402_118, modified: day(8), url: photo('#7dc3e8', '#2f7d57') });
+	put('pics', { id: 'p2', name: 'mountains.jpg', kind: 'file', size: 2_874_512, modified: day(8), url: photo('#f4b183', '#6b4f8a') });
+	put('pics', { id: 'p3', name: 'dunes.png', kind: 'file', size: 1_204_331, modified: day(10), url: photo('#fde68a', '#d97706') });
+	put('pics', { id: 'p4', name: 'trip.mp4', kind: 'file', size: 48_204_331, modified: day(11) });
+	put('top', { id: 'f1', name: 'app.svelte', kind: 'file', size: 4_120, modified: day(15) });
+	put('top', { id: 'f2', name: 'export.csv', kind: 'file', size: 18_400, modified: day(15) });
+	put('top', { id: 'f3', name: 'backup.zip', kind: 'file', size: 92_400_000, modified: day(4) });
+	put('top', { id: 'f4', name: 'pitch.pptx', kind: 'file', size: 2_400_000, modified: day(6) });
+	put('top', { id: 'f5', name: 'theme.mp3', kind: 'file', size: 5_400_000, modified: day(7) });
 
 	const load = (folder: FileNode | null) =>
 		new Promise<FileNode[]>((ok) => setTimeout(() => ok((content.get(folder?.id ?? 'top') ?? []).map((id) => nodes.get(id)!)), 200));
@@ -75,7 +87,7 @@
 		const to = target?.id ?? 'top';
 		for (const item of items) {
 			if (item instanceof File) {
-				put(to, { id: `${Date.now()}-${item.name}`, name: item.name, kind: 'file', size: item.size, modified: new Date() });
+				put(to, { id: `${Date.now()}-${item.name}`, name: item.name, kind: 'file', size: item.size, modified: new Date(), url: item.type.startsWith('image/') ? URL.createObjectURL(item) : undefined });
 				continue;
 			}
 			for (const [k, ids] of content) content.set(k, ids.filter((id) => id !== item.id));
@@ -164,4 +176,26 @@
 			}}
 		/>
 	</div>
+</Section>
+
+<Section
+	title="Icons by extension"
+	subtitle="FILE_ICONS is the default table; icons merges yours over it, one extension at a time. Images with a url show as pictures."
+	svelte={`<script>
+  import { FILE_ICONS } from 'sepale';
+</`+`script>
+
+<FileExplorer {load} view="grid"
+  icons={{ md: { color: '#0d9488', glyph: '<path d="M8 17v-5l2 2 2-2v5m3-5v5m-1.5-1.5L15 17l1.5-1.5"/>' } }}
+  preview={(node) => node.thumbnail ?? node.url} />`}
+	html={`<span class="file-explorer-icon" style="--file-explorer-icon-color:#dc2626"><svg>…</svg></span>
+<span class="file-explorer-icon" data-preview><img class="file-explorer-thumb" src="…"></span>`}
+>
+	<FileExplorer
+		{load}
+		view="grid"
+		tree={false}
+		style="height:24rem; width:100%"
+		icons={{ md: { color: '#0d9488', glyph: '<path d="M8 17v-5l2 2 2-2v5m3-5v5m-1.5-1.5L15 17l1.5-1.5"/>' } }}
+	/>
 </Section>

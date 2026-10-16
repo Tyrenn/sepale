@@ -24,6 +24,7 @@
 		'item',
 		'entry',
 		'icon',
+		'thumb',
 		'name',
 		'meta',
 		'empty',
@@ -69,6 +70,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import Breadcrumbs from './Breadcrumbs.svelte';
+	import { FILE_ICONS, IMAGE_EXTENSIONS, PAGE, extensionOf, type FileIcon } from './file-icons.js';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
 	type Folder = FileNode | null;
@@ -91,8 +93,18 @@
 		details?: Snippet<[FileNode[]]>;
 		/** The context menu's content. `close` closes it. */
 		menu?: Snippet<[{ items: FileNode[]; close: () => void }]>;
-		/** A node's icon. Defaults to a folder or a page. */
+		/** A node's icon, drawn by you. Wins over `icons` and `preview`. */
 		icon?: Snippet<[FileNode]>;
+		/**
+		 * Icons by extension (`{ pdf: { glyph, color } }`), merged over the
+		 * default table. `false` turns the table off: every file is a page.
+		 */
+		icons?: Record<string, FileIcon> | false;
+		/**
+		 * A picture for a file, or nothing. Defaults to the node's `thumbnail`,
+		 * else its `url` when the extension is an image's. `false`: never.
+		 */
+		preview?: ((node: FileNode) => string | undefined) | false;
 		/** Drawn in an empty folder. */
 		empty?: Snippet<[Folder]>;
 		/** A file was opened (double-click, Enter). */
@@ -136,6 +148,8 @@
 		details,
 		menu,
 		icon,
+		icons = {},
+		preview = defaultPreview,
 		empty,
 		onOpen,
 		onSelect,
@@ -152,6 +166,14 @@
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 	let t = $derived({ ...LABELS, ...labels });
+
+	let table = $derived(icons === false ? {} : { ...FILE_ICONS, ...icons });
+
+	function defaultPreview(node: FileNode): string | undefined {
+		if (typeof node.thumbnail === 'string') return node.thumbnail;
+		if (typeof node.url === 'string' && IMAGE_EXTENSIONS.has(extensionOf(node.name))) return node.url;
+		return undefined;
+	}
 
 	function defaultSize(n: number): string {
 		const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -428,9 +450,21 @@
 </script>
 
 {#snippet nodeIcon(node: FileNode)}
-	<span class="file-explorer-icon" data-kind={node.kind} aria-hidden="true">
+	{@const picture = !icon && node.kind === 'file' && preview ? preview(node) : undefined}
+	{@const fileIcon = node.kind === 'file' ? table[extensionOf(node.name)] : undefined}
+	<span
+		class="file-explorer-icon"
+		data-kind={node.kind}
+		data-preview={picture ? '' : undefined}
+		style:--file-explorer-icon-color={fileIcon?.color}
+		aria-hidden="true"
+	>
 		{#if icon}
 			{@render icon(node)}
+		{:else if picture}
+			<img class="file-explorer-thumb" src={picture} alt="" loading="lazy" decoding="async" />
+		{:else if fileIcon}
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{@html (fileIcon.bare ? '' : PAGE) + fileIcon.glyph}</svg>
 		{:else if node.kind === 'folder'}
 			<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.38a1.5 1.5 0 0 1 1.06.44L11.5 7h8a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z" /></svg>
 		{:else}

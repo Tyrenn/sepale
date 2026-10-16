@@ -168,4 +168,11 @@
 			--tooltip-fg: var(--color-on-#{$color});
 		}
 	}
+
+	/* ── peony signature: the soft label ──
+	   Ink on a pill, lifted by a shadow. */
+	.tooltip {
+		--tooltip-radius: 0.6em;
+		--tooltip-shadow: 0 0.5em 1.25em -0.4em color-mix(in oklab, #000 35%, #0000);
+	}
 }

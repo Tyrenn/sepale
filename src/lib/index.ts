@@ -36,7 +36,7 @@ export { default as Range } from './components/Range.svelte';
 export { default as Fieldset } from './components/Fieldset.svelte';
 export { default as Label } from './components/Label.svelte';
 export { default as FloatingLabel } from './components/FloatingLabel.svelte';
-export { default as Segmented } from './components/Segmented.svelte';
+export { default as Switch } from './components/Switch.svelte';
 export { default as NumberInput } from './components/NumberInput.svelte';
 
 // Display
@@ -45,6 +45,7 @@ export { default as Bubble } from './components/Bubble.svelte';
 export { default as Chip } from './components/Chip.svelte';
 export { default as Badge } from './components/Badge.svelte';
 export { default as Swatch } from './components/Swatch.svelte';
+export { default as ColorPicker } from './components/ColorPicker.svelte';
 export { default as Loading } from './components/Loading.svelte';
 export { default as Progress } from './components/Progress.svelte';
 export { default as RadialProgress } from './components/RadialProgress.svelte';
@@ -59,7 +60,7 @@ export { default as Title } from './components/Title.svelte';
 export { default as Subtitle } from './components/Subtitle.svelte';
 export { default as Divider } from './components/Divider.svelte';
 export { default as Alert } from './components/Alert.svelte';
-export { default as Toaster } from './components/Toaster.svelte';
+export { default as Toast, type ToastOptions } from './components/Toast.svelte';
 export { default as Tooltip } from './components/Tooltip.svelte';
 export { default as Collapse } from './components/Collapse.svelte';
 export { default as Accordion } from './components/Accordion.svelte';
@@ -70,8 +71,8 @@ export { default as Footer, type FooterSection } from './components/Footer.svelt
 export { default as MobileFrame } from './components/MobileFrame.svelte';
 export { default as WindowFrame } from './components/WindowFrame.svelte';
 export { default as LaptopFrame } from './components/LaptopFrame.svelte';
+export { default as Sidebar } from './components/Sidebar.svelte';
 export { default as Drawer, type DrawerState } from './components/Drawer.svelte';
-export { toast, dismissToast, toasts, type ToastOptions } from './components/toast.svelte.js';
 
 // Navigation
 export { default as Menu, type MenuNode } from './components/Menu.svelte';
@@ -112,6 +113,7 @@ export {
 } from './components/Table.svelte';
 export { default as Grid } from './components/Grid.svelte';
 export { default as FileExplorer, type FileNode, type FileDrop } from './components/FileExplorer.svelte';
+export { FILE_ICONS, extensionOf, type FileIcon } from './components/file-icons.js';
 
 // Overlay
 export { default as Dialog } from './components/Dialog.svelte';

@@ -234,4 +234,34 @@
 		background-color: var(--color-primary);
 	}
 
+	/* ── peony signature: the soft pill ──
+	   A wide pill whose white knob floats on a real shadow. On, the
+	   track takes the colour and glows; pressed, the knob stretches
+	   like a finger on glass. */
+	.toggle {
+		--peony-accent: var(--color-primary);
+		width: calc(var(--size) * 1.85);
+		transition: background-color 0.25s ease, box-shadow 0.25s ease;
+	}
+	@each $color in c.$color-list {
+		.toggle-#{$color} {
+			--peony-accent: var(--color-#{$color});
+		}
+	}
+	.toggle::before {
+		box-shadow:
+			0 0.1em 0.25em color-mix(in oklab, #000 18%, #0000),
+			0 0.3em 0.7em -0.2em color-mix(in oklab, #000 22%, #0000);
+		transition: translate 0.25s cubic-bezier(0.3, 1.4, 0.5, 1), inset-inline-start 0.25s cubic-bezier(0.3, 1.4, 0.5, 1), scale 0.15s ease;
+		transform-origin: center;
+	}
+	.toggle:active::before {
+		scale: 1.18 0.94;
+	}
+	.toggle:checked,
+	.toggle[aria-checked='true'],
+	.toggle:has(> input:checked) {
+		background-color: var(--peony-accent);
+		box-shadow: 0 0.35em 0.9em -0.35em color-mix(in oklab, var(--peony-accent) 70%, #0000);
+	}
 }

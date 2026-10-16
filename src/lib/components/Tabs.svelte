@@ -17,7 +17,7 @@
 	} as const;
 
 	export const FLAGS = {} as const;
-	export const PARTS = ['item', 'item-active', 'item-disabled', 'item-content'] as const;
+	export const PARTS = ['item', 'item-active', 'item-disabled', 'item-content', 'indicator'] as const;
 
 	import type { Snippet } from 'svelte';
 
@@ -53,6 +53,9 @@
 		active?: number;
 		/** Called with the new index when a tab is chosen. */
 		onSelect?: (index: number) => void;
+		/** Slide the selection from one tab to the next. Not with `lift`, whose
+		    tab opens into its panel. */
+		animated?: boolean;
 		class?: string;
 	}
 
@@ -61,12 +64,34 @@
 		tab,
 		active = $bindable(0),
 		onSelect,
+		animated = true,
 		class: klass = '',
 		...axes
 	}: Props = $props();
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
+
+	let root: HTMLDivElement | undefined = $state();
+	let box = $state({ x: 0, y: 0, w: 0, h: 0 });
+
+	/* The indicator follows the selected tab: measured after every change,
+	   and again whenever the strip resizes (a font, a wrap, a panel). */
+	$effect(() => {
+		if (!animated || !root) return;
+		void active;
+		void tabs.length;
+		const measure = () => {
+			const item = root?.querySelectorAll<HTMLElement>(`:scope > [role="tab"]`)[active];
+			box = item
+				? { x: item.offsetLeft, y: item.offsetTop, w: item.offsetWidth, h: item.offsetHeight }
+				: { x: 0, y: 0, w: 0, h: 0 };
+		};
+		measure();
+		const observer = new ResizeObserver(measure);
+		observer.observe(root);
+		return () => observer.disconnect();
+	});
 
 	function select(i: number) {
 		active = i;
@@ -80,7 +105,13 @@
 	{:else}{item.label}{/if}
 {/snippet}
 
-<div {...applied.rest} role="tablist" class={classes}>
+<div {...applied.rest} bind:this={root} role="tablist" class={classes}
+	style:--tabs-x="{box.x}px"
+	style:--tabs-y="{box.y}px"
+	style:--tabs-w="{box.w}px"
+	style:--tabs-h="{box.h}px"
+>
+	{#if animated}<span class="{PREFIX}-item {PREFIX}-item-active {PREFIX}-indicator" aria-hidden="true"></span>{/if}
 	{#each tabs as item, i (i)}
 		<button
 			type="button"

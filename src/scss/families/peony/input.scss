@@ -1,3 +1,4 @@
+@use '../../_config' as c;
 @use '../../_mixins' as m;
 
 /* peony — input.
@@ -238,5 +239,41 @@
 	/* peony: fields sit flat, edged by a hairline; only objects lift. */
 	:where(.input, .select, .textarea, .file-input) {
 		--light-intensity: 0;
+	}
+
+	/* ── peony signature: the soft well ──
+	   A field is a tinted well with no edge. Hover deepens it; focus
+	   lifts it out of the page and lights it from below: it turns white,
+	   a gradient of its accent draws itself along the bottom edge, and
+	   the glow pools under it rather than around it — off-centre, like
+	   light spilling on the desk. */
+	.input {
+		--peony-accent: var(--color-primary);
+	}
+	@each $color in c.$color-list {
+		.input-#{$color} {
+			--peony-accent: var(--color-#{$color});
+		}
+	}
+	.input:not(.input-ghost) {
+		border-color: transparent;
+		background-color: var(--color-surface-2);
+		transition: background-color 0.2s ease, box-shadow 0.25s ease;
+	}
+	.input:not(.input-ghost):hover {
+		background-color: var(--color-surface-3);
+	}
+	.input:is(:focus, :focus-within) {
+		--input-color: transparent;
+		outline: none;
+		background-color: var(--color-surface-1);
+		background-image: linear-gradient(90deg, color-mix(in oklab, var(--peony-accent) 35%, #fff), var(--peony-accent));
+		background-repeat: no-repeat;
+		background-position: bottom center;
+		background-size: calc(100% - 2 * var(--radius-field, 0.5em)) calc(0.14em * var(--scale));
+		box-shadow:
+			0 0 0 1px color-mix(in oklab, var(--peony-accent) 18%, #0000),
+			0 0.9em 1.4em -0.8em color-mix(in oklab, var(--peony-accent) 75%, #0000),
+			0 0.35em 0.6em -0.35em color-mix(in oklab, var(--peony-accent) 45%, #0000);
 	}
 }

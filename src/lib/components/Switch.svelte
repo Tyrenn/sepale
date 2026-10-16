@@ -1,7 +1,7 @@
 <script module lang="ts">
-	/** What .segmented is made of, classified. Each family's copy writes these out as
+	/** What .switch is made of, classified. Each family's copy writes these out as
 	    plain props (scripts/family-component.mjs). */
-	export const PREFIX = 'segmented';
+	export const PREFIX = 'switch';
 
 	export const AXES = {
 		color: ['primary', 'secondary', 'accent', 'neutral', 'info', 'success', 'warning', 'error'],
@@ -11,7 +11,7 @@
 	export const FLAGS = {
 		block: 'Fill the width, the items sharing it equally.'
 	} as const;
-	export const PARTS = ['item', 'input'] as const;
+	export const PARTS = ['item', 'input', 'indicator'] as const;
 </script>
 
 <script lang="ts">
@@ -20,6 +20,9 @@
 	 *
 	 * `options` are strings, or `{ value, label, disabled }`. `value` is
 	 * bindable — it is the field's own value.
+	 *
+	 * An indicator slides from the old choice to the new one (`animated`,
+	 * off when the visitor asks for reduced motion).
 	 */
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
@@ -36,6 +39,8 @@
 		label?: string;
 		/** After the user picked another option. */
 		onChange?: (value: string) => void;
+		/** Slide the checked look from one option to the next. */
+		animated?: boolean;
 		class?: string;
 	}
 
@@ -44,9 +49,10 @@
 	let {
 		options,
 		value = $bindable(),
-		name = `segmented-${Math.random().toString(36).slice(2, 9)}`,
+		name = `switch-${Math.random().toString(36).slice(2, 9)}`,
 		label,
 		onChange,
+		animated = true,
 		class: klass = '',
 		...axes
 	}: Props = $props();
@@ -55,14 +61,35 @@
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
 	let list = $derived(options.map((o) => (typeof o === 'string' ? { value: o, label: o, disabled: false } : { label: o.value, disabled: false, ...o })));
+
+	let root: HTMLDivElement | undefined = $state();
+	let x = $state(0);
+	let w = $state(0);
+
+	/* The indicator follows the checked item: measured after every change of
+	   value, and again whenever the track resizes (a font, a wrap). */
+	$effect(() => {
+		if (!animated || !root) return;
+		void value;
+		const measure = () => {
+			const item = root?.querySelector<HTMLElement>(`.${PREFIX}-item:has(:checked)`);
+			x = item?.offsetLeft ?? 0;
+			w = item?.offsetWidth ?? 0;
+		};
+		measure();
+		const observer = new ResizeObserver(measure);
+		observer.observe(root);
+		return () => observer.disconnect();
+	});
 </script>
 
-<div {...applied.rest} class={classes} role="radiogroup" aria-label={label}>
+<div {...applied.rest} bind:this={root} class={classes} role="radiogroup" aria-label={label} style:--switch-x="{x}px" style:--switch-w="{w}px">
+	{#if animated}<span class="{PREFIX}-indicator" aria-hidden="true"></span>{/if}
 	{#each list as o (o.value)}
-		<label class="segmented-item">
+		<label class="switch-item">
 			<input
 				type="radio"
-				class="segmented-input"
+				class="switch-input"
 				{name}
 				value={o.value}
 				checked={value === o.value}

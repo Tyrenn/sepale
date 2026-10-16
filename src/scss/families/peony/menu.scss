@@ -1,3 +1,4 @@
+@use '../../_config' as c;
 @use '../../_mixins' as m;
 
 /* peony — menu.
@@ -233,7 +234,7 @@
 		--menu-divider-inset: calc(0.5em * var(--scale));
 
 		--menu-sub-indent: calc(1em * var(--scale));
-		--menu-sub-transition: 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+		--menu-sub-transition: 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	.menu .menu-toggle::after {
@@ -250,4 +251,26 @@
 
 	/* size variants */
 	@include m.size-variants('menu');
+
+	/* ── peony signature: the tinted pill ──
+	   The current item is not a block of ink but a pale wash of the
+	   accent, written in the accent: the sidebar of a dashboard. */
+	.menu {
+		--menu-active-bg: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface-1));
+		--menu-active-fg: var(--color-primary);
+	}
+	.menu .menu-active,
+	.menu li > :is(a, button, span).menu-active {
+		font-weight: 600;
+	}
+
+	/* A group folds and fades at once: the rows leave rather than being
+	   cut off by the closing edge. */
+	.menu .menu-sub {
+		transition: opacity var(--menu-sub-transition), translate var(--menu-sub-transition);
+	}
+	.menu .menu-sub-closed {
+		opacity: 0;
+		translate: 0 -0.35em;
+	}
 }

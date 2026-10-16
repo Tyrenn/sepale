@@ -78,8 +78,9 @@
 	.bubble::after {
 		--bubble-tail-in: calc(var(--bubble-tail) - 1.4142 * var(--bubble-border-width));
 		bottom: 0;
+		/* One pixel into the bubble: no hairline seam at fractional zoom. */
 		inset-inline-start: calc(-1 * var(--bubble-tail-in));
-		width: var(--bubble-tail-in);
+		width: calc(var(--bubble-tail-in) + 1px);
 		height: var(--bubble-tail-in);
 		background-color: var(--bubble-bg);
 	}

@@ -35,7 +35,17 @@
 		Pagination,
 		Fieldset,
 		Title,
-		Text
+		Text,
+		Alert,
+		Steps,
+		Switch,
+		ChipsInput,
+		ColorPicker,
+		Dropdown,
+		Swatch,
+		Rating,
+		Toast,
+		MobileFrame
 	} from '$lib/index.js';
 	import { playground } from './playground.svelte.js';
 	import { classesByFamily } from '$lib/generated/components.js';
@@ -108,6 +118,18 @@
 	let page = $state(1);
 	let plan = $state('pro');
 	let budget = $state(60);
+
+	/* The campaign card: the newer components, used the way a form would. */
+	const CAMPAIGN = [
+		{ id: 1, label: 'Audience', complete: true },
+		{ id: 2, label: 'Message' },
+		{ id: 3, label: 'Launch' }
+	];
+	let audience = $state('returning');
+	let tags = $state(['autumn', 'outerwear']);
+	let brand = $state('oklch(62% 0.19 260)');
+	let score = $state(4);
+	let toast: Toast | undefined = $state();
 </script>
 
 {#snippet orderRow(o: (typeof ORDERS)[number])}
@@ -337,35 +359,88 @@
 					<List rows={[...ACTIVITY]} row={activityRow} />
 				</Card>
 
+				<!-- Campaign: the newer components, in a form. -->
+				<Card class="db-span">
+					{#snippet title()}New campaign{/snippet}
+					<Steps steps={CAMPAIGN} current={2} clickable={false} />
+					<div class="db-campaign">
+						<Fieldset>
+							{#snippet legend()}Audience{/snippet}
+							<Switch
+								block
+								size="sm"
+								color={has('primary')}
+								options={[
+									{ value: 'all', label: 'Everyone' },
+									{ value: 'returning', label: 'Returning' },
+									{ value: 'new', label: 'New' }
+								]}
+								bind:value={audience}
+							/>
+						</Fieldset>
+						<Fieldset>
+							{#snippet legend()}Tags{/snippet}
+							<ChipsInput bind:values={tags} size="sm" side="end" placeholder="Add a tag" chipClass="chip-soft" />
+						</Fieldset>
+						<Fieldset>
+							{#snippet legend()}Brand colour{/snippet}
+							<Dropdown>
+								{#snippet trigger({ props })}
+									<Button size="sm" {...props}><Swatch sample={brand} size="xs" shape="circle" /> {brand}</Button>
+								{/snippet}
+								<ColorPicker flat size="sm" bind:value={brand} />
+							</Dropdown>
+						</Fieldset>
+						<Fieldset>
+							{#snippet legend()}Last campaign{/snippet}
+							<Rating bind:value={score} size="sm" color={has('warning')} />
+						</Fieldset>
+					</div>
+					<Alert color={has('info')} title="Heads up">Returning customers get the email on Tuesday morning.</Alert>
+					{#snippet actions()}
+						<Button size="sm" variant="ghost">Save draft</Button>
+						<Button
+							size="sm"
+							color="primary"
+							onclick={() => toast?.add({ title: 'Scheduled', message: 'The campaign leaves on Tuesday.', color: has('success') })}
+						>Schedule</Button>
+					{/snippet}
+				</Card>
+
 				<!-- Phone -->
 				<Card>
 					{#snippet title()}On the phone{/snippet}
 					<div class="db-phone">
-						<div class="db-phone-screen">
-							<div class="db-strong">Today</div>
-							<div class="db-figure">€1,920</div>
-							<Progress color="success" value={64} />
-						</div>
-						<Dock size="sm" style="position:absolute;">
-							<button class="dock-active">
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V21H3z" /></svg>
-								<span class="dock-label">Home</span>
-							</button>
-							<button>
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2" /></svg>
-								<span class="dock-label">Stats</span>
-							</button>
-							<button>
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
-								<span class="dock-label">Me</span>
-							</button>
-						</Dock>
+						<MobileFrame style="--mobile-frame-width: 13em">
+							<div class="db-phone-screen">
+								<div class="db-strong">Today</div>
+								<div class="db-figure">€1,920</div>
+								<Progress color="success" value={64} />
+								<Alert color={has('success')}>12 orders shipped.</Alert>
+							</div>
+							<Dock size="sm">
+								<button class="dock-active">
+									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V21H3z" /></svg>
+									<span class="dock-label">Home</span>
+								</button>
+								<button>
+									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2" /></svg>
+									<span class="dock-label">Stats</span>
+								</button>
+								<button>
+									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+									<span class="dock-label">Me</span>
+								</button>
+							</Dock>
+						</MobileFrame>
 					</div>
 				</Card>
 			</div>
 		</div>
 	</div>
 </div>
+
+<Toast bind:this={toast} side="bottom" align="end" />
 
 <!-- ══ The sweeps ════════════════════════════════════════════════════════ -->
 <div class="tp-grid">

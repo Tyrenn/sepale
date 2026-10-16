@@ -136,4 +136,44 @@
 	}
 
 	@include m.size-variants('alert');
+
+	/* ── peony signature: the notification tile ──
+	   An alert is a white tile floating on the page, not a wash: its
+	   colour lives in the icon, set on a pale disc of it, and in the
+	   title. The notification of a dashboard's top-right bell. */
+	.alert:not(.alert-solid, .alert-outline) {
+		--alert-bg: var(--color-surface-1);
+		--alert-border-width: 0px;
+		--alert-shadow:
+			0 0.1em 0.25em color-mix(in oklab, var(--color-on-surface) 5%, #0000),
+			0 0.75em 2em -0.75em color-mix(in oklab, var(--alert-color, var(--color-on-surface)) 30%, #0000);
+	}
+	.alert-icon {
+		display: grid;
+		place-items: center;
+		width: 2.25em;
+		height: 2.25em;
+		border-radius: 0.75em;
+		background-color: color-mix(in oklab, var(--alert-color, var(--color-neutral)) 14%, var(--color-surface-1));
+		color: var(--alert-accent);
+	}
+	/* Solid, in peony, is coloured but pale: a wash of the colour that
+	   fades towards white across the tile, the ink kept dark, the icon
+	   on a white disc. Strong enough to be seen, never a slab. */
+	.alert-solid {
+		--alert-bg: color-mix(in oklab, var(--alert-color) 20%, var(--color-surface-1));
+		--alert-fg: var(--color-on-surface);
+		--alert-accent: color-mix(in oklab, var(--alert-color) 75%, var(--color-on-surface));
+		--alert-border-width: 0px;
+		--alert-shadow: 0 0.75em 2em -0.9em color-mix(in oklab, var(--alert-color) 55%, #0000);
+		background-image: linear-gradient(
+			120deg,
+			color-mix(in oklab, var(--alert-color) 30%, var(--color-surface-1)),
+			color-mix(in oklab, var(--alert-color) 8%, var(--color-surface-1))
+		);
+	}
+	.alert-solid .alert-icon {
+		background-color: var(--color-surface-1);
+		box-shadow: 0 0.2em 0.5em -0.2em color-mix(in oklab, var(--alert-color) 60%, #0000);
+	}
 }

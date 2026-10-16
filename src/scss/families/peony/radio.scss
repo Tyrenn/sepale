@@ -144,4 +144,35 @@
 		--input-color: var(--color-primary);
 	}
 
+	/* ── peony signature: the bead ──
+	   Off, a pale well with a hairline. On, the whole disc fills with
+	   its colour around a white bead and wears a soft halo. */
+	.radio {
+		--peony-accent: var(--color-primary);
+		border-color: color-mix(in oklab, var(--color-on-surface) 14%, #0000);
+		background-color: var(--color-surface-2);
+		padding: calc(var(--size) * 0.3);
+		transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease, padding 0.2s cubic-bezier(0.3, 1.4, 0.5, 1);
+	}
+	@each $color in c.$color-list {
+		.radio-#{$color} {
+			--peony-accent: var(--color-#{$color});
+		}
+	}
+	.radio:hover {
+		border-color: color-mix(in oklab, var(--peony-accent) 50%, #0000);
+	}
+	.radio:checked,
+	.radio[aria-checked='true'] {
+		border-color: var(--peony-accent);
+		background-color: var(--peony-accent);
+		box-shadow:
+			0 0 0 calc(0.2em * var(--scale)) color-mix(in oklab, var(--peony-accent) 16%, #0000),
+			0 0.25em 0.6em -0.2em color-mix(in oklab, var(--peony-accent) 60%, #0000);
+	}
+	.radio:checked::before,
+	.radio[aria-checked='true']::before {
+		background-color: #fff;
+		box-shadow: 0 0.05em 0.15em color-mix(in oklab, #000 25%, #0000);
+	}
 }

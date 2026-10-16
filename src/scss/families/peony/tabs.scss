@@ -468,4 +468,67 @@
 		}
 	}
 
+	/* ── The sliding indicator ──
+	   The Svelte wrapper draws one empty `.tabs-item.tabs-item-active.tabs-indicator`
+	   first in the strip and slides it under the selected tab
+	   (--tabs-x/y/w/h, measured on the tab). Being an active tab itself,
+	   it wears whatever this family draws for one; the real selected tab
+	   then lets it show through. Written last, so it wins the ties. */
+	.tabs:has(> .tabs-indicator) {
+		position: relative;
+	}
+	.tabs > .tabs-indicator {
+		position: absolute;
+		left: var(--tabs-x, 0);
+		top: var(--tabs-y, 0);
+		width: var(--tabs-w, 0);
+		height: var(--tabs-h, 0);
+		margin: 0;
+		padding: 0;
+		pointer-events: none;
+		transition-property: left, top, width, height;
+		transition-duration: 0.25s;
+		transition-timing-function: cubic-bezier(0.3, 0.7, 0.2, 1);
+	}
+	/* lift opens the selected tab into its panel: nothing slides there. */
+	.tabs-lift > .tabs-indicator {
+		display: none;
+	}
+	.tabs > .tabs-indicator ~ .tabs-item {
+		z-index: 1;
+	}
+	.tabs:not(.tabs-lift) > .tabs-indicator ~ .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]) {
+		background-color: transparent;
+		box-shadow: none;
+	}
+	.tabs:not(.tabs-lift) > .tabs-indicator ~ .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled])::before {
+		visibility: hidden;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.tabs > .tabs-indicator {
+			transition: none;
+		}
+	}
+
+	/* ── peony signature: the accent underline ──
+	   The current tab is written in the accent, underlined by a short
+	   rounded pill of it that glows a little; the box variant's tab is
+	   a white tile floating on a soft shadow. */
+	.tabs-border > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]),
+	.tabs-border > .tabs-indicator {
+		color: var(--color-primary);
+	}
+	.tabs-border > .tabs-item::before {
+		height: calc(0.2em * var(--scale));
+		border-radius: 999px;
+		box-shadow: 0 0.1em 0.5em -0.05em color-mix(in oklab, var(--color-primary) 60%, #0000);
+	}
+	.tabs-border > .tabs-item:not(:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]), .tabs-indicator)::before {
+		box-shadow: none;
+	}
+	.tabs-box > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]) {
+		box-shadow:
+			0 0.1em 0.2em color-mix(in oklab, var(--color-on-surface) 6%, #0000),
+			0 0.4em 1em -0.3em color-mix(in oklab, var(--color-on-surface) 18%, #0000);
+	}
 }

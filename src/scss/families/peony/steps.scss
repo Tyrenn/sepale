@@ -277,4 +277,31 @@
 	}
 
 	@include m.size-variants('steps');
+
+	/* ── peony signature: beads on a soft rail ──
+	   Rounded bars a little thicker than a hairline; the current step's
+	   disc wears a pale halo of the journey's colour. */
+	.steps {
+		--steps-bar: calc(0.3em * var(--scale));
+	}
+	.steps-segment > span,
+	.steps-segment {
+		border-radius: 999px;
+	}
+	.steps-item[data-state='current'] .steps-marker {
+		box-shadow: 0 0 0 calc(0.3em * var(--scale)) color-mix(in oklab, var(--steps-color) 18%, #0000);
+	}
+	.steps-item[data-state='complete'] .steps-marker {
+		background-image: linear-gradient(135deg, color-mix(in oklab, var(--steps-color) 45%, #fff), var(--steps-color));
+		box-shadow: 0 0.2em 0.5em -0.15em color-mix(in oklab, var(--steps-color) 60%, #0000);
+	}
+	/* The progress bar's gradient on every bar walked, and on the one
+	   being walked a gradient that fades into the rest of the way. */
+	.steps-segment[data-state='complete'] > span {
+		background: linear-gradient(var(--steps-dir, 90deg), color-mix(in oklab, var(--steps-color) 50%, #fff), var(--steps-color));
+		box-shadow: 0 0.15em 0.45em -0.1em color-mix(in oklab, var(--steps-color) 50%, #0000);
+	}
+	.steps-segment[data-state='current'] > span {
+		background: linear-gradient(var(--steps-dir, 90deg), var(--steps-color), color-mix(in oklab, var(--steps-color) 25%, var(--steps-off)) 70%, var(--steps-off));
+	}
 }

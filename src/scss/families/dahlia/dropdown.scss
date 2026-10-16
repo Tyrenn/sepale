@@ -90,30 +90,30 @@
 	}
 
 	/* ── Axis: side ── which side of the trigger the box opens on. */
-	.dropdown-top > .dropdown-content {
+	.dropdown-top:not(.dropdown-fixed) > .dropdown-content {
 		inset-block-start: auto;
 		inset-block-end: calc(100% + var(--dropdown-gap));
 	}
-	.dropdown-left > .dropdown-content {
+	.dropdown-left:not(.dropdown-fixed) > .dropdown-content {
 		inset-block-start: 0;
 		inset-inline-start: auto;
 		inset-inline-end: calc(100% + var(--dropdown-gap));
 	}
-	.dropdown-right > .dropdown-content {
+	.dropdown-right:not(.dropdown-fixed) > .dropdown-content {
 		inset-block-start: 0;
 		inset-inline-start: calc(100% + var(--dropdown-gap));
 	}
 
 	/* ── Axis: align ── where the box lines up along that side. */
-	.dropdown-end:not(.dropdown-left, .dropdown-right) > .dropdown-content {
+	.dropdown-end:not(.dropdown-left, .dropdown-right):not(.dropdown-fixed) > .dropdown-content {
 		inset-inline-start: auto;
 		inset-inline-end: 0;
 	}
-	.dropdown-center:not(.dropdown-left, .dropdown-right) > .dropdown-content {
+	.dropdown-center:not(.dropdown-left, .dropdown-right):not(.dropdown-fixed) > .dropdown-content {
 		inset-inline-start: 50%;
 		translate: -50% 0;
 	}
-	.dropdown-end:is(.dropdown-left, .dropdown-right) > .dropdown-content {
+	.dropdown-end:is(.dropdown-left, .dropdown-right):not(.dropdown-fixed) > .dropdown-content {
 		inset-block-start: auto;
 		inset-block-end: 0;
 	}

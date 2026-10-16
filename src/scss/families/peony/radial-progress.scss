@@ -1,3 +1,4 @@
+@use '../../_config' as c;
 @use '../../_mixins' as m;
 
 /* peony — radial-progress.
@@ -107,5 +108,23 @@
 
 	.radial-progress::after {
 		background-color: var(--ring);
+	}
+
+	/* ── peony signature: the glowing ring ──
+	   The progress bar's gradient, bent round: the ring brightens from
+	   a pale start to its full colour at the head, on a pale track of
+	   itself, and casts a soft glow of its colour below. The figure in
+	   the middle is heavy and tight, like a KPI. */
+	.radial-progress {
+		--thickness: calc(var(--size) / 7.5);
+		--ring-start: color-mix(in oklab, var(--ring) 55%, #fff);
+		font-weight: 800;
+		letter-spacing: -0.02em;
+		filter: drop-shadow(0 0.25em 0.3em color-mix(in oklab, var(--ring) 28%, #0000));
+	}
+	.radial-progress::before {
+		background:
+			radial-gradient(farthest-side, var(--ring-start) 98%, #0000) top / var(--thickness) var(--thickness) no-repeat,
+			conic-gradient(var(--ring-start) 0, var(--ring) var(--radialprogress), color-mix(in oklab, var(--ring) 9%, var(--color-surface-3)) 0);
 	}
 }

@@ -150,4 +150,11 @@
 	.badge:has(> .avatar-square) {
 		--avatar-corner: 0%;
 	}
+
+	/* ── peony signature: the white ring ──
+	   Every face sits in a thin white ring on a soft shadow, the way
+	   a profile picture lifts off a dashboard card. */
+	.avatar {
+		--avatar-shadow: 0 0.15em 0.5em -0.1em color-mix(in oklab, var(--color-on-surface) 22%, #0000);
+	}
 }

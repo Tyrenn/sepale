@@ -56,7 +56,7 @@
 	.bubble::before {
 		content: '';
 		position: absolute;
-		bottom: calc(0.5em * var(--scale));
+		bottom: max(calc(0.5em * var(--scale)), calc(0.3 * var(--bubble-radius)));
 		inset-inline-start: calc(-1 * var(--bubble-tail));
 		/* One pixel into the bubble: no hairline seam at fractional zoom. */
 		width: calc(var(--bubble-tail) + 1px);

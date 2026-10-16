@@ -1,0 +1,154 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* peony — color-picker.
+   Everything peony draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   color-picker.scss — .color-picker (one colour, edited in OKLCH)
+
+	<div class="color-picker" style="--color-picker-value: oklch(62% 0.19 260)">
+	  <div class="color-picker-head">
+	    <span class="color-picker-preview"></span>
+	    <input class="input color-picker-value" value="oklch(62% 0.19 260)">
+	  </div>
+	  <label class="color-picker-channel">
+	    <span>L</span>
+	    <input type="range" class="color-picker-track" style="--color-picker-track: linear-gradient(…)">
+	    <output>62</output>
+	  </label>
+	  …
+	  <div class="color-picker-presets"> <button class="swatch">…</button> … </div>
+	</div>
+
+   A panel, not a popover: put it in a .dropdown to float it. Each
+   channel is a real range input whose track is painted with the
+   gradient it moves along (--color-picker-track, written by whoever
+   drives it), so the slider shows what it does.
+
+   Plumbing contract:
+	--color-picker-value       the colour (preview)
+	--color-picker-bg / --color-picker-fg
+	--color-picker-border / --color-picker-border-width
+	--color-picker-radius / --color-picker-shadow
+	--color-picker-p / --color-picker-gap
+	--color-picker-width
+	--color-picker-track-h / --color-picker-track-radius
+	--color-picker-thumb / --color-picker-thumb-ring
+   ============================================================ */
+
+@mixin structure {
+	.color-picker {
+		display: grid;
+		gap: var(--color-picker-gap);
+		box-sizing: border-box;
+		width: var(--color-picker-width);
+		max-width: 100%;
+		padding: var(--color-picker-p);
+		background-color: var(--color-picker-bg);
+		color: var(--color-picker-fg);
+		border: var(--color-picker-border-width) solid var(--color-picker-border);
+		border-radius: var(--color-picker-radius);
+		box-shadow: var(--color-picker-shadow);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	/* Flat: inside a dropdown or a card, the host draws the box. */
+	.color-picker-flat {
+		background-color: transparent;
+		border: 0;
+		box-shadow: none;
+	}
+	.color-picker-head {
+		display: flex;
+		align-items: center;
+		gap: var(--color-picker-gap);
+	}
+	.color-picker-preview {
+		flex: none;
+		width: calc(2.5em * var(--scale));
+		aspect-ratio: 1;
+		border-radius: var(--color-picker-track-radius);
+		/* The colour over a checkerboard: a translucent value shows as such. */
+		background:
+			linear-gradient(var(--color-picker-value), var(--color-picker-value)),
+			repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 0 0 / 0.75em 0.75em;
+		box-shadow: inset 0 0 0 1px color-mix(in oklab, currentColor 15%, #0000);
+	}
+	.color-picker-value {
+		flex: 1;
+		min-width: 0;
+		font-family: ui-monospace, SFMono-Regular, monospace;
+		font-size: 0.85em;
+	}
+	.color-picker-channel {
+		display: grid;
+		grid-template-columns: 1.25em 1fr 2.5em;
+		align-items: center;
+		gap: calc(0.5 * var(--color-picker-gap));
+		font-size: 0.85em;
+	}
+	.color-picker-channel > output {
+		text-align: end;
+		font-variant-numeric: tabular-nums;
+		opacity: 0.7;
+	}
+	.color-picker-track {
+		appearance: none;
+		width: 100%;
+		height: var(--color-picker-track-h);
+		margin: 0;
+		border-radius: var(--color-picker-track-radius);
+		background: var(--color-picker-track, linear-gradient(to right, #000, #fff));
+		box-shadow: inset 0 0 0 1px color-mix(in oklab, currentColor 12%, #0000);
+		cursor: ew-resize;
+	}
+	.color-picker-track::-webkit-slider-thumb {
+		appearance: none;
+		width: calc(var(--color-picker-track-h) + 0.25em);
+		height: calc(var(--color-picker-track-h) + 0.25em);
+		border-radius: 50%;
+		background: var(--color-picker-thumb);
+		box-shadow: 0 0 0 0.2em var(--color-picker-thumb-ring), 0 0.1em 0.4em 0.1em color-mix(in oklab, #000 30%, #0000);
+	}
+	.color-picker-track::-moz-range-thumb {
+		width: calc(var(--color-picker-track-h) + 0.25em);
+		height: calc(var(--color-picker-track-h) + 0.25em);
+		border: 0;
+		border-radius: 50%;
+		background: var(--color-picker-thumb);
+		box-shadow: 0 0 0 0.2em var(--color-picker-thumb-ring), 0 0.1em 0.4em 0.1em color-mix(in oklab, #000 30%, #0000);
+	}
+	.color-picker-track:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+	.color-picker-presets {
+		display: flex;
+		flex-wrap: wrap;
+		gap: calc(0.4 * var(--color-picker-gap));
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('color-picker', c.$sizes-field);
+}
+
+@mixin look {
+	.color-picker {
+		--color-picker-value: transparent;
+		--color-picker-bg: var(--color-surface-1);
+		--color-picker-fg: var(--color-on-surface);
+		--color-picker-border: var(--color-border);
+		--color-picker-border-width: 0px;
+		--color-picker-radius: var(--radius-box);
+		--color-picker-shadow: 0 1.25em 3em -1em color-mix(in oklab, var(--color-on-surface) 18%, #0000), 0 0.25em 0.75em -0.25em color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+		--color-picker-p: calc(0.875em * var(--scale));
+		--color-picker-gap: calc(0.75em * var(--scale));
+		--color-picker-width: 18em;
+		--color-picker-track-h: 0.85em;
+		--color-picker-track-radius: 999px;
+		--color-picker-thumb: transparent;
+		--color-picker-thumb-ring: var(--color-surface-1);
+	}
+}

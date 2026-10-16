@@ -1327,6 +1327,42 @@ svg {
 /* ------------------------------------------------------------
    structure — the sample, its label, and the interactive states.
    ------------------------------------------------------------ */
+/* daisy — color-picker.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   color-picker.scss — .color-picker (one colour, edited in OKLCH)
+
+	<div class="color-picker" style="--color-picker-value: oklch(62% 0.19 260)">
+	  <div class="color-picker-head">
+	    <span class="color-picker-preview"></span>
+	    <input class="input color-picker-value" value="oklch(62% 0.19 260)">
+	  </div>
+	  <label class="color-picker-channel">
+	    <span>L</span>
+	    <input type="range" class="color-picker-track" style="--color-picker-track: linear-gradient(…)">
+	    <output>62</output>
+	  </label>
+	  …
+	  <div class="color-picker-presets"> <button class="swatch">…</button> … </div>
+	</div>
+
+   A panel, not a popover: put it in a .dropdown to float it. Each
+   channel is a real range input whose track is painted with the
+   gradient it moves along (--color-picker-track, written by whoever
+   drives it), so the slider shows what it does.
+
+   Plumbing contract:
+	--color-picker-value       the colour (preview)
+	--color-picker-bg / --color-picker-fg
+	--color-picker-border / --color-picker-border-width
+	--color-picker-radius / --color-picker-shadow
+	--color-picker-p / --color-picker-gap
+	--color-picker-width
+	--color-picker-track-h / --color-picker-track-radius
+	--color-picker-thumb / --color-picker-thumb-ring
+   ============================================================ */
 /* daisy — table.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism (layout, states,
@@ -1590,25 +1626,28 @@ svg {
    	--alert-p / --alert-gap
    	--fontsize             font size (size variants)
    ============================================================ */
-/* daisy — toaster.
+/* daisy — toast.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism, `look` the values and
    the variants (ADR 0010). */
 /* ============================================================
-   toaster.scss — .toaster (the stack toasts float in)
+   toast.scss — .toast (alerts that pile up)
 
-   	<section class="toaster toaster-bottom toaster-end" aria-live="polite">
-   	  <div class="alert alert-success">…</div>
-   	</section>
+	<section class="toast" aria-live="polite">
+	  <div class="alert alert-success">…</div>
+	  <div class="alert">…</div>
+	</section>
 
-      Fixed to a corner of the viewport; each toast is an .alert. The
-      stack lets clicks through everywhere but on the toasts themselves.
+   A stack of .alert, one under the other, in the flow of the page.
+   Give it a corner — a side, an align, or both — and it is pinned
+   there in fixed position, the newest alert against the edge; then
+   it lets clicks through everywhere but on the alerts themselves.
 
-      Plumbing contract:
-   	--toaster-gap     space between toasts
-   	--toaster-m       distance from the viewport's edges
-   	--toaster-width   the toasts' width
-   	--toaster-shadow  the shadow a floating toast casts
+   Plumbing contract:
+	--toast-gap     space between alerts
+	--toast-m       distance from the viewport's edges, when pinned
+	--toast-width   the stack's width
+	--toast-shadow  the shadow a pinned alert casts
    ============================================================ */
 /* daisy — tooltip.
    Everything daisy draws for this component, and nothing another
@@ -1700,27 +1739,28 @@ svg {
    	--rating-gap                 space between icons
    	--rating-mask                the icon (a mask image; a star by default)
    ============================================================ */
-/* daisy — segmented.
+/* daisy — switch.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism, `look` the values and
    the variants (ADR 0010). */
 /* ============================================================
-   segmented.scss — .segmented (one choice among a few, as a pill track)
+   switch.scss — .switch (one choice among a few, as a pill track)
 
-   	<div class="segmented" role="radiogroup" aria-label="View">
-   	  <label class="segmented-item"><input type="radio" class="segmented-input" name="v" value="list" checked>List</label>
-   	  <label class="segmented-item"><input type="radio" class="segmented-input" name="v" value="grid">Grid</label>
+   	<div class="switch" role="radiogroup" aria-label="View">
+   	  <label class="switch-item"><input type="radio" class="switch-input" name="v" value="list" checked>List</label>
+   	  <label class="switch-item"><input type="radio" class="switch-input" name="v" value="grid">Grid</label>
    	</div>
 
       Real radios laid invisibly over their labels: keyboard, forms and
       screen readers work as for any radio group.
 
       Plumbing contract:
-   	--segmented-bg / --segmented-border / --segmented-border-width
-   	--segmented-radius / --segmented-item-radius
-   	--segmented-pad          the track's inner padding
-   	--segmented-fg           an idle item's ink
-   	--segmented-active-bg / --segmented-active-fg / --segmented-active-shadow
+   	--switch-x / --switch-w  the indicator's place (set by the script)
+   	--switch-bg / --switch-border / --switch-border-width
+   	--switch-radius / --switch-item-radius
+   	--switch-pad          the track's inner padding
+   	--switch-fg           an idle item's ink
+   	--switch-active-bg / --switch-active-fg / --switch-active-shadow
    	--size                   an item's height
    ============================================================ */
 /* daisy — number-input.
@@ -1919,6 +1959,37 @@ svg {
    	--drawer-speed                    the slide's duration
    	--drawer-handle-bg / --drawer-handle-w / --drawer-handle-l
    ============================================================ */
+/* daisy — sidebar.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+/* ============================================================
+   sidebar.scss — .sidebar (an app's side column, folding to a rail)
+
+	<div class="sidebar-layout">
+	  <aside class="sidebar">
+	    <div class="sidebar-head">… <button class="sidebar-toggle" aria-expanded="true">…</button></div>
+	    <div class="sidebar-body"> <ul class="menu">…</ul> </div>
+	    <div class="sidebar-foot">…</div>
+	  </aside>
+	  <main>…</main>
+	</div>
+
+   In the flow, unlike a drawer: the page beside it gets narrower or
+   wider, it never covers it. `.sidebar-collapsed` folds it to a rail
+   (--sidebar-rail) where only the toggle — and whatever the author
+   marks `.sidebar-keep` — stays; the rest fades out as it closes.
+   `.sidebar-end` puts it on the other side. `.sidebar-layout` is the
+   optional row it sits in: the sidebar, then the page filling the
+   rest, both as tall as the viewport.
+
+   Plumbing contract:
+	--sidebar-width / --sidebar-rail   open and folded widths
+	--sidebar-bg / --sidebar-fg
+	--sidebar-border / --sidebar-border-width / --sidebar-shadow
+	--sidebar-p / --sidebar-gap
+	--sidebar-speed                    the fold's timing
+   ============================================================ */
 /* daisy — steps.
    Everything daisy draws for this component, and nothing another
    family reads: `structure` is the mechanism, `look` the values and
@@ -1992,23 +2063,24 @@ svg {
    family reads: `structure` is the mechanism, `look` the values and
    the variants (ADR 0010). */
 /* ============================================================
-   chips-input.scss — .chips-input (several values, each a chip)
+   chips-input.scss — .chips-input (a field that feeds a list of chips)
 
-   	<div class="input chips-input">
-   	  <span class="chip">Lyon<button class="chips-input-remove" aria-label="Remove Lyon">×</button></span>
-   	  <input class="chips-input-field" placeholder="Add a city">
-   	  <input type="hidden" name="cities[]" value="Lyon">
-   	</div>
+	<div class="chips-input">
+	  <input class="input" placeholder="Add a city">
+	  <ul class="chips-input-list">
+	    <li class="chip">Lyon<button class="chips-input-remove" aria-label="Remove Lyon">×</button></li>
+	  </ul>
+	</div>
 
-      An accumulator around a field: the frame is the family's .input, made
-      to grow and wrap; each value is the family's .chip. The field may be
-      any other component — an Input, a Select, a Combobox — whose own frame
-      is folded into this one (ADR 0009: integration).
+   A utility, not a field: the field is any component — an Input, a
+   Select, a Combobox — and keeps its own frame; the values it commits
+   pile up as the family's .chip in a list BESIDE it, never inside.
+   `.chips-input-top|start|end` moves the list (below by default).
 
-      Plumbing contract:
-   	--chips-input-gap   space between chips and field
-   	--chips-input-py    vertical padding of the grown frame
-   	--chips-input-min   the field's minimum width
+   Plumbing contract:
+	--chips-input-gap        between the field and the list
+	--chips-input-list-gap   between two chips
+	--chips-input-side-min   the field's minimum width when side by side
    ============================================================ */
 /* daisy — file-explorer.
    Everything daisy draws for this component, and nothing another
@@ -3615,34 +3687,34 @@ svg {
 }
 
 /* ── Axis: side ── which side of the trigger the box opens on. */
-.dropdown-top > .dropdown-content {
+.dropdown-top:not(.dropdown-fixed) > .dropdown-content {
   inset-block-start: auto;
   inset-block-end: calc(100% + var(--dropdown-gap));
 }
 
-.dropdown-left > .dropdown-content {
+.dropdown-left:not(.dropdown-fixed) > .dropdown-content {
   inset-block-start: 0;
   inset-inline-start: auto;
   inset-inline-end: calc(100% + var(--dropdown-gap));
 }
 
-.dropdown-right > .dropdown-content {
+.dropdown-right:not(.dropdown-fixed) > .dropdown-content {
   inset-block-start: 0;
   inset-inline-start: calc(100% + var(--dropdown-gap));
 }
 
 /* ── Axis: align ── where the box lines up along that side. */
-.dropdown-end:not(.dropdown-left, .dropdown-right) > .dropdown-content {
+.dropdown-end:not(.dropdown-left, .dropdown-right):not(.dropdown-fixed) > .dropdown-content {
   inset-inline-start: auto;
   inset-inline-end: 0;
 }
 
-.dropdown-center:not(.dropdown-left, .dropdown-right) > .dropdown-content {
+.dropdown-center:not(.dropdown-left, .dropdown-right):not(.dropdown-fixed) > .dropdown-content {
   inset-inline-start: 50%;
   translate: -50% 0;
 }
 
-.dropdown-end:is(.dropdown-left, .dropdown-right) > .dropdown-content {
+.dropdown-end:is(.dropdown-left, .dropdown-right):not(.dropdown-fixed) > .dropdown-content {
   inset-block-start: auto;
   inset-block-end: 0;
 }
@@ -5039,6 +5111,126 @@ input[type=color].swatch::-moz-color-swatch {
   border-radius: inherit;
 }
 
+.color-picker {
+  display: grid;
+  gap: var(--color-picker-gap);
+  box-sizing: border-box;
+  width: var(--color-picker-width);
+  max-width: 100%;
+  padding: var(--color-picker-p);
+  background-color: var(--color-picker-bg);
+  color: var(--color-picker-fg);
+  border: var(--color-picker-border-width) solid var(--color-picker-border);
+  border-radius: var(--color-picker-radius);
+  box-shadow: var(--color-picker-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+}
+
+/* Flat: inside a dropdown or a card, the host draws the box. */
+.color-picker-flat {
+  background-color: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.color-picker-head {
+  display: flex;
+  align-items: center;
+  gap: var(--color-picker-gap);
+}
+
+.color-picker-preview {
+  flex: none;
+  width: calc(2.5em * var(--scale));
+  aspect-ratio: 1;
+  border-radius: var(--color-picker-track-radius);
+  /* The colour over a checkerboard: a translucent value shows as such. */
+  background: linear-gradient(var(--color-picker-value), var(--color-picker-value)), repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 0 0/0.75em 0.75em;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, currentColor 15%, rgba(0, 0, 0, 0));
+}
+
+.color-picker-value {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.85em;
+}
+
+.color-picker-channel {
+  display: grid;
+  grid-template-columns: 1.25em 1fr 2.5em;
+  align-items: center;
+  gap: calc(0.5 * var(--color-picker-gap));
+  font-size: 0.85em;
+}
+
+.color-picker-channel > output {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.color-picker-track {
+  appearance: none;
+  width: 100%;
+  height: var(--color-picker-track-h);
+  margin: 0;
+  border-radius: var(--color-picker-track-radius);
+  background: var(--color-picker-track, linear-gradient(to right, #000, #fff));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, currentColor 12%, rgba(0, 0, 0, 0));
+  cursor: ew-resize;
+}
+
+.color-picker-track::-webkit-slider-thumb {
+  appearance: none;
+  width: calc(var(--color-picker-track-h) + 0.25em);
+  height: calc(var(--color-picker-track-h) + 0.25em);
+  border-radius: 50%;
+  background: var(--color-picker-thumb);
+  box-shadow: 0 0 0 0.2em var(--color-picker-thumb-ring), 0 0.1em 0.4em 0.1em color-mix(in oklab, #000 30%, rgba(0, 0, 0, 0));
+}
+
+.color-picker-track::-moz-range-thumb {
+  width: calc(var(--color-picker-track-h) + 0.25em);
+  height: calc(var(--color-picker-track-h) + 0.25em);
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-picker-thumb);
+  box-shadow: 0 0 0 0.2em var(--color-picker-thumb-ring), 0 0.1em 0.4em 0.1em color-mix(in oklab, #000 30%, rgba(0, 0, 0, 0));
+}
+
+.color-picker-track:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.color-picker-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(0.4 * var(--color-picker-gap));
+}
+
+/* ── Axis: size ── */
+.color-picker-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.color-picker-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.color-picker-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.color-picker-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.color-picker-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
 /* The frame is the scroll box's: it clips the table to its corners. */
 .table-scroll {
   overflow: auto;
@@ -5643,47 +5835,45 @@ input[type=color].swatch::-moz-color-swatch {
   background-color: color-mix(in oklab, currentColor 12%, rgba(0, 0, 0, 0));
 }
 
-.toaster {
-  position: fixed;
-  z-index: 1000;
-  inset-block-end: var(--toaster-m);
-  inset-inline-end: var(--toaster-m);
+.toast {
   display: flex;
   flex-direction: column;
-  gap: var(--toaster-gap);
-  width: min(var(--toaster-width), 100vw - 2 * var(--toaster-m));
-  pointer-events: none;
+  gap: var(--toast-gap);
+  width: min(var(--toast-width), 100%);
   font-size: var(--fontsize, var(--base, var(--default-base)));
 }
 
-.toaster > * {
+/* ── Axes: side, align ── either one pins the stack to a corner. */
+.toast:is(.toast-top, .toast-bottom, .toast-start, .toast-center, .toast-end) {
+  position: fixed;
+  z-index: 1000;
+  inset-block: auto var(--toast-m);
+  inset-inline: auto var(--toast-m);
+  width: min(var(--toast-width), 100vw - 2 * var(--toast-m));
+  pointer-events: none;
+}
+
+.toast:is(.toast-top, .toast-bottom, .toast-start, .toast-center, .toast-end) > * {
   pointer-events: auto;
 }
 
-.toaster .alert {
-  box-shadow: var(--toaster-shadow);
+.toast:is(.toast-top, .toast-bottom, .toast-start, .toast-center, .toast-end) .alert {
+  box-shadow: var(--toast-shadow);
 }
 
-.toaster-top {
-  inset-block: var(--toaster-m) auto;
+/* At the top, the newest alert is the first one under the edge. */
+.toast.toast-top {
+  inset-block: var(--toast-m) auto;
   flex-direction: column-reverse;
 }
 
-.toaster-bottom {
-  inset-block: auto var(--toaster-m);
+.toast.toast-start {
+  inset-inline: var(--toast-m) auto;
 }
 
-.toaster-start {
-  inset-inline: var(--toaster-m) auto;
-}
-
-.toaster-center {
+.toast.toast-center {
   inset-inline: 0;
   margin-inline: auto;
-}
-
-.toaster-end {
-  inset-inline: auto var(--toaster-m);
 }
 
 .tooltip {
@@ -5977,17 +6167,18 @@ input[type=color].swatch::-moz-color-swatch {
   pointer-events: none;
 }
 
-.segmented {
+.switch {
+  position: relative;
   display: inline-flex;
-  gap: var(--segmented-pad);
-  padding: var(--segmented-pad);
-  border: var(--segmented-border-width) solid var(--segmented-border);
-  border-radius: var(--segmented-radius);
-  background-color: var(--segmented-bg);
+  gap: var(--switch-pad);
+  padding: var(--switch-pad);
+  border: var(--switch-border-width) solid var(--switch-border);
+  border-radius: var(--switch-radius);
+  background-color: var(--switch-bg);
   font-size: var(--fontsize, var(--base, var(--default-base)));
 }
 
-.segmented-item {
+.switch-item {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -5995,8 +6186,8 @@ input[type=color].swatch::-moz-color-swatch {
   gap: 0.4em;
   height: var(--size);
   padding-inline: calc(var(--size) / 2.5);
-  border-radius: var(--segmented-item-radius);
-  color: var(--segmented-fg);
+  border-radius: var(--switch-item-radius);
+  color: var(--switch-fg);
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
@@ -6004,7 +6195,7 @@ input[type=color].swatch::-moz-color-swatch {
   transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
 }
 
-.segmented-input {
+.switch-input {
   position: absolute;
   inset: 0;
   margin: 0;
@@ -6012,31 +6203,61 @@ input[type=color].swatch::-moz-color-swatch {
   cursor: pointer;
 }
 
-.segmented-item:hover {
-  color: var(--segmented-active-fg);
+.switch-item:hover {
+  color: var(--switch-active-fg);
 }
 
-.segmented-item:has(.segmented-input:checked) {
-  background-color: var(--segmented-active-bg);
-  color: var(--segmented-active-fg);
-  box-shadow: var(--segmented-active-shadow);
+.switch-item:has(.switch-input:checked) {
+  background-color: var(--switch-active-bg);
+  color: var(--switch-active-fg);
+  box-shadow: var(--switch-active-shadow);
 }
 
-.segmented-item:has(.segmented-input:focus-visible) {
-  outline: 2px solid var(--segmented-active-fg);
+/* The indicator: the checked look as one block that the script slides
+   from item to item (--switch-x / --switch-w, measured on the item).
+   With it, the checked item lets it show through; without a script
+   there is no indicator and the item paints itself. */
+.switch-indicator {
+  position: absolute;
+  inset-block: var(--switch-pad);
+  left: var(--switch-x, 0);
+  width: var(--switch-w, 0);
+  border-radius: var(--switch-item-radius);
+  background-color: var(--switch-active-bg);
+  box-shadow: var(--switch-active-shadow);
+  pointer-events: none;
+  transition: left 0.25s cubic-bezier(0.3, 0.7, 0.2, 1), width 0.25s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.switch-indicator ~ .switch-item {
+  z-index: 1;
+}
+
+.switch-indicator ~ .switch-item:has(.switch-input:checked) {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch-indicator {
+    transition: none;
+  }
+}
+.switch-item:has(.switch-input:focus-visible) {
+  outline: 2px solid var(--switch-active-fg);
   outline-offset: 1px;
 }
 
-.segmented-item:has(.segmented-input:disabled) {
+.switch-item:has(.switch-input:disabled) {
   opacity: 0.5;
   pointer-events: none;
 }
 
-.segmented-block {
+.switch-block {
   display: flex;
 }
 
-.segmented-block > .segmented-item {
+.switch-block > .switch-item {
   flex: 1 1 0;
 }
 
@@ -6340,7 +6561,9 @@ input[type=color].swatch::-moz-color-swatch {
   background-color: var(--mobile-frame-body);
 }
 
+/* A screen is where page chrome (a dock, a toast) is placed against. */
 .mobile-frame-screen {
+  position: relative;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -6672,6 +6895,159 @@ dialog.drawer[open] {
     transition: none;
   }
 }
+.sidebar-layout {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.sidebar-layout > :not(.sidebar) {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.sidebar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: var(--sidebar-width);
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-fg);
+  border-inline-end: var(--sidebar-border-width) solid var(--sidebar-border);
+  box-shadow: var(--sidebar-shadow);
+  font-size: var(--fontsize, var(--base, var(--default-base)));
+  transition: width var(--sidebar-speed);
+}
+
+.sidebar-end {
+  order: 1;
+  border-inline-end: 0;
+  border-inline-start: var(--sidebar-border-width) solid var(--sidebar-border);
+}
+
+.sidebar-head,
+.sidebar-foot {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sidebar-gap);
+  padding: var(--sidebar-p);
+}
+
+.sidebar-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--sidebar-p) var(--sidebar-p);
+  scrollbar-width: thin;
+}
+
+/* Laid out at the open width whatever the sidebar's width: folding
+   clips the content instead of reflowing it on every frame. */
+.sidebar > * {
+  min-width: calc(var(--sidebar-width) - var(--sidebar-border-width));
+  box-sizing: border-box;
+  transition: opacity var(--sidebar-speed);
+}
+
+.sidebar-toggle {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: calc(var(--sidebar-rail) - 2 * var(--sidebar-p));
+  aspect-ratio: 1;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0.5em;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sidebar-toggle:hover {
+  background-color: color-mix(in oklab, currentColor 8%, rgba(0, 0, 0, 0));
+}
+
+.sidebar-toggle:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.sidebar-toggle svg {
+  width: 1.1em;
+  height: 1.1em;
+  transition: rotate var(--sidebar-speed);
+}
+
+/* ── Folded: a rail. The head stays, everything else fades. ── */
+.sidebar-collapsed {
+  width: var(--sidebar-rail);
+}
+
+.sidebar-collapsed > :not(.sidebar-head) {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--sidebar-speed), visibility 0s var(--sidebar-speed);
+}
+
+.sidebar-collapsed > .sidebar-head {
+  min-width: var(--sidebar-rail);
+  justify-content: center;
+}
+
+.sidebar-collapsed > .sidebar-head > :not(.sidebar-toggle, .sidebar-keep) {
+  display: none;
+}
+
+.sidebar-collapsed .sidebar-toggle {
+  margin-inline: 0;
+}
+
+.sidebar-collapsed .sidebar-toggle svg {
+  rotate: 180deg;
+}
+
+.sidebar-end .sidebar-toggle svg,
+[dir=rtl] .sidebar-toggle svg {
+  scale: -1 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar > *,
+  .sidebar-toggle svg {
+    transition: none;
+  }
+}
+/* ── Axis: size ── */
+.sidebar-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.sidebar-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.sidebar-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.sidebar-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.sidebar-xl {
+  --fontsize: var(--xl, var(--default-xl));
+}
+
 .steps {
   display: flex;
   flex-direction: column;
@@ -6962,16 +7338,55 @@ dialog.drawer[open] {
 }
 
 .chips-input {
-  flex-wrap: wrap;
-  align-items: center;
-  height: auto;
-  min-height: var(--size);
-  cursor: text;
+  display: flex;
+  flex-direction: column;
+  gap: var(--chips-input-gap);
+  min-width: 0;
+  font-size: var(--fontsize, var(--base, var(--default-base)));
 }
 
-.chips-input > .chip {
-  flex: none;
+.chips-input-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--chips-input-list-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* An empty list takes no room: no gap under a lone field. */
+.chips-input-list:empty {
+  display: none;
+}
+
+.chips-input-list > .chip {
   max-width: 100%;
+}
+
+/* ── Axis: side ── where the list sits. */
+.chips-input-top {
+  flex-direction: column-reverse;
+}
+
+.chips-input-start,
+.chips-input-end {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.chips-input-start {
+  flex-direction: row-reverse;
+}
+
+.chips-input:is(.chips-input-start, .chips-input-end) > :not(.chips-input-list) {
+  flex: 1 1 var(--chips-input-side-min);
+  min-width: var(--chips-input-side-min);
+}
+
+.chips-input:is(.chips-input-start, .chips-input-end) > .chips-input-list {
+  flex: 0 1 auto;
+  align-self: center;
 }
 
 .chips-input-remove {
@@ -6996,6 +7411,27 @@ dialog.drawer[open] {
 .chips-input-remove:focus-visible {
   opacity: 1;
   background-color: color-mix(in oklab, currentColor 15%, rgba(0, 0, 0, 0));
+}
+
+/* ── Axis: size ── */
+.chips-input-xs {
+  --fontsize: var(--xs, var(--default-xs));
+}
+
+.chips-input-sm {
+  --fontsize: var(--sm, var(--default-sm));
+}
+
+.chips-input-md {
+  --fontsize: var(--md, var(--default-md));
+}
+
+.chips-input-lg {
+  --fontsize: var(--lg, var(--default-lg));
+}
+
+.chips-input-xl {
+  --fontsize: var(--xl, var(--default-xl));
 }
 
 .file-explorer {
@@ -7256,7 +7692,27 @@ dialog.drawer[open] {
   place-items: center;
   width: 1.25em;
   height: 1.25em;
-  color: var(--file-explorer-muted);
+  color: var(--file-explorer-icon-color, var(--file-explorer-muted));
+}
+
+/* A picture instead of an icon: the file's own thumbnail, cropped to
+   the icon's box, a little rounded. The grid view gives it room. */
+.file-explorer-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.2em;
+  background-color: var(--file-explorer-muted);
+}
+
+.file-explorer-grid .file-explorer-icon[data-preview] {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4/3;
+}
+
+.file-explorer-grid .file-explorer-thumb {
+  border-radius: 0.4em;
 }
 
 .file-explorer-icon svg {
@@ -10266,6 +10722,23 @@ fieldset:disabled .select {
   --fontsize: var(--xl, var(--default-xl));
 }
 
+.color-picker {
+  --color-picker-value: transparent;
+  --color-picker-bg: var(--color-base-100);
+  --color-picker-fg: var(--color-base-content);
+  --color-picker-border: var(--color-base-300);
+  --color-picker-border-width: var(--border);
+  --color-picker-radius: var(--radius-box);
+  --color-picker-shadow: 0 0.5em 1.5em -0.5em color-mix(in oklab, #000 25%, #0000);
+  --color-picker-p: calc(0.875em * var(--scale));
+  --color-picker-gap: calc(0.75em * var(--scale));
+  --color-picker-width: 18em;
+  --color-picker-track-h: 0.85em;
+  --color-picker-track-radius: var(--radius-field);
+  --color-picker-thumb: transparent;
+  --color-picker-thumb-ring: var(--color-base-100);
+}
+
 .table-scroll {
   --table-frame: #0000;
   --table-frame-width: 0px;
@@ -10641,6 +11114,53 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
+/* ── The sliding indicator ──
+   The Svelte wrapper draws one empty `.tabs-item.tabs-item-active.tabs-indicator`
+   first in the strip and slides it under the selected tab
+   (--tabs-x/y/w/h, measured on the tab). Being an active tab itself,
+   it wears whatever this family draws for one; the real selected tab
+   then lets it show through. Written last, so it wins the ties. */
+.tabs:has(> .tabs-indicator) {
+  position: relative;
+}
+
+.tabs > .tabs-indicator {
+  position: absolute;
+  left: var(--tabs-x, 0);
+  top: var(--tabs-y, 0);
+  width: var(--tabs-w, 0);
+  height: var(--tabs-h, 0);
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  transition-property: left, top, width, height;
+  transition-duration: 0.25s;
+  transition-timing-function: cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+/* lift opens the selected tab into its panel: nothing slides there. */
+.tabs-lift > .tabs-indicator {
+  display: none;
+}
+
+.tabs > .tabs-indicator ~ .tabs-item {
+  z-index: 1;
+}
+
+.tabs:not(.tabs-lift) > .tabs-indicator ~ .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled]) {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.tabs:not(.tabs-lift) > .tabs-indicator ~ .tabs-item:is(.tabs-item-active, [aria-selected=true], [aria-current=true], [aria-current=page]):not(.tabs-item-disabled, [disabled])::before {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabs > .tabs-indicator {
+    transition: none;
+  }
+}
 .title {
   font-weight: 800;
   line-height: 1.15;
@@ -11175,15 +11695,15 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
-.toaster {
-  --toaster-gap: calc(0.6em * var(--scale));
-  --toaster-m: calc(1em * var(--scale));
-  --toaster-width: 24em;
-  --toaster-shadow: 0 0.4em 1.4em -0.4em color-mix(in oklab, #000 35%, #0000);
+.toast {
+  --toast-gap: calc(0.6em * var(--scale));
+  --toast-m: calc(1em * var(--scale));
+  --toast-width: 24em;
+  --toast-shadow: 0 0.4em 1.4em -0.4em color-mix(in oklab, #000 35%, #0000);
 }
 
-/* A floating toast needs an opaque ground: the page must not show through. */
-.toaster .alert {
+/* A pinned alert needs an opaque ground: the page must not show through. */
+.toast:is(.toast-top, .toast-bottom, .toast-start, .toast-center, .toast-end) .alert {
   background-image: linear-gradient(var(--alert-bg), var(--alert-bg));
   background-color: var(--color-base-100);
 }
@@ -11327,78 +11847,78 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
-.segmented {
+.switch {
   --size: calc(2.1em * var(--scale));
-  --segmented-bg: var(--color-base-200);
-  --segmented-border: var(--color-base-300);
-  --segmented-border-width: 0px;
-  --segmented-radius: var(--radius-field);
-  --segmented-item-radius: calc(var(--radius-field) - var(--segmented-pad) / 2);
-  --segmented-pad: calc(0.2em * var(--scale));
-  --segmented-fg: color-mix(in oklab, var(--color-base-content) 65%, #0000);
-  --segmented-active-bg: var(--color-base-100);
-  --segmented-active-fg: var(--color-base-content);
-  --segmented-active-shadow: 0 1px 3px color-mix(in oklab, #000 18%, #0000);
+  --switch-bg: var(--color-base-200);
+  --switch-border: var(--color-base-300);
+  --switch-border-width: 0px;
+  --switch-radius: var(--radius-field);
+  --switch-item-radius: calc(var(--radius-field) - var(--switch-pad) / 2);
+  --switch-pad: calc(0.2em * var(--scale));
+  --switch-fg: color-mix(in oklab, var(--color-base-content) 65%, #0000);
+  --switch-active-bg: var(--color-base-100);
+  --switch-active-fg: var(--color-base-content);
+  --switch-active-shadow: 0 1px 3px color-mix(in oklab, #000 18%, #0000);
 }
 
 /* colour variants: the checked item takes the colour. */
-.segmented-primary {
-  --segmented-active-bg: var(--color-primary);
-  --segmented-active-fg: var(--color-primary-content);
+.switch-primary {
+  --switch-active-bg: var(--color-primary);
+  --switch-active-fg: var(--color-primary-content);
 }
 
-.segmented-secondary {
-  --segmented-active-bg: var(--color-secondary);
-  --segmented-active-fg: var(--color-secondary-content);
+.switch-secondary {
+  --switch-active-bg: var(--color-secondary);
+  --switch-active-fg: var(--color-secondary-content);
 }
 
-.segmented-accent {
-  --segmented-active-bg: var(--color-accent);
-  --segmented-active-fg: var(--color-accent-content);
+.switch-accent {
+  --switch-active-bg: var(--color-accent);
+  --switch-active-fg: var(--color-accent-content);
 }
 
-.segmented-neutral {
-  --segmented-active-bg: var(--color-neutral);
-  --segmented-active-fg: var(--color-neutral-content);
+.switch-neutral {
+  --switch-active-bg: var(--color-neutral);
+  --switch-active-fg: var(--color-neutral-content);
 }
 
-.segmented-info {
-  --segmented-active-bg: var(--color-info);
-  --segmented-active-fg: var(--color-info-content);
+.switch-info {
+  --switch-active-bg: var(--color-info);
+  --switch-active-fg: var(--color-info-content);
 }
 
-.segmented-success {
-  --segmented-active-bg: var(--color-success);
-  --segmented-active-fg: var(--color-success-content);
+.switch-success {
+  --switch-active-bg: var(--color-success);
+  --switch-active-fg: var(--color-success-content);
 }
 
-.segmented-warning {
-  --segmented-active-bg: var(--color-warning);
-  --segmented-active-fg: var(--color-warning-content);
+.switch-warning {
+  --switch-active-bg: var(--color-warning);
+  --switch-active-fg: var(--color-warning-content);
 }
 
-.segmented-error {
-  --segmented-active-bg: var(--color-error);
-  --segmented-active-fg: var(--color-error-content);
+.switch-error {
+  --switch-active-bg: var(--color-error);
+  --switch-active-fg: var(--color-error-content);
 }
 
-.segmented-xs {
+.switch-xs {
   --fontsize: var(--xs, var(--default-xs));
 }
 
-.segmented-sm {
+.switch-sm {
   --fontsize: var(--sm, var(--default-sm));
 }
 
-.segmented-md {
+.switch-md {
   --fontsize: var(--md, var(--default-md));
 }
 
-.segmented-lg {
+.switch-lg {
   --fontsize: var(--lg, var(--default-lg));
 }
 
-.segmented-xl {
+.switch-xl {
   --fontsize: var(--xl, var(--default-xl));
 }
 
@@ -11671,6 +12191,19 @@ label:has(:checked),
   --drawer-handle-l: 2.5em;
 }
 
+.sidebar {
+  --sidebar-width: 15rem;
+  --sidebar-rail: 3.5rem;
+  --sidebar-bg: var(--color-base-100);
+  --sidebar-fg: var(--color-base-content);
+  --sidebar-border: var(--color-base-300);
+  --sidebar-border-width: 1px;
+  --sidebar-shadow: none;
+  --sidebar-p: calc(0.6em * var(--scale));
+  --sidebar-gap: calc(0.5em * var(--scale));
+  --sidebar-speed: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .steps {
   --steps-color: var(--color-primary);
   --steps-off: color-mix(in oklab, var(--color-base-content) 14%, #0000);
@@ -11776,61 +12309,13 @@ label:has(:checked),
 }
 
 .chips-input {
-  --chips-input-gap: calc(0.35em * var(--scale));
-  --chips-input-py: calc(0.3em * var(--scale));
-  --chips-input-min: 6em;
-  gap: var(--chips-input-gap);
-  width: 100%;
-  padding-block: var(--chips-input-py);
+  --chips-input-gap: calc(0.5em * var(--scale));
+  --chips-input-list-gap: calc(0.35em * var(--scale));
+  --chips-input-side-min: 12em;
 }
 
-.chips-input > .chip {
+.chips-input-list > .chip {
   font-size: 0.875em;
-}
-
-/* The field: the plain one, or another component's, folded into the frame. */
-.chips-input .chips-input-field,
-.chips-input :is(.input, .select, .combobox) {
-  flex: 1 1 var(--chips-input-min);
-  width: auto;
-  min-width: var(--chips-input-min);
-  height: calc(var(--size) - 2 * var(--chips-input-py) - 2 * var(--border));
-  min-height: 0;
-  padding-inline: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  box-shadow: none;
-  color: inherit;
-  font: inherit;
-}
-
-.chips-input .combobox > .input {
-  height: 100%;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.chips-input-xs {
-  --fontsize: var(--xs, var(--default-xs));
-}
-
-.chips-input-sm {
-  --fontsize: var(--sm, var(--default-sm));
-}
-
-.chips-input-md {
-  --fontsize: var(--md, var(--default-md));
-}
-
-.chips-input-lg {
-  --fontsize: var(--lg, var(--default-lg));
-}
-
-.chips-input-xl {
-  --fontsize: var(--xl, var(--default-xl));
 }
 
 .file-explorer,

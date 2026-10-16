@@ -45,6 +45,24 @@
 	);
 
 	let active = $state<TabId>('preview');
+
+	/* The chrome's own sliding indicator (the kit's Tabs, renamed ui-):
+	   measured under the selected tab after every change. */
+	let strip: HTMLDivElement | undefined = $state();
+	let mark = $state({ x: 0, y: 0, w: 0, h: 0 });
+	$effect(() => {
+		void active;
+		void tabs.length;
+		if (!strip) return;
+		const measure = () => {
+			const tab = strip?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+			if (tab) mark = { x: tab.offsetLeft, y: tab.offsetTop, w: tab.offsetWidth, h: tab.offsetHeight };
+		};
+		measure();
+		const observer = new ResizeObserver(measure);
+		observer.observe(strip);
+		return () => observer.disconnect();
+	});
 	let code = $derived(active === 'html' ? htmlSrc : svelteSrc);
 
 	/**
@@ -94,12 +112,22 @@
 	</header>
 
 	<div class="box">
-		<div class="box-tabs" role="tablist">
+		<div
+			class="ui-tabs ui-tabs-box ui-tabs-sm box-tabs"
+			role="tablist"
+			bind:this={strip}
+			style:--ui-tabs-x="{mark.x}px"
+			style:--ui-tabs-y="{mark.y}px"
+			style:--ui-tabs-w="{mark.w}px"
+			style:--ui-tabs-h="{mark.h}px"
+		>
+			<span class="ui-tabs-item ui-tabs-item-active ui-tabs-indicator" aria-hidden="true"></span>
 			{#each tabs as t (t.id)}
 				<button
 					type="button"
 					role="tab"
-					class="box-tab"
+					class="ui-tabs-item box-tab"
+					class:ui-tabs-item-active={active === t.id}
 					aria-selected={active === t.id}
 					onclick={() => (active = t.id)}
 				>{t.label}</button>
@@ -113,12 +141,22 @@
 						? ', '
 						: ''}{/each}, so this example has nothing to show.{#if elsewhere.length}{' '}It belongs to {elsewhere.join(', ')}.{/if}
 			</p>
-		{:else if active === 'preview'}
-			<div class="box-body box-preview uu-island">{@render children()}</div>
 		{:else}
-			<div class="box-body box-code">
-				<button type="button" class="box-copy" onclick={copy}>{copied ? 'Copied' : 'Copy'}</button>
-				<pre><code>{code}</code></pre>
+			<!-- Every pane is rendered, stacked in one grid cell; only the
+			     active one shows. The box is as tall as the tallest, so
+			     switching tabs never moves the page. -->
+			<div class="box-stack">
+				<div class="box-body box-preview uu-island" hidden={active !== 'preview'}>
+					{@render children()}
+				</div>
+				{#each [['svelte', svelteSrc], ['html', htmlSrc]] as [id, src] (id)}
+					{#if src}
+						<div class="box-body box-code" hidden={active !== id}>
+							<button type="button" class="box-copy" onclick={copy}>{copied ? 'Copied' : 'Copy'}</button>
+							<pre><code>{src}</code></pre>
+						</div>
+					{/if}
+				{/each}
 			</div>
 		{/if}
 	</div>
@@ -153,8 +191,8 @@
 		border-radius: 0.4rem;
 		font-size: 0.95rem;
 		font-weight: 700;
-		color: color-mix(in oklab, var(--app-fg) 45%, transparent);
-		background: color-mix(in oklab, var(--app-fg) 7%, transparent);
+		color: var(--ui-color-primary);
+		background: color-mix(in oklab, var(--ui-color-primary) 12%, transparent);
 	}
 
 	.section-subtitle {
@@ -166,45 +204,41 @@
 
 	/* ── Tabbed box ──────────────────────────────────────────────────────── */
 	.box {
-		border: 1px solid color-mix(in oklab, var(--app-fg) 12%, transparent);
-		border-radius: 0.85rem;
+		border-radius: 1rem;
 		background: var(--app-bg);
 		overflow: hidden;
+		box-shadow:
+			0 1px 2px color-mix(in oklab, var(--app-fg) 6%, transparent),
+			0 0.75rem 2rem -1rem color-mix(in oklab, var(--ui-color-primary) 35%, transparent);
+	}
+	.box-tabs + * {
+		margin-top: 0.5rem;
 	}
 
 	.box-tabs {
-		display: flex;
-		gap: 0.15rem;
-		padding: 0.4rem 0.5rem 0;
-		border-bottom: 1px solid color-mix(in oklab, var(--app-fg) 10%, transparent);
-	}
-
-	.box-tab {
-		appearance: none;
-		border: 1px solid transparent;
-		border-bottom: none;
-		background: none;
-		font: inherit;
-		font-size: 0.85rem;
-		font-weight: 600;
-		padding: 0.45rem 0.95rem;
-		border-radius: 0.55rem 0.55rem 0 0;
-		color: color-mix(in oklab, var(--app-fg) 50%, transparent);
-		cursor: pointer;
-		margin-bottom: -1px;
-		transition: color 0.15s, background 0.15s;
-	}
-	.box-tab:hover {
-		color: var(--app-fg);
-	}
-	.box-tab[aria-selected='true'] {
-		color: var(--app-fg);
-		background: var(--app-bg);
-		border-color: color-mix(in oklab, var(--app-fg) 10%, transparent);
+		margin: 0.5rem 0.5rem 0;
+		width: fit-content;
 	}
 
 	.box-body {
 		min-height: 6rem;
+	}
+
+	.box-stack {
+		display: grid;
+	}
+	/* `hidden` keeps its box in the grid cell but paints nothing. */
+	.box-stack > .box-body {
+		grid-area: 1 / 1;
+	}
+	.box-stack > [hidden] {
+		visibility: hidden;
+	}
+	.box-stack > .box-preview[hidden] {
+		display: flex;
+	}
+	.box-stack > .box-code[hidden] {
+		display: block;
 	}
 
 	/* Diagonal hatch backdrop behind the live preview (see screenshot). */

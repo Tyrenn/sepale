@@ -215,4 +215,18 @@
 			--pagination-fg: var(--color-on-#{$color});
 		}
 	}
+
+	/* ── peony signature: soft pills ──
+	   Pages are bare numbers; the current one is a pill of the accent
+	   that glows, and the pointer finds a pale wash. */
+	.pagination {
+		--pagination-item-bg: transparent;
+		--pagination-border-width: 0px;
+		--pagination-shadow: none;
+		--pagination-radius: 999px;
+		--pagination-hover-bg: color-mix(in oklab, var(--pagination-color) 10%, var(--color-surface-1));
+	}
+	.pagination-item[aria-current='page'] {
+		box-shadow: 0 0.3em 0.8em -0.3em color-mix(in oklab, var(--pagination-color) 70%, #0000);
+	}
 }

@@ -80,4 +80,24 @@
 	}
 
 	@include m.size-variants('combobox');
+
+	/* ── peony signature: a picker, not a typing field ──
+	   The combobox's frame is the family's .input, whose focus draws an
+	   underline as one types. A combobox picks: it takes the select's
+	   focus instead — a white tile on a fine line of its accent — and,
+	   open, keeps it while its list hangs under it. */
+	.combobox .input {
+		--peony-accent: var(--color-primary);
+	}
+	.combobox .input:is(:focus, :focus-within),
+	.combobox .input:has([aria-expanded='true']) {
+		--input-color: transparent;
+		outline: none;
+		background-color: var(--color-surface-1);
+		box-shadow:
+			0 0 0 1px color-mix(in oklab, var(--peony-accent) 40%, #0000),
+			0 0.1em 0.25em color-mix(in oklab, var(--color-on-surface) 6%, #0000),
+			0 0.6em 1.4em -0.6em color-mix(in oklab, var(--peony-accent) 35%, #0000);
+		background-image: none;
+	}
 }

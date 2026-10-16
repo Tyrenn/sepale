@@ -1,0 +1,79 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* daisy — toast.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   toast.scss — .toast (alerts that pile up)
+
+	<section class="toast" aria-live="polite">
+	  <div class="alert alert-success">…</div>
+	  <div class="alert">…</div>
+	</section>
+
+   A stack of .alert, one under the other, in the flow of the page.
+   Give it a corner — a side, an align, or both — and it is pinned
+   there in fixed position, the newest alert against the edge; then
+   it lets clicks through everywhere but on the alerts themselves.
+
+   Plumbing contract:
+	--toast-gap     space between alerts
+	--toast-m       distance from the viewport's edges, when pinned
+	--toast-width   the stack's width
+	--toast-shadow  the shadow a pinned alert casts
+   ============================================================ */
+
+@mixin structure {
+	.toast {
+		display: flex;
+		flex-direction: column;
+		gap: var(--toast-gap);
+		width: min(var(--toast-width), 100%);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+
+	/* ── Axes: side, align ── either one pins the stack to a corner. */
+	.toast:is(.toast-top, .toast-bottom, .toast-start, .toast-center, .toast-end) {
+		position: fixed;
+		z-index: 1000;
+		inset-block: auto var(--toast-m);
+		inset-inline: auto var(--toast-m);
+		width: min(var(--toast-width), calc(100vw - 2 * var(--toast-m)));
+		pointer-events: none;
+	}
+	.toast:is(.toast-top, .toast-bottom, .toast-start, .toast-center, .toast-end) > * {
+		pointer-events: auto;
+	}
+	.toast:is(.toast-top, .toast-bottom, .toast-start, .toast-center, .toast-end) .alert {
+		box-shadow: var(--toast-shadow);
+	}
+	/* At the top, the newest alert is the first one under the edge. */
+	.toast.toast-top {
+		inset-block: var(--toast-m) auto;
+		flex-direction: column-reverse;
+	}
+	.toast.toast-start {
+		inset-inline: var(--toast-m) auto;
+	}
+	.toast.toast-center {
+		inset-inline: 0;
+		margin-inline: auto;
+	}
+}
+
+@mixin look {
+	.toast {
+		--toast-gap: calc(0.6em * var(--scale));
+		--toast-m: calc(1em * var(--scale));
+		--toast-width: 24em;
+		--toast-shadow: 0 0.4em 1.4em -0.4em color-mix(in oklab, #000 35%, #0000);
+	}
+	/* A pinned alert needs an opaque ground: the page must not show through. */
+	.toast:is(.toast-top, .toast-bottom, .toast-start, .toast-center, .toast-end) .alert {
+		background-image: linear-gradient(var(--alert-bg), var(--alert-bg));
+		background-color: var(--color-base-100);
+	}
+}

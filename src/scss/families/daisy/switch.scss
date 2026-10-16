@@ -1,0 +1,140 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* daisy — switch.
+   Everything daisy draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values and
+   the variants (ADR 0010). */
+
+/* ============================================================
+   switch.scss — .switch (one choice among a few, as a pill track)
+   
+   	<div class="switch" role="radiogroup" aria-label="View">
+   	  <label class="switch-item"><input type="radio" class="switch-input" name="v" value="list" checked>List</label>
+   	  <label class="switch-item"><input type="radio" class="switch-input" name="v" value="grid">Grid</label>
+   	</div>
+   
+      Real radios laid invisibly over their labels: keyboard, forms and
+      screen readers work as for any radio group.
+   
+      Plumbing contract:
+   	--switch-x / --switch-w  the indicator's place (set by the script)
+   	--switch-bg / --switch-border / --switch-border-width
+   	--switch-radius / --switch-item-radius
+   	--switch-pad          the track's inner padding
+   	--switch-fg           an idle item's ink
+   	--switch-active-bg / --switch-active-fg / --switch-active-shadow
+   	--size                   an item's height
+   ============================================================ */
+
+@mixin structure {
+	.switch {
+		position: relative;
+		display: inline-flex;
+		gap: var(--switch-pad);
+		padding: var(--switch-pad);
+		border: var(--switch-border-width) solid var(--switch-border);
+		border-radius: var(--switch-radius);
+		background-color: var(--switch-bg);
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	.switch-item {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4em;
+		height: var(--size);
+		padding-inline: calc(var(--size) / 2.5);
+		border-radius: var(--switch-item-radius);
+		color: var(--switch-fg);
+		font-weight: 500;
+		white-space: nowrap;
+		cursor: pointer;
+		user-select: none;
+		transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+	}
+	.switch-input {
+		position: absolute;
+		inset: 0;
+		margin: 0;
+		opacity: 0;
+		cursor: pointer;
+	}
+	.switch-item:hover {
+		color: var(--switch-active-fg);
+	}
+	.switch-item:has(.switch-input:checked) {
+		background-color: var(--switch-active-bg);
+		color: var(--switch-active-fg);
+		box-shadow: var(--switch-active-shadow);
+	}
+	/* The indicator: the checked look as one block that the script slides
+	   from item to item (--switch-x / --switch-w, measured on the item).
+	   With it, the checked item lets it show through; without a script
+	   there is no indicator and the item paints itself. */
+	.switch-indicator {
+		position: absolute;
+		inset-block: var(--switch-pad);
+		left: var(--switch-x, 0);
+		width: var(--switch-w, 0);
+		border-radius: var(--switch-item-radius);
+		background-color: var(--switch-active-bg);
+		box-shadow: var(--switch-active-shadow);
+		pointer-events: none;
+		transition: left 0.25s cubic-bezier(0.3, 0.7, 0.2, 1), width 0.25s cubic-bezier(0.3, 0.7, 0.2, 1);
+	}
+	.switch-indicator ~ .switch-item {
+		z-index: 1;
+	}
+	.switch-indicator ~ .switch-item:has(.switch-input:checked) {
+		background-color: transparent;
+		box-shadow: none;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.switch-indicator {
+			transition: none;
+		}
+	}
+	.switch-item:has(.switch-input:focus-visible) {
+		outline: 2px solid var(--switch-active-fg);
+		outline-offset: 1px;
+	}
+	.switch-item:has(.switch-input:disabled) {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+	.switch-block {
+		display: flex;
+	}
+	.switch-block > .switch-item {
+		flex: 1 1 0;
+	}
+}
+
+@mixin look {
+	.switch {
+		
+		--size: calc(2.1em * var(--scale));
+		--switch-bg: var(--color-base-200);
+		--switch-border: var(--color-base-300);
+		--switch-border-width: 0px;
+		--switch-radius: var(--radius-field);
+		--switch-item-radius: calc(var(--radius-field) - var(--switch-pad) / 2);
+		--switch-pad: calc(0.2em * var(--scale));
+		--switch-fg: color-mix(in oklab, var(--color-base-content) 65%, #0000);
+		--switch-active-bg: var(--color-base-100);
+		--switch-active-fg: var(--color-base-content);
+		--switch-active-shadow: 0 1px 3px color-mix(in oklab, #000 18%, #0000);
+	}
+
+	/* colour variants: the checked item takes the colour. */
+	@each $color in c.$color-list {
+		.switch-#{$color} {
+			--switch-active-bg: var(--color-#{$color});
+			--switch-active-fg: var(--color-#{$color}-content);
+		}
+	}
+
+	@include m.size-variants('switch');
+}

@@ -65,8 +65,8 @@ count++;
    and `:root` becomes `.app-ui`. Nothing in it can then touch, or be touched
    by, the family under preview. App tooling only: the kit itself has no
    prefix (ADR 0007). */
-const CHROME_FAMILY = 'daisy';
-const CHROME_THEME = 'corporate';
+const CHROME_FAMILY = 'peony';
+const CHROME_THEME = 'sage';
 const chromeSrc =
 	compile(join(familiesDir, CHROME_FAMILY, 'index.scss'), options).css +
 	'\n' +

@@ -157,4 +157,22 @@
 		--stat-value-weight: 700;
 		--stat-figure-fg: var(--color-primary);
 	}
+
+	/* ── peony signature: the KPI tile ──
+	   The figure sits on a pale square of the accent; the value is
+	   heavy and tight. */
+	.stat {
+		--stat-value-weight: 800;
+	}
+	.stat-value {
+		letter-spacing: -0.02em;
+	}
+	.stat-figure {
+		display: grid;
+		place-items: center;
+		width: 2.75em;
+		height: 2.75em;
+		border-radius: 0.9em;
+		background-color: color-mix(in oklab, var(--stat-figure-fg) 12%, var(--color-surface-1));
+	}
 }

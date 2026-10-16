@@ -32,6 +32,7 @@
 @use 'skeleton';
 @use 'stat';
 @use 'swatch';
+@use 'color-picker';
 @use 'tabs';
 @use 'text';
 @use 'textarea';
@@ -44,12 +45,12 @@
 @use 'data-control';
 @use 'divider';
 @use 'alert';
-@use 'toaster';
+@use 'toast';
 @use 'tooltip';
 @use 'collapse';
 @use 'accordion';
 @use 'rating';
-@use 'segmented';
+@use 'switch';
 @use 'number-input';
 @use 'empty-state';
 @use 'hero';
@@ -58,6 +59,7 @@
 @use 'window-frame';
 @use 'laptop-frame';
 @use 'drawer';
+@use 'sidebar';
 @use 'steps';
 @use 'combobox';
 @use 'chips-input';
@@ -188,6 +190,7 @@ $params: map.merge(
 @include skeleton.structure;
 @include stat.structure;
 @include swatch.structure;
+@include color-picker.structure;
 @include tabs.structure;
 @include text.structure;
 @include textarea.structure;
@@ -200,12 +203,12 @@ $params: map.merge(
 @include data-control.structure;
 @include divider.structure;
 @include alert.structure;
-@include toaster.structure;
+@include toast.structure;
 @include tooltip.structure;
 @include collapse.structure;
 @include accordion.structure;
 @include rating.structure;
-@include segmented.structure;
+@include switch.structure;
 @include number-input.structure;
 @include empty-state.structure;
 @include hero.structure;
@@ -214,6 +217,7 @@ $params: map.merge(
 @include window-frame.structure;
 @include laptop-frame.structure;
 @include drawer.structure;
+@include sidebar.structure;
 @include steps.structure;
 @include combobox.structure;
 @include chips-input.structure;
@@ -251,6 +255,7 @@ $params: map.merge(
 @include skeleton.look;
 @include stat.look;
 @include swatch.look;
+@include color-picker.look;
 @include tabs.look;
 @include text.look;
 @include textarea.look;
@@ -263,12 +268,12 @@ $params: map.merge(
 @include data-control.look;
 @include divider.look;
 @include alert.look;
-@include toaster.look;
+@include toast.look;
 @include tooltip.look;
 @include collapse.look;
 @include accordion.look;
 @include rating.look;
-@include segmented.look;
+@include switch.look;
 @include number-input.look;
 @include empty-state.look;
 @include hero.look;
@@ -277,6 +282,7 @@ $params: map.merge(
 @include window-frame.look;
 @include laptop-frame.look;
 @include drawer.look;
+@include sidebar.look;
 @include steps.look;
 @include combobox.look;
 @include chips-input.look;

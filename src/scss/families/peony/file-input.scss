@@ -181,4 +181,18 @@
 	:where(.input, .select, .textarea, .file-input) {
 		--light-intensity: 0;
 	}
+
+	/* ── peony signature: the soft well ──
+	   The field is a tinted well like every peony field; its button a
+	   pale pill of the accent. */
+	.file-input {
+		border-color: transparent;
+		background-color: var(--color-surface-2);
+	}
+	.file-input::file-selector-button {
+		border-radius: 999px;
+		background-color: color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-1));
+		color: var(--color-primary);
+		box-shadow: none;
+	}
 }

@@ -454,4 +454,14 @@
 			--calendar-range-bg: color-mix(in oklab, var(--color-#{$color}) 15%, #0000);
 		}
 	}
+
+	/* ── peony signature: the soft day ──
+	   The chosen day is a disc of the accent that glows; today is
+	   ringed by a pale halo of it. */
+	.calendar .air-datepicker-cell.-selected- {
+		box-shadow: 0 0.3em 0.8em -0.3em color-mix(in oklab, var(--calendar-accent) 70%, #0000);
+	}
+	.calendar .air-datepicker-cell.-current-:not(.-selected-) {
+		box-shadow: inset 0 0 0 calc(0.12em * var(--scale)) color-mix(in oklab, var(--calendar-accent) 45%, #0000);
+	}
 }

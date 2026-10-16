@@ -18,57 +18,17 @@ export function categoryFor(family: string): string {
  * had stylesheets, components and no entry in the nav for months.
  */
 const GROUPS: { group: string; ids: string[] }[] = [
-	{
-		group: 'Form',
-		ids: [
-			'button',
-			'input',
-			'select',
-			'textarea',
-			'checkbox',
-			'radio',
-			'toggle',
-			'range',
-			'file-input',
-			'calendar',
-			'fieldset',
-			'label',
-			'floating-label',
-			'number-input',
-			'rating',
-			'segmented',
-			'date-picker',
-			'combobox',
-			'chips-input'
-		]
-	},
-	{
-		group: 'Display',
-		ids: [
-			'avatar',
-			'chip',
-			'badge',
-			'bubble',
-			'tabs',
-			'loading',
-			'progress',
-			'radial-progress',
-			'skeleton',
-			'list',
-			'card',
-			'stat',
-			'carousel',
-			'text',
-			'link',
-			'swatch'
-		]
-	},
+	{ group: 'Actions', ids: ['button', 'link', 'join'] },
+	{ group: 'Form', ids: ['input', 'textarea', 'select', 'combobox', 'number-input', 'date-picker', 'calendar', 'color-picker', 'file-input', 'checkbox', 'radio', 'toggle', 'switch', 'range', 'rating', 'chips-input'] },
+	{ group: 'Form layout', ids: ['label', 'floating-label', 'fieldset', 'validator'] },
+	{ group: 'Display', ids: ['text', 'avatar', 'badge', 'chip', 'swatch', 'bubble', 'card', 'stat', 'carousel'] },
+	{ group: 'Feedback', ids: ['alert', 'toast', 'loading', 'progress', 'radial-progress', 'skeleton', 'empty-state'] },
 	{ group: 'Data', ids: ['data-handler', 'data-control', 'table', 'grid', 'list', 'file-explorer'] },
-	{ group: 'Feedback', ids: ['alert', 'toast', 'tooltip', 'empty-state'] },
-	{ group: 'Layout', ids: ['divider', 'collapse', 'accordion', 'drawer', 'hero', 'footer', 'mobile-frame', 'window-frame', 'laptop-frame'] },
-	{ group: 'Overlay', ids: ['dialog', 'dropdown'] },
-	{ group: 'Navigation', ids: ['breadcrumbs', 'menu', 'navbar', 'dock', 'pagination', 'steps'] },
-	{ group: 'Other', ids: ['join', 'validator'] }
+	{ group: 'Navigation', ids: ['menu', 'tabs', 'breadcrumbs', 'steps', 'pagination', 'dock'] },
+	{ group: 'Layout', ids: ['navbar', 'sidebar', 'drawer', 'footer', 'hero', 'divider', 'collapse', 'accordion'] },
+	{ group: 'Overlay', ids: ['dialog', 'dropdown', 'tooltip'] },
+	{ group: 'Mockups', ids: ['mobile-frame', 'window-frame', 'laptop-frame'] },
+	{ group: 'Other', ids: [] }
 ];
 
 /* Paths only — the modules themselves are never loaded here, or the nav would

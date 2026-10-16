@@ -15,7 +15,8 @@
 				{ name: 'values', type: 'string[]', description: 'Bindable.' },
 				{ name: 'name', type: 'string', description: 'For a form: one hidden name[] input per value.' },
 				{ name: 'unique', type: 'boolean', default: 'true', description: 'Refuse a value already there.' },
-				{ name: 'field', type: 'Snippet<[{ add }]>', description: 'The field; it calls add(value). Defaults to a plain input.' },
+				{ name: 'side', type: "'top' | 'bottom' | 'start' | 'end'", default: "'bottom'", description: 'Where the list sits.' },
+				{ name: 'field', type: 'Snippet<[{ add, has }]>', description: 'The field; it calls add(value). Defaults to a plain input.' },
 				{ name: 'chip', type: 'Snippet<[string]>', description: 'How a chip reads.' },
 				{ name: 'chipClass', type: 'string', description: 'Classes on each chip: chip-primary, chip-soft…' },
 				{ name: 'onChange', type: '(values) => void', description: 'After every addition or removal.' },
@@ -83,7 +84,8 @@
 
 <Section
 	title="With a select"
-	svelte={`<ChipsInput>
+	subtitle="The list on the side, after the field."
+	svelte={`<ChipsInput side="end">
   {#snippet field({ add })}
     <Select options={['Red', 'Green', 'Blue']} placeholder="Colour" onValue={(v) => v && add(v)} />
   {/snippet}
@@ -91,10 +93,21 @@
 	html={`<div class="input chips-input">… <select class="select">…</select></div>`}
 >
 	<div style="width:100%; max-width:28em">
-		<ChipsInput chipClass="chip-outline">
+		<ChipsInput side="end" values={['Red']} chipClass="chip-outline">
 			{#snippet field({ add })}
 				<Select options={['Red', 'Green', 'Blue']} placeholder="Colour" onValue={(v) => v && add(v)} />
 			{/snippet}
 		</ChipsInput>
+	</div>
+</Section>
+
+
+<Section
+	title="List above"
+	svelte={`<ChipsInput side="top" values={['design', 'ui']} placeholder="Add a label" />`}
+	html={`<div class="chips-input chips-input-top">…</div>`}
+>
+	<div style="width:100%; max-width:28em">
+		<ChipsInput side="top" values={['design', 'ui']} placeholder="Add a label" chipClass="chip-primary" />
 	</div>
 </Section>

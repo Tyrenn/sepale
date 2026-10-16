@@ -25,6 +25,8 @@
 		hint?: Snippet;
 		class?: string;
 		value?: number;
+		min?: number;
+		max?: number;
 	}
 
 	// The axes are deliberately NOT destructured: they travel in `axes` and are
@@ -33,13 +35,19 @@
 		validator = false,
 		hint,
 		value = $bindable(0),
+		min = 0,
+		max = 100,
 		class: klass = '',
 		...axes
 	}: Props = $props();
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, validator && 'validator', klass));
+
+	/* How far the value is along the track, for a family that paints the
+	   filled part itself (`data-fill`) rather than with the thumb's shadow. */
+	let pct = $derived(max > min ? Math.min(100, Math.max(0, ((Number(value) - min) / (max - min)) * 100)) : 0);
 </script>
 
-<input type="range" {...applied.rest} class={classes} bind:value />
+<input type="range" {...applied.rest} {min} {max} class={classes} data-fill style:--range-pct="{pct}%" bind:value />
 {#if hint}<p class="validator-hint">{@render hint()}</p>{/if}
