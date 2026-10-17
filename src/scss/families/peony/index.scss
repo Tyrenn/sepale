@@ -53,6 +53,7 @@
 @use 'toast';
 @use 'tooltip';
 @use 'collapse';
+@use 'editable';
 @use 'accordion';
 @use 'rating';
 @use 'switch';
@@ -223,6 +224,7 @@ $params: map.merge(
 @include toast.structure;
 @include tooltip.structure;
 @include collapse.structure;
+@include editable.structure;
 @include accordion.structure;
 @include rating.structure;
 @include switch.structure;
@@ -288,6 +290,7 @@ $params: map.merge(
 @include toast.look;
 @include tooltip.look;
 @include collapse.look;
+@include editable.look;
 @include accordion.look;
 @include rating.look;
 @include switch.look;

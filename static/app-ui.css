@@ -288,6 +288,8 @@ svg {
 
 
 
+
+
 :where(.app-ui) {
   --ui-color-page: #faf6f0;
   --ui-color-surface-1: #ffffff;
@@ -4100,6 +4102,90 @@ input[type=color].ui-swatch::-moz-color-swatch {
     transition: none;
   }
 }
+.ui-editable {
+  display: inline-flex;
+  max-width: 100%;
+  vertical-align: middle;
+  font-size: var(--ui-fontsize, var(--ui-base, var(--ui-default-base)));
+}
+
+
+.ui-editable-display {
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  max-width: 100%;
+  min-height: 1lh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-editable-radius);
+  background: transparent;
+  color: var(--ui-editable-fg);
+  font: inherit;
+  text-align: start;
+  cursor: text;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+@media (hover: hover) {
+  button.editable-display:not(:disabled):hover {
+    background-color: var(--ui-editable-hover-bg);
+    box-shadow: 0 0 0 var(--ui-editable-pad) var(--ui-editable-hover-bg);
+  }
+}
+.ui-editable-display:focus-visible {
+  outline: 2px solid var(--ui-editable-focus);
+  outline-offset: var(--ui-editable-pad);
+}
+
+.ui-editable-display:disabled {
+  cursor: default;
+}
+
+
+span.editable-display {
+  cursor: inherit;
+}
+
+.ui-editable-empty {
+  color: var(--ui-editable-empty-fg);
+}
+
+.ui-editable-form {
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.ui-editable-list {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.ui-editable-xs {
+  --ui-fontsize: var(--ui-xs, var(--ui-default-xs));
+}
+
+.ui-editable-sm {
+  --ui-fontsize: var(--ui-sm, var(--ui-default-sm));
+}
+
+.ui-editable-md {
+  --ui-fontsize: var(--ui-md, var(--ui-default-md));
+}
+
+.ui-editable-lg {
+  --ui-fontsize: var(--ui-lg, var(--ui-default-lg));
+}
+
+.ui-editable-xl {
+  --ui-fontsize: var(--ui-xl, var(--ui-default-xl));
+}
+
 .ui-accordion {
   display: flex;
   flex-direction: column;
@@ -10466,6 +10552,34 @@ label:has(:checked),
   --ui-collapse-shadow: none;
 }
 
+.ui-editable {
+  --ui-editable-fg: inherit;
+  --ui-editable-empty-fg: color-mix(in oklab, var(--ui-color-on-surface) 45%, #0000);
+  --ui-editable-hover-bg: color-mix(in oklab, var(--ui-color-primary) 7%, var(--ui-color-surface-1));
+  --ui-editable-radius: var(--ui-radius-field);
+  --ui-editable-pad: calc(0.25em * var(--ui-scale));
+  --ui-editable-focus: var(--ui-color-primary);
+}
+
+
+.ui-editable-display {
+  background-image: linear-gradient(90deg, color-mix(in oklab, var(--ui-color-primary) 35%, #fff), var(--ui-color-primary));
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: 0% calc(0.12em * var(--ui-scale));
+  transition: background-color 0.15s, box-shadow 0.15s, background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  button.editable-display:not(:disabled):hover {
+    background-size: calc(100% - 2 * var(--ui-editable-radius)) calc(0.12em * var(--ui-scale));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-editable-display {
+    transition: none;
+  }
+}
 .ui-accordion {
   --ui-accordion-gap: calc(0.5em * var(--ui-scale));
 }

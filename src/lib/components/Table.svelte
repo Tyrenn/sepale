@@ -30,6 +30,7 @@
 	] as const;
 
 	import type { Snippet } from 'svelte';
+	import type { EditableKind } from './Editable.svelte';
 
 	/** One column of a table. */
 	export interface TableColumn<Row = any> {
@@ -49,6 +50,12 @@
 		align?: 'start' | 'center' | 'end';
 		/** The cell's text when there is no `cell` snippet. Defaults to `row[key]`. */
 		value?: (row: Row) => unknown;
+		/**
+		 * Make the cell editable in place with the editor for this shape of value
+		 * (an `Editable`). The edit is handed to `onEdit`. Ignored when a `cell`
+		 * snippet draws the cell — put an `Editable` in it yourself.
+		 */
+		edit?: EditableKind;
 	}
 
 	export type TableSortDirection = 'asc' | 'desc';
@@ -71,6 +78,7 @@
 	 */
 	import type { HTMLTableAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import Editable from './Editable.svelte';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLTableAttributes {
 		/** The columns, in order. */
@@ -96,6 +104,8 @@
 		sort?: TableSort;
 		/** A sortable header was clicked: ascending, then descending, then none. */
 		onSort?: (sort: TableSort | undefined) => void;
+		/** An editable cell (a column with `edit`) was changed: the row, the column's key, the new value. */
+		onEdit?: (row: Row, key: string, value: unknown) => void;
 		/** The scroll box's maximum height, for a long table with a pinned head. */
 		maxHeight?: string;
 		class?: string;
@@ -112,6 +122,7 @@
 		dirty,
 		sort,
 		onSort,
+		onEdit,
 		maxHeight,
 		class: klass = '',
 		...axes
@@ -163,8 +174,10 @@
 		onSort?.(undefined);
 	}
 
+	const raw = (r: Row, c: TableColumn<Row>) =>
+		c.value ? c.value(r) : (r as Record<string, unknown>)?.[c.key];
 	const text = (r: Row, c: TableColumn<Row>) => {
-		const v = c.value ? c.value(r) : (r as Record<string, unknown>)?.[c.key];
+		const v = raw(r, c);
 		return v == null ? '' : String(v);
 	};
 </script>
@@ -209,7 +222,11 @@
 					{:else}
 						{#each visible as c, i (c.key)}
 							<td class={cellClass(c, i)} style={cellStyle(c, i, false)}>
-								{#if cell}{@render cell(r, c, ri)}{:else}{text(r, c)}{/if}
+								{#if cell}{@render cell(r, c, ri)}{:else if c.edit}<Editable
+										value={raw(r, c)}
+										kind={c.edit}
+										onChange={(v) => onEdit?.(r, c.key, v)}
+									/>{:else}{text(r, c)}{/if}
 							</td>
 						{/each}
 					{/if}

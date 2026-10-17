@@ -19,7 +19,7 @@ export function categoryFor(family: string): string {
  */
 const GROUPS: { group: string; ids: string[] }[] = [
 	{ group: 'Actions', ids: ['button', 'link', 'join'] },
-	{ group: 'Form', ids: ['input', 'textarea', 'select', 'combobox', 'number-input', 'date-picker', 'calendar', 'color-picker', 'file-input', 'checkbox', 'radio', 'toggle', 'switch', 'range', 'rating', 'chips-input'] },
+	{ group: 'Form', ids: ['input', 'textarea', 'select', 'combobox', 'number-input', 'date-picker', 'calendar', 'color-picker', 'file-input', 'checkbox', 'radio', 'toggle', 'switch', 'range', 'rating', 'chips-input', 'editable'] },
 	{ group: 'Form layout', ids: ['label', 'floating-label', 'fieldset', 'validator'] },
 	{ group: 'Display', ids: ['text', 'avatar', 'badge', 'chip', 'swatch', 'bubble', 'card', 'stat', 'carousel'] },
 	{ group: 'Feedback', ids: ['alert', 'toast', 'loading', 'progress', 'radial-progress', 'skeleton', 'empty-state'] },

@@ -19,7 +19,7 @@
 		},
 		props: {
 			Table: [
-				{ name: 'columns', type: 'TableColumn[]', description: '{ key, label, width, sticky, hidden, sortable, align, value }, in order. A width is a minimum: text wraps inside it.' },
+				{ name: 'columns', type: 'TableColumn[]', description: '{ key, label, width, sticky, hidden, sortable, align, value, edit }, in order. `edit` (a kind of `Editable`: text, number, boolean and their lists) makes the cell editable in place. A width is a minimum: text wraps inside it.' },
 				{ name: 'rows', type: 'Row[]', default: '[]', description: 'Your data, as is.' },
 				{ name: 'key', type: '(row, index) => string', default: 'the index', description: 'A row’s identity, for selected, dirty and keyed rendering.' },
 				{ name: 'cell', type: 'Snippet<[row, column, index]>', description: 'How one cell is drawn. Without it, the column’s value as text.' },
@@ -29,6 +29,7 @@
 				{ name: 'dirty', type: 'Iterable<string>', description: 'Keys of the rows drawn as changed and not saved.' },
 				{ name: 'sort', type: '{ key, direction }', description: 'The current sort, drawn on its header.' },
 				{ name: 'onSort', type: '(sort | undefined) => void', description: 'A sortable header was clicked: ascending, then descending, then none.' },
+				{ name: 'onEdit', type: '(row, key, value) => void', description: 'An editable cell was changed. The table keeps no data: update the row — with a DataHandler, `handler.update(id, { [key]: value })`.' },
 				{ name: 'maxHeight', type: 'string', description: 'The scroll box’s maximum height — for a pinned head.' }
 			]
 		}
@@ -56,6 +57,13 @@
 		{ key: 'type', label: 'Type' },
 		{ key: 'moons', label: 'Moons', align: 'end' }
 	];
+
+	let editRows = $state(planets.slice(2, 6).map((p) => ({ ...p, tags: p.type === 'Gas giant' ? ['giant'] : [] })));
+	const editable = [
+		{ key: 'name', label: 'Planet', edit: 'text' },
+		{ key: 'moons', label: 'Moons', align: 'end', edit: 'number' },
+		{ key: 'tags', label: 'Tags', edit: 'text[]' }
+	] satisfies TableColumn[] as TableColumn[];
 
 	let sort: TableSort | undefined = $state({ key: 'radius', direction: 'desc' });
 	let picked: string[] = $state(['Earth']);
@@ -166,4 +174,21 @@
 	<Table rows={[]} columns={basic} style="min-width:22rem;">
 		{#snippet empty()}No planet matches.{/snippet}
 	</Table>
+</Section>
+
+<Section
+	title="Editable in place"
+	subtitle="A column with `edit` draws an Editable in its cells; the new value comes back through onEdit."
+	svelte={`<Table {rows} key={(p) => p.name} columns={[
+	{ key: 'name', label: 'Planet', edit: 'text' },
+	{ key: 'moons', label: 'Moons', align: 'end', edit: 'number' },
+	{ key: 'tags', label: 'Tags', edit: 'text[]' }
+]} onEdit={(row, key, value) => (row[key] = value)} />`}
+>
+	<Table
+		rows={editRows}
+		columns={editable}
+		onEdit={(row, key, value) => ((row as Record<string, unknown>)[key] = value)}
+		style="min-width:26rem;"
+	/>
 </Section>

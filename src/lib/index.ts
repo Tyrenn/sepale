@@ -65,6 +65,12 @@ export { default as Tooltip } from './components/Tooltip.svelte';
 export { default as Collapse } from './components/Collapse.svelte';
 export { default as Accordion } from './components/Accordion.svelte';
 export { default as Rating } from './components/Rating.svelte';
+export {
+	default as Editable,
+	type EditableKind,
+	type EditableTrigger,
+	type EditableControl
+} from './components/Editable.svelte';
 export { default as EmptyState } from './components/EmptyState.svelte';
 export { default as Hero } from './components/Hero.svelte';
 export { default as Footer, type FooterSection } from './components/Footer.svelte';

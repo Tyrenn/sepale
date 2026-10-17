@@ -1,0 +1,111 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* cosmos — editable.
+   Everything cosmos draws for this component, and nothing another
+   family reads: `structure` is the mechanism, `look` the values
+   (ADR 0010). */
+
+/* ============================================================
+   editable.scss — .editable (a value that turns into its editor)
+
+   	<div class="editable">
+   	  <button type="button" class="editable-display">Rollback</button>
+   	</div>
+
+   	<div class="editable">
+   	  <div class="editable-form" role="group"><input class="input" …></div>
+   	</div>
+
+   At rest the value is a button: the whole value is the target, and the
+   pointer finds a wash that says "this can change". Open, the editor is
+   another component (.input, .number-input, .toggle, .chips-input…) in
+   .editable-form.
+
+   Parts:   .editable-display  the value at rest: a button, or a span when only
+                               `editing` opens it
+            .editable-empty    the placeholder of an empty value
+            .editable-form     the frame around the editor
+            .editable-list     the row of checkboxes of a boolean list
+
+   Plumbing contract:
+	--editable-fg          ink of the value
+	--editable-empty-fg    ink of the placeholder
+	--editable-hover-bg    fill under the pointer
+	--editable-radius      corner radius of the display
+	--editable-pad         how far the wash and the focus ring reach past the value
+	--editable-focus       focus ring colour
+   ============================================================ */
+
+@mixin structure {
+	.editable {
+		display: inline-flex;
+		max-width: 100%;
+		vertical-align: middle;
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+	/* No padding: a value at rest lines up with the text around it. Its wash
+	   is a spread shadow, so it reaches past the value without moving it. */
+	.editable-display {
+		appearance: none;
+		box-sizing: border-box;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4em;
+		max-width: 100%;
+		min-height: 1lh;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		border-radius: var(--editable-radius);
+		background: transparent;
+		color: var(--editable-fg);
+		font: inherit;
+		text-align: start;
+		cursor: text;
+		transition: background-color 0.15s, box-shadow 0.15s;
+	}
+	@media (hover: hover) {
+		button.editable-display:not(:disabled):hover {
+			background-color: var(--editable-hover-bg);
+			box-shadow: 0 0 0 var(--editable-pad) var(--editable-hover-bg);
+		}
+	}
+	.editable-display:focus-visible {
+		outline: 2px solid var(--editable-focus);
+		outline-offset: var(--editable-pad);
+	}
+	.editable-display:disabled {
+		cursor: default;
+	}
+	/* Opened from outside only: text, not a control. */
+	span.editable-display {
+		cursor: inherit;
+	}
+	.editable-empty {
+		color: var(--editable-empty-fg);
+	}
+	.editable-form {
+		display: inline-flex;
+		max-width: 100%;
+	}
+	.editable-list {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5em;
+	}
+
+	@include m.size-variants('editable');
+}
+
+@mixin look {
+	.editable {
+		--editable-fg: inherit;
+		--editable-empty-fg: color-mix(in oklab, var(--color-on-surface) 45%, #0000);
+		--editable-hover-bg: color-mix(in oklab, var(--color-on-surface) 8%, #0000);
+		--editable-radius: 0.5em;
+		--editable-pad: calc(0.25em * var(--scale));
+		--editable-focus: var(--color-on-surface);
+	}
+}
