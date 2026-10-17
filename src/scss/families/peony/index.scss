@@ -1,4 +1,9 @@
 @use 'sass:map';
+/* The colour axis peony ships: one loud primary, the neutral, and the
+   four states. A dashboard draws its washes from these; secondary and
+   accent variants do not exist here. Configured on the first load of
+   the shared config, so every component file loops over these only. */
+@use '../../config' with ($color-list: (primary, neutral, info, success, warning, error));
 @use '../../params';
 @use 'root';
 @use 'avatar';
@@ -106,11 +111,9 @@ $params: map.merge(
 		'color-surface-2': #f6f3ee,
 		'color-surface-3': #efebe5,
 		'color-surface-4': #e6e1da,
-		'color-border': #ece8e2,
+		'color-border': #e0dbd3,
 		'color-on-surface': #1d1d1f,
 		'color-primary': #161616,
-		'color-secondary': #f27ba5,
-		'color-accent': #fbc56c,
 		'color-neutral': #8b8681,
 		'color-info': #7fb8ec,
 		'color-success': #8fd16a,

@@ -241,7 +241,9 @@
 	.toggle {
 		--peony-accent: var(--color-primary);
 		width: calc(var(--size) * 1.85);
-		transition: background-color 0.25s ease, box-shadow 0.25s ease;
+		/* The knob travels by grid-template-columns: it must stay in the
+		   list, eased out so the knob glides and settles. */
+		transition: grid-template-columns 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.3s ease, box-shadow 0.3s ease;
 	}
 	@each $color in c.$color-list {
 		.toggle-#{$color} {
@@ -258,10 +260,17 @@
 	.toggle:active::before {
 		scale: 1.18 0.94;
 	}
+	@media (prefers-reduced-motion: reduce) {
+		.toggle,
+		.toggle::before {
+			transition: none;
+		}
+	}
 	.toggle:checked,
 	.toggle[aria-checked='true'],
 	.toggle:has(> input:checked) {
 		background-color: var(--peony-accent);
+		background-image: linear-gradient(135deg, color-mix(in oklab, var(--peony-accent) 45%, #fff), var(--peony-accent) 70%);
 		box-shadow: 0 0.35em 0.9em -0.35em color-mix(in oklab, var(--peony-accent) 70%, #0000);
 	}
 }

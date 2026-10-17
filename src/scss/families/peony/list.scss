@@ -103,8 +103,7 @@
 		.list > :not(:last-child) .list-row::after {
 		bottom: 0;
 		inset-inline: calc(1em * var(--scale));
-		border-bottom: var(--border) solid
-				color-mix(in oklab, var(--color-on-surface) 5%, #0000);
+		border-bottom: var(--border) solid var(--color-border);
 	}
 	.list-row:has(.list-col-grow:nth-child(1)) {
 		--list-grid-cols: 1fr;
@@ -125,10 +124,10 @@
 	/* variant suggestions */
 	.list-suggestions {
 		padding: calc(0.25em * var(--scale));
-		border: var(--border) solid var(--color-surface-2);
-		box-shadow:
-			0 8px 16px -4px color-mix(in oklab, var(--color-on-surface) 10%, #0000),
-			var(--shadow-light, );
+		--light-intensity: 1;
+		background-color: var(--color-surface-1);
+		border: 1px solid var(--color-border);
+		box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-on-surface) 6%, #0000), 0 calc(0.5em * var(--peony-shadow, 1)) calc(1.5em * var(--peony-shadow, 1)) calc(-0.25em * var(--peony-shadow, 1)) color-mix(in oklab, var(--color-on-surface) 16%, #0000), 0 calc(0.15em * var(--peony-shadow, 1)) calc(0.4em * var(--peony-shadow, 1)) color-mix(in oklab, var(--color-on-surface) 8%, #0000);
 		overflow-y: auto;
 		max-height: min(16rem, 60dvh);
 	}

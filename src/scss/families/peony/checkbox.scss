@@ -197,13 +197,34 @@
 	.checkbox:active {
 		scale: 0.9;
 	}
+	/* Checked, it fills with the family's gradient — the same light-to-
+	   colour sweep a focused field draws under itself — and blooms: a
+	   short overshoot, then the tick draws in. */
 	.checkbox:checked,
 	.checkbox[aria-checked='true'],
 	.checkbox:indeterminate {
-		border-color: var(--peony-accent);
+		border-color: transparent;
 		background-color: var(--peony-accent);
+		background-image: linear-gradient(135deg, color-mix(in oklab, var(--peony-accent) 45%, #fff), var(--peony-accent) 70%);
 		color: var(--peony-on);
 		box-shadow: 0 0.25em 0.6em -0.2em color-mix(in oklab, var(--peony-accent) 60%, #0000);
+		animation: peony-checkbox-bloom 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+	}
+	.checkbox::before {
+		transition: clip-path 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s, rotate 0.3s, translate 0.3s;
+		transition-delay: 0.08s;
+	}
+	@keyframes peony-checkbox-bloom {
+		0% { scale: 0.85; }
+		55% { scale: 1.12; }
+		100% { scale: 1; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.checkbox:checked,
+		.checkbox[aria-checked='true'],
+		.checkbox:indeterminate {
+			animation: none;
+		}
 	}
 	.checkbox:focus-visible {
 		outline: none;

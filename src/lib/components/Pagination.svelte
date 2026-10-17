@@ -20,7 +20,7 @@
 	} as const;
 
 	export const FLAGS = {} as const;
-	export const PARTS = ['item', 'gap', 'text'] as const;
+	export const PARTS = ['item', 'gap', 'text', 'number'] as const;
 </script>
 
 <script lang="ts">
@@ -42,6 +42,10 @@
 		page?: number;
 		/** Pages kept on each side of the current one before a gap. Default 1. */
 		siblings?: number;
+		/** Keep the first and last pages, with a gap, around the window. Default no.
+		    Without: only the current page and its siblings — `< 6 >` with
+		    siblings 0, `< 5 6 7 >` with 1. */
+		edges?: boolean;
 		/** Draw previous / next. Default: yes, except in the dots and bars variants. */
 		controls?: boolean;
 		/** Called with the new page after every change. */
@@ -62,6 +66,7 @@
 		count,
 		page = $bindable(1),
 		siblings = 1,
+		edges = false,
 		controls,
 		onPage,
 		pageLabel = (p: number) => `Page ${p}`,
@@ -83,29 +88,38 @@
 	/** The pages to draw, with `null` for a gap. */
 	let pages = $derived.by((): (number | null)[] => {
 		const all = Array.from({ length: Math.max(0, count) }, (_, i) => i + 1);
-		// first + last + current + siblings + two gaps: below that, folding saves nothing
 		if (variant === 'count') return [];
-		if (marks || count <= 2 * siblings + 5) return all;
-		const from = Math.max(2, page - siblings);
-		const to = Math.min(count - 1, page + siblings);
-		return [
-			1,
-			...(from > 2 ? [null] : []),
-			...all.slice(from - 1, to),
-			...(to < count - 1 ? [null] : []),
-			count
-		];
+		if (marks) return all;
+		// No edges: a window of 2 * siblings + 1 pages, slid back inside the row at its ends.
+		if (!edges) {
+			const w = Math.min(count, 2 * siblings + 1);
+			const start = Math.min(Math.max(1, page - siblings), count - w + 1);
+			return all.slice(start - 1, start - 1 + w);
+		}
+		// first + last + current + siblings + two gaps: below that, folding saves nothing
+		if (count <= 2 * siblings + 5) return all;
+		// Always 2 * siblings + 5 slots, so the row keeps its width: near an
+		// end, the pages the missing gap would have taken are shown instead.
+		const edge = 2 * siblings + 3;
+		if (page <= siblings + 3) return [...all.slice(0, edge), null, count];
+		if (page >= count - siblings - 2) return [1, null, ...all.slice(count - edge)];
+		return [1, null, ...all.slice(page - siblings - 1, page + siblings), null, count];
 	});
+
+	/** Which way the last move went, for a family that animates the numbers.
+	    Unset until the first move, so nothing plays on load. */
+	let direction = $state<'next' | 'previous'>();
 
 	function go(p: number) {
 		const next = Math.min(Math.max(1, p), count);
 		if (next === page) return;
+		direction = next > page ? 'next' : 'previous';
 		page = next;
 		onPage?.(next);
 	}
 </script>
 
-<nav {...applied.rest} class={classes}>
+<nav {...applied.rest} class={classes} data-direction={direction}>
 	{#if showControls}
 		<button
 			type="button"
@@ -122,7 +136,9 @@
 		<span class={`${PREFIX}-text`} aria-live="polite">{countLabel(page, count)}</span>
 	{/if}
 
-	{#each pages as p, i (p ?? `gap-${i}`)}
+	<!-- Unkeyed: the slots stay put and only their numbers change, so the
+	     current page's fill moves between fixed buttons. -->
+	{#each pages as p}
 		{#if p === null}
 			<span class={`${PREFIX}-gap`} aria-hidden="true">…</span>
 		{:else}
@@ -133,7 +149,8 @@
 				aria-current={p === page ? 'page' : undefined}
 				onclick={() => go(p)}
 			>
-				{p}
+				<!-- Keyed: a new number is a new span, so its entrance can play. -->
+				{#key p}<span class={`${PREFIX}-number`}>{p}</span>{/key}
 			</button>
 		{/if}
 	{/each}

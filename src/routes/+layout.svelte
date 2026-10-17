@@ -12,7 +12,7 @@
 		selectFamily,
 		selectTheme
 	} from './playground.svelte.js';
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -24,6 +24,15 @@
 	});
 
 	let themes = $derived(themesFor(playground.family));
+
+	/* Every load opens on a family and a theme drawn at random. Client-side
+	   only: drawn during SSR, the server and the browser would disagree. */
+	onMount(() => {
+		const pick = <T,>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)];
+		selectFamily(pick(families));
+		const theme = pick(themesFor(playground.family));
+		if (theme) selectTheme(theme.name);
+	});
 
 	/* The whole menu folds to a rail too, remembered across visits. */
 	let collapsed = $state(false);

@@ -6,6 +6,7 @@
 
 
 
+
 @property --ui-radialprogress {
   syntax: "<percentage>";
   inherits: true;
@@ -286,17 +287,16 @@ svg {
 
 
 
+
 :where(.app-ui) {
   --ui-color-page: #faf6f0;
   --ui-color-surface-1: #ffffff;
   --ui-color-surface-2: #f6f3ee;
   --ui-color-surface-3: #efebe5;
   --ui-color-surface-4: #e6e1da;
-  --ui-color-border: #ece8e2;
+  --ui-color-border: #e0dbd3;
   --ui-color-on-surface: #1d1d1f;
   --ui-color-primary: #161616;
-  --ui-color-secondary: #f27ba5;
-  --ui-color-accent: #fbc56c;
   --ui-color-neutral: #8b8681;
   --ui-color-info: #7fb8ec;
   --ui-color-success: #8fd16a;
@@ -2022,12 +2022,12 @@ fieldset:disabled .ui-input {
 
 .ui-menu li:has(> .ui-menu-sub) {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: min-content 1fr;
   transition: grid-template-rows var(--ui-menu-sub-transition);
 }
 
 .ui-menu li:has(> .ui-menu-sub-closed) {
-  grid-template-rows: auto 0fr;
+  grid-template-rows: min-content 0fr;
 }
 
 .ui-menu .ui-menu-sub {
@@ -2909,18 +2909,6 @@ input[type=color].ui-swatch::-moz-color-swatch {
 .ui-title-primary,
 .ui-subtitle-primary {
   color: var(--ui-color-primary);
-}
-
-.ui-text-secondary,
-.ui-title-secondary,
-.ui-subtitle-secondary {
-  color: var(--ui-color-secondary);
-}
-
-.ui-text-accent,
-.ui-title-accent,
-.ui-subtitle-accent {
-  color: var(--ui-color-accent);
 }
 
 .ui-text-neutral,
@@ -5845,18 +5833,6 @@ dialog.drawer[open] {
   --ui-avatar-gap-width: 2px;
 }
 
-.ui-avatar-secondary {
-  --ui-avatar-ring: var(--ui-color-secondary);
-  --ui-avatar-ring-width: 2px;
-  --ui-avatar-gap-width: 2px;
-}
-
-.ui-avatar-accent {
-  --ui-avatar-ring: var(--ui-color-accent);
-  --ui-avatar-ring-width: 2px;
-  --ui-avatar-gap-width: 2px;
-}
-
 .ui-avatar-neutral {
   --ui-avatar-ring: var(--ui-color-neutral);
   --ui-avatar-ring-width: 2px;
@@ -5975,16 +5951,6 @@ dialog.drawer[open] {
 .ui-bubble-primary {
   --ui-bubble-bg: var(--ui-color-primary);
   --ui-bubble-fg: var(--ui-color-on-primary);
-}
-
-.ui-bubble-secondary {
-  --ui-bubble-bg: var(--ui-color-secondary);
-  --ui-bubble-fg: var(--ui-color-on-secondary);
-}
-
-.ui-bubble-accent {
-  --ui-bubble-bg: var(--ui-color-accent);
-  --ui-bubble-fg: var(--ui-color-on-accent);
 }
 
 .ui-bubble-neutral {
@@ -6124,20 +6090,6 @@ dialog.drawer[open] {
   --ui-calendar-range-bg: color-mix(in oklab, var(--ui-color-primary) 15%, #0000);
 }
 
-.ui-calendar-secondary {
-  --ui-calendar-accent: var(--ui-color-secondary);
-  --ui-calendar-accent-fg: var(--ui-color-on-secondary);
-  --ui-calendar-current: var(--ui-color-secondary);
-  --ui-calendar-range-bg: color-mix(in oklab, var(--ui-color-secondary) 15%, #0000);
-}
-
-.ui-calendar-accent {
-  --ui-calendar-accent: var(--ui-color-accent);
-  --ui-calendar-accent-fg: var(--ui-color-on-accent);
-  --ui-calendar-current: var(--ui-color-accent);
-  --ui-calendar-range-bg: color-mix(in oklab, var(--ui-color-accent) 15%, #0000);
-}
-
 .ui-calendar-neutral {
   --ui-calendar-accent: var(--ui-color-neutral);
   --ui-calendar-accent-fg: var(--ui-color-on-neutral);
@@ -6254,16 +6206,6 @@ dialog.drawer[open] {
 .ui-btn-primary {
   --ui-btn-color: var(--ui-color-primary);
   --ui-btn-fg: var(--ui-color-on-primary);
-}
-
-.ui-btn-secondary {
-  --ui-btn-color: var(--ui-color-secondary);
-  --ui-btn-fg: var(--ui-color-on-secondary);
-}
-
-.ui-btn-accent {
-  --ui-btn-color: var(--ui-color-accent);
-  --ui-btn-fg: var(--ui-color-on-accent);
 }
 
 .ui-btn-neutral {
@@ -6523,7 +6465,7 @@ dialog.drawer[open] {
   }
 }
 
-.ui-btn-soft:is(.ui-btn-secondary, .ui-btn-accent, .ui-btn-info, .ui-btn-success, .ui-btn-warning) {
+.ui-btn-soft:is(.ui-btn-info, .ui-btn-success, .ui-btn-warning) {
   --ui-btn-fg: color-mix(in oklab, var(--ui-btn-color), var(--ui-color-on-surface) 55%);
 }
 
@@ -6544,16 +6486,6 @@ dialog.drawer[open] {
 .ui-btn-primary {
   --ui-btn-color: var(--ui-color-primary);
   --ui-btn-fg: var(--ui-color-on-primary);
-}
-
-.ui-btn-secondary {
-  --ui-btn-color: var(--ui-color-secondary);
-  --ui-btn-fg: var(--ui-color-on-secondary);
-}
-
-.ui-btn-accent {
-  --ui-btn-color: var(--ui-color-accent);
-  --ui-btn-fg: var(--ui-color-on-accent);
 }
 
 .ui-btn-neutral {
@@ -6659,16 +6591,6 @@ dialog.drawer[open] {
   --ui-input-color: var(--ui-color-primary);
 }
 
-.ui-checkbox-secondary {
-  color: var(--ui-color-on-secondary);
-  --ui-input-color: var(--ui-color-secondary);
-}
-
-.ui-checkbox-accent {
-  color: var(--ui-color-on-accent);
-  --ui-input-color: var(--ui-color-accent);
-}
-
 .ui-checkbox-neutral {
   color: var(--ui-color-on-neutral);
   --ui-input-color: var(--ui-color-neutral);
@@ -6739,16 +6661,6 @@ dialog.drawer[open] {
   --ui-peony-on: var(--ui-color-on-primary);
 }
 
-.ui-checkbox-secondary {
-  --ui-peony-accent: var(--ui-color-secondary);
-  --ui-peony-on: var(--ui-color-on-secondary);
-}
-
-.ui-checkbox-accent {
-  --ui-peony-accent: var(--ui-color-accent);
-  --ui-peony-on: var(--ui-color-on-accent);
-}
-
 .ui-checkbox-neutral {
   --ui-peony-accent: var(--ui-color-neutral);
   --ui-peony-on: var(--ui-color-on-neutral);
@@ -6782,15 +6694,31 @@ dialog.drawer[open] {
   scale: 0.9;
 }
 
+
 .ui-checkbox:checked,
 .ui-checkbox[aria-checked=true],
 .ui-checkbox:indeterminate {
-  border-color: var(--ui-peony-accent);
+  border-color: transparent;
   background-color: var(--ui-peony-accent);
+  background-image: linear-gradient(135deg, color-mix(in oklab, var(--ui-peony-accent) 45%, #fff), var(--ui-peony-accent) 70%);
   color: var(--ui-peony-on);
   box-shadow: 0 0.25em 0.6em -0.2em color-mix(in oklab, var(--ui-peony-accent) 60%, rgba(0, 0, 0, 0));
+  animation: peony-checkbox-bloom 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
 }
 
+.ui-checkbox::before {
+  transition: clip-path 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s, rotate 0.3s, translate 0.3s;
+  transition-delay: 0.08s;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-checkbox:checked,
+  .ui-checkbox[aria-checked=true],
+  .ui-checkbox:indeterminate {
+    animation: none;
+  }
+}
 .ui-checkbox:focus-visible {
   outline: none;
   box-shadow: 0 0 0 calc(0.2em * var(--ui-scale)) color-mix(in oklab, var(--ui-peony-accent) 22%, rgba(0, 0, 0, 0));
@@ -6846,16 +6774,6 @@ dialog.drawer[open] {
 .ui-chip-primary {
   --ui-chip-color: var(--ui-color-primary);
   --ui-chip-fg: var(--ui-color-on-primary);
-}
-
-.ui-chip-secondary {
-  --ui-chip-color: var(--ui-color-secondary);
-  --ui-chip-fg: var(--ui-color-on-secondary);
-}
-
-.ui-chip-accent {
-  --ui-chip-color: var(--ui-color-accent);
-  --ui-chip-fg: var(--ui-color-on-accent);
 }
 
 .ui-chip-neutral {
@@ -6917,7 +6835,7 @@ dialog.drawer[open] {
   border-radius: 9999px;
 }
 
-.ui-chip:is(.ui-chip-secondary, .ui-chip-accent, .ui-chip-info, .ui-chip-success, .ui-chip-warning) {
+.ui-chip:is(.ui-chip-info, .ui-chip-success, .ui-chip-warning) {
   color: color-mix(in oklab, var(--ui-chip-color), var(--ui-color-on-surface) 55%);
 }
 
@@ -7236,34 +7154,6 @@ dialog.drawer[open] {
   --ui-input-color: var(--ui-color-primary);
 }
 
-.ui-file-input-secondary {
-  --ui-btn-color: var(--ui-color-secondary);
-}
-
-.ui-file-input-secondary::file-selector-button {
-  color: var(--ui-color-on-secondary);
-}
-
-.ui-file-input-secondary,
-.ui-file-input-secondary:focus,
-.ui-file-input-secondary:focus-within {
-  --ui-input-color: var(--ui-color-secondary);
-}
-
-.ui-file-input-accent {
-  --ui-btn-color: var(--ui-color-accent);
-}
-
-.ui-file-input-accent::file-selector-button {
-  color: var(--ui-color-on-accent);
-}
-
-.ui-file-input-accent,
-.ui-file-input-accent:focus,
-.ui-file-input-accent:focus-within {
-  --ui-input-color: var(--ui-color-accent);
-}
-
 .ui-file-input-neutral {
   --ui-btn-color: var(--ui-color-neutral);
 }
@@ -7480,18 +7370,6 @@ fieldset:disabled .ui-input::placeholder {
   --ui-input-color: var(--ui-color-primary);
 }
 
-.ui-input-secondary,
-.ui-input-secondary:focus,
-.ui-input-secondary:focus-within {
-  --ui-input-color: var(--ui-color-secondary);
-}
-
-.ui-input-accent,
-.ui-input-accent:focus,
-.ui-input-accent:focus-within {
-  --ui-input-color: var(--ui-color-accent);
-}
-
 .ui-input-neutral,
 .ui-input-neutral:focus,
 .ui-input-neutral:focus-within {
@@ -7567,14 +7445,6 @@ fieldset:disabled .ui-input::placeholder {
   --ui-peony-accent: var(--ui-color-primary);
 }
 
-.ui-input-secondary {
-  --ui-peony-accent: var(--ui-color-secondary);
-}
-
-.ui-input-accent {
-  --ui-peony-accent: var(--ui-color-accent);
-}
-
 .ui-input-neutral {
   --ui-peony-accent: var(--ui-color-neutral);
 }
@@ -7601,7 +7471,7 @@ fieldset:disabled .ui-input::placeholder {
   transition: background-color 0.2s ease, box-shadow 0.25s ease;
 }
 
-.ui-input:not(.ui-input-ghost):hover {
+.ui-input:not(.ui-input-ghost, :focus, :focus-within, :has([aria-expanded=true])):hover {
   background-color: var(--ui-color-surface-3);
 }
 
@@ -7613,7 +7483,7 @@ fieldset:disabled .ui-input::placeholder {
   background-repeat: no-repeat;
   background-position: bottom center;
   background-size: calc(100% - 2 * var(--ui-radius-field, 0.5em)) calc(0.14em * var(--ui-scale));
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-peony-accent) 18%, rgba(0, 0, 0, 0)), 0 0.9em 1.4em -0.8em color-mix(in oklab, var(--ui-peony-accent) 75%, rgba(0, 0, 0, 0)), 0 0.35em 0.6em -0.35em color-mix(in oklab, var(--ui-peony-accent) 45%, rgba(0, 0, 0, 0));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-peony-accent) 18%, rgba(0, 0, 0, 0)), 0 calc(0.9em * var(--ui-peony-shadow, 1)) calc(1.4em * var(--ui-peony-shadow, 1)) calc(-0.8em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-peony-accent) 75%, rgba(0, 0, 0, 0)), 0 calc(0.35em * var(--ui-peony-shadow, 1)) calc(0.6em * var(--ui-peony-shadow, 1)) calc(-0.35em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-peony-accent) 45%, rgba(0, 0, 0, 0));
 }
 
 .ui-label {
@@ -7668,14 +7538,6 @@ fieldset:disabled .ui-input::placeholder {
   color: var(--ui-color-primary);
 }
 
-.ui-link-secondary {
-  color: var(--ui-color-secondary);
-}
-
-.ui-link-accent {
-  color: var(--ui-color-accent);
-}
-
 .ui-link-neutral {
   color: var(--ui-color-neutral);
 }
@@ -7698,28 +7560,81 @@ fieldset:disabled .ui-input::placeholder {
 
 @media (hover: hover) {
   .ui-link-primary:hover {
-    color: color-mix(in oklab, var(--ui-color-primary) 80%, #000);
-  }
-  .ui-link-secondary:hover {
-    color: color-mix(in oklab, var(--ui-color-secondary) 80%, #000);
-  }
-  .ui-link-accent:hover {
-    color: color-mix(in oklab, var(--ui-color-accent) 80%, #000);
+    color: color-mix(in oklab, var(--ui-color-primary) 70%, #fff);
   }
   .ui-link-neutral:hover {
-    color: color-mix(in oklab, var(--ui-color-neutral) 80%, #000);
+    color: color-mix(in oklab, var(--ui-color-neutral) 70%, #fff);
   }
   .ui-link-info:hover {
-    color: color-mix(in oklab, var(--ui-color-info) 80%, #000);
+    color: color-mix(in oklab, var(--ui-color-info) 70%, #fff);
   }
   .ui-link-success:hover {
-    color: color-mix(in oklab, var(--ui-color-success) 80%, #000);
+    color: color-mix(in oklab, var(--ui-color-success) 70%, #fff);
   }
   .ui-link-warning:hover {
-    color: color-mix(in oklab, var(--ui-color-warning) 80%, #000);
+    color: color-mix(in oklab, var(--ui-color-warning) 70%, #fff);
   }
   .ui-link-error:hover {
-    color: color-mix(in oklab, var(--ui-color-error) 80%, #000);
+    color: color-mix(in oklab, var(--ui-color-error) 70%, #fff);
+  }
+}
+
+.ui-link {
+  --ui-peony-accent: var(--ui-color-primary);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in oklab, currentColor 30%, rgba(0, 0, 0, 0));
+  background-image: linear-gradient(90deg, color-mix(in oklab, var(--ui-peony-accent) 30%, #fff), var(--ui-peony-accent));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 0.12em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1), text-decoration-color 0.2s, color 0.2s;
+}
+
+.ui-link-hover {
+  text-decoration-color: transparent;
+}
+
+.ui-link-primary {
+  --ui-peony-accent: var(--ui-color-primary);
+}
+
+.ui-link-neutral {
+  --ui-peony-accent: var(--ui-color-neutral);
+}
+
+.ui-link-info {
+  --ui-peony-accent: var(--ui-color-info);
+}
+
+.ui-link-success {
+  --ui-peony-accent: var(--ui-color-success);
+}
+
+.ui-link-warning {
+  --ui-peony-accent: var(--ui-color-warning);
+}
+
+.ui-link-error {
+  --ui-peony-accent: var(--ui-color-error);
+}
+
+
+.ui-link:not(.ui-link-primary, .ui-link-neutral, .ui-link-info, .ui-link-success, .ui-link-warning, .ui-link-error):hover {
+  color: color-mix(in oklab, var(--ui-peony-accent) 70%, #fff);
+}
+
+.ui-link:hover {
+  text-decoration-color: transparent;
+  background-size: 100% 0.12em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-link {
+    transition: none;
   }
 }
 .ui-list {
@@ -7743,7 +7658,7 @@ fieldset:disabled .ui-input::placeholder {
 .ui-list > :not(:last-child) .ui-list-row::after {
   bottom: 0;
   inset-inline: calc(1em * var(--ui-scale));
-  border-bottom: var(--ui-border) solid color-mix(in oklab, var(--ui-color-on-surface) 5%, rgba(0, 0, 0, 0));
+  border-bottom: var(--ui-border) solid var(--ui-color-border);
 }
 
 .ui-list-row:has(.ui-list-col-grow:nth-child(1)) {
@@ -7769,8 +7684,10 @@ fieldset:disabled .ui-input::placeholder {
 
 .ui-list-suggestions {
   padding: calc(0.25em * var(--ui-scale));
-  border: var(--ui-border) solid var(--ui-color-surface-2);
-  box-shadow: 0 8px 16px -4px color-mix(in oklab, var(--ui-color-on-surface) 10%, rgba(0, 0, 0, 0)), var(--ui-shadow-light, );
+  --ui-light-intensity: 1;
+  background-color: var(--ui-color-surface-1);
+  border: 1px solid var(--ui-color-border);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-color-on-surface) 6%, rgba(0, 0, 0, 0)), 0 calc(0.5em * var(--ui-peony-shadow, 1)) calc(1.5em * var(--ui-peony-shadow, 1)) calc(-0.25em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-color-on-surface) 16%, rgba(0, 0, 0, 0)), 0 calc(0.15em * var(--ui-peony-shadow, 1)) calc(0.4em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-color-on-surface) 8%, rgba(0, 0, 0, 0));
   overflow-y: auto;
   max-height: min(16rem, 60dvh);
 }
@@ -8044,7 +7961,7 @@ fieldset:disabled .ui-input::placeholder {
   --ui-navbar-border-width: 0px;
   --ui-navbar-shadow:
   	0 0.1em 0.25em color-mix(in oklab, var(--ui-color-on-surface) 5%, #0000),
-  	0 0.75em 2em -1em color-mix(in oklab, var(--ui-color-on-surface) 22%, #0000);
+  	0 calc(0.75em * var(--ui-peony-shadow, 1)) calc(2em * var(--ui-peony-shadow, 1)) calc(-1em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-color-on-surface) 22%, #0000);
 }
 
 
@@ -8081,16 +7998,6 @@ fieldset:disabled .ui-input::placeholder {
   --ui-pagination-fg: var(--ui-color-on-primary);
 }
 
-.ui-pagination-secondary {
-  --ui-pagination-color: var(--ui-color-secondary);
-  --ui-pagination-fg: var(--ui-color-on-secondary);
-}
-
-.ui-pagination-accent {
-  --ui-pagination-color: var(--ui-color-accent);
-  --ui-pagination-fg: var(--ui-color-on-accent);
-}
-
 .ui-pagination-neutral {
   --ui-pagination-color: var(--ui-color-neutral);
   --ui-pagination-fg: var(--ui-color-on-neutral);
@@ -8121,14 +8028,50 @@ fieldset:disabled .ui-input::placeholder {
   --ui-pagination-item-bg: transparent;
   --ui-pagination-border-width: 0px;
   --ui-pagination-shadow: none;
-  --ui-pagination-radius: 999px;
-  --ui-pagination-hover-bg: color-mix(in oklab, var(--ui-pagination-color) 10%, var(--ui-color-surface-1));
+  --ui-pagination-radius: var(--ui-radius-field);
+  --ui-pagination-hover-bg: color-mix(in oklab, var(--ui-color-on-surface) 6%, #0000);
 }
 
-.ui-pagination-item[aria-current=page] {
-  box-shadow: 0 0.3em 0.8em -0.3em color-mix(in oklab, var(--ui-pagination-color) 70%, rgba(0, 0, 0, 0));
+
+.ui-pagination:not(.ui-pagination-dots, .ui-pagination-bars) .ui-pagination-item {
+  width: calc(var(--ui-pagination-size) + 0.5em);
+  padding-inline: 0;
+  overflow: hidden;
+  background-image: linear-gradient(90deg, color-mix(in oklab, var(--ui-pagination-color) 35%, #fff), var(--ui-pagination-color));
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: 0% calc(0.14em * var(--ui-scale));
+  transition: color 0.15s, background-color 0.15s, background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.ui-pagination:not(.ui-pagination-dots, .ui-pagination-bars) .ui-pagination-item[aria-current=page] {
+  color: var(--ui-pagination-color);
+  background-color: transparent;
+  background-size: calc(100% - 2 * var(--ui-radius-field, 0.5em)) calc(0.14em * var(--ui-scale));
+  font-weight: 600;
+}
+
+.ui-pagination-number {
+  display: inline-block;
+}
+
+.ui-pagination[data-direction=next] .ui-pagination-number {
+  animation: peony-page-next 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ui-pagination[data-direction=previous] .ui-pagination-number {
+  animation: peony-page-previous 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-pagination-item,
+  .ui-pagination-number {
+    transition: none;
+    animation: none;
+  }
+}
 .ui-progress {
   height: calc(0.5em * var(--ui-scale));
   width: 100%;
@@ -8168,14 +8111,6 @@ fieldset:disabled .ui-input::placeholder {
 
 .ui-progress-primary {
   color: var(--ui-color-primary);
-}
-
-.ui-progress-secondary {
-  color: var(--ui-color-secondary);
-}
-
-.ui-progress-accent {
-  color: var(--ui-color-accent);
 }
 
 .ui-progress-neutral {
@@ -8379,14 +8314,6 @@ fieldset:disabled .ui-input::placeholder {
   --ui-input-color: var(--ui-color-primary);
 }
 
-.ui-radio-secondary {
-  --ui-input-color: var(--ui-color-secondary);
-}
-
-.ui-radio-accent {
-  --ui-input-color: var(--ui-color-accent);
-}
-
 .ui-radio-neutral {
   --ui-input-color: var(--ui-color-neutral);
 }
@@ -8452,14 +8379,6 @@ fieldset:disabled .ui-input::placeholder {
 
 .ui-radio-primary {
   --ui-peony-accent: var(--ui-color-primary);
-}
-
-.ui-radio-secondary {
-  --ui-peony-accent: var(--ui-color-secondary);
-}
-
-.ui-radio-accent {
-  --ui-peony-accent: var(--ui-color-accent);
 }
 
 .ui-radio-neutral {
@@ -8573,16 +8492,6 @@ fieldset:disabled .ui-input::placeholder {
   --ui-range-thumb: var(--ui-color-on-primary);
 }
 
-.ui-range-secondary {
-  color: var(--ui-color-secondary);
-  --ui-range-thumb: var(--ui-color-on-secondary);
-}
-
-.ui-range-accent {
-  color: var(--ui-color-accent);
-  --ui-range-thumb: var(--ui-color-on-accent);
-}
-
 .ui-range-neutral {
   color: var(--ui-color-neutral);
   --ui-range-thumb: var(--ui-color-on-neutral);
@@ -8684,14 +8593,6 @@ fieldset:disabled .ui-input::placeholder {
 }
 
 .ui-range-primary {
-  --ui-range-thumb: #fff;
-}
-
-.ui-range-secondary {
-  --ui-range-thumb: #fff;
-}
-
-.ui-range-accent {
   --ui-range-thumb: #fff;
 }
 
@@ -8866,11 +8767,12 @@ fieldset:disabled .ui-select {
   max-height: min(24rem, 70dvh);
   margin-inline: calc(0.5em * var(--ui-scale));
   translate: calc(-0.5em * var(--ui-scale)) 0;
-  border: var(--ui-border) solid var(--ui-color-surface-2);
+  border: 1px solid var(--ui-color-border);
+  border-radius: var(--ui-radius-box);
   margin-block: calc(0.5em * var(--ui-scale));
   padding: calc(0.5em * var(--ui-scale));
-  background-color: inherit;
-  box-shadow: 0 20px 25px -5px rgb(0, 0, 0, calc(var(--ui-depth) * 0.1)), 0 8px 10px -6px rgb(0, 0, 0, calc(var(--ui-depth) * 0.1));
+  background-color: var(--ui-color-surface-1);
+  box-shadow: 0 calc(0.5em * var(--ui-peony-shadow, 1)) calc(1.5em * var(--ui-peony-shadow, 1)) calc(-0.25em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-color-on-surface) 16%, rgba(0, 0, 0, 0)), 0 calc(0.15em * var(--ui-peony-shadow, 1)) calc(0.4em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-color-on-surface) 8%, rgba(0, 0, 0, 0));
 }
 
 [dir=rtl] .ui-select::picker(select),
@@ -8931,18 +8833,6 @@ fieldset:disabled .ui-select {
 .ui-select-primary:focus,
 .ui-select-primary:focus-within {
   --ui-input-color: var(--ui-color-primary);
-}
-
-.ui-select-secondary,
-.ui-select-secondary:focus,
-.ui-select-secondary:focus-within {
-  --ui-input-color: var(--ui-color-secondary);
-}
-
-.ui-select-accent,
-.ui-select-accent:focus,
-.ui-select-accent:focus-within {
-  --ui-input-color: var(--ui-color-accent);
 }
 
 .ui-select-neutral,
@@ -9026,14 +8916,6 @@ fieldset:disabled .ui-select {
   --ui-peony-accent: var(--ui-color-primary);
 }
 
-.ui-select-secondary {
-  --ui-peony-accent: var(--ui-color-secondary);
-}
-
-.ui-select-accent {
-  --ui-peony-accent: var(--ui-color-accent);
-}
-
 .ui-select-neutral {
   --ui-peony-accent: var(--ui-color-neutral);
 }
@@ -9060,17 +8942,45 @@ fieldset:disabled .ui-select {
   transition: background-color 0.2s ease, box-shadow 0.25s ease;
 }
 
-.ui-select:not(.ui-select-ghost):hover {
+.ui-select:not(.ui-select-ghost, :focus, :focus-within, [aria-expanded=true]):hover {
   background-color: var(--ui-color-surface-3);
 }
 
 
-.ui-select:is(:focus, :focus-within) {
+.ui-select:is(:focus, :focus-within),
+.ui-select[aria-expanded=true] {
   --ui-input-color: transparent;
   outline: none;
   background-color: var(--ui-color-surface-1);
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-peony-accent) 40%, rgba(0, 0, 0, 0)), 0 0.1em 0.25em color-mix(in oklab, var(--ui-color-on-surface) 6%, rgba(0, 0, 0, 0)), 0 0.6em 1.4em -0.6em color-mix(in oklab, var(--ui-peony-accent) 35%, rgba(0, 0, 0, 0));
-  background-image: linear-gradient(45deg, rgba(0, 0, 0, 0) 50%, var(--ui-peony-accent) 50%), linear-gradient(135deg, var(--ui-peony-accent) 50%, rgba(0, 0, 0, 0) 50%);
+  background-image: linear-gradient(45deg, rgba(0, 0, 0, 0) 50%, var(--ui-peony-accent) 50%), linear-gradient(135deg, var(--ui-peony-accent) 50%, rgba(0, 0, 0, 0) 50%), linear-gradient(90deg, color-mix(in oklab, var(--ui-peony-accent) 35%, #fff), var(--ui-peony-accent));
+  background-repeat: no-repeat;
+  background-position: calc(100% - 20px) calc(1px + 50%), calc(100% - 16.1px) calc(1px + 50%), bottom center;
+  background-size: 4px 4px, 4px 4px, calc(100% - 2 * var(--ui-radius-field, 0.5em)) calc(0.14em * var(--ui-scale));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-peony-accent) 18%, rgba(0, 0, 0, 0)), 0 calc(0.9em * var(--ui-peony-shadow, 1)) calc(1.4em * var(--ui-peony-shadow, 1)) calc(-0.8em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-peony-accent) 75%, rgba(0, 0, 0, 0)), 0 calc(0.35em * var(--ui-peony-shadow, 1)) calc(0.6em * var(--ui-peony-shadow, 1)) calc(-0.35em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-peony-accent) 45%, rgba(0, 0, 0, 0));
+}
+
+
+@supports selector(:open) {
+  .ui-select:is(:open, :has(select:open)),
+  .ui-select:is(:open, :has(select:open)):hover {
+    --ui-input-color: transparent;
+    outline: none;
+    background-color: var(--ui-color-surface-1);
+    background-image: linear-gradient(45deg, rgba(0, 0, 0, 0) 50%, var(--ui-peony-accent) 50%), linear-gradient(135deg, var(--ui-peony-accent) 50%, rgba(0, 0, 0, 0) 50%), linear-gradient(90deg, color-mix(in oklab, var(--ui-peony-accent) 35%, #fff), var(--ui-peony-accent));
+    background-repeat: no-repeat;
+    background-position: calc(100% - 20px) calc(1px + 50%), calc(100% - 16.1px) calc(1px + 50%), bottom center;
+    background-size: 4px 4px, 4px 4px, calc(100% - 2 * var(--ui-radius-field, 0.5em)) calc(0.14em * var(--ui-scale));
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-peony-accent) 18%, rgba(0, 0, 0, 0)), 0 calc(0.9em * var(--ui-peony-shadow, 1)) calc(1.4em * var(--ui-peony-shadow, 1)) calc(-0.8em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-peony-accent) 75%, rgba(0, 0, 0, 0)), 0 calc(0.35em * var(--ui-peony-shadow, 1)) calc(0.6em * var(--ui-peony-shadow, 1)) calc(-0.35em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-peony-accent) 45%, rgba(0, 0, 0, 0));
+  }
+}
+[dir=rtl] .ui-select:is(:focus, :focus-within),
+[dir=rtl] .ui-select[aria-expanded=true] {
+  background-position: calc(0% + 12px) calc(1px + 50%), calc(0% + 16px) calc(1px + 50%), bottom center;
+}
+
+
+.ui-select:is(:focus, :focus-within) select {
+  background: transparent;
 }
 
 .ui-skeleton {
@@ -9185,14 +9095,6 @@ fieldset:disabled .ui-select {
 
 .ui-swatch-primary {
   --ui-swatch-color: var(--ui-color-primary);
-}
-
-.ui-swatch-secondary {
-  --ui-swatch-color: var(--ui-color-secondary);
-}
-
-.ui-swatch-accent {
-  --ui-swatch-color: var(--ui-color-accent);
 }
 
 .ui-swatch-neutral {
@@ -9802,18 +9704,6 @@ label:has(:checked),
   --ui-input-color: var(--ui-color-primary);
 }
 
-.ui-textarea-secondary,
-.ui-textarea-secondary:focus,
-.ui-textarea-secondary:focus-within {
-  --ui-input-color: var(--ui-color-secondary);
-}
-
-.ui-textarea-accent,
-.ui-textarea-accent:focus,
-.ui-textarea-accent:focus-within {
-  --ui-input-color: var(--ui-color-accent);
-}
-
 .ui-textarea-neutral,
 .ui-textarea-neutral:focus,
 .ui-textarea-neutral:focus-within {
@@ -9889,14 +9779,6 @@ label:has(:checked),
   --ui-peony-accent: var(--ui-color-primary);
 }
 
-.ui-textarea-secondary {
-  --ui-peony-accent: var(--ui-color-secondary);
-}
-
-.ui-textarea-accent {
-  --ui-peony-accent: var(--ui-color-accent);
-}
-
 .ui-textarea-neutral {
   --ui-peony-accent: var(--ui-color-neutral);
 }
@@ -9923,7 +9805,7 @@ label:has(:checked),
   transition: background-color 0.2s ease, box-shadow 0.25s ease;
 }
 
-.ui-textarea:not(.ui-textarea-ghost):hover {
+.ui-textarea:not(.ui-textarea-ghost, :focus, :focus-within):hover {
   background-color: var(--ui-color-surface-3);
 }
 
@@ -9935,7 +9817,7 @@ label:has(:checked),
   background-repeat: no-repeat;
   background-position: bottom center;
   background-size: calc(100% - 2 * var(--ui-radius-field, 0.5em)) calc(0.14em * var(--ui-scale));
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-peony-accent) 18%, rgba(0, 0, 0, 0)), 0 0.9em 1.4em -0.8em color-mix(in oklab, var(--ui-peony-accent) 75%, rgba(0, 0, 0, 0)), 0 0.35em 0.6em -0.35em color-mix(in oklab, var(--ui-peony-accent) 45%, rgba(0, 0, 0, 0));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-peony-accent) 18%, rgba(0, 0, 0, 0)), 0 calc(0.9em * var(--ui-peony-shadow, 1)) calc(1.4em * var(--ui-peony-shadow, 1)) calc(-0.8em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-peony-accent) 75%, rgba(0, 0, 0, 0)), 0 calc(0.35em * var(--ui-peony-shadow, 1)) calc(0.6em * var(--ui-peony-shadow, 1)) calc(-0.35em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-peony-accent) 45%, rgba(0, 0, 0, 0));
 }
 
 .ui-toggle {
@@ -10054,16 +9936,6 @@ label:has(:checked),
   --ui-input-color: var(--ui-color-primary);
 }
 
-.ui-toggle-secondary:checked,
-.ui-toggle-secondary[aria-checked=true] {
-  --ui-input-color: var(--ui-color-secondary);
-}
-
-.ui-toggle-accent:checked,
-.ui-toggle-accent[aria-checked=true] {
-  --ui-input-color: var(--ui-color-accent);
-}
-
 .ui-toggle-neutral:checked,
 .ui-toggle-neutral[aria-checked=true] {
   --ui-input-color: var(--ui-color-neutral);
@@ -10140,19 +10012,12 @@ label:has(:checked),
 .ui-toggle {
   --ui-peony-accent: var(--ui-color-primary);
   width: calc(var(--ui-size) * 1.85);
-  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+  
+  transition: grid-template-columns 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .ui-toggle-primary {
   --ui-peony-accent: var(--ui-color-primary);
-}
-
-.ui-toggle-secondary {
-  --ui-peony-accent: var(--ui-color-secondary);
-}
-
-.ui-toggle-accent {
-  --ui-peony-accent: var(--ui-color-accent);
 }
 
 .ui-toggle-neutral {
@@ -10185,10 +10050,17 @@ label:has(:checked),
   scale: 1.18 0.94;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .ui-toggle,
+  .ui-toggle::before {
+    transition: none;
+  }
+}
 .ui-toggle:checked,
 .ui-toggle[aria-checked=true],
 .ui-toggle:has(> input:checked) {
   background-color: var(--ui-peony-accent);
+  background-image: linear-gradient(135deg, color-mix(in oklab, var(--ui-peony-accent) 45%, #fff), var(--ui-peony-accent) 70%);
   box-shadow: 0 0.35em 0.9em -0.35em color-mix(in oklab, var(--ui-peony-accent) 70%, rgba(0, 0, 0, 0));
 }
 
@@ -10224,7 +10096,7 @@ label:has(:checked),
   --ui-dropdown-border: var(--ui-color-border);
   --ui-dropdown-border-width: 1px;
   --ui-dropdown-radius: var(--ui-radius-box);
-  --ui-dropdown-shadow: 0 12px 32px -16px oklch(0% 0 0 / 0.18), 0 12px 60px oklch(0% 0 0 / 0.08);
+  --ui-dropdown-shadow: 0 calc(12px * var(--ui-peony-shadow, 1)) calc(32px * var(--ui-peony-shadow, 1)) calc(-16px * var(--ui-peony-shadow, 1)) oklch(0% 0 0 / 0.18), 0 calc(12px * var(--ui-peony-shadow, 1)) calc(60px * var(--ui-peony-shadow, 1)) oklch(0% 0 0 / 0.08);
   --ui-dropdown-p: calc(0.25em * var(--ui-scale));
   --ui-dropdown-gap: calc(0.25em * var(--ui-scale));
   --ui-dropdown-z: 999;
@@ -10354,14 +10226,6 @@ label:has(:checked),
   --ui-divider-color: var(--ui-color-primary);
 }
 
-.ui-divider-secondary {
-  --ui-divider-color: var(--ui-color-secondary);
-}
-
-.ui-divider-accent {
-  --ui-divider-color: var(--ui-color-accent);
-}
-
 .ui-divider-neutral {
   --ui-divider-color: var(--ui-color-neutral);
 }
@@ -10406,14 +10270,6 @@ label:has(:checked),
   --ui-alert-color: var(--ui-color-primary);
 }
 
-.ui-alert-secondary {
-  --ui-alert-color: var(--ui-color-secondary);
-}
-
-.ui-alert-accent {
-  --ui-alert-color: var(--ui-color-accent);
-}
-
 .ui-alert-neutral {
   --ui-alert-color: var(--ui-color-neutral);
 }
@@ -10450,14 +10306,6 @@ label:has(:checked),
 
 .ui-alert-solid.alert-primary {
   --ui-alert-on: var(--ui-color-on-primary);
-}
-
-.ui-alert-solid.alert-secondary {
-  --ui-alert-on: var(--ui-color-on-secondary);
-}
-
-.ui-alert-solid.alert-accent {
-  --ui-alert-on: var(--ui-color-on-accent);
 }
 
 .ui-alert-solid.alert-neutral {
@@ -10506,7 +10354,7 @@ label:has(:checked),
   --ui-alert-border-width: 0px;
   --ui-alert-shadow:
   	0 0.1em 0.25em color-mix(in oklab, var(--ui-color-on-surface) 5%, #0000),
-  	0 0.75em 2em -0.75em color-mix(in oklab, var(--ui-alert-color, var(--ui-color-on-surface)) 30%, #0000);
+  	0 calc(0.75em * var(--ui-peony-shadow, 1)) calc(2em * var(--ui-peony-shadow, 1)) calc(-0.75em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-alert-color, var(--ui-color-on-surface)) 30%, #0000);
 }
 
 .ui-alert-icon {
@@ -10525,7 +10373,7 @@ label:has(:checked),
   --ui-alert-fg: var(--ui-color-on-surface);
   --ui-alert-accent: color-mix(in oklab, var(--ui-alert-color) 75%, var(--ui-color-on-surface));
   --ui-alert-border-width: 0px;
-  --ui-alert-shadow: 0 0.75em 2em -0.9em color-mix(in oklab, var(--ui-alert-color) 55%, #0000);
+  --ui-alert-shadow: 0 calc(0.75em * var(--ui-peony-shadow, 1)) calc(2em * var(--ui-peony-shadow, 1)) calc(-0.9em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-alert-color) 55%, #0000);
   background-image: linear-gradient(120deg, color-mix(in oklab, var(--ui-alert-color) 30%, var(--ui-color-surface-1)), color-mix(in oklab, var(--ui-alert-color) 8%, var(--ui-color-surface-1)));
 }
 
@@ -10564,16 +10412,6 @@ label:has(:checked),
 .ui-tooltip-primary {
   --ui-tooltip-bg: var(--ui-color-primary);
   --ui-tooltip-fg: var(--ui-color-on-primary);
-}
-
-.ui-tooltip-secondary {
-  --ui-tooltip-bg: var(--ui-color-secondary);
-  --ui-tooltip-fg: var(--ui-color-on-secondary);
-}
-
-.ui-tooltip-accent {
-  --ui-tooltip-bg: var(--ui-color-accent);
-  --ui-tooltip-fg: var(--ui-color-on-accent);
 }
 
 .ui-tooltip-neutral {
@@ -10649,14 +10487,6 @@ label:has(:checked),
   --ui-rating-on: var(--ui-color-primary);
 }
 
-.ui-rating-secondary {
-  --ui-rating-on: var(--ui-color-secondary);
-}
-
-.ui-rating-accent {
-  --ui-rating-on: var(--ui-color-accent);
-}
-
 .ui-rating-neutral {
   --ui-rating-on: var(--ui-color-neutral);
 }
@@ -10713,43 +10543,27 @@ label:has(:checked),
 
 
 .ui-switch-primary {
-  --ui-switch-active-bg: var(--ui-color-primary);
-  --ui-switch-active-fg: var(--ui-color-on-primary);
-}
-
-.ui-switch-secondary {
-  --ui-switch-active-bg: var(--ui-color-secondary);
-  --ui-switch-active-fg: var(--ui-color-on-secondary);
-}
-
-.ui-switch-accent {
-  --ui-switch-active-bg: var(--ui-color-accent);
-  --ui-switch-active-fg: var(--ui-color-on-accent);
+  --ui-switch-active-fg: var(--ui-color-primary);
 }
 
 .ui-switch-neutral {
-  --ui-switch-active-bg: var(--ui-color-neutral);
-  --ui-switch-active-fg: var(--ui-color-on-neutral);
+  --ui-switch-active-fg: var(--ui-color-neutral);
 }
 
 .ui-switch-info {
-  --ui-switch-active-bg: var(--ui-color-info);
-  --ui-switch-active-fg: var(--ui-color-on-info);
+  --ui-switch-active-fg: var(--ui-color-info);
 }
 
 .ui-switch-success {
-  --ui-switch-active-bg: var(--ui-color-success);
-  --ui-switch-active-fg: var(--ui-color-on-success);
+  --ui-switch-active-fg: var(--ui-color-success);
 }
 
 .ui-switch-warning {
-  --ui-switch-active-bg: var(--ui-color-warning);
-  --ui-switch-active-fg: var(--ui-color-on-warning);
+  --ui-switch-active-fg: var(--ui-color-warning);
 }
 
 .ui-switch-error {
-  --ui-switch-active-bg: var(--ui-color-error);
-  --ui-switch-active-fg: var(--ui-color-on-error);
+  --ui-switch-active-fg: var(--ui-color-error);
 }
 
 .ui-switch-xs {
@@ -10772,6 +10586,52 @@ label:has(:checked),
   --ui-fontsize: var(--ui-xl, var(--ui-default-xl));
 }
 
+
+.ui-switch {
+  --ui-peony-accent: var(--ui-color-primary);
+}
+
+.ui-switch-primary {
+  --ui-peony-accent: var(--ui-color-primary);
+}
+
+.ui-switch-neutral {
+  --ui-peony-accent: var(--ui-color-neutral);
+}
+
+.ui-switch-info {
+  --ui-peony-accent: var(--ui-color-info);
+}
+
+.ui-switch-success {
+  --ui-peony-accent: var(--ui-color-success);
+}
+
+.ui-switch-warning {
+  --ui-peony-accent: var(--ui-color-warning);
+}
+
+.ui-switch-error {
+  --ui-peony-accent: var(--ui-color-error);
+}
+
+.ui-switch-item {
+  background-image: linear-gradient(90deg, color-mix(in oklab, var(--ui-peony-accent) 35%, #fff), var(--ui-peony-accent));
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: 0% calc(0.14em * var(--ui-scale));
+  transition: background-color 0.15s, color 0.15s, box-shadow 0.15s, background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ui-switch-item:has(.ui-switch-input:checked) {
+  background-size: calc(100% - 2 * var(--ui-switch-item-radius)) calc(0.14em * var(--ui-scale));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-switch-item {
+    transition: none;
+  }
+}
 .ui-number-input {
   --ui-size: calc(2.5em * var(--ui-scale));
   --ui-number-input-bg: var(--ui-color-surface-1);
@@ -10867,18 +10727,6 @@ label:has(:checked),
   --ui-hero-muted: color-mix(in oklab, var(--ui-color-on-primary) 80%, #0000);
 }
 
-.ui-hero-secondary {
-  --ui-hero-bg: var(--ui-color-secondary);
-  --ui-hero-fg: var(--ui-color-on-secondary);
-  --ui-hero-muted: color-mix(in oklab, var(--ui-color-on-secondary) 80%, #0000);
-}
-
-.ui-hero-accent {
-  --ui-hero-bg: var(--ui-color-accent);
-  --ui-hero-fg: var(--ui-color-on-accent);
-  --ui-hero-muted: color-mix(in oklab, var(--ui-color-on-accent) 80%, #0000);
-}
-
 .ui-hero-neutral {
   --ui-hero-bg: var(--ui-color-neutral);
   --ui-hero-fg: var(--ui-color-on-neutral);
@@ -10946,20 +10794,6 @@ label:has(:checked),
   --ui-footer-fg: var(--ui-color-on-primary);
   --ui-footer-muted: color-mix(in oklab, var(--ui-color-on-primary) 75%, #0000);
   --ui-footer-border: color-mix(in oklab, var(--ui-color-on-primary) 25%, #0000);
-}
-
-.ui-footer-secondary {
-  --ui-footer-bg: var(--ui-color-secondary);
-  --ui-footer-fg: var(--ui-color-on-secondary);
-  --ui-footer-muted: color-mix(in oklab, var(--ui-color-on-secondary) 75%, #0000);
-  --ui-footer-border: color-mix(in oklab, var(--ui-color-on-secondary) 25%, #0000);
-}
-
-.ui-footer-accent {
-  --ui-footer-bg: var(--ui-color-accent);
-  --ui-footer-fg: var(--ui-color-on-accent);
-  --ui-footer-muted: color-mix(in oklab, var(--ui-color-on-accent) 75%, #0000);
-  --ui-footer-border: color-mix(in oklab, var(--ui-color-on-accent) 25%, #0000);
 }
 
 .ui-footer-neutral {
@@ -11083,16 +10917,6 @@ label:has(:checked),
   --ui-steps-marker-fg: var(--ui-color-on-primary);
 }
 
-.ui-steps-secondary {
-  --ui-steps-color: var(--ui-color-secondary);
-  --ui-steps-marker-fg: var(--ui-color-on-secondary);
-}
-
-.ui-steps-accent {
-  --ui-steps-color: var(--ui-color-accent);
-  --ui-steps-marker-fg: var(--ui-color-on-accent);
-}
-
 .ui-steps-neutral {
   --ui-steps-color: var(--ui-color-neutral);
   --ui-steps-marker-fg: var(--ui-color-on-neutral);
@@ -11195,17 +11019,15 @@ label:has(:checked),
 }
 
 
-.ui-combobox .ui-input {
-  --ui-peony-accent: var(--ui-color-primary);
-}
-
-.ui-combobox .ui-input:is(:focus, :focus-within),
 .ui-combobox .ui-input:has([aria-expanded=true]) {
   --ui-input-color: transparent;
   outline: none;
   background-color: var(--ui-color-surface-1);
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-peony-accent) 40%, rgba(0, 0, 0, 0)), 0 0.1em 0.25em color-mix(in oklab, var(--ui-color-on-surface) 6%, rgba(0, 0, 0, 0)), 0 0.6em 1.4em -0.6em color-mix(in oklab, var(--ui-peony-accent) 35%, rgba(0, 0, 0, 0));
-  background-image: none;
+  background-image: linear-gradient(90deg, color-mix(in oklab, var(--ui-peony-accent) 35%, #fff), var(--ui-peony-accent));
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: calc(100% - 2 * var(--ui-radius-field, 0.5em)) calc(0.14em * var(--ui-scale));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-peony-accent) 18%, rgba(0, 0, 0, 0)), 0 calc(0.9em * var(--ui-peony-shadow, 1)) calc(1.4em * var(--ui-peony-shadow, 1)) calc(-0.8em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-peony-accent) 75%, rgba(0, 0, 0, 0)), 0 calc(0.35em * var(--ui-peony-shadow, 1)) calc(0.6em * var(--ui-peony-shadow, 1)) calc(-0.35em * var(--ui-peony-shadow, 1)) color-mix(in oklab, var(--ui-peony-accent) 45%, rgba(0, 0, 0, 0));
 }
 
 .ui-chips-input {
@@ -11265,11 +11087,9 @@ label:has(:checked),
   --ui-color-surface-2: #f3f7f3;
   --ui-color-surface-3: #e7efe8;
   --ui-color-surface-4: #d9e5db;
-  --ui-color-border: #e1eae2;
+  --ui-color-border: #d3ded5;
   --ui-color-on-surface: #1b2a22;
   --ui-color-primary: #2f7d57;
-  --ui-color-secondary: #7cc6a4;
-  --ui-color-accent: #f4b183;
   --ui-color-neutral: #6f8478;
   --ui-color-info: #6fb3d9;
   --ui-color-success: #5cb87a;

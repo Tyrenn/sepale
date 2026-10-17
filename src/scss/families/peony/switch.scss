@@ -128,13 +128,41 @@
 		--switch-active-shadow: 0 1px 3px color-mix(in oklab, #000 18%, #0000);
 	}
 
-	/* colour variants: the checked item takes the colour. */
+	/* colour variants: the tile stays white; the colour goes to the
+	   checked item's ink and to its underline. */
 	@each $color in c.$color-list {
 		.switch-#{$color} {
-			--switch-active-bg: var(--color-#{$color});
-			--switch-active-fg: var(--color-on-#{$color});
+			--switch-active-fg: var(--color-#{$color});
 		}
 	}
 
 	@include m.size-variants('switch');
+
+	/* ── peony signature: the drawn underline ──
+	   The chosen item keeps its white tile; along the tile's bottom edge
+	   the family's gradient — the line a focused field draws under
+	   itself — runs out from the centre, in the variant's colour. */
+	.switch {
+		--peony-accent: var(--color-primary);
+	}
+	@each $color in c.$color-list {
+		.switch-#{$color} {
+			--peony-accent: var(--color-#{$color});
+		}
+	}
+	.switch-item {
+		background-image: linear-gradient(90deg, color-mix(in oklab, var(--peony-accent) 35%, #fff), var(--peony-accent));
+		background-repeat: no-repeat;
+		background-position: bottom center;
+		background-size: 0% calc(0.14em * var(--scale));
+		transition: background-color 0.15s, color 0.15s, box-shadow 0.15s, background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.switch-item:has(.switch-input:checked) {
+		background-size: calc(100% - 2 * var(--switch-item-radius)) calc(0.14em * var(--scale));
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.switch-item {
+			transition: none;
+		}
+	}
 }

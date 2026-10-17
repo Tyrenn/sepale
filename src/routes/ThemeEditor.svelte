@@ -21,17 +21,15 @@
 	// colour says through `on` which variable holds the ink written on it:
 	//   - when that ink is a parameter too (daisy's --color-primary-content),
 	//     it is shown as an editable tile next to its colour;
-	//   - when the family derives it (--color-on-primary), a second,
-	//     NON-editable tile paints an "A" in it: a live contrast check rather
-	//     than a control. The picker grades the same pair numerically.
+	//   - when the family derives it (--color-on-primary), nothing is shown:
+	//     the palette holds only what can be set. The picker still grades
+	//     the colour against that ink.
 	let colorTokens = $derived(playground.tokens.filter((t) => t.type === 'color'));
 
 	/** Surfaces first, then the colours, then the inks that stand alone. */
 	const RANK: Record<string, number> = { surface: 0, accent: 1, ink: 2 };
 
-	/** `derivedInk` is an ink shown only as a contrast check: derived by the
-	 *  family, or a parameter already shown beside an earlier colour. */
-	type Entry = { token: ThemeToken; partner?: ThemeToken; derivedInk?: string };
+	type Entry = { token: ThemeToken; partner?: ThemeToken };
 
 	let palette = $derived.by(() => {
 		const byName = new Map(colorTokens.map((t) => [t.name, t]));
@@ -50,7 +48,7 @@
 					shown.add(ink);
 					return { token, partner };
 				}
-				return { token, derivedInk: ink };
+				return { token };
 			});
 	});
 
@@ -97,6 +95,7 @@
 		label={token.label}
 		help={token.description}
 		contrast={contrastOf(token)}
+		ink={colorTokens.some((t) => t.on === token.name)}
 		onchange={(v) => (token.value = v)}
 	/>
 {/snippet}
@@ -108,20 +107,14 @@
 		{#if name === 'Colors'}
 			<div class="pal">
 				<!-- One entry per colour, surfaces first. A colour whose ink is a
-				     parameter shows it as a second editable tile; one whose ink is
-				     derived shows that ink painting an "A". -->
-				{#each palette as { token, partner, derivedInk } (token.name)}
+				     parameter shows it as a second editable tile; a derived ink
+				     is not shown. -->
+				{#each palette as { token, partner } (token.name)}
 					<div class="pal-item">
 						<div class="pal-tiles">
 							{@render tile(token)}
 							{#if partner}
 								{@render tile(partner)}
-							{:else if derivedInk}
-								<span
-									class="ui-swatch ct ct-derived"
-									style="--ui-swatch-color:var(--{token.name}); --ui-swatch-on-color:var(--{derivedInk});"
-									title="--{derivedInk} written on --{token.name}"
-								>A</span>
 							{/if}
 						</div>
 						<span class="pal-label">{shortName(token.name)}</span>

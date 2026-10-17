@@ -260,7 +260,7 @@
 		background-color: var(--color-surface-2);
 		transition: background-color 0.2s ease, box-shadow 0.25s ease;
 	}
-	.input:not(.input-ghost):hover {
+	.input:not(.input-ghost, :focus, :focus-within, :has([aria-expanded='true'])):hover {
 		background-color: var(--color-surface-3);
 	}
 	.input:is(:focus, :focus-within) {
@@ -273,7 +273,7 @@
 		background-size: calc(100% - 2 * var(--radius-field, 0.5em)) calc(0.14em * var(--scale));
 		box-shadow:
 			0 0 0 1px color-mix(in oklab, var(--peony-accent) 18%, #0000),
-			0 0.9em 1.4em -0.8em color-mix(in oklab, var(--peony-accent) 75%, #0000),
-			0 0.35em 0.6em -0.35em color-mix(in oklab, var(--peony-accent) 45%, #0000);
+			0 calc(0.9em * var(--peony-shadow, 1)) calc(1.4em * var(--peony-shadow, 1)) calc(-0.8em * var(--peony-shadow, 1)) color-mix(in oklab, var(--peony-accent) 75%, #0000),
+			0 calc(0.35em * var(--peony-shadow, 1)) calc(0.6em * var(--peony-shadow, 1)) calc(-0.35em * var(--peony-shadow, 1)) color-mix(in oklab, var(--peony-accent) 45%, #0000);
 	}
 }

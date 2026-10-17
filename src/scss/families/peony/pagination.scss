@@ -216,17 +216,56 @@
 		}
 	}
 
-	/* ── peony signature: soft pills ──
-	   Pages are bare numbers; the current one is a pill of the accent
-	   that glows, and the pointer finds a pale wash. */
+	/* ── peony signature: the drawn underline ──
+	   Pages are bare numbers on a soft square. The current page is not a
+	   button: it keeps no fill, takes the accent as ink, and the family's
+	   gradient — the line a focused field draws under itself — runs out
+	   from the centre under it. The numbers slide in the way the row moved. */
 	.pagination {
 		--pagination-item-bg: transparent;
 		--pagination-border-width: 0px;
 		--pagination-shadow: none;
-		--pagination-radius: 999px;
-		--pagination-hover-bg: color-mix(in oklab, var(--pagination-color) 10%, var(--color-surface-1));
+		--pagination-radius: var(--radius-field);
+		--pagination-hover-bg: color-mix(in oklab, var(--color-on-surface) 6%, #0000);
 	}
-	.pagination-item[aria-current='page'] {
-		box-shadow: 0 0.3em 0.8em -0.3em color-mix(in oklab, var(--pagination-color) 70%, #0000);
+	/* Every page the same width, so the row does not breathe as numbers
+	   grow a digit. */
+	.pagination:not(.pagination-dots, .pagination-bars) .pagination-item {
+		width: calc(var(--pagination-size) + 0.5em);
+		padding-inline: 0;
+		overflow: hidden;
+		background-image: linear-gradient(90deg, color-mix(in oklab, var(--pagination-color) 35%, #fff), var(--pagination-color));
+		background-repeat: no-repeat;
+		background-position: bottom center;
+		background-size: 0% calc(0.14em * var(--scale));
+		transition: color 0.15s, background-color 0.15s, background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.pagination:not(.pagination-dots, .pagination-bars) .pagination-item[aria-current='page'] {
+		color: var(--pagination-color);
+		background-color: transparent;
+		background-size: calc(100% - 2 * var(--radius-field, 0.5em)) calc(0.14em * var(--scale));
+		font-weight: 600;
+	}
+	.pagination-number {
+		display: inline-block;
+	}
+	.pagination[data-direction='next'] .pagination-number {
+		animation: peony-page-next 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.pagination[data-direction='previous'] .pagination-number {
+		animation: peony-page-previous 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	@keyframes peony-page-next {
+		from { opacity: 0; translate: 0.6em 0; }
+	}
+	@keyframes peony-page-previous {
+		from { opacity: 0; translate: -0.6em 0; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.pagination-item,
+		.pagination-number {
+			transition: none;
+			animation: none;
+		}
 	}
 }

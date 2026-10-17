@@ -91,7 +91,7 @@ body {
 	width: 2rem;
 	height: 2rem;
 	border-radius: 0.65rem;
-	background: linear-gradient(135deg, var(--ui-color-secondary), var(--ui-color-primary));
+	background: linear-gradient(135deg, color-mix(in oklab, var(--ui-color-primary) 55%, #fff), var(--ui-color-primary));
 	color: #fff;
 	font-weight: 800;
 	box-shadow: 0 0.35rem 0.9rem -0.35rem var(--ui-color-primary);
@@ -207,9 +207,14 @@ body {
    semantics two per line. Each tile is itself the picker. */
 .pal {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 0.9rem 0.75rem;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 0.9rem 0.4rem;
 }
+
+/* Five tiles to a row. A colour shown with its editable ink takes two
+   cells, so every tile keeps the same size whether it has a partner or
+   not. */
+.pal-item:has(.pal-tiles > :nth-child(2)) { grid-column: span 2; }
 
 .pal-item { display: flex; flex-direction: column; gap: 0.3rem; }
 .pal-item-wide { grid-column: 1 / -1; }
@@ -234,9 +239,6 @@ body {
 	cursor: pointer;
 	overflow: hidden;
 }
-
-/* The derived-content tiles are samples, not controls. */
-.ct-derived { cursor: default; }
 
 /* ── Parameter fields ────────────────────────────────────────────────────── */
 

@@ -146,7 +146,7 @@
 		--alert-border-width: 0px;
 		--alert-shadow:
 			0 0.1em 0.25em color-mix(in oklab, var(--color-on-surface) 5%, #0000),
-			0 0.75em 2em -0.75em color-mix(in oklab, var(--alert-color, var(--color-on-surface)) 30%, #0000);
+			0 calc(0.75em * var(--peony-shadow, 1)) calc(2em * var(--peony-shadow, 1)) calc(-0.75em * var(--peony-shadow, 1)) color-mix(in oklab, var(--alert-color, var(--color-on-surface)) 30%, #0000);
 	}
 	.alert-icon {
 		display: grid;
@@ -165,7 +165,7 @@
 		--alert-fg: var(--color-on-surface);
 		--alert-accent: color-mix(in oklab, var(--alert-color) 75%, var(--color-on-surface));
 		--alert-border-width: 0px;
-		--alert-shadow: 0 0.75em 2em -0.9em color-mix(in oklab, var(--alert-color) 55%, #0000);
+		--alert-shadow: 0 calc(0.75em * var(--peony-shadow, 1)) calc(2em * var(--peony-shadow, 1)) calc(-0.9em * var(--peony-shadow, 1)) color-mix(in oklab, var(--alert-color) 55%, #0000);
 		background-image: linear-gradient(
 			120deg,
 			color-mix(in oklab, var(--alert-color) 30%, var(--color-surface-1)),

@@ -134,7 +134,7 @@
 		--dropdown-border: var(--color-border);
 		--dropdown-border-width: 1px;
 		--dropdown-radius: var(--radius-box);
-		--dropdown-shadow: 0 12px 32px -16px oklch(0% 0 0 / 0.18), 0 12px 60px oklch(0% 0 0 / 0.08);
+		--dropdown-shadow: 0 calc(12px * var(--peony-shadow, 1)) calc(32px * var(--peony-shadow, 1)) calc(-16px * var(--peony-shadow, 1)) oklch(0% 0 0 / 0.18), 0 calc(12px * var(--peony-shadow, 1)) calc(60px * var(--peony-shadow, 1)) oklch(0% 0 0 / 0.08);
 		--dropdown-p: calc(0.25em * var(--scale));
 		--dropdown-gap: calc(0.25em * var(--scale));
 		--dropdown-z: 999;

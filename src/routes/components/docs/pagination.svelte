@@ -11,11 +11,12 @@
 	export const DOC: ComponentDoc = {
 		namespaces: ['pagination'],
 		description:
-			'A row of pages to jump between, with previous / next. The current page is marked by `aria-current="page"`, not by a class. Far pages fold into a gap. Three variants draw the same pages differently: dots, bars, count.',
+			'A row of pages to jump between, with previous / next. The current page is marked by `aria-current="page"`, not by a class. With `edges`, the first and last pages stay and far ones fold into a gap. Three variants draw the same pages differently: dots, bars, count.',
 		classes: {
 			'pagination-item': 'One page, or a previous / next control.',
 			'pagination-gap': 'The “…” standing for pages that are not drawn.',
 			'pagination-text': 'The “3 / 8” of the count variant.',
+			'pagination-number': 'The number inside a page; a new one on every change, so a family can animate it. The row carries `data-direction="next | previous"` after a move.',
 			'pagination-count': 'No page drawn: “3 / 8” between previous and next.',
 			'pagination-dots': 'A dot per page instead of its number — as under a carousel.',
 			'pagination-bars': 'A segment per page, stretched across the row.'
@@ -25,6 +26,7 @@
 				{ name: 'count', type: 'number', description: 'How many pages there are.' },
 				{ name: 'page', type: 'number', default: '$bindable(1)', description: 'The current page, from 1.' },
 				{ name: 'siblings', type: 'number', default: '1', description: 'Pages kept on each side of the current one before a gap.' },
+				{ name: 'edges', type: 'boolean', default: 'false', description: 'Keep the first and last pages, with a gap. Without (the default): only the window — `‹ 6 ›` with siblings 0, `‹ 5 6 7 ›` with 1.' },
 				{ name: 'controls', type: 'boolean', default: 'true (false for dots, bars)', description: 'Draw previous / next.' },
 				{ name: 'variant', type: "'dots' | 'bars' | 'count'", description: 'How the pages are drawn: dots, segments, or only “3 / 8” between previous and next.' },
 				{ name: 'onPage', type: '(page) => void', description: 'Called with the new page after every change.' },
@@ -48,12 +50,13 @@
 	import { Pagination } from '$lib/index.js';
 
 	let page = $state(6);
+	let windowPage = $state(6);
 </script>
 
 <Section
-	title="Default"
-	subtitle="Twelve pages: the far ones fold into gaps."
-	svelte={`<Pagination count={12} bind:page />`}
+	title="Edges"
+	subtitle="Twelve pages, with `edges`: the first and last stay, the far ones fold into gaps."
+	svelte={`<Pagination count={12} bind:page edges />`}
 	html={`<nav class="pagination">
 	<button class="pagination-item" aria-label="Previous page">‹</button>
 	<button class="pagination-item">1</button>
@@ -67,8 +70,25 @@
 </nav>`}
 >
 	<div style="display:flex; flex-direction:column; gap:.5rem; align-items:center;">
-		<Pagination count={12} bind:page />
+		<Pagination count={12} bind:page edges />
 		<small>page: {page}</small>
+	</div>
+</Section>
+
+<Section
+	title="Default: a window"
+	subtitle="Without `edges`, the default: the current page alone, or with a neighbour on each side."
+	svelte={`<Pagination count={32} bind:page siblings={0} />
+<Pagination count={32} bind:page />`}
+	html={`<nav class="pagination">
+	<button class="pagination-item" aria-label="Previous page">‹</button>
+	<button class="pagination-item" aria-current="page"><span class="pagination-number">6</span></button>
+	<button class="pagination-item" aria-label="Next page">›</button>
+</nav>`}
+>
+	<div style="display:flex; flex-direction:column; gap:.5rem; align-items:center;">
+		<Pagination count={32} bind:page={windowPage} siblings={0} />
+		<Pagination count={32} bind:page={windowPage} />
 	</div>
 </Section>
 

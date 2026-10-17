@@ -111,7 +111,7 @@
 		--light-intensity: 0;
 		border-radius: 9999px;
 	}
-	.chip:is(.chip-secondary, .chip-accent, .chip-info, .chip-success, .chip-warning) {
+	.chip:is(.chip-info, .chip-success, .chip-warning) {
 		color: color-mix(in oklab, var(--chip-color), var(--color-on-surface) 55%);
 	}
 }

@@ -24,6 +24,7 @@
 		help = '',
 		contrast = '',
 		small = false,
+		ink = false,
 		onchange
 	}: {
 		value: string;
@@ -33,6 +34,8 @@
 		contrast?: string;
 		/** Small when the tile is one control in a row rather than a palette. */
 		small?: boolean;
+		/** An ink: drawn as a letter in this colour on `contrast`, as text is. */
+		ink?: boolean;
 		onchange: (v: string) => void;
 	} = $props();
 
@@ -86,12 +89,14 @@
 <span class="box" class:small bind:this={box}>
 	<button
 		class="ui-swatch"
-		style:--ui-swatch-color={value}
+		class:ink
+		style:--ui-swatch-color={ink ? contrast || 'transparent' : value}
+		style:color={ink ? value : undefined}
 		onclick={toggle}
 		aria-expanded={open}
 		aria-label={label}
 		title="{label} — {value}"
-	></button>
+	>{#if ink}<span aria-hidden="true">Aa</span>{/if}</button>
 
 	{#if open}
 		<div class="panel" style:left="{at.x}px" style:top="{at.y}px" transition:slide={{ duration: 160 }}>
@@ -138,6 +143,12 @@
 </span>
 
 <style>
+	/* An ink reads as text: a letter of it on the ground it is written on. */
+	.ink {
+		font-weight: 700;
+		font-size: 1.05rem;
+		letter-spacing: -0.02em;
+	}
 	.box {
 		display: inline-flex;
 		position: relative;

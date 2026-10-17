@@ -144,6 +144,30 @@
 	}
 }
 
+/* peony's focused field: white, lit from below, the accent gradient
+   along the bottom edge, the arrow in the accent. Shared by every state
+   that means "in use": focus, an open list, an open native picker. */
+@mixin lifted {
+	--input-color: transparent;
+	outline: none;
+	background-color: var(--color-surface-1);
+	background-image:
+		linear-gradient(45deg, #0000 50%, var(--peony-accent) 50%),
+		linear-gradient(135deg, var(--peony-accent) 50%, #0000 50%),
+		linear-gradient(90deg, color-mix(in oklab, var(--peony-accent) 35%, #fff), var(--peony-accent));
+	background-repeat: no-repeat;
+	background-position: calc(100% - 20px) calc(1px + 50%),
+		calc(100% - 16.1px) calc(1px + 50%),
+		bottom center;
+	background-size: 4px 4px,
+		4px 4px,
+		calc(100% - 2 * var(--radius-field, 0.5em)) calc(0.14em * var(--scale));
+	box-shadow:
+		0 0 0 1px color-mix(in oklab, var(--peony-accent) 18%, #0000),
+		0 calc(0.9em * var(--peony-shadow, 1)) calc(1.4em * var(--peony-shadow, 1)) calc(-0.8em * var(--peony-shadow, 1)) color-mix(in oklab, var(--peony-accent) 75%, #0000),
+		0 calc(0.35em * var(--peony-shadow, 1)) calc(0.6em * var(--peony-shadow, 1)) calc(-0.35em * var(--peony-shadow, 1)) color-mix(in oklab, var(--peony-accent) 45%, #0000);
+}
+
 @mixin look {
 	:where(.select) {
 		width: unset;
@@ -216,12 +240,14 @@
 		max-height: min(24rem, 70dvh);
 		margin-inline: calc(0.5em * var(--scale));
 		translate: calc(-0.5em * var(--scale)) 0;
-		border: var(--border) solid var(--color-surface-2);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-box);
 		margin-block: calc(0.5em * var(--scale));
 		padding: calc(0.5em * var(--scale));
-		background-color: inherit;
-		box-shadow: 0 20px 25px -5px rgb(0 0 0 / calc(var(--depth) * 0.1)),
-				0 8px 10px -6px rgb(0 0 0 / calc(var(--depth) * 0.1));
+		background-color: var(--color-surface-1);
+		box-shadow:
+			0 calc(0.5em * var(--peony-shadow, 1)) calc(1.5em * var(--peony-shadow, 1)) calc(-0.25em * var(--peony-shadow, 1)) color-mix(in oklab, var(--color-on-surface) 16%, #0000),
+			0 calc(0.15em * var(--peony-shadow, 1)) calc(0.4em * var(--peony-shadow, 1)) color-mix(in oklab, var(--color-on-surface) 8%, #0000);
 	}
 	[dir="rtl"] .select::picker(select),
 		[dir="rtl"] .select select::picker(select) {
@@ -318,21 +344,35 @@
 		background-color: var(--color-surface-2);
 		transition: background-color 0.2s ease, box-shadow 0.25s ease;
 	}
-	.select:not(.select-ghost):hover {
+	.select:not(.select-ghost, :focus, :focus-within, [aria-expanded='true']):hover {
 		background-color: var(--color-surface-3);
 	}
-	/* A picker is not a typing field: no underline being drawn. Focused,
-	   it is a white tile lifted off the page, edged by a fine line of its
-	   accent, its arrow turned to the accent too. */
-	.select:is(:focus, :focus-within) {
-		--input-color: transparent;
-		outline: none;
-		background-color: var(--color-surface-1);
-		box-shadow:
-			0 0 0 1px color-mix(in oklab, var(--peony-accent) 40%, #0000),
-			0 0.1em 0.25em color-mix(in oklab, var(--color-on-surface) 6%, #0000),
-			0 0.6em 1.4em -0.6em color-mix(in oklab, var(--peony-accent) 35%, #0000);
-		background-image: linear-gradient(45deg, #0000 50%, var(--peony-accent) 50%),
-			linear-gradient(135deg, var(--peony-accent) 50%, #0000 50%);
+	/* Focused — or open, its list hanging under it — it takes the
+	   field's focus: white, lit from below, the accent gradient drawn
+	   along its bottom edge. The arrow stays, turned to the accent. */
+	.select:is(:focus, :focus-within),
+	.select[aria-expanded='true'] {
+		@include lifted;
+	}
+	/* A native picker in base-select appearance moves the focus to its
+	   option, in the top layer: the select is then neither :focus nor
+	   :focus-within, only :open. Guarded, because an unknown pseudo-class
+	   would void a whole selector list. */
+	@supports selector(:open) {
+		.select:is(:open, :has(select:open)),
+		.select:is(:open, :has(select:open)):hover {
+			@include lifted;
+		}
+	}
+	[dir="rtl"] .select:is(:focus, :focus-within),
+	[dir="rtl"] .select[aria-expanded='true'] {
+		background-position: calc(0% + 12px) calc(1px + 50%),
+			calc(0% + 16px) calc(1px + 50%),
+			bottom center;
+	}
+	/* The inner <select> inherits the frame's background: it would draw
+	   the line a second time, on its own wider box. */
+	.select:is(:focus, :focus-within) select {
+		background: transparent;
 	}
 }

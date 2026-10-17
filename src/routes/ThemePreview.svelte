@@ -265,7 +265,7 @@
 					<List rows={[...ORDERS]} row={orderRow} />
 					<div class="db-row db-between">
 						<span class="db-muted">Showing 4 of 128</span>
-						<Pagination count={32} bind:page size="sm" />
+						<Pagination count={32} bind:page edges size="sm" />
 					</div>
 				</Card>
 

@@ -366,7 +366,7 @@
 		}
 	}
 	/* soft on a pastel: the pastel itself is too pale to read as ink */
-	.btn-soft:is(.btn-secondary, .btn-accent, .btn-info, .btn-success, .btn-warning) {
+	.btn-soft:is(.btn-info, .btn-success, .btn-warning) {
 		--btn-fg: color-mix(in oklab, var(--btn-color), var(--color-on-surface) 55%);
 	}
 	.btn-dash {

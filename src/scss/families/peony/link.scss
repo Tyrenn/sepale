@@ -1,3 +1,4 @@
+@use 'sass:list';
 @use '../../_config' as c;
 
 /* peony — link.
@@ -46,7 +47,54 @@
 
 	@media (hover: hover) {
 		@each $color in c.$color-list {
-			.link-#{$color}:hover { color: color-mix(in oklab, var(--color-#{$color}) 80%, #000); }
+			.link-#{$color}:hover { color: color-mix(in oklab, var(--color-#{$color}) 70%, #fff); }
+		}
+	}
+
+	/* ── peony signature: the drawn underline ──
+	   At rest a faint hairline; hovered, the family's gradient — the
+	   light-to-colour sweep a focused field draws under itself — runs
+	   in from the left beneath the text. A background, not a
+	   text-decoration, so it can be a gradient and can grow. It wraps
+	   with the text: each line gets its own stroke. */
+	.link {
+		--peony-accent: var(--color-primary);
+		text-decoration-line: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.2em;
+		text-decoration-color: color-mix(in oklab, currentColor 30%, #0000);
+		background-image: linear-gradient(90deg, color-mix(in oklab, var(--peony-accent) 30%, #fff), var(--peony-accent));
+		background-repeat: no-repeat;
+		background-position: 0 100%;
+		background-size: 0% 0.12em;
+		-webkit-box-decoration-break: clone;
+		box-decoration-break: clone;
+		transition: background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1), text-decoration-color 0.2s, color 0.2s;
+	}
+	.link-hover {
+		text-decoration-color: transparent;
+	}
+	@each $color in c.$color-list {
+		.link-#{$color} {
+			--peony-accent: var(--color-#{$color});
+		}
+	}
+	/* Hovered, the text always goes lighter: a plain link towards a pale
+	   primary, a coloured one towards a pale version of its colour. */
+	$colored: ();
+	@each $color in c.$color-list {
+		$colored: list.append($colored, '.link-#{$color}', $separator: comma);
+	}
+	.link:not(#{$colored}):hover {
+		color: color-mix(in oklab, var(--peony-accent) 70%, #fff);
+	}
+	.link:hover {
+		text-decoration-color: transparent;
+		background-size: 100% 0.12em;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.link {
+			transition: none;
 		}
 	}
 }

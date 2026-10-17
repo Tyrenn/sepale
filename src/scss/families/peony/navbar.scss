@@ -117,6 +117,6 @@
 		--navbar-border-width: 0px;
 		--navbar-shadow:
 			0 0.1em 0.25em color-mix(in oklab, var(--color-on-surface) 5%, #0000),
-			0 0.75em 2em -1em color-mix(in oklab, var(--color-on-surface) 22%, #0000);
+			0 calc(0.75em * var(--peony-shadow, 1)) calc(2em * var(--peony-shadow, 1)) calc(-1em * var(--peony-shadow, 1)) color-mix(in oklab, var(--color-on-surface) 22%, #0000);
 	}
 }

@@ -1,0 +1,24 @@
+/* Theme "iris" - sage's white dashboard in business violet: a lilac-grey
+   page, white cards, a deep violet button, tight corners, a faint lift. */
+:root {
+	color-scheme: light;
+	--color-page: #f2f1f7;
+	--color-surface-1: #ffffff;
+	--color-surface-2: #f5f4fa;
+	--color-surface-3: #ebe9f3;
+	--color-surface-4: #dedbea;
+	--color-border: #d9d6e6;
+	--color-on-surface: #1e1b2e;
+	--color-primary: #5b3fd1;
+	--color-neutral: #75718a;
+	--color-info: #4f8fe0;
+	--color-success: #3faa78;
+	--color-warning: #e3a33e;
+	--color-error: #dc5a6e;
+	--radius-field: 0.375rem;
+	--radius-box: 0.625rem;
+	--radius-selector: 0.25rem;
+	--peony-shadow: 0.1;
+	--peony-glow: 0.6;
+	--peony-tint: 1;
+}

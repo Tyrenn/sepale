@@ -166,14 +166,16 @@
 
 	/* Sub-menu. The row count is animated on the <li>, so the <ul> needs no
 	   wrapper and no measured height: auto → 0fr collapses it. :has() lets the
-	   state class stay on the sub-menu it describes. */
+	   state class stay on the sub-menu it describes. The heading row is
+	   min-content, not auto: mid-transition the fr row leaves free space
+	   and an auto row stretches into it — the heading balloons. */
 	.menu li:has(> .menu-sub) {
 		display: grid;
-		grid-template-rows: auto 1fr;
+		grid-template-rows: min-content 1fr;
 		transition: grid-template-rows var(--menu-sub-transition);
 	}
 	.menu li:has(> .menu-sub-closed) {
-		grid-template-rows: auto 0fr;
+		grid-template-rows: min-content 0fr;
 	}
 	.menu .menu-sub {
 		display: flex;
