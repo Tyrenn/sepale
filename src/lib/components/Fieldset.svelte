@@ -16,9 +16,9 @@
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLFieldsetAttributes {
 		/** The group's heading. */
-		legend?: Snippet;
+		legend?: string | Snippet;
 		/** A note under the group. */
-		label?: Snippet;
+		label?: string | Snippet;
 		class?: string;
 		children?: Snippet;
 	}
@@ -36,7 +36,7 @@
 </script>
 
 <fieldset {...applied.rest} class={classes}>
-	{#if legend}<legend class="fieldset-legend">{@render legend()}</legend>{/if}
+	{#if legend}<legend class="fieldset-legend">{#if typeof legend === 'function'}{@render legend()}{:else}{legend}{/if}</legend>{/if}
 	{@render children?.()}
-	{#if label}<p class="fieldset-label">{@render label()}</p>{/if}
+	{#if label}<p class="fieldset-label">{#if typeof label === 'function'}{@render label()}{:else}{label}{/if}</p>{/if}
 </fieldset>

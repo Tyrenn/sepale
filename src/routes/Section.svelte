@@ -79,7 +79,7 @@
 		const shipped = classesByFamily[playground.family] ?? {};
 		const used = new Set<string>();
 		for (const m of htmlSrc.matchAll(/class="([^"]+)"/g)) {
-			for (const cls of m[1].split(/\s+/)) {
+			for (const cls of m[1]!.split(/\s+/)) {
 				if (knownClasses.has(cls) && !(cls in shipped)) used.add(cls);
 			}
 		}
@@ -91,7 +91,7 @@
 	let elsewhere = $derived(
 		missing.length
 			? Object.keys(classesByFamily)
-					.filter((f) => f !== playground.family && missing.every((c) => c in classesByFamily[f]))
+					.filter((f) => f !== playground.family && missing.every((c) => c in classesByFamily[f]!))
 					.sort()
 			: []
 	);

@@ -26,6 +26,7 @@
 				{ name: 'filters', type: 'boolean', default: 'true', description: 'Offer the handler’s filters.' },
 				{ name: 'sorts', type: 'boolean', default: 'true', description: 'Offer the handler’s sorts.' },
 				{ name: 'search', type: 'boolean', default: 'true', description: 'Draw a search field.' },
+				{ name: 'searchDelay', type: 'number', default: '300', description: 'Milliseconds without typing before the search is fetched: longer for a slow resource.' },
 				{ name: 'limits', type: 'number[] | false', default: '[5, 10, 25, 50, 100]', description: 'The page sizes to choose from.' },
 				{ name: 'pagination', type: "'top' | 'bottom' | 'both' | 'none'", default: "'bottom'", description: 'Where the pagination goes.' },
 				{ name: 'editing', type: 'boolean', default: 'true', description: 'Draw undo, redo, discard and save — when the handler can update.' },

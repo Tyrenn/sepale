@@ -13,6 +13,7 @@
 		type DataRow,
 		type DiscardChoice,
 		type EntityValue,
+		type EntitySuggestion,
 		type Filter,
 		type FilterValues,
 		type GetParams,

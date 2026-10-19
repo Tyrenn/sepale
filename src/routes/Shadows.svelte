@@ -103,7 +103,7 @@
 					</div>
 				</div>
 
-				{#each [['blur', 'Blur', 0, 40], ['spread', 'Spread', -10, 20]] as [k, name, lo, hi] (k)}
+				{#each ([['blur', 'Blur', 0, 40], ['spread', 'Spread', -10, 20]] as const) as [k, name, lo, hi] (k)}
 					<label class="slide"><span>{name}</span>
 						<input type="range" class="ui-range" min={lo} max={hi} step="1"
 							value={num(l[k as 'blur' | 'spread'])}

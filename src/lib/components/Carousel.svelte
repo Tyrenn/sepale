@@ -233,7 +233,7 @@
 		const view = vertical ? track.clientHeight : track.clientWidth;
 		const from = track.children[rendered];
 		const to = track.children[rendered < clones ? rendered + count : rendered - count];
-		const shift = anchor(to, vertical, view) - anchor(from, vertical, view);
+		const shift = anchor(to!, vertical, view) - anchor(from!, vertical, view);
 		track.scrollBy(vertical ? { top: shift, behavior: 'instant' } : { left: shift, behavior: 'instant' });
 		rendered += rendered < clones ? count : -count;
 	}
@@ -446,7 +446,7 @@
 		for (let step = 1; step <= Math.min(n, count - 1); step++) {
 			const i = current + step;
 			if (i >= count && !wraps) break;
-			list.push({ item: items[mod(i, count)], index: mod(i, count) });
+			list.push({ item: items[mod(i, count)]!, index: mod(i, count) });
 		}
 		return list;
 	});
@@ -478,7 +478,7 @@
 {#snippet duplicate(i: number)}
 	<!-- A duplicate is only a picture: out of the accessibility tree, out of reach. -->
 	<div class={`${PREFIX}-item`} aria-hidden="true" inert>
-		{@render children(items[i], i)}
+		{@render children(items[i]!, i)}
 	</div>
 {/snippet}
 

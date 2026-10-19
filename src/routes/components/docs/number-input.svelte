@@ -17,6 +17,8 @@
 				{ name: 'min / max / step', type: 'number', description: 'As on the native input; the buttons honour them.' },
 				{ name: 'disabled', type: 'boolean', default: 'false', description: 'No typing, no stepping.' },
 				{ name: 'onValue', type: '(value: number | null) => void', description: 'After every change, typed or stepped.' },
+				{ name: 'validator', type: 'boolean', default: 'false', description: 'Colour the field by its own validity (required, min, max, step) and reveal hint once the browser marks it invalid.' },
+				{ name: 'hint', type: 'Snippet', description: 'Shown under the field when it is invalid.' },
 				{ name: 'decreaseLabel / increaseLabel', type: 'string', description: "The buttons' accessible names." }
 			]
 		}

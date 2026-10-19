@@ -27,6 +27,7 @@ export { default as Select } from './components/Select.svelte';
 export { default as Combobox, type ComboboxSource } from './components/Combobox.svelte';
 export { default as ChipsInput, type ChipsInputField } from './components/ChipsInput.svelte';
 export { default as FileInput } from './components/FileInput.svelte';
+export { default as FileDropzone } from './components/FileDropzone.svelte';
 export { default as Calendar } from './components/Calendar.svelte';
 export { default as DatePicker } from './components/DatePicker.svelte';
 export { default as Checkbox } from './components/Checkbox.svelte';
@@ -101,6 +102,7 @@ export {
 	type DataRow,
 	type DiscardChoice,
 	type EntityValue,
+	type EntitySuggestion,
 	type Filter,
 	type FilterValues,
 	type GetParams,

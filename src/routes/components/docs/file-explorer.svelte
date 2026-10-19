@@ -132,16 +132,16 @@
 			{/snippet}
 			{#snippet details(items)}
 				{#if items.length === 1}
-					<strong>{items[0].name}</strong>
-					<p style="margin:.5em 0 0; opacity:.7">{items[0].kind === 'folder' ? 'Folder' : `${items[0].size?.toLocaleString()} bytes`}</p>
-					<p style="margin:.25em 0 0; opacity:.7">Modified {items[0].modified?.toLocaleDateString()}</p>
+					<strong>{items[0]!.name}</strong>
+					<p style="margin:.5em 0 0; opacity:.7">{items[0]!.kind === 'folder' ? 'Folder' : `${items[0]!.size?.toLocaleString()} bytes`}</p>
+					<p style="margin:.25em 0 0; opacity:.7">Modified {items[0]!.modified?.toLocaleDateString()}</p>
 				{:else}
 					<strong>{items.length} items selected</strong>
 				{/if}
 			{/snippet}
 			{#snippet menu({ items, close })}
 				<Menu
-					items={[{ label: `Open ${items.length > 1 ? `${items.length} items` : items[0].name}` }, { label: 'Rename' }, { label: 'Delete' }]}
+					items={[{ label: `Open ${items.length > 1 ? `${items.length} items` : items[0]!.name}` }, { label: 'Rename' }, { label: 'Delete' }]}
 					onSelect={(n) => {
 						log = `${n.label}`;
 						close();

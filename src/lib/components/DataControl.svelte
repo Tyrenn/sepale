@@ -100,7 +100,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
-	import type { DataHandlerState, DiscardChoice, EntityValue, Filter, HandledFilter, Sort } from './data-handler.svelte.js';
+	import type { DataHandlerState, DiscardChoice, EntitySuggestion, EntityValue, Filter, HandledFilter, Sort } from './data-handler.svelte.js';
 	import Button from './Button.svelte';
 	import Chip from './Chip.svelte';
 	import Dialog from './Dialog.svelte';
@@ -126,6 +126,8 @@
 		sorts?: boolean;
 		/** Draw a search field. Default true. */
 		search?: boolean;
+		/** Milliseconds without typing before the search is fetched. Default 300. */
+		searchDelay?: number;
 		/** The page sizes to choose from, or `false` for none. */
 		limits?: number[] | false;
 		/** Where the pagination goes. Default `bottom`. */
@@ -159,6 +161,7 @@
 		filters = true,
 		sorts = true,
 		search = true,
+		searchDelay = 300,
 		limits = [5, 10, 25, 50, 100],
 		pagination = 'bottom',
 		editing = true,
@@ -234,7 +237,7 @@
 				return v ? t.yes : t.no;
 			case 'entity': {
 				const e = v as EntityValue;
-				return f.show ? (f.show(e) ?? e.name ?? e.id) : (e.name ?? e.id);
+				return f.show ? f.show(e) : String(e.name ?? e.id);
 			}
 			case 'select': {
 				const chosen = v as string[];
@@ -331,10 +334,10 @@
 				placeholder={f.title}
 				value={valueOf(f)}
 				options={(q: string) => Promise.resolve(f.items(q))}
-				show={(s: EntityValue) => (f.show ? f.show(s) : (s.name ?? s.id))}
+				show={(s: EntitySuggestion) => (f.show ? f.show(s) : String(s.name ?? s.id))}
 				wait={f.wait}
 				eager
-				onSelect={(s) => set(f, s ?? undefined)}
+				onSelect={(s: EntitySuggestion | undefined) => set(f, s ? ({ id: String(s.id), name: s.name } satisfies EntityValue) : undefined)}
 			/>
 		{/if}
 	</div>
@@ -399,7 +402,7 @@
 					placeholder={t.search}
 					aria-label={t.search}
 					value={handler.search}
-					oninput={(e) => handler.changeSearch(e.currentTarget.value)}
+					oninput={(e) => handler.changeSearch(e.currentTarget.value, searchDelay)}
 				>
 					{#snippet start()}{@render icon('M21 21l-4.3-4.3M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z')}{/snippet}
 				</Input>

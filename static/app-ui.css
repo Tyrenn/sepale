@@ -1388,6 +1388,35 @@ svg {
   box-shadow: var(--ui-shadow-light, );
 }
 
+
+.ui-chip-remove {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.2em;
+  height: 1.2em;
+  margin: 0 -0.4em 0 0.1em;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.ui-chip-remove:hover,
+.ui-chip-remove:focus-visible {
+  opacity: 1;
+  background-color: color-mix(in oklab, currentColor 15%, rgba(0, 0, 0, 0));
+}
+
+.ui-chip-remove:disabled {
+  display: none;
+}
+
 .ui-dock {
   background-color: var(--ui-color-surface-1);
   position: fixed;

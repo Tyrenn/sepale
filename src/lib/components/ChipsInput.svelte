@@ -17,6 +17,8 @@
 		add: (value: string) => void;
 		/** Whether a value is already in the list. */
 		has: (value: string) => boolean;
+		/** `required` and no value yet: the field should say so to its form. */
+		missing: boolean;
 	}
 </script>
 
@@ -46,6 +48,12 @@
 		/** The default field's placeholder. */
 		placeholder?: string;
 		disabled?: boolean;
+		/** At least one value. The default field is then `required` while the list is empty. */
+		required?: boolean;
+		/** The default field's longest value. */
+		maxlength?: number;
+		/** Colour the default field by its validity, as Input's `validator`. */
+		validator?: boolean;
 		/** The field, given `add`. Defaults to a plain input (Enter or comma adds). */
 		field?: Snippet<[ChipsInputField]>;
 		/** How one chip reads. Defaults to the value. */
@@ -69,6 +77,9 @@
 		unique = true,
 		placeholder,
 		disabled = false,
+		required = false,
+		maxlength,
+		validator = false,
 		field,
 		chip,
 		onChange,
@@ -91,6 +102,7 @@
 		onChange?.(values);
 	}
 	const has = (value: string) => values.includes(`${value ?? ''}`.trim());
+	let missing = $derived(required && values.length === 0);
 
 	function remove(i: number) {
 		values = values.filter((_, n) => n !== i);
@@ -111,13 +123,15 @@
 
 <div {...applied.rest} class={classes}>
 	{#if field}
-		{@render field({ add, has })}
+		{@render field({ add, has, missing })}
 	{:else}
 		<input
-			class="input"
+			class={cx('input', validator && 'validator')}
 			bind:value={draft}
 			{placeholder}
 			{disabled}
+			{maxlength}
+			required={missing}
 			onkeydown={draftKeydown}
 			onblur={() => (add(draft), (draft = ''))}
 		/>

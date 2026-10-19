@@ -163,7 +163,7 @@
 							class="steps-marker"
 							aria-label={step.label ?? `${n + 1}`}
 							disabled={!reachable(state)}
-							onclick={() => onStep?.(own[0])}
+							onclick={() => onStep?.(own[0]!)}
 						>
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
 						</button>

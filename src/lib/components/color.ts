@@ -53,7 +53,7 @@ export function colorToHex(input: string): string {
 		ctx.fillStyle = resolved;
 		ctx.fillRect(0, 0, 1, 1);
 		const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-		return '#' + [r, g, b].map((n) => n.toString(16).padStart(2, '0')).join('');
+		return '#' + [r, g, b].map((n = 0) => n.toString(16).padStart(2, '0')).join('');
 	} catch {
 		return '#000000';
 	}
@@ -84,7 +84,7 @@ const lin = (v: number) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 
 
 export function toOklch(input: string): Oklch {
 	const hex = colorToHex(input);
-	const [r, g, b] = [1, 3, 5].map((i) => lin(parseInt(hex.slice(i, i + 2), 16) / 255));
+	const [r = 0, g = 0, b = 0] = [1, 3, 5].map((i) => lin(parseInt(hex.slice(i, i + 2), 16) / 255));
 
 	const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
 	const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
@@ -115,7 +115,7 @@ export const oklchToCss = ({ l, c, h }: Oklch) =>
 export function contrastRatio(a: string, b: string): number {
 	const lum = (x: string) => {
 		const hex = colorToHex(x);
-		const [r, g, bl] = [1, 3, 5].map((i) => lin(parseInt(hex.slice(i, i + 2), 16) / 255));
+		const [r = 0, g = 0, bl = 0] = [1, 3, 5].map((i) => lin(parseInt(hex.slice(i, i + 2), 16) / 255));
 		return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
 	};
 	const [x, y] = [lum(a), lum(b)];

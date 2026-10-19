@@ -19,7 +19,7 @@ export function categoryFor(family: string): string {
  */
 const GROUPS: { group: string; ids: string[] }[] = [
 	{ group: 'Actions', ids: ['button', 'link', 'join'] },
-	{ group: 'Form', ids: ['input', 'textarea', 'select', 'combobox', 'number-input', 'date-picker', 'calendar', 'color-picker', 'file-input', 'checkbox', 'radio', 'toggle', 'switch', 'range', 'rating', 'chips-input', 'editable'] },
+	{ group: 'Form', ids: ['input', 'textarea', 'select', 'combobox', 'number-input', 'date-picker', 'calendar', 'color-picker', 'file-input', 'file-dropzone', 'checkbox', 'radio', 'toggle', 'switch', 'range', 'rating', 'chips-input', 'editable'] },
 	{ group: 'Form layout', ids: ['label', 'floating-label', 'fieldset', 'validator'] },
 	{ group: 'Display', ids: ['text', 'avatar', 'badge', 'chip', 'swatch', 'bubble', 'card', 'stat', 'carousel'] },
 	{ group: 'Feedback', ids: ['alert', 'toast', 'loading', 'progress', 'radial-progress', 'skeleton', 'empty-state'] },
@@ -62,10 +62,10 @@ export const COMPONENTS: { group: string; items: { id: string; label: string }[]
 
 /** Themes available for a family (falls back to the first family's). */
 export function themesFor(family: string): ThemeData[] {
-	return themesByFamily[family] ?? themesByFamily[families[0]] ?? [];
+	return themesByFamily[family] ?? themesByFamily[families[0]!] ?? [];
 }
 
-const initialFamily = families[0];
+const initialFamily = families[0]!;
 const initialTheme = themesFor(initialFamily)[0];
 
 /** Shared, reactive playground state. */

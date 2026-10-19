@@ -121,7 +121,7 @@
 
 	const asList = (v: Value): Date[] => (v == null ? [] : Array.isArray(v) ? v : [v]);
 	const same = (a: Date[], b: Date[]) =>
-		a.length === b.length && a.every((d, i) => d.getTime() === b[i].getTime());
+		a.length === b.length && a.every((d, i) => d.getTime() === b[i]!.getTime());
 
 	/** Everything air-datepicker is told, but the dates and the callback. */
 	let settings = $derived<AirDatepickerOptions<HTMLElement>>({

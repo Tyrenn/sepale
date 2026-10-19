@@ -49,7 +49,7 @@ function seeded(seed: number) {
 }
 
 const random = seeded(42);
-const pick = <T>(list: readonly T[]) => list[Math.floor(random() * list.length)];
+const pick = <T>(list: readonly T[]) => list[Math.floor(random() * list.length)]!;
 
 let people: Person[] = Array.from({ length: 124 }, (_, i) => {
 	const first = FIRST[i % FIRST.length];
@@ -134,8 +134,9 @@ export async function getPeople(params: GetParams<Values>): Promise<GetResult<Pe
 			return (x < y ? -1 : x > y ? 1 : 0) * dir;
 		});
 	}
-	const start = (params.page - 1) * params.limit;
-	return { data: rows.slice(start, start + params.limit).map((p) => ({ ...p })), total: rows.length };
+	const { page = 1, limit = rows.length } = params;
+	const start = (page - 1) * limit;
+	return { data: rows.slice(start, start + limit).map((p) => ({ ...p })), total: rows.length };
 }
 
 export async function updatePerson({ id, data }: { id: string; data: Partial<Person> }) {

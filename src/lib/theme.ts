@@ -67,7 +67,7 @@ export function splitLength(value: string, fallbackUnit = 'rem'): [number, strin
 	const pick = parts.find((p) => p !== '0' && !/^0[a-z%]*$/i.test(p)) ?? parts[0] ?? '0';
 	const m = pick.match(/^(-?[\d.]+)\s*([a-z%]*)$/i);
 	if (!m) return [0, fallbackUnit];
-	return [parseFloat(m[1]) || 0, m[2] || fallbackUnit];
+	return [parseFloat(m[1]!) || 0, m[2] || fallbackUnit];
 }
 
 /* ------------------------------------------------------------------ *
@@ -107,7 +107,7 @@ export function edgeWidthFromCss(raw: string, fallbackUnit = 'px'): EdgeWidth {
 	}
 	return {
 		width: `${n}${u}`,
-		sides: { top: !zero(p[0]), right: !zero(p[1]), bottom: !zero(p[2]), left: !zero(p[3]) }
+		sides: { top: !zero(p[0] ?? '0'), right: !zero(p[1] ?? '0'), bottom: !zero(p[2] ?? '0'), left: !zero(p[3] ?? '0') }
 	};
 }
 
@@ -186,9 +186,9 @@ export function parseTheme(css: string): { vars: Record<string, string>; scheme?
 	const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
 	const vars: Record<string, string> = {};
 	for (const [, name, value] of clean.matchAll(/--([\w-]+)\s*:\s*([^;}]+)/g)) {
-		vars[name] = value.trim();
+		vars[name!] = value!.trim();
 	}
-	const scheme = clean.match(/(?:^|[\s;{])color-scheme\s*:\s*([^;}]+)/)?.[1].trim();
+	const scheme = clean.match(/(?:^|[\s;{])color-scheme\s*:\s*([^;}]+)/)?.[1]?.trim();
 	return { vars, scheme };
 }
 
@@ -220,7 +220,7 @@ function fromParam(p: FamilyParam): ThemeToken {
 }
 
 /** A neutral fallback for the rare caller with no family in hand. */
-export const defaultTheme: ThemeToken[] = (paramsByFamily[Object.keys(paramsByFamily)[0]] ?? []).map(
+export const defaultTheme: ThemeToken[] = (paramsByFamily[Object.keys(paramsByFamily)[0]!] ?? []).map(
 	fromParam
 );
 

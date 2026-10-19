@@ -219,7 +219,7 @@
 
 	/** The folders from the top down to the current one (the top excluded). */
 	let path: FileNode[] = $state([]);
-	let current: Folder = $derived(path.length ? path[path.length - 1] : top);
+	let current: Folder = $derived(path.length ? path[path.length - 1]! : top);
 
 	const expanded = new SvelteSet<string | number>();
 
@@ -298,7 +298,7 @@
 		if (e.shiftKey && anchor >= 0) {
 			if (!(e.ctrlKey || e.metaKey)) selected.clear();
 			const [a, b] = anchor < i ? [anchor, i] : [i, anchor];
-			for (let n = a; n <= b; n++) selected.add(items[n].id);
+			for (let n = a; n <= b; n++) selected.add(items[n]!.id);
 		} else if (e.ctrlKey || e.metaKey) {
 			if (selected.has(node.id)) selected.delete(node.id);
 			else selected.add(node.id);
@@ -337,7 +337,7 @@
 			content?.querySelector(`[data-index="${next}"]`)?.scrollIntoView({ block: 'nearest' });
 		} else if (e.key === 'Enter' && focusAt >= 0) {
 			e.preventDefault();
-			open(items[focusAt]);
+			open(items[focusAt]!);
 		} else if (e.key === 'Backspace') {
 			e.preventDefault();
 			up();
@@ -359,7 +359,7 @@
 	function contextmenu(e: MouseEvent, i: number) {
 		if (!menu) return;
 		e.preventDefault();
-		if (!selected.has(items[i].id)) selectAt(i, { ctrlKey: false, metaKey: false, shiftKey: false });
+		if (!selected.has(items[i]!.id)) selectAt(i, { ctrlKey: false, metaKey: false, shiftKey: false });
 		menuItems = items.filter((n) => selected.has(n.id));
 		menuAt = { x: e.clientX, y: e.clientY };
 	}
@@ -398,7 +398,7 @@
 	let dropKey = $state<string | number | null>(null);
 
 	function dragstart(e: DragEvent, i: number) {
-		if (!selected.has(items[i].id)) selectAt(i, { ctrlKey: false, metaKey: false, shiftKey: false });
+		if (!selected.has(items[i]!.id)) selectAt(i, { ctrlKey: false, metaKey: false, shiftKey: false });
 		const moving = items.filter((n) => selected.has(n.id));
 		if (onDrag?.(moving, e) === false) return e.preventDefault();
 		dragging = moving;

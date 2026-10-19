@@ -23,12 +23,12 @@
 			Fieldset: [
 				{
 					name: "legend",
-					type: "Snippet",
+					type: "string | Snippet",
 					description: "The group's heading."
 				},
 				{
 					name: "label",
-					type: "Snippet",
+					type: "string | Snippet",
 					description: "A note under the group."
 				}
 			]

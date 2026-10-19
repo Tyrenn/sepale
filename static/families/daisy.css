@@ -688,7 +688,7 @@ svg {
    variants. Two mixins, because index.scss emits every structure
    before any look (ADR 0010). */
 /* ============================================================
-   chip.scss — .chip (small inline label)
+   chip.scss — .chip (small inline label), .chip-remove (its remove button)
 
    Plumbing contract:
 	--chip-color  seed color (set by color-variants)
@@ -3351,6 +3351,35 @@ svg {
   background-color: var(--chip-bg);
   height: var(--size);
   box-shadow: var(--shadow-light, );
+}
+
+/* A remove button inside the chip (Chip's `onRemove`). */
+.chip-remove {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.2em;
+  height: 1.2em;
+  margin: 0 -0.4em 0 0.1em;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.chip-remove:hover,
+.chip-remove:focus-visible {
+  opacity: 1;
+  background-color: color-mix(in oklab, currentColor 15%, rgba(0, 0, 0, 0));
+}
+
+.chip-remove:disabled {
+  display: none;
 }
 
 .data-control {

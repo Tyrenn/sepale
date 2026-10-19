@@ -41,9 +41,15 @@
 					description: "Index of the selected tab. Bindable, so a parent can drive it."
 				},
 				{
+					name: "value",
+					type: "string | number",
+					default: "$bindable()",
+					description: "`value` of the selected tab, for tabs keyed by their own id (`{ value: 3, label: 'Null' }`) rather than by position. When set, it decides the selection over `active`."
+				},
+				{
 					name: "onSelect",
-					type: "(index: number) => void",
-					description: "Called with the new index when a tab is chosen."
+					type: "(index: number, value: string | number | undefined) => void",
+					description: "Called with the new index, and the tab's `value`, when a tab is chosen."
 				}
 			]
 		}

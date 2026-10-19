@@ -28,6 +28,9 @@
 				{ name: 'option', type: 'Snippet<[any]>', description: 'How one option is drawn.' },
 				{ name: 'start / end', type: 'Snippet', description: 'Inside the frame, before and after the text.' },
 				{ name: 'field', type: 'string', description: 'Extra classes on the .input frame: input-ghost, input-primary…' },
+				{ name: 'validator', type: 'boolean', default: 'false', description: 'Colour the field by its validity and reveal hint once the browser marks it invalid. A strict field left with text but no pick is invalid.' },
+				{ name: 'hint', type: 'Snippet', description: 'Shown under the field when it is invalid.' },
+				{ name: 'unpickedLabel', type: 'string', default: "'Pick an option from the list'", description: 'The validity message of a strict field left with text but no pick.' },
 				{ name: 'clear() / focus()', type: 'methods', description: 'Through bind:this.' }
 			]
 		}

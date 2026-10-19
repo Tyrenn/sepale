@@ -111,6 +111,12 @@
 	/** What is shown under the field. A disabled field shows nothing. */
 	let message = $derived(disabled ? '' : error || (typeof invalid === 'string' ? invalid : ''));
 
+	/* An error from outside is the field's validity too: a form holding it
+	   does not submit. */
+	$effect(() => {
+		element?.setCustomValidity(disabled || !error ? '' : error);
+	});
+
 	let classes = $derived(cx(PREFIX, applied.classes, (validator || !!message) && 'validator', klass));
 
 	const keyOf = (o: any) => (o !== null && typeof o === 'object' ? o[optionvalue] : o);

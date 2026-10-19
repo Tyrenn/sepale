@@ -7,7 +7,7 @@
 	import { playground, families, categoryFor } from '../playground.svelte.js';
 	import { familyDocs, paramsByFamily, themesByFamily } from '$lib/generated/registry.js';
 
-	let doc = $derived(familyDocs[playground.family]);
+	let doc = $derived(familyDocs[playground.family]!);
 	let params = $derived(paramsByFamily[playground.family] ?? []);
 	let themes = $derived(themesByFamily[playground.family] ?? []);
 

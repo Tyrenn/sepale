@@ -20,15 +20,22 @@
 	 * The buttons call its own `stepDown()` / `stepUp()`, so they honour the
 	 * same bounds. `value` is bindable — it is the field's own value.
 	 */
+	import type { Snippet } from 'svelte';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLInputAttributes, 'size' | 'value' | 'type'> {
+		/** Colour the field by its own validity (`required`, `min`, `max`, `step`)
+		    and reveal `hint` once the browser marks it invalid. */
+		validator?: boolean;
+		/** Shown under the field when it is invalid. */
+		hint?: Snippet;
 		/** Bindable. `null` when the field is empty. */
 		value?: number | null;
 		min?: number;
 		max?: number;
-		step?: number;
+		/** `any`: every value is valid, and the buttons move by 1. */
+		step?: number | 'any';
 		disabled?: boolean;
 		/** After every change, typed or stepped. */
 		onValue?: (value: number | null) => void;
@@ -40,6 +47,8 @@
 	// The axes are deliberately NOT destructured: they travel in `axes` and are
 	// resolved by name, so an axis a family drops changes nothing down here.
 	let {
+		validator = false,
+		hint,
 		value = $bindable(null),
 		min,
 		max,
@@ -53,7 +62,7 @@
 	}: Props = $props();
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
-	let classes = $derived(cx(PREFIX, applied.classes, klass));
+	let classes = $derived(cx(PREFIX, applied.classes, validator && 'validator', klass));
 
 	let field: HTMLInputElement | undefined = $state();
 
@@ -65,7 +74,11 @@
 	function stepBy(up: boolean) {
 		if (!field) return;
 		if (field.value === '') field.value = String(min ?? 0);
-		else if (up) field.stepUp();
+		// stepUp() throws without a step: move by 1, within the bounds.
+		else if (step === 'any') {
+			const next = field.valueAsNumber + (up ? 1 : -1);
+			field.value = String(Math.min(max ?? Infinity, Math.max(min ?? -Infinity, next)));
+		} else if (up) field.stepUp();
 		else field.stepDown();
 		read();
 		field.dispatchEvent(new Event('change', { bubbles: true }));
@@ -102,3 +115,4 @@
 		onclick={() => stepBy(true)}>+</button
 	>
 </div>
+{#if hint}<p class="validator-hint">{@render hint()}</p>{/if}

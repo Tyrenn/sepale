@@ -90,7 +90,7 @@
 	/** Item i goes to lane i mod n: row by row, as a reader expects. */
 	let lanes = $derived.by(() => {
 		const out: { item: Item; index: number }[][] = Array.from({ length: count }, () => []);
-		items.forEach((it, index) => out[index % count].push({ item: it, index }));
+		items.forEach((it, index) => out[index % count]!.push({ item: it, index }));
 		return out;
 	});
 

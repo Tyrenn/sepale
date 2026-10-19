@@ -33,6 +33,13 @@
 		 * is a prop and not something you write yourself.
 		 */
 		hint?: Snippet;
+		/**
+		 * An error from outside (the server said no): marks the field invalid and
+		 * shows this, for as long as it is given. The parent owns it.
+		 */
+		error?: string | null;
+		/** The `<textarea>` itself. Bindable. */
+		element?: HTMLTextAreaElement;
 		class?: string;
 		value?: string | number;
 	}
@@ -42,14 +49,28 @@
 	let {
 		validator = false,
 		hint,
+		error = null,
+		element = $bindable(),
+		disabled = false,
 		value = $bindable(''),
 		class: klass = '',
 		...axes
 	}: Props = $props();
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
-	let classes = $derived(cx(PREFIX, applied.classes, validator && 'validator', klass));
+	let failed = $derived(!disabled && !!error);
+	let classes = $derived(cx(PREFIX, applied.classes, (validator || failed) && 'validator', klass));
+
+	/* An error from outside is the field's validity too: a form holding it
+	   does not submit. */
+	$effect(() => {
+		element?.setCustomValidity(failed ? (error ?? '') : '');
+	});
 </script>
 
-<textarea {...applied.rest} class={classes} bind:value></textarea>
-{#if hint}<p class="validator-hint">{@render hint()}</p>{/if}
+<textarea aria-invalid={failed ? 'true' : undefined} {...applied.rest} {disabled} bind:this={element} class={classes} bind:value></textarea>
+{#if failed}
+	<p class="validator-hint">{error}</p>
+{:else if hint}
+	<p class="validator-hint">{@render hint()}</p>
+{/if}

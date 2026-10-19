@@ -27,9 +27,9 @@ export type EntityFilter<ID extends string = string> = {
 	title: string;
 	type: 'entity';
 	/** The suggestions for what is being typed. */
-	items: (query: string) => PromiseLike<EntityValue[]> | EntityValue[];
-	/** The text of one suggestion. Default: its `name`, else its `id`. */
-	show?: (suggestion: EntityValue) => string;
+	items: (query: string) => PromiseLike<EntitySuggestion[]> | EntitySuggestion[];
+	/** The text of one suggestion, and of the value. Default: its `name`, else its `id`. */
+	show?: (suggestion: EntitySuggestion) => string;
 	/** Milliseconds without typing before `items` is asked. */
 	wait?: number;
 };
@@ -79,7 +79,10 @@ export type Filter<ID extends string = string> = Readonly<
 	| TextFilter<ID>
 >;
 
+/** A picked entity: what the filter holds, and what the address bar writes. */
 export type EntityValue = { id: string; name?: string };
+/** A suggestion for an entity filter. A numeric id is written as text once picked. */
+export type EntitySuggestion = { id: string | number; name?: string };
 
 type FilterValueMap<V extends string = string> = {
 	text: string;
@@ -115,9 +118,10 @@ export type GetParams<FV> = {
 	filters: FV;
 	search?: string;
 	sort?: { id: string; value: 'asc' | 'desc' };
-	limit: number;
-	/** From 1. */
-	page: number;
+	/** The handler always sends it; a direct call may leave it out. */
+	limit?: number;
+	/** From 1. The handler always sends it; a direct call may leave it out. */
+	page?: number;
 };
 
 export type GetResult<Model> = { data?: Model[]; total?: number };
@@ -680,10 +684,10 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 		   that touched other rows too (a reset of everything) loses only this
 		   row. Done out of order, it cannot be redone. */
 		for (let i = this.#undo.length - 1; i >= 0; i--) {
-			const at = this.#undo[i].findIndex((s) => s.id === id);
+			const at = this.#undo[i]!.findIndex((s) => s.id === id);
 			if (at < 0) continue;
-			const [s] = this.#undo[i].splice(at, 1);
-			if (!this.#undo[i].length) this.#undo.splice(i, 1);
+			const s = this.#undo[i]!.splice(at, 1)[0]!;
+			if (!this.#undo[i]!.length) this.#undo.splice(i, 1);
 			this.#apply(id, s.before);
 			this.#redo = [];
 			return;

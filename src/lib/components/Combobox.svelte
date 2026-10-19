@@ -58,7 +58,7 @@
 		strict?: boolean;
 		/** Pick several. Implies strict. */
 		multiple?: boolean;
-		/** The pick(s) it starts with — the text, when not strict. Read once. */
+		/** The pick(s) — the text, when not strict. Followed when changed from outside. */
 		value?: any;
 		/** A pick changed: the option, `undefined` when dropped, or the list with `multiple`. */
 		onSelect?: (value: any) => void;
@@ -83,6 +83,14 @@
 		noresult?: string;
 		/** Extra classes on the `.input` frame: `input-ghost`, `input-primary`… */
 		field?: string;
+		/** Colour the field by its validity and reveal `hint` once the browser
+		    marks it invalid. A strict field holding typed text but no pick is
+		    invalid, with `unpickedLabel` as its message. */
+		validator?: boolean;
+		/** Shown under the field when it is invalid. */
+		hint?: Snippet;
+		/** The validity message of a strict field left with text but no pick. */
+		unpickedLabel?: string;
 		class?: string;
 	}
 
@@ -108,9 +116,15 @@
 		end,
 		noresult = 'No results',
 		field = '',
+		validator = false,
+		hint,
+		unpickedLabel = 'Pick an option from the list',
 		name,
 		disabled = false,
 		class: klass = '',
+		onfocus,
+		onblur,
+		onkeydown,
 		...axes
 	}: Props = $props();
 
@@ -159,6 +173,33 @@
 	let ticket = 0;
 
 	let input: HTMLInputElement | undefined = $state();
+
+	/* A `value` changed from outside (a form reset, another field) replaces
+	   the pick(s). A value echoing the current pick changes nothing, so a
+	   parent writing back what `onSelect` gave it does not disturb a search. */
+	const same = (a: any, b: any) => (a == null || b == null ? a == b : keyOf(a) === keyOf(b));
+	$effect(() => {
+		const next = initial;
+		untrack(() => {
+			if (many) {
+				const list = Array.isArray(next) ? next : [];
+				const now = picked as any[];
+				if (list.length === now.length && list.every((o, i) => same(o, now[i]))) return;
+				picked = [...list];
+			} else if (picks) {
+				if (same(next, picked)) return;
+				picked = next;
+				lastPicked = next;
+				query = undefined;
+			} else if (`${next ?? ''}` !== text) text = `${next ?? ''}`;
+		});
+	});
+
+	/* A strict field's text is only a search: left with text but no pick, it
+	   holds nothing, and says so to the form (an empty one is `required`'s). */
+	$effect(() => {
+		input?.setCustomValidity(strict && !multiple && picked == null && shown.trim() !== '' ? unpickedLabel : '');
+	});
 
 	const isPicked = (o: any) =>
 		multiple ? (picked as any[]).some((p) => keyOf(p) === keyOf(o)) : picked != null && keyOf(picked) === keyOf(o);
@@ -307,13 +348,21 @@
 		timer = setTimeout(search, wait);
 	}
 
-	function handleFocus() {
+	/* The caller's own focus, blur and keydown run after ours: a key the list
+	   used (an arrow moving in it, Enter picking) reaches them prevented. */
+	function handleFocus(e: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) {
 		// A multiple field shows its summary at rest, and an empty search when in use.
 		if (multiple) query = '';
 		if (eager) search();
+		onfocus?.(e);
 	}
 
-	function handleBlur() {
+	function handleBlur(e: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) {
+		blurred();
+		onblur?.(e);
+	}
+
+	function blurred() {
 		close();
 		if (multiple) {
 			query = undefined;
@@ -330,7 +379,12 @@
 		query = undefined;
 	}
 
-	function handleKeydown(e: KeyboardEvent) {
+	function handleKeydown(e: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement }) {
+		listKeydown(e);
+		onkeydown?.(e);
+	}
+
+	function listKeydown(e: KeyboardEvent) {
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
 			if (!open) search();
@@ -350,7 +404,7 @@
 </script>
 
 <div class={classes}>
-	<label bind:this={frame} class={cx('input', field)}>
+	<label bind:this={frame} class={cx('input', field, validator && 'validator')}>
 		{@render start?.()}
 		<!-- Password managers fill a field without going through the list,
 		     which would leave a value with no pick: keep them away. -->
@@ -429,6 +483,7 @@
 			</ul>
 		{/if}
 	</label>
+	{#if hint}<p class="validator-hint">{@render hint()}</p>{/if}
 
 	{#if strict}
 		<!-- What was chosen, for a form and for whoever reads the DOM. -->

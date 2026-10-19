@@ -22,9 +22,11 @@
 	import type { Snippet } from 'svelte';
 
 	/** One tab, and optionally the panel it reveals. */
-	export interface TabItem {
+	export interface TabItem<V = string | number> {
 		/** The tab's text, or a snippet drawing whatever belongs in its place. */
 		label: string | Snippet;
+		/** What identifies the tab when the strip is driven by `value` rather than by index. */
+		value?: V;
 		/** Unreachable, and drawn as such. */
 		disabled?: boolean;
 		/** What the tab shows when selected. Omit to place panels yourself. */
@@ -32,7 +34,7 @@
 	}
 </script>
 
-<script lang="ts">
+<script lang="ts" generics="V extends string | number">
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
@@ -43,16 +45,19 @@
 		 * The tabs, in order. A tab's `label` takes a snippet as readily as a
 		 * string, for the one tab that carries an icon or a count.
 		 */
-		tabs?: TabItem[];
+		tabs?: TabItem<V>[];
 		/**
 		 * How to draw the inside of every tab. Written once for the whole strip;
 		 * a tab whose own `label` is a snippet skips it.
 		 */
-		tab?: Snippet<[TabItem]>;
+		tab?: Snippet<[TabItem<V>]>;
 		/** Index of the selected tab. Bindable, so a parent can drive it. */
 		active?: number;
-		/** Called with the new index when a tab is chosen. */
-		onSelect?: (index: number) => void;
+		/** `value` of the selected tab, for tabs keyed by their own id rather than by
+		    position. Bindable. When set, it decides the selection over `active`. */
+		value?: V;
+		/** Called with the new index, and the tab's `value`, when a tab is chosen. */
+		onSelect?: (index: number, value: V | undefined) => void;
 		/** Slide the selection from one tab to the next. Not with `lift`, whose
 		    tab opens into its panel. */
 		animated?: boolean;
@@ -63,6 +68,7 @@
 		tabs = [],
 		tab,
 		active = $bindable(0),
+		value = $bindable(),
 		onSelect,
 		animated = true,
 		class: klass = '',
@@ -72,6 +78,9 @@
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
+	/* The selected index: from `value` when the strip is keyed by value, else `active`. */
+	let current = $derived(value !== undefined ? tabs.findIndex((t) => t.value === value) : active);
+
 	let root: HTMLDivElement | undefined = $state();
 	let box = $state({ x: 0, y: 0, w: 0, h: 0 });
 
@@ -79,10 +88,10 @@
 	   and again whenever the strip resizes (a font, a wrap, a panel). */
 	$effect(() => {
 		if (!animated || !root) return;
-		void active;
+		void current;
 		void tabs.length;
 		const measure = () => {
-			const item = root?.querySelectorAll<HTMLElement>(`:scope > [role="tab"]`)[active];
+			const item = root?.querySelectorAll<HTMLElement>(`:scope > [role="tab"]`)[current];
 			box = item
 				? { x: item.offsetLeft, y: item.offsetTop, w: item.offsetWidth, h: item.offsetHeight }
 				: { x: 0, y: 0, w: 0, h: 0 };
@@ -95,11 +104,12 @@
 
 	function select(i: number) {
 		active = i;
-		onSelect?.(i);
+		if (tabs[i]?.value !== undefined) value = tabs[i].value;
+		onSelect?.(i, tabs[i]?.value);
 	}
 </script>
 
-{#snippet inside(item: TabItem)}
+{#snippet inside(item: TabItem<V>)}
 	{#if typeof item.label === 'function'}{@render item.label()}
 	{:else if tab}{@render tab(item)}
 	{:else}{item.label}{/if}
@@ -118,10 +128,10 @@
 			role="tab"
 			class={cx(
 				`${PREFIX}-item`,
-				i === active && `${PREFIX}-item-active`,
+				i === current && `${PREFIX}-item-active`,
 				item.disabled && `${PREFIX}-item-disabled`
 			)}
-			aria-selected={i === active}
+			aria-selected={i === current}
 			disabled={item.disabled}
 			onclick={() => select(i)}
 		>{@render inside(item)}</button>
