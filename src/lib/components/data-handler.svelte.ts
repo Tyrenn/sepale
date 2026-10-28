@@ -56,6 +56,8 @@ export type SelectFilter<ID extends string = string, V extends string = string> 
 	options: { name: string; value: V }[];
 	multiple?: boolean;
 	nullable?: boolean;
+	/** In a `fields` control, show a choice among few options as a switch rather than a select. */
+	switch?: boolean;
 };
 
 export type BooleanFilter<ID extends string = string> = {

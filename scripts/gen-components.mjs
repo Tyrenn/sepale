@@ -29,6 +29,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compile } from 'svelte/compiler';
 import { familyComponent, axisSuffix, camel } from './family-component.mjs';
+/* Shared with the prefix rename (ADR 0007): what a class is, and which ones are not ours. */
+import { classesIn, isExternal } from './prefix.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const srcDir = join(root, 'src/lib/components');
@@ -37,20 +39,6 @@ const outDir = join(root, 'src/generated/components');
 const docFile = join(root, 'src/lib/generated/components.ts');
 const pagesDir = join(root, 'src/routes/components/docs');
 
-/**
- * Classes we WRITE but do not OWN. They belong to somebody else's stylesheet
- * (daisyUI's `.filter` wrapper, Tailwind Typography's `.prose`) and we only
- * ever name them to qualify our own selectors: `.prose :where(a.btn)`,
- * `:not(.filter .btn)`. Referencing a namespace is not owning it — see
- * CONTEXT.md — but a class name scraped out of compiled CSS cannot tell the
- * two apart, so the list is written down.
- */
-const EXTERNAL = new Set(['prose', 'filter']);
-/* A vendored library's own classes, reached into from under a class of ours:
-   `calendar.scss` styles `.calendar .air-datepicker-cell` (ADR 0009,
-   integration). Never ours to classify. */
-const EXTERNAL_PREFIXES = ['air-datepicker'];
-const isExternal = (cls) => EXTERNAL.has(cls) || EXTERNAL_PREFIXES.some((p) => cls.startsWith(p));
 
 /* The package's per-family entry points (ADR 0012): `sepale/<family>`. */
 const entryDir = join(root, 'src/lib/families');
@@ -191,20 +179,6 @@ function documentedNamespaces() {
 
 const NL = String.fromCharCode(10);
 const TAB = String.fromCharCode(9);
-
-/** Every class name in a stylesheet. Comments go first — a doc comment
- *  mentioning `.badge-{position}` is not a class — and so do quoted strings and
- *  url(), or the `w3.org` inside an inline SVG would read as a class `.org`. */
-function classesIn(css) {
-	const clean = css
-		.replace(/\/\*[\s\S]*?\*\//g, '')
-		.replace(/url\([^)]*\)/g, '')
-		/* Bounded to one line, always: a CSS string cannot span a newline, and an
-		   unbalanced quote (there are ~490 apostrophes in a family stylesheet)
-		   would otherwise swallow the rest of the file and its classes with it. */
-		.replace(/"[^"\n]*"|'[^'\n]*'/g, '');
-	return new Set([...clean.matchAll(/\.([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)].map((m) => m[1]));
-}
 
 /** Read a `export const NAME = <literal> as const;` out of a component. */
 function readConst(src, name) {

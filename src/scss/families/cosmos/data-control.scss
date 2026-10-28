@@ -147,6 +147,60 @@
 		width: var(--data-control-editor);
 		padding: calc(0.5em * var(--scale));
 	}
+	/* With `fields`, a filter is a field in the bar, and the page size and the
+	   sort sit with the pagination. */
+	.data-control-field {
+		display: flex;
+		flex-direction: column;
+		gap: calc(0.25em * var(--scale));
+		flex: 1 1 var(--data-control-field, calc(11em * var(--scale)));
+		max-width: calc(20em * var(--scale));
+		min-width: 0;
+	}
+	.data-control-bar:has(> .data-control-bar-left > .data-control-field) .data-control-bar-left {
+		align-items: flex-end;
+	}
+	.data-control-page-options {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--data-control-bar-gap);
+	}
+	/* The actions of a `fields` control (save, undo, delete, export…) are a row of
+	   their own, apart from the filters. */
+	.data-control-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--data-control-bar-gap);
+	}
+	.data-control-actions-start,
+	.data-control-actions-end {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--data-control-bar-gap);
+	}
+	.data-control-actions-end {
+		margin-inline-start: auto;
+	}
+	/* The filters past the ones that always show: a row of fields that slides open. */
+	.data-control-more {
+		display: flex;
+		flex: 1 1 100%;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		gap: var(--data-control-bar-gap);
+	}
+	.data-control-field-label {
+		color: var(--data-control-muted);
+		font-size: 0.75em;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
 
 	.data-control-pagination {
 		display: flex;

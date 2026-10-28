@@ -16,6 +16,7 @@
 	--btn-color    color seed — set by `color-variants`, drives bg/outline
 	--btn-bg       resolved background color
 	--btn-fg       resolved text color
+	--btn-icon     icon color                   (structure default: currentColor, the text color)
 	--btn-border   resolved border color        (structure default: transparent)
 	--btn-shadow   box-shadow value             (structure default: var(--shadow-light))
 	--btn-p        inline padding
@@ -131,6 +132,7 @@
 	}
 	.btn svg {
 		height: 1em;
+		color: var(--btn-icon, currentColor);
 	}
 	.btn:focus-visible,
 		.btn:has(:focus-visible) {

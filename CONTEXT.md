@@ -66,7 +66,7 @@ every class under it is that component's to name, paint, document and ship
 (ADR 0009). A file may *reference* another component's namespace without owning
 it: `validator.scss` styles `.input`, `join.scss` reaches into `.btn`. That is
 integration, not ownership.
-_Avoid_: prefix (that is the eventual bundle-time rename, ADR 0007), scope
+_Avoid_: prefix (that is the delivery-time rename, ADR 0007: `sp-btn` is still the `btn` namespace), scope
 
 **Part**:
 A class for a piece the component is made of, put on the element that plays

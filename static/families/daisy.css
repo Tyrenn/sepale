@@ -486,6 +486,7 @@ svg {
 	--btn-color    color seed — set by `color-variants`, drives bg/outline
 	--btn-bg       resolved background color
 	--btn-fg       resolved text color
+	--btn-icon     icon color                   (structure default: currentColor, the text color)
 	--btn-border   resolved border color        (structure default: transparent)
 	--btn-shadow   box-shadow value             (structure default: var(--shadow-light))
 	--btn-p        inline padding
@@ -3483,6 +3484,68 @@ svg {
   padding: calc(0.5em * var(--scale));
 }
 
+/* With `fields`, a filter is a field in the bar, and the page size and the
+   sort sit with the pagination. */
+.data-control-field {
+  display: flex;
+  flex-direction: column;
+  gap: calc(0.25em * var(--scale));
+  flex: 1 1 var(--data-control-field, calc(11em * var(--scale)));
+  max-width: calc(20em * var(--scale));
+  min-width: 0;
+}
+
+.data-control-bar:has(> .data-control-bar-left > .data-control-field) .data-control-bar-left {
+  align-items: flex-end;
+}
+
+.data-control-page-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--data-control-bar-gap);
+}
+
+/* The actions of a `fields` control (save, undo, delete, export…) are a row of
+   their own, apart from the filters. */
+.data-control-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--data-control-bar-gap);
+}
+
+.data-control-actions-start,
+.data-control-actions-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--data-control-bar-gap);
+}
+
+.data-control-actions-end {
+  margin-inline-start: auto;
+}
+
+/* The filters past the ones that always show: a row of fields that slides open. */
+.data-control-more {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--data-control-bar-gap);
+}
+
+.data-control-field-label {
+  color: var(--data-control-muted);
+  font-size: 0.75em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .data-control-pagination {
   display: flex;
   flex-wrap: wrap;
@@ -4733,6 +4796,21 @@ fieldset:disabled .input {
 
 .pagination-xl {
   --fontsize: var(--xl, var(--default-xl));
+}
+
+/* Segments: one bar cut into parts, each as wide as its share (--segment).
+   Not a <progress>, which has a single value. */
+.progress-segments {
+  display: flex;
+  gap: 0.125em;
+  overflow: hidden;
+}
+
+.progress-segment {
+  display: block;
+  flex: var(--segment, 1) 1 0;
+  min-width: 0;
+  background-color: var(--segment-color, currentColor);
 }
 
 .progress {
@@ -8374,6 +8452,7 @@ dialog.drawer[open] {
 
 .btn svg {
   height: 1em;
+  color: var(--btn-icon, currentColor);
 }
 
 .btn:focus-visible,

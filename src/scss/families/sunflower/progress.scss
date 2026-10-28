@@ -23,6 +23,19 @@
    ------------------------------------------------------------ */
 
 @mixin structure {
+	/* Segments: one bar cut into parts, each as wide as its share (--segment).
+	   Not a <progress>, which has a single value. */
+	.progress-segments {
+		display: flex;
+		gap: 0.125em;
+		overflow: hidden;
+	}
+	.progress-segment {
+		display: block;
+		flex: var(--segment, 1) 1 0;
+		min-width: 0;
+		background-color: var(--segment-color, currentColor);
+	}
 	.progress {
 		border-radius: var(--radius-box);
 		color: var(--color-on-surface);

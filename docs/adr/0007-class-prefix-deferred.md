@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # A class prefix is a bundle-time rename, deferred
@@ -19,6 +19,33 @@ compiled build per prefix.
 
 - Selectors must stay **renameable**: a class name is always a plain token in
   the selector, never assembled from fragments or hidden inside a construct a
-  substitution cannot see. This is a constraint on today's SCSS even though the
-  feature does not exist.
-- Nothing else is required now.
+  substitution cannot see.
+
+## How it landed (2026-10-23)
+
+A consumer met the collision (its own `.title` and `.chip` picked up the
+kit's), so the rename exists now — still as a delivery step, never in the
+source: `scripts/prefix.mjs` exports `prefixCss` and `prefixComponent`, and
+whoever copies a family calls them on what it copies. No prefix asked, nothing
+is called and the delivery is the unprefixed kit, as before. Sepale itself —
+the app, the docs, the package — stays unprefixed.
+
+- **Classes only.** Custom properties, keyframes, element selectors and
+  attributes keep their names: they never collided.
+- **The stylesheet is renamed token by token**, the way the app's chrome is
+  (`prefixChrome` in `build-css.mjs`); comments, strings and `url()` untouched,
+  external classes (`prose`, `filter`, `air-datepicker-*`) left to their owner.
+- **A component is renamed through its syntax tree**, not by substitution: the
+  same word is a class in one place and something else in the next
+  (`role="alert"`, `type="checkbox"`, `as === 'dialog'`). Renamed: `class`
+  attributes and `class:` directives, whatever flows into them in value
+  position (back to the declaration a `class={classes}` reads), classes tested
+  or toggled (`classes.includes`, `classList.*`) and classes in DOM selectors
+  (`querySelector('.…')`, `closest('.…')`). A template building a class
+  (`` `btn-${color}` ``) is renamed on its head.
+- **The constraint above gets a second half:** a component writes its classes
+  where the rename can see them — a string in a class attribute, or in what it
+  reads. A class reached any other way (built in a helper the attribute does
+  not reference, read back from `className`) would be missed.
+- Props that take classes from the consumer (`class`, `chipClass`, `field`)
+  take them prefixed: the consumer writes `sp-input-ghost`, not `input-ghost`.

@@ -9,15 +9,29 @@
 	} as const;
 
 	export const FLAGS = {} as const;
-	export const PARTS = [] as const;
+	export const PARTS = ['segments', 'segment'] as const;
 </script>
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { HTMLProgressAttributes } from 'svelte/elements';
+	import type { HTMLAttributes, HTMLProgressAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLProgressAttributes, 'color'> {
+	interface Segment {
+		/** Its share of the bar, against the others'. */
+		value: number;
+		/** A theme colour (`primary`, `warning`…) or any CSS colour (`color-mix(…)`). */
+		color?: string;
+		/** Read on hover, and by a screen reader. */
+		label?: string;
+	}
+
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLElement>, 'color'>,
+			Pick<HTMLProgressAttributes, 'value' | 'max'> {
+		/** Cut the bar into parts, each as wide as its `value` among the others.
+		    The bar then stands for a split rather than a progress: `value` and
+		    `max` are ignored. */
+		segments?: Segment[];
 		class?: string;
 	}
 
@@ -27,6 +41,7 @@
 		class: klass = '',
 		value,
 		max = 100,
+		segments,
 		...axes
 	}: Props = $props();
 
@@ -34,4 +49,17 @@
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 </script>
 
-<progress {...applied.rest} class={classes} {value} {max}></progress>
+{#if segments}
+	<div {...applied.rest} class={[classes, 'progress-segments']} role="img">
+		{#each segments as s, i (i)}
+			<span
+				class="progress-segment"
+				title={s.label}
+				style:--segment={s.value}
+				style:--segment-color={s.color && (/^[a-z]+$/.test(s.color) ? `var(--color-${s.color})` : s.color)}
+			></span>
+		{/each}
+	</div>
+{:else}
+	<progress {...applied.rest} class={classes} {value} {max}></progress>
+{/if}

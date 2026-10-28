@@ -531,4 +531,52 @@
 			0 0.1em 0.2em color-mix(in oklab, var(--color-on-surface) 6%, #0000),
 			0 0.4em 1em -0.3em color-mix(in oklab, var(--color-on-surface) 18%, #0000);
 	}
+
+	/* ── The plain strip ──
+	   A tabs with no variant is the switch's twin: a tinted track, the
+	   current tab a white tile on it, and along the tile's foot the
+	   family's drawn underline. Same measures, same colours, so a strip
+	   of tabs and a switch set side by side read as one family. The
+	   variants (border, lift, top, bottom) keep their own shapes. */
+	.tabs:not(.tabs-border, .tabs-lift, .tabs-top, .tabs-bottom) {
+		--tabs-pad: calc(0.2em * var(--scale));
+		--tabs-item-radius: calc(var(--radius-field) - var(--tabs-pad) / 2);
+		--tab-height: calc(2.1em * var(--scale));
+		--peony-accent: var(--color-primary);
+		gap: var(--tabs-pad);
+		padding: var(--tabs-pad);
+		border-radius: var(--radius-field);
+		background-color: var(--color-surface-2);
+	}
+	.tabs:not(.tabs-border, .tabs-lift, .tabs-top, .tabs-bottom):not(:has(> .tabs-item-content)) {
+		width: fit-content;
+	}
+	.tabs:not(.tabs-border, .tabs-lift, .tabs-top, .tabs-bottom) > .tabs-item {
+		border-radius: var(--tabs-item-radius);
+		font-weight: 500;
+		white-space: nowrap;
+	}
+	.tabs:not(.tabs-border, .tabs-lift, .tabs-top, .tabs-bottom) > .tabs-item:not(.tabs-item-active):hover {
+		background-color: transparent;
+	}
+	.tabs:not(.tabs-border, .tabs-lift, .tabs-top, .tabs-bottom) > .tabs-item:is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]) {
+		background-color: var(--color-surface-1);
+		box-shadow: 0 1px 3px color-mix(in oklab, #000 18%, #0000);
+		font-weight: 500;
+	}
+	.tabs:not(.tabs-border, .tabs-lift, .tabs-top, .tabs-bottom) > .tabs-item:not(.tabs-indicator) {
+		background-image: linear-gradient(90deg, color-mix(in oklab, var(--peony-accent) 35%, #fff), var(--peony-accent));
+		background-repeat: no-repeat;
+		background-position: bottom center;
+		background-size: 0% calc(0.14em * var(--scale));
+		transition: background-color 0.12s, color 0.12s, background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.tabs:not(.tabs-border, .tabs-lift, .tabs-top, .tabs-bottom) > .tabs-item:not(.tabs-indicator):is(.tabs-item-active, [aria-selected="true"], [aria-current="true"], [aria-current="page"]):not(.tabs-item-disabled, [disabled]) {
+		background-size: calc(100% - 2 * var(--tabs-item-radius)) calc(0.14em * var(--scale));
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.tabs:not(.tabs-border, .tabs-lift, .tabs-top, .tabs-bottom) > .tabs-item {
+			transition: none;
+		}
+	}
 }

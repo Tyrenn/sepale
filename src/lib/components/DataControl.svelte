@@ -24,6 +24,13 @@
 		'filter',
 		'filter-remove',
 		'editor',
+		'field',
+		'field-label',
+		'more',
+		'actions-start',
+		'actions-end',
+		'actions',
+		'page-options',
 		'pagination',
 		'range',
 		'body'
@@ -98,18 +105,21 @@
 	 * the handler was given its own `confirmDelete` / `confirmDiscard`.
 	 */
 	import type { Snippet } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 	import type { DataHandlerState, DiscardChoice, EntitySuggestion, EntityValue, Filter, HandledFilter, Sort } from './data-handler.svelte.js';
 	import Button from './Button.svelte';
 	import Chip from './Chip.svelte';
 	import Dialog from './Dialog.svelte';
+	import DatePicker from './DatePicker.svelte';
 	import Dropdown from './Dropdown.svelte';
 	import Input from './Input.svelte';
 	import Combobox from './Combobox.svelte';
 	import Menu from './Menu.svelte';
 	import Pagination from './Pagination.svelte';
 	import Select from './Select.svelte';
+	import Switch from './Switch.svelte';
 	import Toggle from './Toggle.svelte';
 
 	type Handler = DataHandlerState<F, Model, Id>;
@@ -122,6 +132,9 @@
 		children?: Snippet<[Handler]>;
 		/** Offer the handler's filters. Default true. */
 		filters?: boolean;
+		/** Draw every filter as a field in the bar, and the page size and the sort
+		    with the pagination, instead of a menu, chips and a select in the bar. */
+		fields?: boolean;
 		/** Offer the handler's sorts. Default true. */
 		sorts?: boolean;
 		/** Draw a search field. Default true. */
@@ -159,6 +172,7 @@
 		handler,
 		children,
 		filters = true,
+		fields = false,
 		sorts = true,
 		search = true,
 		searchDelay = 300,
@@ -265,6 +279,23 @@
 	let from = $derived(handler.total ? (handler.page - 1) * handler.limit + 1 : 0);
 	let to = $derived(Math.min(handler.page * handler.limit, handler.total ?? 0));
 
+	/* With `fields`: the search and this many filters show; the others open from a button. */
+	const FIELDS_SHOWN = 3;
+	const fieldFilters = $derived(handler.filters.filter((f) => !f.immutable));
+	const moreFilters = $derived(fieldFilters.slice(FIELDS_SHOWN));
+	const moreActive = $derived(moreFilters.filter((f) => valueOf(f) !== undefined && valueOf(f) !== null && valueOf(f) !== '').length);
+	// svelte-ignore state_referenced_locally
+	let showMore = $state(moreFilters.some((f) => valueOf(f) !== undefined));
+
+	const hasActions = $derived(
+		!!leftActions ||
+		!!rightActions ||
+		!!onAdd ||
+		!!exportable ||
+		(editing && handler.canUpdate) ||
+		(removable && handler.canDelete)
+	);
+
 	const sortKey = (s: Sort) => `${s.id}-${s.value}`;
 </script>
 
@@ -279,21 +310,47 @@
 			{#if (handler.pages ?? 1) > 1}
 				<Pagination count={handler.pages ?? 1} page={handler.page} onPage={(p) => handler.changePage(p)} />
 			{/if}
+			{#if fields}
+				<div class={`${PREFIX}-page-options`}>
+					{#if sorts && handler.sorts.length}
+						<Select
+							aria-label={t.sort}
+							nullable
+							placeholder={t.sort}
+							options={handler.sorts.map((x) => ({ value: sortKey(x), name: x.name }))}
+							value={handler.sort ? sortKey(handler.sort) : undefined}
+							onValue={(v) => handler.changeSort(handler.sorts.find((x) => sortKey(x) === v))}
+						/>
+					{/if}
+					{#if limits && limits.length}
+						<Select
+							aria-label={t.perPage(handler.limit)}
+							options={limits.map((n) => ({ value: String(n), name: t.perPage(n) }))}
+							value={String(handler.limit)}
+							onValue={(v) => handler.changeLimit(Number(v))}
+						/>
+					{/if}
+				</div>
+			{/if}
 		</div>
 	{/if}
 {/snippet}
 
-{#snippet editor(f: HandledFilter)}
-	<div class={`${PREFIX}-editor`}>
+{#snippet editor(f: HandledFilter, inline: boolean)}
+	<div class={inline ? `${PREFIX}-field` : `${PREFIX}-editor`}>
+		{#if inline}<span class={`${PREFIX}-field-label`}>{f.title}</span>{/if}
 		{#if f.type === 'text'}
 			<Input
-				placeholder={f.title}
+				placeholder={inline ? undefined : f.title}
+				aria-label={f.title}
 				value={(valueOf(f) as string) ?? ''}
 				oninput={(e) => set(f, e.currentTarget.value || undefined, 400)}
 			/>
 		{:else if f.type === 'number'}
 			<Input
 				type="number"
+				placeholder={undefined}
+				aria-label={f.title}
 				min={f.min}
 				max={f.max}
 				step={f.step}
@@ -304,13 +361,26 @@
 				}}
 			/>
 		{:else if f.type === 'date'}
-			<Input
-				type="date"
-				value={dateValue(valueOf(f))}
-				onchange={(e) => {
-					const d = e.currentTarget.valueAsDate;
-					set(f, d ?? undefined);
-				}}
+			<DatePicker
+				value={(valueOf(f) as Date | undefined) ?? null}
+				onChange={(d) => set(f, d instanceof Date ? d : undefined)}
+			/>
+		{:else if f.type === 'boolean' && inline}
+			<Select
+				options={[{ value: 'yes', name: t.yes }, { value: 'no', name: t.no }]}
+				nullable
+				placeholder={t.any}
+				aria-label={f.title}
+				value={valueOf(f) === undefined || valueOf(f) === null ? undefined : valueOf(f) ? 'yes' : 'no'}
+				onValue={(v) => set(f, v ? v === 'yes' : undefined)}
+			/>
+		{:else if f.type === 'select' && inline && f.switch && !f.multiple}
+			<Switch
+				size="sm"
+				label={f.title}
+				options={[{ value: '', label: t.any }, ...f.options.map((o) => ({ value: String(o.value), label: o.name }))]}
+				value={(valueOf(f) as string[] | undefined)?.[0] ?? ''}
+				onChange={(v) => set(f, v ? [v] : undefined)}
 			/>
 		{:else if f.type === 'select'}
 			<Select
@@ -318,7 +388,8 @@
 				multiple={f.multiple}
 				nullable={f.nullable ?? true}
 				placeholder={t.any}
-				value={f.multiple ? ((valueOf(f) as string[]) ?? []) : ((valueOf(f) as string[] | undefined)?.[0] ?? '')}
+				aria-label={f.title}
+				value={f.multiple ? ((valueOf(f) as string[]) ?? []) : ((valueOf(f) as string[] | undefined)?.[0])}
 				onValue={(v) => {
 					const list = Array.isArray(v) ? v : v ? [v] : [];
 					set(f, list.length ? list : undefined);
@@ -331,7 +402,8 @@
 			</label>
 		{:else if f.type === 'entity'}
 			<Combobox
-				placeholder={f.title}
+				placeholder={inline ? t.any : f.title}
+				aria-label={f.title}
 				value={valueOf(f)}
 				options={(q: string) => Promise.resolve(f.items(q))}
 				show={(s: EntitySuggestion) => (f.show ? f.show(s) : String(s.name ?? s.id))}
@@ -343,74 +415,8 @@
 	</div>
 {/snippet}
 
-<div {...applied.rest} class={classes}>
-	<div class={`${PREFIX}-bar`}>
-		<div class={`${PREFIX}-bar-left`}>
-			{#if filters && handler.availableFilters.length}
-				<Dropdown>
-					{#snippet trigger({ props })}
-						<Button {...props} variant="ghost" title={t.filters}>
-							{@render icon('M3 5h18M6 12h12M10 19h4')}
-							{t.filters}
-						</Button>
-					{/snippet}
-					{#snippet children({ close })}
-						<Menu
-							items={handler.availableFilters.map((f) => ({ label: f.title }))}
-							onSelect={(node) => {
-								const f = handler.availableFilters.find((x) => x.title === node.label);
-								close();
-								if (f) add(f);
-							}}
-						/>
-					{/snippet}
-				</Dropdown>
-			{/if}
-
-			{#if sorts && handler.sorts.length}
-				<Dropdown>
-					{#snippet trigger({ props })}
-						<Button {...props} variant="ghost" title={t.sort}>
-							{@render icon('M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4')}
-							{handler.sort?.name ?? t.sort}
-						</Button>
-					{/snippet}
-					{#snippet children({ close })}
-						<Menu
-							items={[
-								{ label: t.noSort, active: !handler.sort },
-								...handler.sorts.map((s) => ({
-									label: s.name,
-									active: !!handler.sort && sortKey(handler.sort) === sortKey(s)
-								}))
-							]}
-							onSelect={(node) => {
-								close();
-								handler.changeSort(handler.sorts.find((s) => s.name === node.label));
-							}}
-						/>
-					{/snippet}
-				</Dropdown>
-			{/if}
-
-			{@render leftActions?.(handler)}
-
-			{#if search}
-				<Input
-					class={`${PREFIX}-search`}
-					type="search"
-					placeholder={t.search}
-					aria-label={t.search}
-					value={handler.search}
-					oninput={(e) => handler.changeSearch(e.currentTarget.value, searchDelay)}
-				>
-					{#snippet start()}{@render icon('M21 21l-4.3-4.3M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z')}{/snippet}
-				</Input>
-			{/if}
-		</div>
-
-		<div class={`${PREFIX}-bar-right`}>
-			{#if limits && limits.length}
+{#snippet actions()}
+			{#if limits && limits.length && !fields}
 				<Select
 					aria-label={t.perPage(handler.limit)}
 					options={limits.map((n) => ({ value: String(n), name: t.perPage(n) }))}
@@ -450,7 +456,7 @@
 				</Button>
 			{/if}
 
-			{#if exportable}
+			{#if exportable && !fields}
 				<Button
 					variant="ghost"
 					shape="square"
@@ -464,10 +470,138 @@
 			{/if}
 
 			{@render rightActions?.(handler)}
+{/snippet}
+
+<div {...applied.rest} class={classes}>
+	<div class={`${PREFIX}-bar`}>
+		<div class={`${PREFIX}-bar-left`}>
+			{#if filters && !fields && handler.availableFilters.length}
+				<Dropdown>
+					{#snippet trigger({ props })}
+						<Button {...props} variant="ghost" title={t.filters}>
+							{@render icon('M3 5h18M6 12h12M10 19h4')}
+							{t.filters}
+						</Button>
+					{/snippet}
+					{#snippet children({ close })}
+						<Menu
+							items={handler.availableFilters.map((f) => ({ label: f.title }))}
+							onSelect={(node) => {
+								const f = handler.availableFilters.find((x) => x.title === node.label);
+								close();
+								if (f) add(f);
+							}}
+						/>
+					{/snippet}
+				</Dropdown>
+			{/if}
+
+			{#if sorts && !fields && handler.sorts.length}
+				<Dropdown>
+					{#snippet trigger({ props })}
+						<Button {...props} variant="ghost" title={t.sort}>
+							{@render icon('M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4')}
+							{handler.sort?.name ?? t.sort}
+						</Button>
+					{/snippet}
+					{#snippet children({ close })}
+						<Menu
+							items={[
+								{ label: t.noSort, active: !handler.sort },
+								...handler.sorts.map((s) => ({
+									label: s.name,
+									active: !!handler.sort && sortKey(handler.sort) === sortKey(s)
+								}))
+							]}
+							onSelect={(node) => {
+								close();
+								handler.changeSort(handler.sorts.find((s) => s.name === node.label));
+							}}
+						/>
+					{/snippet}
+				</Dropdown>
+			{/if}
+
+			{#if !fields}{@render leftActions?.(handler)}{/if}
+
+			{#if search && fields}
+				<div class={`${PREFIX}-field ${PREFIX}-field-search`}>
+					<span class={`${PREFIX}-field-label`}>{t.search}</span>
+					<Input
+						class={`${PREFIX}-search`}
+						type="search"
+						aria-label={t.search}
+						value={handler.search}
+						oninput={(e) => handler.changeSearch(e.currentTarget.value, searchDelay)}
+					>
+						{#snippet start()}{@render icon('M21 21l-4.3-4.3M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z')}{/snippet}
+					</Input>
+				</div>
+			{:else if search}
+				<Input
+					class={`${PREFIX}-search`}
+					type="search"
+					placeholder={t.search}
+					aria-label={t.search}
+					value={handler.search}
+					oninput={(e) => handler.changeSearch(e.currentTarget.value, searchDelay)}
+				>
+					{#snippet start()}{@render icon('M21 21l-4.3-4.3M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z')}{/snippet}
+				</Input>
+			{/if}
+
+			{#if filters && fields}
+				{#each fieldFilters.slice(0, FIELDS_SHOWN) as f (f.id)}
+					{@render editor(f, true)}
+				{/each}
+				{#if moreFilters.length}
+					<Button variant={showMore ? 'soft' : 'ghost'} aria-expanded={showMore} onclick={() => (showMore = !showMore)}>
+						{@render icon('M3 5h18M6 12h12M10 19h4')}
+						{t.filters}{#if moreActive} ({moreActive}){/if}
+					</Button>
+				{/if}
+				{#if showMore}
+					<div class={`${PREFIX}-more`} transition:slide={{ duration: 220 }}>
+						{#each moreFilters as f (f.id)}
+							{@render editor(f, true)}
+						{/each}
+					</div>
+				{/if}
+			{/if}
 		</div>
+
+		{#if !fields}
+			<div class={`${PREFIX}-bar-right`}>
+				{@render actions()}
+			</div>
+		{/if}
 	</div>
 
-	{#if filters && handler.shownFilters.length}
+	{#if fields && hasActions}
+		<div class={`${PREFIX}-actions`}>
+			<div class={`${PREFIX}-actions-start`}>
+				{#if exportable}
+				<Button
+							variant="ghost"
+							shape="square"
+							title={t.export}
+							aria-label={t.export}
+							disabled={!handler.total}
+							onclick={() => handler.export(typeof exportable === 'object' ? exportable : {})}
+						>
+							{@render icon('M12 3v12M7 10l5 5 5-5M5 21h14')}
+						</Button>
+		
+				{/if}
+				{@render leftActions?.(handler)}
+			</div>
+			<div class={`${PREFIX}-actions-end`}>
+				{@render actions()}
+			</div>
+		</div>
+	{/if}
+
+	{#if filters && !fields && handler.shownFilters.length}
 		<div class={`${PREFIX}-filters`}>
 			{#each handler.shownFilters as f (f.id)}
 				<Dropdown
@@ -488,7 +622,7 @@
 							>{@render icon('M18 6 6 18M6 6l12 12')}</button>
 						</Chip>
 					{/snippet}
-					{@render editor(f)}
+					{@render editor(f, false)}
 				</Dropdown>
 			{/each}
 		</div>
