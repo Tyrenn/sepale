@@ -1,6 +1,7 @@
 import { families, themesByFamily, tokensForFamily, familyCategory } from '$lib/index.js';
 import { parseTheme, type ThemeToken } from '$lib/theme.js';
 import type { ThemeData } from '$lib/generated/registry.js';
+import { pageIds } from './(app)/components/page-ids.js';
 
 export { families };
 
@@ -23,19 +24,13 @@ const GROUPS: { group: string; ids: string[] }[] = [
 	{ group: 'Form layout', ids: ['label', 'floating-label', 'fieldset', 'validator'] },
 	{ group: 'Display', ids: ['text', 'avatar', 'badge', 'chip', 'swatch', 'bubble', 'card', 'stat', 'carousel'] },
 	{ group: 'Feedback', ids: ['alert', 'toast', 'loading', 'progress', 'radial-progress', 'skeleton', 'empty-state'] },
-	{ group: 'Data', ids: ['data-handler', 'data-control', 'table', 'grid', 'list', 'file-explorer'] },
+	{ group: 'Data', ids: ['data-handler', 'data-control', 'table', 'grid', 'list', 'kanban', 'file-explorer'] },
 	{ group: 'Navigation', ids: ['menu', 'tabs', 'breadcrumbs', 'steps', 'pagination', 'dock'] },
 	{ group: 'Layout', ids: ['navbar', 'sidebar', 'drawer', 'footer', 'hero', 'divider', 'collapse', 'accordion'] },
 	{ group: 'Overlay', ids: ['dialog', 'dropdown', 'tooltip'] },
 	{ group: 'Mockups', ids: ['mobile-frame', 'window-frame', 'laptop-frame'] },
 	{ group: 'Other', ids: [] }
 ];
-
-/* Paths only — the modules themselves are never loaded here, or the nav would
-   import the pages that import the nav. */
-const pageIds = Object.keys(import.meta.glob('./components/docs/*.svelte')).map((path) =>
-	path.slice('./components/docs/'.length, -'.svelte'.length)
-);
 
 /** `file-input` → `File input`, for a page nobody has given a label. */
 function labelFor(id: string): string {
@@ -65,7 +60,8 @@ export function themesFor(family: string): ThemeData[] {
 	return themesByFamily[family] ?? themesByFamily[families[0]!] ?? [];
 }
 
-const initialFamily = families[0]!;
+/* What a prerendered page is written in, so it opens without a flash of another family. */
+const initialFamily = families.includes('peony') ? 'peony' : families[0]!;
 const initialTheme = themesFor(initialFamily)[0];
 
 /** Shared, reactive playground state. */
@@ -88,15 +84,32 @@ function load(theme: ThemeData | undefined) {
 	playground.tokens = tokensForFamily(playground.family, theme.vars);
 }
 
+/** A family or a theme has been chosen, by hand or by the draw. */
+let chosen = false;
+
 /** Switch family: load that family's first theme into the editor. */
 export function selectFamily(family: string) {
+	chosen = true;
 	playground.family = family;
 	load(themesFor(family)[0]);
 }
 
 /** Switch theme for the current family. */
 export function selectTheme(name: string) {
+	chosen = true;
 	load(themesFor(playground.family).find((t) => t.name === name));
+}
+
+/**
+ * Open the app on a family and a theme drawn at random, unless one has been
+ * chosen already: what was picked on the home page follows into the app.
+ */
+export function drawAtRandom() {
+	if (chosen) return;
+	const pick = <T>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)]!;
+	selectFamily(pick(families));
+	const theme = pick(themesFor(playground.family));
+	if (theme) selectTheme(theme.name);
 }
 
 let lastImport: { name: string; css: string } | null = null;

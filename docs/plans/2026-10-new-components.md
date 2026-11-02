@@ -50,11 +50,11 @@ For component `<id>` (kebab) / `<Name>` (Pascal) / namespace `<ns>`:
    Every class the families ship under `<ns>-*` must be classified in AXES /
    FLAGS / PARTS or the build fails.
 4. **Export** from `src/lib/index.ts`.
-5. **Doc page** `src/routes/components/docs/<id>.svelte` with `DOC`
+5. **Doc page** `src/routes/(app)/components/docs/<id>.svelte` with `DOC`
    (`namespaces`, `description`, `classes`, `props`) and `<Section>` examples;
    add `<id>` to a group in `GROUPS` (`src/routes/playground.svelte.ts`).
-6. **Verify**: `npm run check` (builds CSS, regenerates, type-checks), then
-   `node scripts/shoot.mjs` / `npm run dev` and look at it in a light and a
+6. **Verify**: `pnpm run check` (builds CSS, regenerates, type-checks), then
+   `node scripts/shoot.mjs` / `pnpm run dev` and look at it in a light and a
    dark theme. CSS that compiles is not CSS that looks right.
 
 ### Conventions decided in the session
@@ -359,7 +359,7 @@ Also `onSelect(items)`, `onNavigate(folder)`.
 20. [x] Update CLAUDE.md status (component count) when done.
 
 Each item: 5 family SCSS files + index includes, wrapper, export, doc page,
-GROUPS entry, `npm run check` green.
+GROUPS entry, `pnpm run check` green.
 
 ---
 

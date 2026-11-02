@@ -235,8 +235,9 @@ export function tokensToInlineStyle(tokens: ThemeToken[]): string {
 }
 
 /** Serialise tokens into a drop-in `:root { … }` stylesheet. */
-export function serializeTheme(tokens: ThemeToken[]): string {
+export function serializeTheme(tokens: ThemeToken[], scheme?: string): string {
 	const lines = tokens.map((t) => `\t--${t.name}: ${t.value};`);
+	if (scheme) lines.unshift(`\tcolor-scheme: ${scheme};`);
 	return `:root {\n${lines.join('\n')}\n}\n`;
 }
 

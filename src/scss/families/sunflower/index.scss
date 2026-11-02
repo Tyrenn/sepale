@@ -48,6 +48,7 @@
 @use 'dropdown';
 @use 'table';
 @use 'grid';
+@use 'kanban';
 @use 'data-control';
 @use 'divider';
 @use 'alert';
@@ -113,7 +114,7 @@
        only) and `.btn-reverse` (the shadow on the other side, so
        the press pushes up-left instead).
 
-   Build: static/families/sunflower.css via `npm run build:css`.
+   Build: static/families/sunflower.css via `pnpm run build:css`.
    ============================================================ */
 
 
@@ -230,6 +231,7 @@ $params: map.merge(
 @include dropdown.structure;
 @include table.structure;
 @include grid.structure;
+@include kanban.structure;
 @include data-control.structure;
 @include divider.structure;
 @include alert.structure;
@@ -304,6 +306,7 @@ $params: map.merge(
 @include dropdown.look;
 @include table.look;
 @include grid.look;
+@include kanban.look;
 @include data-control.look;
 @include divider.look;
 @include alert.look;

@@ -120,6 +120,7 @@ export {
 	type TableSortDirection
 } from './components/Table.svelte';
 export { default as Grid } from './components/Grid.svelte';
+export { default as Kanban, type KanbanColumn, type KanbanMove } from './components/Kanban.svelte';
 export { default as FileExplorer, type FileNode, type FileDrop } from './components/FileExplorer.svelte';
 export { FILE_ICONS, extensionOf, type FileIcon } from './components/file-icons.js';
 

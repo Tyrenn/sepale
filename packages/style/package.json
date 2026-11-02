@@ -1,0 +1,30 @@
+{
+	"name": "@sepale/style",
+	"version": "0.0.1",
+	"description": "Sepale's opinionated CSS families and their themes, as plain compiled stylesheets. No dependency, no build step.",
+	"type": "module",
+	"exports": {
+		"./*.css": "./dist/*.css"
+	},
+	"files": [
+		"dist"
+	],
+	"sideEffects": [
+		"**/*.css"
+	],
+	"scripts": {
+		"prepublishOnly": "pnpm --dir ../.. run package"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Tyrenn/u.u.git",
+		"directory": "packages/style"
+	},
+	"bugs": {
+		"url": "https://github.com/Tyrenn/u.u/issues"
+	},
+	"license": "MIT"
+}

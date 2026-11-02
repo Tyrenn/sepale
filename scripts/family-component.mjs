@@ -306,11 +306,12 @@ export function familyComponent(c, family) {
 		.replace(/\$\{PREFIX\}/g, prefix)
 		.replace(/\bPREFIX\b/g, `'${prefix}'`);
 
-	/* Comments: the script keeps the JSDoc of its props, the markup keeps none. */
+	/* Comments: the script keeps the JSDoc of its props, the markup keeps only
+	   its `svelte-ignore`s, which are instructions to the compiler. */
 	out = out
 		.replace(instanceRe, (_, open, body, close) => open + stripComments(body) + close)
-		.replace(/^[ \t]*<!--[\s\S]*?-->[ \t]*\n/gm, '')
-		.replace(/<!--[\s\S]*?-->/g, '');
+		.replace(/^[ \t]*<!--(?!\s*svelte-ignore)[\s\S]*?-->[ \t]*\n/gm, '')
+		.replace(/<!--(?!\s*svelte-ignore)[\s\S]*?-->/g, '');
 
 	for (const leftover of ['AXES', 'FLAGS', 'applied', 'applyAxes', 'AxisProps', 'axes', 'cx']) {
 		if (new RegExp(`(^|[^\\w.-])${leftover}\\b(?!-)`).test(out + moduleScript)) {

@@ -482,6 +482,8 @@ body {
 /* ── Export dialog ───────────────────────────────────────────────────────── */
 
 dialog.export {
+	/* The reset takes away a dialog's own centring. */
+	margin: auto;
 	border: none;
 	border-radius: 0.6rem;
 	padding: 0;
@@ -502,6 +504,8 @@ dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
 	padding: 0.6rem;
 }
 .export-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.bundle-note { margin: 0 0 0.75rem; font-size: 0.875rem; line-height: 1.5; }
+.bundle-option { display: flex; align-items: center; gap: 0.5rem; margin-block: 0.4rem; font-size: 0.875rem; }
 
 /* ── Description page ───────────────────────────────────────────────────────── */
 

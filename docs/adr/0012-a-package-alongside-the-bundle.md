@@ -1,5 +1,7 @@
 # A package alongside the bundle
 
+_Partly superseded by [0014](./0014-two-packages.md): the package is now two, `@sepale/style` and `@sepale/components`. What follows on entry points and semver stands, under the new names._
+
 Partly supersedes [0001](./0001-distribution-by-bundle-not-npm.md): the bundle
 stays, and the kit is also published to npm as `sepale`. Some users want a
 snapshot to own; others want the kit's evolution.

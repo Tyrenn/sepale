@@ -182,7 +182,7 @@
 	title="Icons by extension"
 	subtitle="FILE_ICONS is the default table; icons merges yours over it, one extension at a time. Images with a url show as pictures."
 	svelte={`<script>
-  import { FILE_ICONS } from 'sepale';
+  import { FILE_ICONS } from '@sepale/components';
 </`+`script>
 
 <FileExplorer {load} view="grid"

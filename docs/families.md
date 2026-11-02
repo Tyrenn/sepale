@@ -152,7 +152,7 @@ any structure — including another component's, which matters to `join` and
    look needs a different mechanism.
 4. `themes/<name>/*.scss` — at least one theme, setting exactly the parameters
    this family declares (ADR 0005).
-5. `npm run build:css` — a family is discovered by having an `index.scss`.
+5. `pnpm run build:css` — a family is discovered by having an `index.scss`.
 6. **Look at it**: `node scripts/shoot.mjs <name>`. Every family shipped
    without that step had to be redone.
 
@@ -170,6 +170,6 @@ docs; all of it is in the stylesheet.
 - [ ] `index.scss` with a header, `$params`, `:root`, and the include order
 - [ ] `_root.scss`, and a file per component the family styles
 - [ ] At least one theme
-- [ ] `npm run build:css` green, the family in the picker
+- [ ] `pnpm run build:css` green, the family in the picker
 - [ ] Screenshot walked: every component, light and dark, hover / focus /
       disabled / checked

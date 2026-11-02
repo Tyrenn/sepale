@@ -42,6 +42,7 @@
 @use 'dropdown';
 @use 'table';
 @use 'grid';
+@use 'kanban';
 @use 'data-control';
 @use 'divider';
 @use 'alert';
@@ -96,7 +97,7 @@
      - PaperCSS has no dark theme. Ours adds one — a chalk-on-slate
        reading of the same idea, which is an invention, not a port.
 
-   Build: static/families/cosmos.css via `npm run build:css`.
+   Build: static/families/cosmos.css via `pnpm run build:css`.
    ============================================================ */
 
 
@@ -219,6 +220,7 @@ $params: map.merge(
 @include dropdown.structure;
 @include table.structure;
 @include grid.structure;
+@include kanban.structure;
 @include data-control.structure;
 @include divider.structure;
 @include alert.structure;
@@ -329,6 +331,7 @@ $params: map.merge(
 @include dropdown.look;
 @include table.look;
 @include grid.look;
+@include kanban.look;
 @include data-control.look;
 @include divider.look;
 @include alert.look;

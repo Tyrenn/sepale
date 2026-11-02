@@ -1,0 +1,131 @@
+/* The presentation pages. Colours come from a sepal: a deep green ground, a pale
+   leaf, a petal for what must be seen.
+
+   This chrome shares the page with the family under preview, whose stylesheet
+   claims plain names (.hero, .tabs, .card…) and whose h2 a card title is. So
+   everything here is prefixed `s-`, classes and variables alike, and no rule
+   here selects an element by its tag. */
+
+.s-site {
+	--s-ink: #0f2418;
+	--s-ink-raised: #18331f;
+	--s-ink-line: #2d4d36;
+	--s-on-ink: #f4fbf3;
+	--s-on-ink-muted: #b7cdb9;
+	--s-leaf-dark: #2f7d4f;
+	--s-leaf-light: #bfe6c4;
+	--s-petal: #f29ec0;
+
+	--s-surface: #fbfdf9;
+	--s-surface-raised: #f0f6ee;
+	--s-line: #dbe7d8;
+	--s-text: #13261a;
+	--s-text-muted: #4f6455;
+	--s-link: #24663f;
+	--s-accent: #24663f;
+	--s-on-accent: #fff;
+
+	--s-font-display: 'Newsreader Variable', Georgia, serif;
+	--s-font-body: 'Inter Variable', system-ui, sans-serif;
+	--s-font-mono: 'JetBrains Mono Variable', ui-monospace, Consolas, monospace;
+
+	--s-gutter: clamp(16px, 4vw, 40px);
+	--s-page: 1160px;
+
+	color-scheme: light dark;
+	min-height: 100dvh;
+	background: var(--s-surface);
+	color: var(--s-text);
+	font: 400 1rem/1.65 var(--s-font-body);
+	-webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+	.s-site {
+		--s-surface: #0b1a11;
+		--s-surface-raised: #132619;
+		--s-line: #27412f;
+		--s-text: #eef6ee;
+		--s-text-muted: #a5bca9;
+		--s-link: #bfe6c4;
+		--s-accent: #bfe6c4;
+		--s-on-accent: #0f2418;
+	}
+}
+
+.s-site *,
+.s-site *::before,
+.s-site *::after {
+	box-sizing: border-box;
+}
+
+.s-page {
+	width: 100%;
+	max-width: calc(var(--s-page) + 2 * var(--s-gutter));
+	margin-inline: auto;
+	padding-inline: var(--s-gutter);
+}
+
+.s-h1,
+.s-h2,
+.s-h3 {
+	margin: 0;
+	font-family: var(--s-font-display);
+	font-weight: 500;
+	line-height: 1.2;
+}
+
+.s-link {
+	color: var(--s-link);
+}
+
+/* Code blocks stay dark in both themes, like the hero. */
+.s-code {
+	position: relative;
+	min-width: 0;
+	background: var(--s-ink);
+	border: 1px solid var(--s-ink-line);
+	border-radius: 14px;
+	color: #e8f3e8;
+}
+
+.s-code pre {
+	margin: 0;
+	padding: 18px 20px;
+	overflow-x: auto;
+	font-family: var(--s-font-mono);
+	font-size: 0.875rem;
+	font-variant-ligatures: none;
+	line-height: 1.6;
+	tab-size: 2;
+}
+
+.s-code .t-keyword { color: #ff9ec4; }
+.s-code .t-string { color: #f0dfa0; }
+.s-code .t-tag { color: #bfe6c4; }
+.s-code .t-comment { color: #93ab97; font-style: italic; }
+
+.s-copy {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	padding: 3px 10px;
+	border: 1px solid var(--s-ink-line);
+	border-radius: 999px;
+	background: var(--s-ink-raised);
+	color: var(--s-on-ink-muted);
+	font: 500 0.75rem var(--s-font-body);
+	cursor: pointer;
+}
+
+.s-site :focus-visible {
+	outline: 2px solid var(--s-accent);
+	outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	/* Anchors only: the app scrolls inside its own panes. */
+	html:has(.s-site) {
+		scroll-behavior: smooth;
+	}
+}

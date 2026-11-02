@@ -1,0 +1,238 @@
+@use '../../_config' as c;
+@use '../../_mixins' as m;
+
+/* sunflower — kanban.
+   Everything sunflower draws for this component, and nothing another
+   family reads: `structure` is the mechanism (layout, states,
+   intrinsic sizing, the slots), `look` is the values and the
+   variants. Two mixins, because index.scss emits every structure
+   before any look (ADR 0010). */
+
+/* ============================================================
+   kanban.scss — .kanban (items in columns, one per state)
+
+	<div class="kanban">
+	  <section class="kanban-column">
+	    <header class="kanban-column-head">
+	      <span class="kanban-column-title">To do</span>
+	      <span class="kanban-column-count">2</span>
+	    </header>
+	    <ul class="kanban-column-body">
+	      <li class="kanban-item"> <div class="card">…</div> </li>
+	    </ul>
+	    <footer class="kanban-column-foot">…</footer>
+	  </section>
+	</div>
+
+   Intrinsic: a column is at least --kanban-column-width wide and
+   shares what is left. No breakpoint: when they stop fitting the
+   board scrolls sideways. Give it a height and each column scrolls
+   on its own.
+
+   What an item looks like is the caller's, a card usually. Dragging
+   and the marker are the Svelte wrapper's.
+
+   Plumbing contract (the family fills these on `.kanban`):
+	--kanban-gap                  space between columns
+	--kanban-p                    padding inside a column
+	--kanban-item-gap             space between items
+	--kanban-column-width         the narrowest a column may be
+	--kanban-column-bg            column fill
+	--kanban-column-over-bg       column fill while dragging over it
+	--kanban-column-fg            column ink
+	--kanban-column-border        column border colour
+	--kanban-column-border-width  column border width (0 = none)
+	--kanban-column-radius        column corners
+	--kanban-column-shadow        column box-shadow
+	--kanban-title-weight         title font-weight
+	--kanban-count-bg             count fill
+	--kanban-count-fg             count ink
+	--kanban-empty-fg             ink of an empty column's content
+	--kanban-item-radius          corners the rings follow
+	--kanban-item-selected        the selection and focus ring
+	--kanban-item-dirty           the mark of an item with unsaved changes
+	--kanban-marker               the drop marker's colour
+	--kanban-marker-size          its thickness
+	--fontsize                    font size (set by size-variants classes)
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   structure — the row of columns, the drop marker, states.
+   ------------------------------------------------------------ */
+
+@mixin structure {
+	.kanban {
+		display: flex;
+		align-items: stretch;
+		gap: var(--kanban-gap);
+		overflow-x: auto;
+		font-size: var(--fontsize, var(--base, var(--default-base)));
+	}
+
+	.kanban-column {
+		display: flex;
+		flex: 1 0 min(var(--kanban-column-width), 100%);
+		flex-direction: column;
+		min-width: 0;
+		min-height: 0;
+		background-color: var(--kanban-column-bg);
+		color: var(--kanban-column-fg);
+		border: var(--kanban-column-border-width) solid var(--kanban-column-border);
+		border-radius: var(--kanban-column-radius);
+		box-shadow: var(--kanban-column-shadow);
+		transition: background-color 0.15s;
+	}
+	.kanban-column-over {
+		background-color: var(--kanban-column-over-bg);
+	}
+
+	.kanban-column-head {
+		display: flex;
+		flex: none;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--kanban-item-gap);
+		padding: var(--kanban-p) var(--kanban-p) 0;
+	}
+	.kanban-column-title {
+		min-width: 0;
+		font-weight: var(--kanban-title-weight);
+		overflow-wrap: anywhere;
+	}
+	.kanban-column-count {
+		flex: none;
+		min-width: 1.75em;
+		padding-inline: 0.5em;
+		border-radius: 999px;
+		background-color: var(--kanban-count-bg);
+		color: var(--kanban-count-fg);
+		font-size: 0.8125em;
+		font-variant-numeric: tabular-nums;
+		text-align: center;
+	}
+
+	/* The body takes what the column has left, so the whole height of a short
+	   column is a place to drop on. It scrolls once the board has a height. */
+	.kanban-column-body {
+		display: flex;
+		flex: auto;
+		flex-direction: column;
+		gap: var(--kanban-item-gap);
+		min-height: calc(4em * var(--scale));
+		margin: 0;
+		padding: var(--kanban-p);
+		list-style: none;
+		overflow-y: auto;
+	}
+	.kanban-column-foot {
+		flex: none;
+		padding: 0 var(--kanban-p) var(--kanban-p);
+	}
+	.kanban-column-empty {
+		padding-block: var(--kanban-p);
+		color: var(--kanban-empty-fg);
+		text-align: center;
+	}
+
+	.kanban-item {
+		position: relative;
+		display: flex;
+		flex: none;
+		flex-direction: column;
+		min-width: 0;
+		border-radius: var(--kanban-item-radius);
+	}
+	.kanban-item > * {
+		flex: auto;
+	}
+	.kanban-item[draggable="true"] {
+		cursor: grab;
+	}
+	.kanban-item:focus-visible {
+		outline: var(--kanban-item-selected);
+		outline-offset: 2px;
+	}
+	.kanban-item-dragged {
+		opacity: 0.4;
+	}
+
+	/* Where the item would land: drawn in the gap between two items, its
+	   negative margins giving back the room it takes, so nothing shifts. */
+	.kanban-marker {
+		flex: none;
+		height: var(--kanban-marker-size);
+		margin-block: calc((var(--kanban-item-gap) + var(--kanban-marker-size)) / -2);
+		border-radius: 999px;
+		background-color: var(--kanban-marker);
+		pointer-events: none;
+	}
+
+	/* ── States ── */
+	.kanban-item-selected {
+		outline: var(--kanban-item-selected);
+		outline-offset: 2px;
+	}
+	.kanban-item-dirty::after {
+		content: "";
+		position: absolute;
+		inset-block-start: calc(0.5em * var(--scale));
+		inset-inline-end: calc(0.5em * var(--scale));
+		width: calc(0.5em * var(--scale));
+		height: calc(0.5em * var(--scale));
+		border-radius: 50%;
+		background-color: var(--kanban-item-dirty);
+	}
+
+	/* ── Flag: loading ── */
+	.kanban-loading > .kanban-column {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+	.kanban-loading {
+		cursor: progress;
+	}
+
+	/* ── Axis: size ── */
+	@include m.size-variants('kanban', c.$sizes-field);
+}
+
+/* ------------------------------------------------------------
+   look — an inked frame, a filled count, a thick marker. The hard shadows
+   stay on the cards it holds.
+   ------------------------------------------------------------ */
+
+@mixin look {
+	.kanban {
+		--kanban-gap: calc(1.25em * var(--scale));
+		--kanban-p: calc(0.875em * var(--scale));
+		--kanban-item-gap: calc(0.875em * var(--scale));
+		--kanban-column-width: calc(18em * var(--scale));
+		--kanban-column-bg: color-mix(in oklab, var(--color-on-surface) 5%, var(--color-surface-2));
+		--kanban-column-over-bg: color-mix(in oklab, var(--color-primary) 35%, var(--color-surface-2));
+		--kanban-column-fg: var(--color-on-surface);
+		--kanban-column-border: var(--color-border);
+		--kanban-column-border-width: var(--border);
+		--kanban-column-radius: var(--radius-box);
+		--kanban-column-shadow: none;
+		--kanban-title-weight: 700;
+		--kanban-count-bg: var(--color-on-surface);
+		--kanban-count-fg: var(--color-surface-2);
+		--kanban-empty-fg: var(--color-on-surface);
+		--kanban-item-radius: var(--radius-box);
+		--kanban-item-selected: calc(var(--border) * 1.5) solid var(--color-border);
+		--kanban-item-dirty: var(--color-primary);
+		--kanban-marker: var(--color-border);
+		--kanban-marker-size: calc(var(--border) * 1.5);
+	}
+	/* ── Axis: gap ── */
+	.kanban-nogap {
+		--kanban-gap: 0px;
+	}
+	.kanban-tight {
+		--kanban-gap: calc(0.5em * var(--scale));
+	}
+	.kanban-loose {
+		--kanban-gap: calc(2em * var(--scale));
+	}
+}

@@ -1,11 +1,11 @@
 <script lang="ts">
-	// The theme page: parameters on the left, live preview on the right. It is
-	// the landing route — the configurator is what this app is for; the
-	// component gallery is reachable from the sidebar.
-	import ThemeEditor from './ThemeEditor.svelte';
-	import ThemePreview from './ThemePreview.svelte';
-	import { playground, resetTheme, importTheme } from './playground.svelte.js';
+	// The theme page: parameters on the left, live preview on the right.
+	import ThemeEditor from '../ThemeEditor.svelte';
+	import ThemePreview from '../ThemePreview.svelte';
+	import { playground, resetTheme, importTheme } from '../../playground.svelte.js';
+	import { asset } from '$app/paths';
 	import { serializeTheme } from '$lib/theme.js';
+	import { buildBundle } from '../bundle.js';
 
 	/* Open a theme `.css` from disk: the round trip of Export theme. */
 	let fileInput = $state<HTMLInputElement | null>(null);
@@ -23,7 +23,10 @@
 	let exportText = $state('');
 
 	function download(filename: string, text: string) {
-		const blob = new Blob([text], { type: 'text/css' });
+		save(filename, new Blob([text], { type: 'text/css' }));
+	}
+
+	function save(filename: string, blob: Blob) {
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
@@ -34,8 +37,35 @@
 
 	function exportTheme() {
 		exportTitle = `theme — ${playground.theme}.css (CSS variables)`;
-		exportText = serializeTheme(playground.tokens);
+		exportText = serializeTheme(playground.tokens, playground.scheme);
 		dialog?.showModal();
+	}
+
+	let bundleDialog = $state<HTMLDialogElement | null>(null);
+	let bundleSvelte = $state(true);
+	let bundleReset = $state(false);
+	let bundling = $state(false);
+	let bundleError = $state('');
+
+	async function downloadBundle() {
+		bundling = true;
+		bundleError = '';
+		try {
+			const { name, blob } = await buildBundle({
+				family: playground.family,
+				theme: playground.theme,
+				scheme: playground.scheme,
+				tokens: playground.tokens,
+				svelte: bundleSvelte,
+				reset: bundleReset
+			});
+			save(name, blob);
+			bundleDialog?.close();
+		} catch (e) {
+			bundleError = e instanceof Error ? e.message : String(e);
+		} finally {
+			bundling = false;
+		}
 	}
 
 	async function exportFamily() {
@@ -43,10 +73,10 @@
 		exportText = 'Loading…';
 		dialog?.showModal();
 		try {
-			const res = await fetch(`/families/${playground.family}.css`);
+			const res = await fetch(asset(`/families/${playground.family}.css`));
 			exportText = await res.text();
 		} catch {
-			exportText = '/* Run `npm run build:css` to generate the family. */';
+			exportText = '/* Run `pnpm run build:css` to generate the family. */';
 		}
 	}
 
@@ -63,7 +93,8 @@
 	<div class="editor-head">
 		<strong class="editor-name">{playground.theme}</strong>
 		<div class="editor-actions">
-			<button class="ui-btn ui-btn-xs ui-btn-primary" onclick={exportTheme}>Export theme</button>
+			<button class="ui-btn ui-btn-xs ui-btn-primary" onclick={() => bundleDialog?.showModal()}>Download bundle</button>
+			<button class="ui-btn ui-btn-xs" onclick={exportTheme}>Export theme</button>
 			<button class="ui-btn ui-btn-xs" onclick={exportFamily}>Export family</button>
 			<button class="ui-btn ui-btn-xs" onclick={() => fileInput?.click()}>Import theme</button>
 			<input type="file" accept=".css,text/css" hidden bind:this={fileInput} onchange={onImport} />
@@ -78,6 +109,31 @@
 <main class="content content-preview uu-island" id="preview">
 	<ThemePreview />
 </main>
+
+<dialog class="export" bind:this={bundleDialog}>
+	<div class="export-inner">
+		<h3 style="margin-top:0">Download a bundle</h3>
+		<p class="bundle-note">
+			A zip of {playground.family}’s stylesheet and your theme, <strong>{playground.theme}</strong>, with your edits. A snapshot:
+			it never updates.
+		</p>
+		<label class="bundle-option">
+			<input type="checkbox" bind:checked={bundleSvelte} />
+			The Svelte components, written for {playground.family} alone
+		</label>
+		<label class="bundle-option">
+			<input type="checkbox" bind:checked={bundleReset} />
+			The optional page reset
+		</label>
+		{#if bundleError}<p class="bundle-note" role="alert">{bundleError}</p>{/if}
+		<div class="export-row">
+			<button class="ui-btn ui-btn-sm ui-btn-primary" disabled={bundling} onclick={downloadBundle}>
+				{bundling ? 'Preparing…' : 'Download'}
+			</button>
+			<button class="ui-btn ui-btn-sm ui-btn-ghost" onclick={() => bundleDialog?.close()}>Close</button>
+		</div>
+	</div>
+</dialog>
 
 <dialog class="export" bind:this={dialog}>
 	<div class="export-inner">

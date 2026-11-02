@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+	<g id="s">
+		<path fill="#bfe6c4" d="M32 32C22 25 22 11 32 2c10 9 10 23 0 30Z" />
+		<path fill="#2f7d4f" d="M32 32c10-7 10-21 0-30Z" />
+	</g>
+	<use href="#s" transform="rotate(72 32 32)" />
+	<use href="#s" transform="rotate(144 32 32)" />
+	<use href="#s" transform="rotate(216 32 32)" />
+	<use href="#s" transform="rotate(288 32 32)" />
+</svg>

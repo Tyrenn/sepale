@@ -31,7 +31,7 @@ const page = await browser.newPage({ viewport: { width: 1500, height: 1400 } });
 
 mkdirSync(outDir, { recursive: true });
 
-await page.goto(base, { waitUntil: 'networkidle' });
+await page.goto(base + '/theme', { waitUntil: 'networkidle' });
 
 const list =
 	wanted.length > 0

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { playground } from './playground.svelte.js';
+	import { playground } from '../playground.svelte.js';
 	import {
 		splitLength,
 		edgeWidthFromCss,

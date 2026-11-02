@@ -17,12 +17,12 @@
 			'data-control-editor': 'The box a filter is edited in.',
 			'data-control-pagination': 'The range and the pages, above or below the view.',
 			'data-control-range': '“1–10 / 124”.',
-			'data-control-body': 'The view: a table, a grid, a list.'
+			'data-control-body': 'The view: a table, a grid, a list, a kanban.'
 		},
 		props: {
 			DataControl: [
 				{ name: 'handler', type: 'DataHandlerState', description: 'The handler whose rows and requests these controls drive.' },
-				{ name: 'children', type: 'Snippet<[handler]>', description: 'The view — a Table, a Grid, a List — given the handler.' },
+				{ name: 'children', type: 'Snippet<[handler]>', description: 'The view — a Table, a Grid, a List, a Kanban — given the handler.' },
 				{ name: 'filters', type: 'boolean', default: 'true', description: 'Offer the handler’s filters.' },
 				{ name: 'sorts', type: 'boolean', default: 'true', description: 'Offer the handler’s sorts.' },
 				{ name: 'search', type: 'boolean', default: 'true', description: 'Draw a search field.' },

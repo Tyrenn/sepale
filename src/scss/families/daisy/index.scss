@@ -18,6 +18,7 @@
 @use 'fieldset';
 @use 'floating-label';
 @use 'grid';
+@use 'kanban';
 @use 'file-input';
 @use 'input';
 @use 'join';
@@ -127,7 +128,7 @@
      --border                      border width
      --depth / --noise             3D edge and grain, 0 or 1
 
-   Build: compiled to static/families/daisy.css by `npm run build:css`.
+   Build: compiled to static/families/daisy.css by `pnpm run build:css`.
    ============================================================ */
 
 
@@ -229,6 +230,7 @@ $params: map.merge(
 @include fieldset.structure;
 @include floating-label.structure;
 @include grid.structure;
+@include kanban.structure;
 @include file-input.structure;
 @include input.structure;
 @include join.structure;
@@ -296,6 +298,7 @@ $params: map.merge(
 @include fieldset.look;
 @include floating-label.look;
 @include grid.look;
+@include kanban.look;
 @include file-input.look;
 @include input.look;
 @include label.look;

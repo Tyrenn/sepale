@@ -5,7 +5,7 @@
 	// HTML is optional — some demos only make sense via the Svelte component.
 	import type { Snippet } from 'svelte';
 	import { classesByFamily, knownClasses } from './components/doc.js';
-	import { playground } from './playground.svelte.js';
+	import { playground } from '../playground.svelte.js';
 
 	let {
 		title,

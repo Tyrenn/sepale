@@ -6,8 +6,8 @@ menu, a carousel) quick to put in a page. The components come first; the CSS
 comes after.
 
 To style them you pick an opinionated **family**, then tune it lightly through
-its **parameters**. Two ways to get it: the `sepale` **package**, which
-follows the kit's evolution, or a **bundle** downloaded from the web app, a
+its **parameters**. Two ways to get it: the **packages**, which follow the
+kit's evolution, or a **bundle** downloaded from the web app, a
 snapshot of the files.
 
 ## Language
@@ -101,16 +101,16 @@ total, the search, the sort, the filter values, the selection, the pending
 edits and their history. It fetches, updates, deletes and exports the
 resource. Each row it hands out carries its own actions (select, update,
 save, reset, delete). It is usable either as a component, which passes itself
-to its children, or directly as an object. Table, grid and list know nothing
-of it: they receive its rows as if they were static.
+to its children, or directly as an object. Table, grid, list and kanban know
+nothing of it: they receive its rows as if they were static.
 _Avoid_: visualizer, store, data source, provider
 
 **Data control**:
 The component that puts a data handler's controls on the page: filters, sort,
 search, page size, pagination, and the actions on the selection or the whole
 resource (save, reset, delete, add, export, plus the caller's own). Every one
-of them is optional. It wraps the table, grid or list showing the rows, so a
-family can draw it as a container whatever sits inside.
+of them is optional. It wraps the table, grid, list or kanban showing the rows,
+so a family can draw it as a container whatever sits inside.
 _Avoid_: controls, toolbar
 
 **Filter**:
@@ -208,16 +208,17 @@ custom theme laid over the package's family stylesheet.
 _Avoid_: export, build
 
 **Package**:
-`sepale` on npm — the kit for those who want its evolution (ADR 0012). Holds
-the generic components, one entry point per family, each family's stylesheet
-and its preset themes. A custom theme is not in it: it comes from the app, as
+What is published on npm for those who want the kit's evolution (ADR 0014), in
+two: `@sepale/style` holds each family's stylesheet, its preset themes and the
+reset, and needs nothing; `@sepale/components` holds the generic components and
+one entry point per family. A custom theme is in neither: it comes from the app, as
 a bundle. Its public API — parameters, classes, props — follows semver.
 _Avoid_: library, bundle
 
 **Entry point**:
-`sepale/<family>`: the generic components re-exported with their props
+`@sepale/components/<family>`: the generic components re-exported with their props
 narrowed, by type alone, to what that family ships. Switching family changes
-the types, never the runtime. The root `sepale` is the generic entry: every
+the types, never the runtime. The root `@sepale/components` is the generic entry: every
 axis of every family, no guarantee any renders. Neither loads CSS:
-`sepale/<family>.css` is imported explicitly.
+`@sepale/style/<family>.css` is imported explicitly.
 _Avoid_: export, narrowed copy (that is the bundle's rewritten wrapper)

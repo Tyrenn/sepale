@@ -13,7 +13,7 @@
  *
  * To add a family:   drop src/scss/families/<name>.scss + a themes/<name>/ folder.
  * To add a theme:    drop src/scss/themes/<family>/<name>.scss.
- * Then run `npm run build:css` (this script runs last, after sass).
+ * Then run `pnpm run build:css` (this script runs last, after sass).
  *
  * Output: src/lib/generated/registry.ts (git-ignored, regenerated on build).
  */

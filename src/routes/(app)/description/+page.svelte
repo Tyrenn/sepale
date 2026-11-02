@@ -4,7 +4,7 @@
 	// source, its themes, and the full list of variables it exposes. All of it
 	// read from the family file at build time — this page cannot drift from
 	// the CSS. Picking a family is the sidebar's job, not this page's.
-	import { playground, families, categoryFor } from '../playground.svelte.js';
+	import { playground, families, categoryFor } from '../../playground.svelte.js';
 	import { familyDocs, paramsByFamily, themesByFamily } from '$lib/generated/registry.js';
 
 	let doc = $derived(familyDocs[playground.family]!);

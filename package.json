@@ -1,49 +1,31 @@
 {
 	"name": "sepale",
 	"version": "0.0.1",
-	"description": "A Svelte component kit in opinionated CSS families. Published as `sepale` (one typed entry point per family) and handed over as a downloadable bundle by the app (ADR 0012).",
+	"private": true,
+	"packageManager": "pnpm@10.28.2",
+	"description": "Sepale's source and its site: the components, the families, the theme generator. Published as @sepale/style and @sepale/components, from packages/ (ADR 0014).",
 	"type": "module",
 	"scripts": {
 		"gen:registry": "node scripts/gen-registry.mjs",
 		"gen:components": "node scripts/gen-components.mjs",
-		"build:css": "node scripts/build-css.mjs && npm run gen:registry && npm run gen:components",
-		"dev": "npm run build:css && vite dev",
-		"build": "npm run build:css && vite build",
+		"build:css": "node scripts/build-css.mjs && pnpm run gen:registry && pnpm run gen:components",
+		"dev": "pnpm run build:css && vite dev",
+		"build": "pnpm run build:css && vite build",
 		"preview": "vite preview",
-		"prepare": "svelte-kit sync && npm run gen:registry || echo ''",
-		"check": "npm run build:css && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"prepare": "svelte-kit sync && pnpm run gen:registry || echo ''",
+		"check": "pnpm run build:css && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"package": "npm run build:css && svelte-package && node scripts/package-css.mjs",
-		"prepublishOnly": "npm run package"
-	},
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"svelte": "./dist/index.js"
-		},
-		"./*.css": "./dist/*.css",
-		"./*": {
-			"types": "./dist/families/*.d.ts",
-			"svelte": "./dist/families/*.js"
-		}
-	},
-	"svelte": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"files": [
-		"dist",
-		"!dist/**/*.test.*"
-	],
-	"sideEffects": [
-		"**/*.css"
-	],
-	"peerDependencies": {
-		"svelte": "^5.0.0"
+		"package": "pnpm run build:css && svelte-package -i src/lib -o packages/components/dist && node scripts/package.mjs"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^7.0.1",
+		"@fontsource-variable/inter": "^5.3.0",
+		"@fontsource-variable/jetbrains-mono": "^5.3.0",
+		"@fontsource-variable/newsreader": "^5.3.0",
+		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/package": "^3.0.1",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"jszip": "^3.10.2",
 		"playwright": "^1.63.0",
 		"sass": "^1.99.0",
 		"svelte": "^5.55.2",
@@ -56,7 +38,7 @@
 		"url": "git+https://github.com/Tyrenn/u.u.git"
 	},
 	"author": "",
-	"license": "ISC",
+	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/Tyrenn/u.u/issues"
 	},

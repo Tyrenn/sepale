@@ -4,7 +4,7 @@
 	// the sidebar and they change, because a family that does not ship a
 	// variant does not offer it either.
 	import { page } from '$app/state';
-	import { playground, COMPONENTS } from '../../playground.svelte.js';
+	import { playground, COMPONENTS } from '../../../playground.svelte.js';
 	import { pages, classRows, propRows, hasWrapper } from '../doc.js';
 
 	let id = $derived(page.params.id ?? 'button');

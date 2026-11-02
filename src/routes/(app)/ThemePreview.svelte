@@ -47,7 +47,7 @@
 		Toast,
 		MobileFrame
 	} from '$lib/index.js';
-	import { playground } from './playground.svelte.js';
+	import { playground } from '../playground.svelte.js';
 	import { classesByFamily } from '$lib/generated/components.js';
 
 	const COLORS = [
