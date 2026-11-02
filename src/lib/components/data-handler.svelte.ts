@@ -780,8 +780,13 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 
 	/**
 	 * Every row matching the current query, fetched by batches, as a CSV file
-	 * the browser downloads. Returns the CSV, or `undefined` when there was
-	 * nothing to export.
+	 * the browser downloads. Returns the file's content, or `undefined` when
+	 * there was nothing to export.
+	 *
+	 * The file is written for a spreadsheet: a UTF-8 BOM (without it Excel
+	 * reads ANSI and mangles accents), CRLF line ends (RFC 4180), and text
+	 * starting with `= + - @` prefixed with `'`, so that a cell coming from a
+	 * user is never run as a formula.
 	 */
 	async export(
 		options: {
@@ -797,11 +802,15 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 			format?: (row: Model) => Record<string, unknown>;
 			/** The cell separator. Default `;`. */
 			separator?: string;
+			/** The decimal mark of numbers. Default `,` with a `;` separator (how
+			 *  a spreadsheet in a comma-decimal locale reads it), `.` otherwise. */
+			decimal?: string;
 			/** Build the CSV without downloading it. */
 			download?: boolean;
 		} = {}
 	): Promise<string | undefined> {
 		const { name = 'export.csv', max, batch = 100, format, separator = ';', download = true } = options;
+		const decimal = options.decimal ?? (separator === ';' ? ',' : '.');
 		const rows: Model[] = [];
 		try {
 			for (let page = 1; ; page++) {
@@ -832,13 +841,21 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 			);
 		const cell = (v: unknown) => {
 			if (v === undefined || v === null) return '';
-			const s = v instanceof Date ? v.toISOString() : typeof v === 'object' ? JSON.stringify(v) : String(v);
+			let s =
+				v instanceof Date ? v.toISOString()
+				: typeof v === 'number' ? String(v).replace('.', decimal)
+				: typeof v === 'object' ? JSON.stringify(v)
+				: String(v);
+			// A number is never a formula, a negative one included
+			if (typeof v !== 'number' && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
 			return /["\n\r]/.test(s) || s.includes(separator) ? `"${s.replace(/"/g, '""')}"` : s;
 		};
-		const csv = [
-			columns.map((c) => cell(c.label ?? c.key)).join(separator),
-			...records.map((r) => columns.map((c) => cell(r[c.key])).join(separator))
-		].join('\n');
+		const csv =
+			'﻿' +
+			[
+				columns.map((c) => cell(c.label ?? c.key)).join(separator),
+				...records.map((r) => columns.map((c) => cell(r[c.key])).join(separator))
+			].join('\r\n');
 
 		if (download && typeof document !== 'undefined') {
 			const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));

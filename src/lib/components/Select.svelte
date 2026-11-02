@@ -61,9 +61,9 @@
 		optionname?: string;
 		/** How one option is drawn. Defaults to its `optionname` text. */
 		option?: Snippet<[any]>;
-		/** Shown while nothing is chosen. */
+		/** Shown while nothing is chosen, which is shown empty without it. */
 		placeholder?: string;
-		/** The placeholder can be chosen back, to clear the field. */
+		/** Nothing can be chosen back, to clear the field. */
 		nullable?: boolean;
 		/** Several choices: `value` is then an array. */
 		multiple?: boolean;
@@ -319,10 +319,8 @@
 		onchange={handleChange}
 		onblur={handleBlur}
 	>
-		{#if placeholder !== undefined}
-			<!-- Chosen while the value is empty. Only nullable lets it be chosen back. -->
-			<option value={undefined} disabled={!nullable} hidden={!nullable}>{placeholder}</option>
-		{/if}
+		<!-- Always there : without it, the browser shows the first option as chosen while the value stays undefined -->
+		<option value={undefined} disabled={!nullable} hidden={!nullable}>{placeholder ?? ''}</option>
 		{@render children?.()}
 		{#each options as o (keyOf(o))}
 			<option value={keyOf(o)}>{#if option}{@render option(o)}{:else}{nameOf(o)}{/if}</option>

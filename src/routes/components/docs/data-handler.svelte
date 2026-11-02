@@ -106,7 +106,7 @@
 		{ name: 'reset(id?)', what: 'Drop every unsaved change, of a row or of the page — as one step that undo() brings back.' },
 		{ name: 'save(id?) · delete(id?)', what: 'Send the changes of a row or of every changed row; delete a row or the selection. A saved or deleted row leaves the history.' },
 		{ name: 'canUpdate · canDelete', what: 'Whether update / delete exist (as functions or through path).' },
-		{ name: 'export({ name, max, batch, columns, format, separator, download })', what: 'Every row matching the query, fetched by batches, as a CSV file. Returns the CSV.' },
+		{ name: 'export({ name, max, batch, columns, format, separator, decimal, download })', what: 'Every row matching the query, fetched by batches, as a CSV file for a spreadsheet: UTF-8 BOM, CRLF, numbers with a comma under a ; separator, text starting with = + - @ prefixed with \' so it never runs as a formula. Returns the CSV.' },
 		{ name: 'toSearchParams()', what: 'The query, as the address bar writes it.' }
 	];
 </script>
