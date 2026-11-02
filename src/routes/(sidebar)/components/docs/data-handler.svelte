@@ -35,14 +35,15 @@
 				},
 				{ name: 'fetch', type: 'typeof fetch', default: 'fetch', description: 'The fetch `path` goes through — SvelteKit’s, in a load.' },
 				{ name: 'filters', type: 'Filter[]', description: 'The filters the visitor may use: text, number, date, select, boolean, or entity (picked from suggestions).' },
-				{ name: 'sorts', type: 'Sort[]', description: 'The orders the visitor may pick, `{ id, name, value }`. The first is the starting one.' },
+				{ name: 'sorts', type: 'Sort[]', description: 'The orders the visitor may pick, `{ id, name, value }`.' },
+				{ name: 'sort', type: 'Sort', description: 'The starting order. Default: the first of `sorts`.' },
 				{ name: 'immutableFilters', type: 'string[]', description: 'Filters the page sets and the visitor never sees — a user’s own orders, say.' },
 				{ name: 'search', type: 'string', description: 'The starting search.' },
 				{ name: 'filterValues', type: 'FilterValues', description: 'The starting filter values. A filter with a value starts shown.' },
 				{ name: 'init', type: '{ data?, total? }', description: 'Rows already loaded, by a server load: the first fetch is skipped.' },
 				{ name: 'limit', type: 'number', default: '10', description: 'Rows per page.' },
 				{ name: 'page', type: 'number', default: '1', description: 'The starting page, from 1.' },
-				{ name: 'history', type: 'boolean', default: 'false', description: 'Write the query to the address bar after every fetch, so back and reload land on the same rows. `parseQuery` reads it back.' },
+				{ name: 'history', type: 'boolean', default: 'false', description: 'Write the query to the address bar after every fetch, so reload lands on the same rows and back can: `parseQuery` reads it back, `restore()` applies it when the visitor walks the history. A change in a field being typed in makes one entry, and a change of page size none.' },
 				{
 					name: 'navigation',
 					type: '{ push(url, state); replace(url, state) }',
@@ -107,7 +108,8 @@
 		{ name: 'save(id?) · delete(id?)', what: 'Send the changes of a row or of every changed row; delete a row or the selection. A saved or deleted row leaves the history.' },
 		{ name: 'canUpdate · canDelete', what: 'Whether update / delete exist (as functions or through path).' },
 		{ name: 'export({ name, max, batch, columns, format, separator, decimal, download })', what: 'Every row matching the query, fetched by batches, as a CSV file for a spreadsheet: UTF-8 BOM, CRLF, numbers with a comma under a ; separator, text starting with = + - @ prefixed with \' so it never runs as a formula. Returns the CSV.' },
-		{ name: 'toSearchParams()', what: 'The query, as the address bar writes it.' }
+		{ name: 'toSearchParams()', what: 'The query, as the address bar writes it.' },
+		{ name: 'restore(params)', what: 'Go back to a query the address bar holds, without adding an entry: call it on popstate. Filters holding a value are shown, the others are not.' }
 	];
 </script>
 

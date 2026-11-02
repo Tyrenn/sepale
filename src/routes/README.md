@@ -29,8 +29,8 @@ src/scss/themes/<fam>/*.scss ───┘        │
    family prose                           narrowed copies    class classification
               │                                                     │
               ▼                                                     ▼
-    (app)/theme (theme editor)                     (app)/components/[id]
-    (app)/description, (site)/+page                (the CSS and Svelte tables)
+    (sidebar)/theme (theme editor)                     (sidebar)/components/[id]
+    (sidebar)/description, +page                (the CSS and Svelte tables)
 ```
 
 ### `scripts/build-css.mjs`
@@ -51,8 +51,8 @@ Reads `src/scss/families/` (the list of families and their header prose),
 `uu-params` comment out of each compiled stylesheet.
 
 Read by `routes/playground.svelte.ts` (the family and theme pickers),
-`(app)/theme/+page.svelte` (the theme editor), `(app)/description/+page.svelte`
-and `(site)/+page.svelte` (the home page's figures).
+`(sidebar)/theme/+page.svelte` (the theme editor), `(sidebar)/description/+page.svelte`
+and `+page.svelte` (the home page's figures).
 
 ### `scripts/gen-components.mjs` → two outputs
 
@@ -69,7 +69,7 @@ in each compiled stylesheet.
    Each copy goes through the Svelte compiler before it is written; types are
    checked by `pnpm run check`. Nothing in the app imports these: they are what
    the bundle hands over. The script also writes them as one JSON per family
-   into `static/bundle/`, which `(app)/bundle.ts` fetches when someone downloads
+   into `static/bundle/`, which `(sidebar)/bundle.ts` fetches when someone downloads
    a zip, assembled in the browser with JSZip (ADR 0001).
 
    The rewrite leans on hooks every source writes the same way — the
@@ -106,7 +106,7 @@ nobody exposed or a part nobody draws, and both need a human.
 no page. That second half matters: `.text-*`, `.link-*` and `.validator-*` have
 no Svelte wrapper by design, so "no component classifies it" is true of them and
 says nothing. To tell the difference, the script reads the `namespaces` out of
-`src/routes/(app)/components/docs/*.svelte` — the one place a build script reaches
+`src/routes/(sidebar)/components/docs/*.svelte` — the one place a build script reaches
 into the app, and the reason the warning is a handful of real gaps rather than
 four hundred false ones. Two class names it can never place are written down in
 `EXTERNAL`: `.prose` and `.filter` belong to stylesheets we do not ship and are
@@ -127,22 +127,25 @@ box), which takes back the family's ground, ink, font and colour scheme.
 
 | Route | File | What it shows |
 | --- | --- | --- |
-| `/` | `(site)/+page.svelte` | The home page: what Sepale is, the families, the catalogue |
-| `/theme` | `(app)/theme/+page.svelte` | The theme editor: parameters on the left, `ThemePreview` on the right |
-| `/description` | `(app)/description/+page.svelte` | What the active family is, and every variable it exposes — all of it read from `registry.ts` |
-| `/components/<id>` | `(app)/components/[id]/+page.svelte` | One component: description, the CSS and Svelte tables, then the examples |
+| `/` | `+page.svelte` | The home page: what Sepale is, the families, the catalogue |
+| `/about` | `about/+page.svelte` | Who makes it, the author's other work, how to contribute |
+| `/theme` | `(sidebar)/theme/+page.svelte` | The theme editor: parameters on the left, `ThemePreview` on the right |
+| `/description` | `(sidebar)/description/+page.svelte` | What the active family is, and every variable it exposes — all of it read from `registry.ts` |
+| `/components` | `(sidebar)/components/+page.svelte` | The summary: every component page, by group, with the first sentence of its description |
+| `/components/<id>` | `(sidebar)/components/[id]/+page.svelte` | One component: description, the CSS and Svelte tables, then the examples |
 
-`routes/+layout.svelte` swaps the family stylesheet and applies the theme, for
-both groups. `(app)/+layout.svelte` owns the sidebar (family picker, theme
-picker, component nav); `(site)/+layout.svelte` the presentation's header and
-footer. `routes/playground.svelte.ts` holds the shared reactive state —
-`family`, `theme`, `scheme`, `tokens` — and the nav grouping. The app opens on a
-family drawn at random, unless one was picked on the home page.
+It is one site. `routes/+layout.svelte` holds the header, swaps the family
+stylesheet and applies the theme, for every page. `(sidebar)` groups the pages
+under the sidebar (family picker, theme picker, component nav), which scroll
+inside their panes; the others scroll as a whole and wrap themselves in
+`Page.svelte`, which adds the footer. `routes/playground.svelte.ts` holds the shared reactive state —
+`family`, `theme`, `scheme`, `tokens` — and the nav grouping. The pages under the
+sidebar open on a family drawn at random, unless one was picked on the home page.
 
-The presentation shares the page with the family under preview too, but is not
-renamed like the chrome: it is hand-written, so `(site)/site.css` and the home
-page prefix everything `s-` and select no element by its tag. Fonts load in
-`(site)` only.
+The header and the home page share the page with the family under preview too,
+but are not renamed like the sidebar's chrome: they are hand-written, so
+`site.css` and those files prefix everything `s-` and select no element by its
+tag.
 
 ### Deployment
 
@@ -154,9 +157,9 @@ bare `/families/x.css` works in dev and breaks once deployed.
 
 ### A component page
 
-Two halves, joined in `(app)/components/doc.ts`:
+Two halves, joined in `(sidebar)/components/doc.ts`:
 
-- **`(app)/components/docs/<id>.svelte`** — hand-written. Its `<script module>`
+- **`(sidebar)/components/docs/<id>.svelte`** — hand-written. Its `<script module>`
   exports a `DOC`: `namespaces`, `description`, `classes` (class → what it
   does) and `props` (component → its props). The markup below is the examples,
   as `<Section>` blocks. One file per page; `import.meta.glob` picks them up, so
@@ -188,7 +191,7 @@ from what the example itself writes.
 | a theme | `src/scss/themes/<family>/<name>.scss` |
 | a parameter | declare it in the family's `$params` map; the editor follows |
 | a component | a file in every family that styles it (`structure` + `look`, ADR 0010) + (if a wrapper earns its keep) `src/lib/components/<Name>.svelte` with its `<script module>` block |
-| a component page | `src/routes/(app)/components/docs/<name>.svelte` with a `DOC`. The sidebar finds it on its own; add its id to `GROUPS` in `playground.svelte.ts` only to place it in a group rather than under "Other" |
+| a component page | `src/routes/(sidebar)/components/docs/<name>.svelte` with a `DOC`. The sidebar finds it on its own; add its id to `GROUPS` in `playground.svelte.ts` only to place it in a group rather than under "Other" |
 
 ## Verification
 

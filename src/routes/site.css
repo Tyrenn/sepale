@@ -6,7 +6,12 @@
    everything here is prefixed `s-`, classes and variables alike, and no rule
    here selects an element by its tag. */
 
-.s-site {
+:root {
+	--s-header-height: 61px;
+}
+
+.s-site,
+.s-header {
 	--s-ink: #0f2418;
 	--s-ink-raised: #18331f;
 	--s-ink-line: #2d4d36;
@@ -31,9 +36,11 @@
 
 	--s-gutter: clamp(16px, 4vw, 40px);
 	--s-page: 1160px;
+}
 
+.s-site {
 	color-scheme: light dark;
-	min-height: 100dvh;
+	min-height: calc(100dvh - var(--s-header-height));
 	background: var(--s-surface);
 	color: var(--s-text);
 	font: 400 1rem/1.65 var(--s-font-body);
@@ -41,7 +48,8 @@
 }
 
 @media (prefers-color-scheme: dark) {
-	.s-site {
+	.s-site,
+	.s-header {
 		--s-surface: #0b1a11;
 		--s-surface-raised: #132619;
 		--s-line: #27412f;
@@ -53,9 +61,13 @@
 	}
 }
 
+.s-header,
 .s-site *,
 .s-site *::before,
-.s-site *::after {
+.s-site *::after,
+.s-header *,
+.s-header *::before,
+.s-header *::after {
 	box-sizing: border-box;
 }
 
@@ -118,7 +130,8 @@
 	cursor: pointer;
 }
 
-.s-site :focus-visible {
+.s-site :focus-visible,
+.s-header :focus-visible {
 	outline: 2px solid var(--s-accent);
 	outline-offset: 2px;
 }

@@ -50,7 +50,7 @@ For component `<id>` (kebab) / `<Name>` (Pascal) / namespace `<ns>`:
    Every class the families ship under `<ns>-*` must be classified in AXES /
    FLAGS / PARTS or the build fails.
 4. **Export** from `src/lib/index.ts`.
-5. **Doc page** `src/routes/(app)/components/docs/<id>.svelte` with `DOC`
+5. **Doc page** `src/routes/(sidebar)/components/docs/<id>.svelte` with `DOC`
    (`namespaces`, `description`, `classes`, `props`) and `<Section>` examples;
    add `<id>` to a group in `GROUPS` (`src/routes/playground.svelte.ts`).
 6. **Verify**: `pnpm run check` (builds CSS, regenerates, type-checks), then

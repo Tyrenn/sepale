@@ -90,6 +90,16 @@
 		box-sizing: border-box;
 		transition: opacity var(--sidebar-speed);
 	}
+	/* Except the head: as wide as the sidebar, so the toggle at its end stays on
+	   the edge and travels with it. On the rail, that edge centres it. */
+	.sidebar > .sidebar-head {
+		min-width: 0;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+	.sidebar-head > :not(.sidebar-toggle) {
+		min-width: 0;
+	}
 	.sidebar-toggle {
 		display: inline-grid;
 		flex: none;
@@ -127,15 +137,8 @@
 		visibility: hidden;
 		transition: opacity var(--sidebar-speed), visibility 0s var(--sidebar-speed);
 	}
-	.sidebar-collapsed > .sidebar-head {
-		min-width: var(--sidebar-rail);
-		justify-content: center;
-	}
 	.sidebar-collapsed > .sidebar-head > :not(.sidebar-toggle, .sidebar-keep) {
 		display: none;
-	}
-	.sidebar-collapsed .sidebar-toggle {
-		margin-inline: 0;
 	}
 	.sidebar-collapsed .sidebar-toggle svg {
 		rotate: 180deg;

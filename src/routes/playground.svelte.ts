@@ -1,7 +1,7 @@
 import { families, themesByFamily, tokensForFamily, familyCategory } from '$lib/index.js';
 import { parseTheme, type ThemeToken } from '$lib/theme.js';
 import type { ThemeData } from '$lib/generated/registry.js';
-import { pageIds } from './(app)/components/page-ids.js';
+import { pageIds } from './(sidebar)/components/page-ids.js';
 
 export { families };
 

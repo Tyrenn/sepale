@@ -33,8 +33,7 @@
 		'page-options',
 		'pagination',
 		'range',
-		'body'
-	] as const;
+		'body', 'total'] as const;
 
 	/** Every text the control writes. */
 	export interface DataControlLabels {
@@ -45,6 +44,7 @@
 		perPage: (n: number) => string;
 		selected: (n: number) => string;
 		range: (from: number, to: number, total: number) => string;
+		results: (total: number) => string;
 		save: string;
 		undo: string;
 		redo: string;
@@ -73,6 +73,7 @@
 		perPage: (n) => `${n} per page`,
 		selected: (n) => `${n} selected`,
 		range: (from, to, total) => `${from}–${to} / ${total}`,
+		results: (total) => `${total} result${total > 1 ? 's' : ''}`,
 		save: 'Save',
 		undo: 'Undo',
 		redo: 'Redo',
@@ -120,7 +121,6 @@
 	import Pagination from './Pagination.svelte';
 	import Select from './Select.svelte';
 	import Switch from './Switch.svelte';
-	import Toggle from './Toggle.svelte';
 
 	type Handler = DataHandlerState<F, Model, Id>;
 	type ExportOptions = Parameters<Handler['export']>[0];
@@ -137,6 +137,8 @@
 		fields?: boolean;
 		/** Offer the handler's sorts. Default true. */
 		sorts?: boolean;
+		/** Draw the filter, sort and save buttons as icons alone, their text as a title, and the menus and filters small. The sort in use and the number of results go with the filters. */
+		compact?: boolean;
 		/** Draw a search field. Default true. */
 		search?: boolean;
 		/** Milliseconds without typing before the search is fetched. Default 300. */
@@ -155,6 +157,10 @@
 		onAdd?: () => void;
 		/** Confirm deletions and discarded changes in a dialog. Default true. */
 		confirm?: boolean;
+		/** How an entity is drawn, in its filter's chip and suggestions. Default: its text. */
+		entity?: Snippet<[HandledFilter, EntitySuggestion]>;
+		/** Drawn first in the bar, before the filters. */
+		start?: Snippet<[Handler]>;
 		/** Drawn at the start of the bar, after the filters and the sort. */
 		leftActions?: Snippet<[Handler]>;
 		/** Drawn at the end of the bar, after the built-in actions. */
@@ -173,6 +179,7 @@
 		children,
 		filters = true,
 		fields = false,
+		compact = false,
 		sorts = true,
 		search = true,
 		searchDelay = 300,
@@ -183,6 +190,8 @@
 		exportable = false,
 		onAdd,
 		confirm = true,
+		entity,
+		start,
 		leftActions,
 		rightActions,
 		header,
@@ -236,8 +245,27 @@
 
 	/* ── Filters ── */
 
-	/** The filter whose editor is open. */
+	/** The filter being edited: its chip holds its field. */
 	let openFilter: string | undefined = $state();
+
+	/* A press anywhere but on the chip being edited ends the editing. */
+	function pressed(e: PointerEvent) {
+		if (openFilter && !(e.target as Element).closest?.(`[data-filter="${openFilter}"]`)) openFilter = undefined;
+	}
+
+	/* A chip turning into its field hands it the focus, and opens what can be opened. */
+	function takeFocus(node: HTMLElement, on: boolean) {
+		if (!on) return;
+		const field = node.querySelector<HTMLElement>('input, select, [tabindex]');
+		field?.focus();
+		if (field instanceof HTMLSelectElement) {
+			try {
+				field.showPicker();
+			} catch {
+				/* Not every browser opens it from code: the focus is enough. */
+			}
+		} else if (field && !(field instanceof HTMLInputElement)) field.click();
+	}
 
 	const valueOf = (f: HandledFilter) => (handler.filterValues as Record<string, unknown>)[f.id];
 
@@ -269,8 +297,11 @@
 		openFilter = f.id;
 	}
 
-	const set = (f: HandledFilter, value: unknown, delay = 0) =>
-		handler.changeFilter(f.id, value as never, delay);
+	/* A value chosen once and for all ends the editing; one being typed or ticked does not. */
+	function set(f: HandledFilter, value: unknown, delay = 0) {
+		if (!delay && value !== undefined && !(f.type === 'select' && f.multiple)) openFilter = undefined;
+		return handler.changeFilter(f.id, value as never, delay);
+	}
 
 	const dateValue = (v: unknown) => (v instanceof Date ? v.toISOString().slice(0, 10) : '');
 
@@ -297,10 +328,31 @@
 	);
 
 	const sortKey = (s: Sort) => `${s.id}-${s.value}`;
+
+	/* The rows of the two menus, each found back by its place: two may read the same. */
+	const filterNodes = $derived(handler.availableFilters.map((f) => ({ label: f.title })));
+	const sortNodes = $derived([
+		{ label: t.noSort, active: !handler.sort },
+		...handler.sorts.map((s) => ({
+			label: s.name,
+			active: !!handler.sort && sortKey(handler.sort) === sortKey(s)
+		}))
+	]);
 </script>
 
 {#snippet icon(path: string)}
 	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={path} /></svg>
+{/snippet}
+
+{#snippet sortMenu(close: () => void)}
+	<Menu
+		size={compact ? 'sm' : undefined}
+		items={sortNodes}
+		onSelect={(node) => {
+			close();
+			handler.changeSort(handler.sorts[sortNodes.indexOf(node as (typeof sortNodes)[number]) - 1]);
+		}}
+	/>
 {/snippet}
 
 {#snippet pager()}
@@ -337,17 +389,19 @@
 {/snippet}
 
 {#snippet editor(f: HandledFilter, inline: boolean)}
-	<div class={inline ? `${PREFIX}-field` : `${PREFIX}-editor`}>
+	{@const fieldSize = compact && !inline ? 'xs' : undefined}
+	<div class={inline ? `${PREFIX}-field` : `${PREFIX}-editor`} use:takeFocus={!inline}>
 		{#if inline}<span class={`${PREFIX}-field-label`}>{f.title}</span>{/if}
 		{#if f.type === 'text'}
 			<Input
-				placeholder={inline ? undefined : f.title}
+				size={fieldSize}
 				aria-label={f.title}
 				value={(valueOf(f) as string) ?? ''}
 				oninput={(e) => set(f, e.currentTarget.value || undefined, 400)}
 			/>
 		{:else if f.type === 'number'}
 			<Input
+				size={fieldSize}
 				type="number"
 				placeholder={undefined}
 				aria-label={f.title}
@@ -362,11 +416,13 @@
 			/>
 		{:else if f.type === 'date'}
 			<DatePicker
+				size={fieldSize}
 				value={(valueOf(f) as Date | undefined) ?? null}
 				onChange={(d) => set(f, d instanceof Date ? d : undefined)}
 			/>
-		{:else if f.type === 'boolean' && inline}
+		{:else if f.type === 'boolean'}
 			<Select
+				size={fieldSize}
 				options={[{ value: 'yes', name: t.yes }, { value: 'no', name: t.no }]}
 				nullable
 				placeholder={t.any}
@@ -384,6 +440,7 @@
 			/>
 		{:else if f.type === 'select'}
 			<Select
+				size={fieldSize}
 				options={f.options}
 				multiple={f.multiple}
 				nullable={f.nullable ?? true}
@@ -395,14 +452,10 @@
 					set(f, list.length ? list : undefined);
 				}}
 			/>
-		{:else if f.type === 'boolean'}
-			<label style="display:flex; align-items:center; gap:.5em;">
-				<Toggle checked={!!valueOf(f)} onchange={(e) => set(f, e.currentTarget.checked)} />
-				{f.title}
-			</label>
 		{:else if f.type === 'entity'}
 			<Combobox
-				placeholder={inline ? t.any : f.title}
+				size={fieldSize}
+				placeholder={t.any}
 				aria-label={f.title}
 				value={valueOf(f)}
 				options={(q: string) => Promise.resolve(f.items(q))}
@@ -410,12 +463,29 @@
 				wait={f.wait}
 				eager
 				onSelect={(s: EntitySuggestion | undefined) => set(f, s ? ({ id: String(s.id), name: s.name } satisfies EntityValue) : undefined)}
-			/>
+			>
+				{#snippet option(s: EntitySuggestion)}
+					{#if entity}{@render entity(f, s)}{:else}{f.show ? f.show(s) : String(s.name ?? s.id)}{/if}
+				{/snippet}
+			</Combobox>
 		{/if}
 	</div>
 {/snippet}
 
 {#snippet actions()}
+			{#if exportable && !fields}
+				<Button
+					variant="soft"
+					shape="square"
+					title={t.export}
+					aria-label={t.export}
+					disabled={!handler.total}
+					onclick={() => handler.export(typeof exportable === 'object' ? exportable : {})}
+				>
+					{@render icon('M12 3v12M7 10l5 5 5-5M5 21h14')}
+				</Button>
+			{/if}
+
 			{#if limits && limits.length && !fields}
 				<Select
 					aria-label={t.perPage(handler.limit)}
@@ -439,8 +509,12 @@
 				<Button variant="ghost" shape="square" title={t.reset} aria-label={t.reset} disabled={!handler.dirty} onclick={() => handler.reset()}>
 					{@render icon('M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5')}
 				</Button>
-				<Button color="primary" disabled={!handler.dirty} onclick={() => handler.save()}>
-					{t.save}
+				<Button color="primary" shape={compact ? 'square' : undefined} title={t.save} aria-label={t.save} disabled={!handler.dirty} onclick={() => handler.save()}>
+					{#if compact}
+						{@render icon('M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7M7 3v4a1 1 0 0 0 1 1h7')}
+					{:else}
+						{t.save}
+					{/if}
 				</Button>
 			{/if}
 
@@ -456,38 +530,30 @@
 				</Button>
 			{/if}
 
-			{#if exportable && !fields}
-				<Button
-					variant="ghost"
-					shape="square"
-					title={t.export}
-					aria-label={t.export}
-					disabled={!handler.total}
-					onclick={() => handler.export(typeof exportable === 'object' ? exportable : {})}
-				>
-					{@render icon('M12 3v12M7 10l5 5 5-5M5 21h14')}
-				</Button>
-			{/if}
-
 			{@render rightActions?.(handler)}
 {/snippet}
+
+<svelte:window onpointerdown={pressed} />
 
 <div {...applied.rest} class={classes}>
 	<div class={`${PREFIX}-bar`}>
 		<div class={`${PREFIX}-bar-left`}>
+			{@render start?.(handler)}
+
 			{#if filters && !fields && handler.availableFilters.length}
 				<Dropdown>
 					{#snippet trigger({ props })}
-						<Button {...props} variant="ghost" title={t.filters}>
+						<Button {...props} variant="ghost" shape={compact ? 'square' : undefined} title={t.filters} aria-label={t.filters}>
 							{@render icon('M3 5h18M6 12h12M10 19h4')}
-							{t.filters}
+							{#if !compact}{t.filters}{/if}
 						</Button>
 					{/snippet}
 					{#snippet children({ close })}
 						<Menu
-							items={handler.availableFilters.map((f) => ({ label: f.title }))}
+							size={compact ? 'sm' : undefined}
+							items={filterNodes}
 							onSelect={(node) => {
-								const f = handler.availableFilters.find((x) => x.title === node.label);
+								const f = handler.availableFilters[filterNodes.indexOf(node as (typeof filterNodes)[number])];
 								close();
 								if (f) add(f);
 							}}
@@ -499,26 +565,12 @@
 			{#if sorts && !fields && handler.sorts.length}
 				<Dropdown>
 					{#snippet trigger({ props })}
-						<Button {...props} variant="ghost" title={t.sort}>
+						<Button {...props} variant="ghost" shape={compact ? 'square' : undefined} title={handler.sort?.name ?? t.sort} aria-label={t.sort}>
 							{@render icon('M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4')}
-							{handler.sort?.name ?? t.sort}
+							{#if !compact}{handler.sort?.name ?? t.sort}{/if}
 						</Button>
 					{/snippet}
-					{#snippet children({ close })}
-						<Menu
-							items={[
-								{ label: t.noSort, active: !handler.sort },
-								...handler.sorts.map((s) => ({
-									label: s.name,
-									active: !!handler.sort && sortKey(handler.sort) === sortKey(s)
-								}))
-							]}
-							onSelect={(node) => {
-								close();
-								handler.changeSort(handler.sorts.find((s) => s.name === node.label));
-							}}
-						/>
-					{/snippet}
+					{#snippet children({ close })}{@render sortMenu(close)}{/snippet}
 				</Dropdown>
 			{/if}
 
@@ -601,30 +653,64 @@
 		</div>
 	{/if}
 
-	{#if filters && !fields && handler.shownFilters.length}
+	{#if !fields && ((filters && handler.shownFilters.length) || (compact && (handler.sort || handler.total !== undefined)))}
 		<div class={`${PREFIX}-filters`}>
-			{#each handler.shownFilters as f (f.id)}
-				<Dropdown
-					open={openFilter === f.id}
-					onToggle={(open) => (openFilter = open ? f.id : openFilter === f.id ? undefined : openFilter)}
-				>
+			{#if compact && sorts && handler.sort}
+				<Dropdown>
 					{#snippet trigger({ props })}
-						<Chip variant="soft" class={`${PREFIX}-filter`}>
-							<button type="button" {...props}><strong>{f.title}</strong> {summary(f)}</button>
+						<Chip variant="soft" color="primary" size="sm" class={`${PREFIX}-filter`}>
+							<button type="button" {...props} title={t.sort}>
+								{@render icon('M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4')}
+								<strong>{handler.sort?.name}</strong>
+							</button>
 							<button
 								type="button"
 								class={`${PREFIX}-filter-remove`}
-								aria-label={t.removeFilter(f.title)}
-								onclick={() => {
-									openFilter = undefined;
-									handler.removeFilter(f.id);
-								}}
+								aria-label={t.noSort}
+								title={t.noSort}
+								onclick={() => handler.changeSort(undefined)}
 							>{@render icon('M18 6 6 18M6 6l12 12')}</button>
 						</Chip>
 					{/snippet}
-					{@render editor(f, false)}
+					{#snippet children({ close })}{@render sortMenu(close)}{/snippet}
 				</Dropdown>
+			{/if}
+
+			{#each filters ? handler.shownFilters : [] as f (f.id)}
+				<Chip
+					variant="soft"
+					color="primary"
+					size={compact ? 'sm' : undefined}
+					class={`${PREFIX}-filter`}
+					data-filter={f.id}
+					onkeydown={(e: KeyboardEvent) => {
+						if (e.key === 'Escape' || (e.key === 'Enter' && (f.type === 'text' || f.type === 'number'))) openFilter = undefined;
+					}}
+				>
+					{#if openFilter === f.id}
+						<strong>{f.title}</strong>
+						{@render editor(f, false)}
+					{:else}
+						<button type="button" onclick={() => (openFilter = f.id)}>
+							<strong>{f.title}</strong>
+							{#if f.type === 'entity' && entity && valueOf(f)}{@render entity(f, valueOf(f) as EntityValue)}{:else}{summary(f)}{/if}
+						</button>
+					{/if}
+					<button
+						type="button"
+						class={`${PREFIX}-filter-remove`}
+						aria-label={t.removeFilter(f.title)}
+						onclick={() => {
+							openFilter = undefined;
+							handler.removeFilter(f.id);
+						}}
+					>{@render icon('M18 6 6 18M6 6l12 12')}</button>
+				</Chip>
 			{/each}
+
+			{#if compact && handler.total !== undefined}
+				<span class={`${PREFIX}-total`}>{t.results(handler.total)}</span>
+			{/if}
 		</div>
 	{/if}
 

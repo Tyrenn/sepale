@@ -37,7 +37,7 @@ const srcDir = join(root, 'src/lib/components');
 const builtDir = join(root, 'static/families');
 const outDir = join(root, 'src/generated/components');
 const docFile = join(root, 'src/lib/generated/components.ts');
-const pagesDir = join(root, 'src/routes/(app)/components/docs');
+const pagesDir = join(root, 'src/routes/(sidebar)/components/docs');
 
 
 /* The package's per-family entry points (ADR 0012): `@sepale/components/<family>`. */
@@ -431,7 +431,7 @@ writeFileSync(
 // What each family actually ships, read back out of its compiled CSS and
 // classified by the components' own AXES / FLAGS / PARTS blocks. The component
 // pages render this; the prose that goes beside it is hand-written in
-// src/routes/(app)/components/docs/.
+// src/routes/(sidebar)/components/docs/.
 
 /** How a component accounts for one of its classes. */
 export interface ClassInfo {

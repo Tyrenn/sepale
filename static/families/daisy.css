@@ -3504,8 +3504,8 @@ svg {
   gap: var(--data-control-bar-gap);
 }
 
-/* A filter is a chip holding two buttons: the one that opens its
-   editor, and the one that takes it off. */
+/* A filter is a chip holding two buttons: the one that turns it into its
+   field, and the one that takes it off. */
 .data-control-filter {
   gap: calc(0.25em * var(--scale));
 }
@@ -3522,8 +3522,22 @@ svg {
   cursor: pointer;
 }
 
+.data-control-filter svg {
+  width: 1em;
+  height: 1em;
+}
+
 .data-control-filter-remove {
   opacity: 0.6;
+}
+
+/* How many rows match: at the far end of the row of filters. */
+.data-control-total {
+  margin-inline-start: auto;
+  color: var(--data-control-muted);
+  font-size: 0.875em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (hover: hover) {
@@ -3536,12 +3550,23 @@ svg {
   outline-offset: 2px;
 }
 
+/* Being edited, the chip holds the field: it takes the height of it, and
+   what the field opens is not cropped by any box of its own. */
+.data-control-filter:has(.data-control-editor) {
+  position: relative;
+  z-index: 20;
+  height: auto;
+  padding-block: calc(0.1em * var(--scale));
+}
+
 .data-control-editor {
   display: flex;
-  flex-direction: column;
-  gap: calc(0.5em * var(--scale));
   width: var(--data-control-editor);
-  padding: calc(0.5em * var(--scale));
+}
+
+.data-control-editor > * {
+  flex: 1;
+  min-width: 0;
 }
 
 /* With `fields`, a filter is a field in the bar, and the page size and the
@@ -7407,6 +7432,18 @@ dialog.drawer[open] {
   transition: opacity var(--sidebar-speed);
 }
 
+/* Except the head: as wide as the sidebar, so the toggle at its end stays on
+   the edge and travels with it. On the rail, that edge centres it. */
+.sidebar > .sidebar-head {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar-head > :not(.sidebar-toggle) {
+  min-width: 0;
+}
+
 .sidebar-toggle {
   display: inline-grid;
   flex: none;
@@ -7449,17 +7486,8 @@ dialog.drawer[open] {
   transition: opacity var(--sidebar-speed), visibility 0s var(--sidebar-speed);
 }
 
-.sidebar-collapsed > .sidebar-head {
-  min-width: var(--sidebar-rail);
-  justify-content: center;
-}
-
 .sidebar-collapsed > .sidebar-head > :not(.sidebar-toggle, .sidebar-keep) {
   display: none;
-}
-
-.sidebar-collapsed .sidebar-toggle {
-  margin-inline: 0;
 }
 
 .sidebar-collapsed .sidebar-toggle svg {

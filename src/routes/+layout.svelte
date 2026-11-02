@@ -1,10 +1,13 @@
 <script lang="ts">
-	// What every page shares: the active family and its theme, because both the
-	// presentation pages and the app show the kit in it. The app's chrome is in
-	// (app)/+layout.svelte, the presentation's in (site)/+layout.svelte.
+	// What every page shares: the header, the active family and its theme.
+	import '@fontsource-variable/inter';
+	import '@fontsource-variable/jetbrains-mono';
+	import '@fontsource-variable/newsreader';
 	import './app.css';
+	import './site.css';
 	import { asset } from '$app/paths';
 	import { tokensToInlineStyle } from '$lib/theme.js';
+	import Header from './Header.svelte';
 	import { playground } from './playground.svelte.js';
 	import type { Snippet } from 'svelte';
 
@@ -28,4 +31,9 @@
 	{@html `<style>${rootStyle}</style>`}
 </svelte:head>
 
-{@render children()}
+<!-- As tall as its content: the body is only as tall as the screen, and the
+     sticky header would leave with it. -->
+<div>
+	<Header />
+	{@render children()}
+</div>

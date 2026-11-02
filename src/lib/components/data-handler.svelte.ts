@@ -32,6 +32,8 @@ export type EntityFilter<ID extends string = string> = {
 	show?: (suggestion: EntitySuggestion) => string;
 	/** Milliseconds without typing before `items` is asked. */
 	wait?: number;
+	/** What it picks, for whoever draws the entity (DataControl's `entity`). */
+	kind?: string;
 };
 
 export type NumberFilter<ID extends string = string> = {
@@ -106,7 +108,7 @@ export type FilterValues<F extends readonly Filter[]> = {
 /** A filter as the handler holds it: shown or not, and maybe immutable. */
 export type HandledFilter<F extends Filter = Filter> = F & {
 	/** On the page, with or without a value. */
-	show: boolean;
+	shown: boolean;
 	/** Set by the page and never offered to the visitor. */
 	immutable: boolean;
 };
@@ -184,8 +186,10 @@ export type DataHandlerOptions<F extends readonly Filter[], Model, Id> = {
 
 	/** The filters the visitor may use. */
 	filters?: F;
-	/** The orders the visitor may pick. The first is the starting one. */
+	/** The orders the visitor may pick. */
 	sorts?: readonly Sort[];
+	/** The starting order. Default: the first of `sorts`. */
+	sort?: Sort;
 	/** Filters set by the page and never shown. */
 	immutableFilters?: F[number]['id'][];
 
@@ -341,6 +345,9 @@ export function parseQuery<const F extends readonly Filter[]>(
 	};
 }
 
+/** A pause longer than this in a field being typed in starts a new entry of the browser history. */
+const TYPING_PAUSE = 2000;
+
 const historyNavigation: Navigation = {
 	push: (url, state) => history.pushState(state, '', url),
 	replace: (url, state) => history.replaceState(state, '', url)
@@ -377,9 +384,9 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 	dirty = $derived(this.changed.length > 0);
 
 	/** The filters on the page. */
-	shownFilters = $derived(this.filters.filter((f) => f.show && !f.immutable));
+	shownFilters = $derived(this.filters.filter((f) => f.shown && !f.immutable));
 	/** The filters that could be added to the page. */
-	availableFilters = $derived(this.filters.filter((f) => !f.show && !f.immutable));
+	availableFilters = $derived(this.filters.filter((f) => !f.shown && !f.immutable));
 
 	/** How many pages there are, once the total is known. */
 	pages = $derived(this.total === undefined ? undefined : Math.max(1, Math.ceil(this.total / this.limit)));
@@ -398,6 +405,10 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 	#timer: ReturnType<typeof setTimeout> | undefined;
 	/** The query of the last fetch that went through, to go back to on "stay". */
 	#committed: { filterValues: FilterValues<F>; search: string; sort?: Sort; page: number; limit: number };
+	/** The rows per page the handler started with: what an address without a limit means. */
+	#startLimit: number;
+	/** The field whose typing wrote the address bar last, and when. */
+	#typed: { field: string; at: number } | undefined;
 
 	constructor(options: DataHandlerOptions<F, Model, Id>) {
 		this.options = options;
@@ -413,14 +424,15 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 		this.filters = (options.filters ?? []).map((f) => ({
 			...f,
 			immutable: !!options.immutableFilters?.includes(f.id),
-			show: (options.filterValues as Record<string, unknown> | undefined)?.[f.id] !== undefined
+			shown: (options.filterValues as Record<string, unknown> | undefined)?.[f.id] !== undefined
 		})) as HandledFilter<F[number]>[];
 		this.filterValues = { ...(options.filterValues ?? {}) } as FilterValues<F>;
 		this.search = options.search ?? '';
-		this.sort = this.sorts[0];
+		this.sort = options.sort ?? this.sorts[0];
 
 		const limit = options.limit ?? options.init?.data?.length;
 		this.limit = Number.isInteger(limit) && (limit as number) > 0 ? (limit as number) : 10;
+		this.#startLimit = this.limit;
 		this.page = Math.max(1, options.page ?? 1);
 
 		if (options.init) {
@@ -445,15 +457,16 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 	 * Fetch the current page. Unsaved changes are put to `confirmDiscard`
 	 * first; "stay" puts the query back where the last fetch left it.
 	 * `delay` debounces (a search being typed); `replace` rewrites the
-	 * address bar entry instead of adding one.
+	 * address bar entry instead of adding one; `typing` names the field being
+	 * typed in, whose changes in a row make a single entry.
 	 */
-	load(options: { delay?: number; replace?: boolean } = {}): Promise<void> {
+	load(options: { delay?: number; replace?: boolean; typing?: string } = {}): Promise<void> {
 		clearTimeout(this.#timer);
 		if (options.delay)
 			return new Promise((resolve) => {
-				this.#timer = setTimeout(() => resolve(this.#load(options.replace)), options.delay);
+				this.#timer = setTimeout(() => resolve(this.#load(options.replace, options.typing)), options.delay);
 			});
-		return this.#load(options.replace);
+		return this.#load(options.replace, options.typing);
 	}
 
 	/** Fetch again, as is: after a change made elsewhere. */
@@ -461,12 +474,48 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 		return this.load({ replace: true });
 	}
 
-	async #load(replace = false) {
+	/**
+	 * Go back to a query the address bar holds, when the visitor walks the
+	 * browser history: fetches it without adding an entry. Filters holding a
+	 * value are shown, the others are not; immutable ones keep their value. On
+	 * "stay", the address is written back to the rows still on screen.
+	 */
+	async restore(params: URLSearchParams) {
+		clearTimeout(this.#timer);
+		if (!(await this.#guard())) {
+			this.#write(false);
+			return;
+		}
+		const query = parseQuery(params, this.filters as unknown as F, this.sorts);
+		const values = query.filterValues as Record<string, unknown>;
+		for (const f of this.filters) {
+			if (f.immutable) values[f.id] = (this.filterValues as Record<string, unknown>)[f.id];
+			else f.shown = values[f.id] !== undefined;
+		}
+		this.filterValues = query.filterValues;
+		this.search = query.search ?? '';
+		this.sort = query.sort ?? this.sorts[0];
+		this.page = query.page ?? 1;
+		this.limit = query.limit ?? this.#startLimit;
+		this.#typed = undefined;
+		await this.#fetchPage();
+	}
+
+	async #load(replace = false, typing?: string) {
 		if (!(await this.#guard())) {
 			Object.assign(this, { ...this.#committed, filterValues: { ...this.#committed.filterValues } });
 			return;
 		}
+		await this.#fetchPage(() => {
+			const now = Date.now();
+			const sameTyping = !!typing && this.#typed?.field === typing && now - this.#typed.at < TYPING_PAUSE;
+			this.#typed = typing ? { field: typing, at: now } : undefined;
+			if (this.options.history) this.#write(replace || sameTyping);
+		});
+	}
 
+	/** Fetch the query as it stands; `fetched` runs once its rows are in. */
+	async #fetchPage(fetched?: () => void) {
 		const ticket = ++this.#ticket;
 		this.loading = true;
 		try {
@@ -489,7 +538,7 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 			this.#undo = [];
 			this.#redo = [];
 			this.#committed = this.#query();
-			if (this.options.history) this.#write(replace);
+			fetched?.();
 		} catch (error) {
 			if (ticket === this.#ticket) this.#error(this.messages.loadFailed, error);
 		} finally {
@@ -549,7 +598,8 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 		const url = `${location.pathname}?${ours}${location.hash}`;
 		const nav = this.options.navigation ?? historyNavigation;
 		const state = { datahandler: ours.toString() };
-		if (replace) nav.replace(url, state);
+		/* The same query again is not a step back to walk through. */
+		if (replace || url === `${location.pathname}${location.search}${location.hash}`) nav.replace(url, state);
 		else nav.push(url, state);
 	}
 
@@ -583,7 +633,7 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 		this.limit = limit > 0 ? limit : 10;
 		/* The first row on screen stays on screen. */
 		this.page = Math.max(1, Math.floor(((this.#committed.page - 1) * this.#committed.limit) / this.limit) + 1);
-		return this.load();
+		return this.load({ replace: true });
 	}
 
 	changeSort(sort: Sort | undefined) {
@@ -596,27 +646,27 @@ export class DataHandlerState<const F extends readonly Filter[] = Filter[], Mode
 	changeSearch(search: string, delay = 300) {
 		this.search = search;
 		this.page = 1;
-		return this.load({ delay });
+		return this.load({ delay, typing: 'search' });
 	}
 
 	changeFilter<K extends F[number]['id']>(id: K, value: FilterValues<F>[K] | undefined, delay = 0) {
 		(this.filterValues as Record<string, unknown>)[id] = value;
 		this.total = undefined;
 		this.page = 1;
-		return this.load({ delay });
+		return this.load({ delay, typing: delay ? id : undefined });
 	}
 
 	/** Put a filter on the page, without a value yet. */
 	showFilter(id: F[number]['id']) {
 		const f = this.filters.find((f) => f.id === id);
-		if (f) f.show = true;
+		if (f) f.shown = true;
 	}
 
 	/** Take a filter off the page, and its value with it. */
 	removeFilter(id: F[number]['id']) {
 		const f = this.filters.find((f) => f.id === id);
 		if (!f) return;
-		f.show = false;
+		f.shown = false;
 		if ((this.filterValues as Record<string, unknown>)[id] === undefined) return;
 		return this.changeFilter(id, undefined);
 	}
