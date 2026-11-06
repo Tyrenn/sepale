@@ -39,7 +39,10 @@
 	}
 </script>
 
-<main class="content fam">
+<!-- The scroll container takes the whole width, so its scrollbar stays at
+     the window edge; the column inside is centred, like a component page. -->
+<main class="content">
+<div class="fam">
 	<header class="fam-head">
 		<h1 class="fam-title">{doc.title}</h1>
 		{#if doc.after}<p class="fam-after">{doc.after}</p>{/if}
@@ -141,4 +144,5 @@
 			</table>
 		</div>
 	</section>
+</div>
 </main>

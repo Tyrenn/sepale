@@ -1863,7 +1863,8 @@ svg {
    family reads: `structure` is the mechanism, `look` the values and
    the variants (ADR 0010). */
 /* ============================================================
-   number-input.scss — .number-input (a number with − and + beside it)
+   number-input.scss — .number-input (a number, aligned to the end;
+   −/+ buttons around it with the `controls` prop)
 
    	<div class="number-input">
    	  <button type="button" class="number-input-dec" aria-label="Decrease">−</button>
@@ -1871,8 +1872,9 @@ svg {
    	  <button type="button" class="number-input-inc" aria-label="Increase">+</button>
    	</div>
 
-      One field-shaped frame: the native spinners are hidden, the two
-      buttons step the value.
+      One field-shaped frame: the native spinners are hidden. The two
+      buttons are only there with `controls`; without them the field is
+      alone, its figure aligned to the end like a number in a column.
 
       Plumbing contract:
    	--number-input-bg / --number-input-fg / --number-input-border
@@ -6758,15 +6760,21 @@ span.editable-display {
   width: var(--number-input-width);
   min-width: 0;
   margin: 0;
-  padding: 0 0.25em;
+  padding: 0 calc(0.75em * var(--scale));
   border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
-  text-align: center;
+  text-align: end;
   font-variant-numeric: tabular-nums;
   -moz-appearance: textfield;
   appearance: textfield;
+}
+
+/* With its buttons, the figure sits centred between them. */
+.number-input:has(> .number-input-dec) .number-input-field {
+  padding: 0 0.25em;
+  text-align: center;
 }
 
 .number-input-field:focus {
@@ -12456,8 +12464,12 @@ label:has(:checked),
   --number-input-radius: var(--radius-field);
   --number-input-btn-bg: transparent;
   --number-input-btn-hover: color-mix(in oklab, var(--color-base-content) 8%, #0000);
-  --number-input-width: 4em;
+  --number-input-width: 8em;
   --number-input-focus: 0 0 0 2px color-mix(in oklab, var(--color-primary) 45%, #0000);
+}
+
+.number-input:has(> .number-input-dec) {
+  --number-input-width: 4em;
 }
 
 .number-input-xs {

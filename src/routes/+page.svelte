@@ -178,6 +178,22 @@
 	</section>
 
 	<section class="s-page s-section">
+		<h2 class="s-h2 s-heading">The principles</h2>
+		<p class="s-intro">
+			What Sépale is made of, whichever family you pick: components first, plain CSS after, and a Svelte layer that knows what the
+			stylesheet ships.
+		</p>
+		<ul class="s-features">
+			{#each FEATURES as feature (feature.title)}
+				<li>
+					<h3 class="s-h3 s-feature-title">{feature.title}</h3>
+					<p class="s-feature-text">{feature.text}</p>
+				</li>
+			{/each}
+		</ul>
+	</section>
+
+	<section class="s-page s-section">
 		<h2 class="s-h2 s-heading">One markup, {families.length} families</h2>
 		<p class="s-intro">
 			Changing family is changing a stylesheet and an import, never the markup. Pick one, then drag the cards: this is the kit
@@ -196,6 +212,12 @@
 					<span class="s-family-count">{themesFor(family).length} themes · {paramsByFamily[family]?.length ?? 0} parameters</span>
 				</button>
 			{/each}
+			<!-- Not a family: the way to make one, sized like one. -->
+			<a class="s-family s-family-add" href={resolve('/new-family')}>
+				<strong class="s-family-name">Add yours</strong>
+				<span>One CSS file</span>
+				<span class="s-family-count">Write it with an AI →</span>
+			</a>
 		</div>
 		<label class="s-theme">
 			Theme
@@ -254,8 +276,9 @@
 		</div>
 	</section>
 
-	<section class="s-page s-section s-rest">
+	<section class="s-page s-section">
 		<h2 class="s-h2 s-heading">Two ways to get it</h2>
+		<p class="s-intro">Follow the kit as it evolves, or take a snapshot that is yours to change.</p>
 		<div class="s-ways">
 			<div class="s-way">
 				<h3 class="s-h3 s-way-title">The packages follow the kit</h3>
@@ -281,17 +304,6 @@
 		</div>
 	</section>
 
-	<section class="s-page s-section s-rest">
-		<h2 class="s-h2 s-heading">And the rest</h2>
-		<ul class="s-features">
-			{#each FEATURES as feature (feature.title)}
-				<li>
-					<h3 class="s-h3 s-feature-title">{feature.title}</h3>
-					<p class="s-feature-text">{feature.text}</p>
-				</li>
-			{/each}
-		</ul>
-	</section>
 </Page>
 
 <style>
@@ -488,8 +500,9 @@
 		padding-block: clamp(56px, 8vw, 88px);
 	}
 
-	/* Two plain sections in a row: one gap between them, not two. */
-	.s-rest + .s-rest {
+	/* Two plain sections in a row (no band of colour between them): one gap
+	   between them, not two. */
+	.s-section + .s-section {
 		padding-top: 0;
 	}
 
@@ -516,7 +529,7 @@
 
 	.s-families {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
 		gap: 10px;
 	}
 
@@ -542,6 +555,15 @@
 		border-color: var(--s-accent);
 		box-shadow: inset 0 0 0 1px var(--s-accent);
 		background: var(--s-surface-raised);
+	}
+
+	.s-family-add {
+		border-style: dashed;
+		text-decoration: none;
+	}
+
+	.s-family-add:hover .s-family-name {
+		color: var(--s-accent);
 	}
 
 	.s-family-name {
@@ -636,7 +658,6 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
 		gap: 28px 32px;
-		margin-top: 20px;
 	}
 
 	.s-way {
@@ -664,7 +685,7 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
 		gap: 28px 40px;
-		margin: 28px 0 0;
+		margin: 0;
 		padding: 0;
 		list-style: none;
 	}

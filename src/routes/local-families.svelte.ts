@@ -52,7 +52,11 @@ const slug = (s: string) =>
  * the file's; a name a built family already has is suffixed, since a built
  * family is not ours to replace.
  */
+/** Five times a built family: room to grow, not room to freeze the tab. */
+export const MAX_BYTES = 2_000_000;
+
 export function readFamily(css: string, fileName = 'family'): LocalFamily {
+	if (css.length > MAX_BYTES) throw new Error(`A family is at most ${MAX_BYTES / 1e6} MB; this file is larger.`);
 	const doc = docIn(css);
 	const params = paramsIn(css);
 	let name = slug(doc?.name || fileName.replace(/\.css$/i, '')) || 'family';
@@ -100,9 +104,16 @@ export function restoreFamilies(): Promise<void> {
 	restored ??= (async () => {
 		const rows = (await store('getAll')) as { css: string; fileName?: string; loadedAt?: number }[] | undefined;
 		for (const row of rows ?? []) {
-			const family = readFamily(row.css, row.fileName);
-			family.loadedAt = row.loadedAt ?? family.loadedAt;
-			if (!local.list.some((f) => f.name === family.name)) local.list.push(family);
+			if (typeof row?.css !== 'string' || row.css.length > MAX_BYTES) continue;
+			try {
+				/* Read again, through every check: what was stored is a file
+				   like any other, not something trusted for having been saved. */
+				const family = readFamily(row.css, typeof row.fileName === 'string' ? row.fileName : undefined);
+				if (typeof row.loadedAt === 'number') family.loadedAt = row.loadedAt;
+				if (!local.list.some((f) => f.name === family.name)) local.list.push(family);
+			} catch {
+				/* An unreadable row is skipped, not fatal to the others. */
+			}
 		}
 	})();
 	return restored;

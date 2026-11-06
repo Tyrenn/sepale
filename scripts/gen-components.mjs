@@ -447,6 +447,44 @@ const hooksOf = (src, prefix) => {
 	if (allCss.includes(`var(--${prefix}-bg`)) found.add(`--${prefix}-bg`);
 	return [...found].sort();
 };
+/**
+ * How a wrapper moves, read from its source: the Svelte transitions it plays
+ * in JavaScript (`transition:`, `in:`, `out:`, `animate:`), and the CSS events
+ * it waits for (`animationend`, `transitionend`), each as one sentence. A
+ * family needs both: the first it cannot restyle, the second it must provide.
+ */
+const motionOf = (src, prefix) => {
+	const out = [];
+	/* The element a directive sits on, by its class when it has one. */
+	const target = (at) => {
+		const open = src.lastIndexOf('<', at);
+		const tag = src.slice(open, src.indexOf('>', at) + 1);
+		const part = tag.match(/class=\{`\$\{PREFIX\}-([\w-]+)`\}/)?.[1];
+		if (part) return `\`.${prefix}-${part}\``;
+		if (/class=\{classes\}/.test(tag)) return `\`.${prefix}\``;
+		return `a \`<${tag.match(/^<([\w-]+)/)?.[1] ?? 'element'}>\``;
+	};
+	for (const m of src.matchAll(/\b(transition|in|out|animate):(\w+)(?:=\{\{([^}]*)\}\})?/g)) {
+		const params = (m[3] ?? '').replace(/\s+/g, ' ').trim();
+		const kind = { transition: 'enters and leaves', in: 'enters', out: 'leaves', animate: 'moves between places' }[m[1]];
+		out.push(
+			`${target(m.index)} ${kind} with Svelte's \`${m[2]}\`${params ? ` (\`${params}\`)` : ''}, played in JavaScript by the component.`
+		);
+	}
+	for (const m of src.matchAll(/onanimationend=/g)) {
+		out.push(
+			`${target(m.index)} is removed when its CSS animation ends (\`animationend\`): the family must animate it, or it stays in the DOM.`
+		);
+	}
+	for (const m of src.matchAll(/['"]transitionend['"]/g)) {
+		const fallback = /setTimeout\(/.test(src.slice(m.index, m.index + 200));
+		out.push(
+			`Waits for a CSS \`transitionend\`${fallback ? ' (with a fallback timeout)' : ''} before finishing a change of state: the family's transition sets the pace.`
+		);
+	}
+	return out;
+};
+
 const schema = Object.fromEntries(
 	components.map((c) => [
 		c.name,
@@ -455,7 +493,8 @@ const schema = Object.fromEntries(
 			axes: c.axes.value,
 			flags: Object.keys(c.flags),
 			parts: [...c.parts],
-			hooks: hooksOf(c.src, c.prefix)
+			hooks: hooksOf(c.src, c.prefix),
+			motion: motionOf(c.src, c.prefix)
 		}
 	])
 );
@@ -499,6 +538,8 @@ export interface ComponentSchema {
 	parts: string[];
 	/** Custom properties the wrapper writes inline: the inputs a family reads. */
 	hooks: string[];
+	/** How it moves: Svelte transitions it plays, CSS events it waits for. */
+	motion: string[];
 }
 
 /** component → its declared vocabulary. Lets the app classify a stylesheet it

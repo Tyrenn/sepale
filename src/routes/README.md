@@ -82,8 +82,9 @@ in each compiled stylesheet.
    every class each family ships, classified (`root` / `axis` / `flag` /
    `part` / `unclassified`), plus the axis values and flags each component has
    left in that family. The component pages render this. Also, family-blind:
-   `schema` (each component's AXES / FLAGS / PARTS and the custom properties it
-   writes inline), and `statesByClass` (the attribute selectors and state
+   `schema` (each component's AXES / FLAGS / PARTS, the custom properties it
+   writes inline, and its motion: the Svelte transitions it plays and the CSS
+   events it waits for), and `statesByClass` (the attribute selectors and state
    pseudo-classes any family draws on a class, read by `scripts/states.mjs`).
    `schema` is what lets the app classify a stylesheet it never built
    (`routes/classify.ts`).
@@ -142,6 +143,7 @@ box), which takes back the family's ground, ink, font and colour scheme.
 | `/components` | `(sidebar)/components/+page.svelte` | The summary: every component page, by group, with the first sentence of its description |
 | `/components/<id>` | `(sidebar)/components/[id]/+page.svelte` | One component: description, the CSS, Svelte and DOM tabs, then the examples |
 | `/new-family` | `(sidebar)/new-family/+page.svelte` | Create a family: the link to the family kit, loading a family from disk, its report |
+| `/new-family/reference` | `(sidebar)/new-family/reference/` | Writing a family by hand: the rules in short, a family to start from, then every component's classes, states, custom properties, motion and DOM (the kit's data, `referenceOf`) |
 | `/family-kit/*.md` | `family-kit/` (`kit.server.ts`, `guide.md`) | The family kit, Markdown for an AI: the hand-written guide, then one generated page per component; `reference/` serves the built families' SCSS |
 
 It is one site. `routes/+layout.svelte` holds the header, swaps the family
@@ -210,6 +212,23 @@ the active family asks through `playground.svelte.ts` (`paramsFor`,
 `classesFor`, `axesFor`, `flagsFor`, `docFor`, `stylesheetFor`…), never the
 generated maps directly, so a loaded family is a family like the others. The
 home page is the exception: it shows the built families only.
+
+**A loaded file is untrusted.** A family or a theme from disk may have been
+written by anyone, and its values end up as CSS text in a style element
+(`+layout.svelte`). Three layers keep that text from becoming script:
+
+1. **At the sink**: `tokensToInlineStyle` / `serializeTheme` (`$lib/theme.ts`)
+   write only names that are CSS idents and values with no `< > { } ; `,
+   comment, at-rule or `url(`; the scheme is one of the `color-scheme` keywords.
+2. **At reading**: `paramsIn` (`classify.ts`) rebuilds each `uu-params` entry
+   field by field through the same checks, `parseTheme` drops what fails them,
+   and a file over 2 MB is refused. Restoring from IndexedDB reads again.
+3. **The CSP** (`svelte.config.js`, `kit.csp`): a `<meta>` on every
+   prerendered page allows SvelteKit's own scripts by hash and nothing else,
+   and allows no remote resource, so a loaded stylesheet can neither run code
+   nor fetch anything.
+
+Nothing in the app writes outside the browser: no server, no token, no API.
 
 ## Adding things
 

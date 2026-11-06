@@ -184,11 +184,15 @@ export function shadowsFromCss(raw: string): ShadowLayer[] {
  */
 export function parseTheme(css: string): { vars: Record<string, string>; scheme?: string } {
 	const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
-	const vars: Record<string, string> = {};
+	/* No prototype: a file may name a variable `__proto__`. */
+	const vars: Record<string, string> = Object.create(null);
 	for (const [, name, value] of clean.matchAll(/--([\w-]+)\s*:\s*([^;}]+)/g)) {
-		vars[name!] = value!.trim();
+		/* The file is not ours: a value that could leave its declaration is
+		   dropped, and the family's default stands (see "What may be written"). */
+		const v = value!.trim();
+		if (isSafeName(name) && isSafeValue(v)) vars[name] = v;
 	}
-	const scheme = clean.match(/(?:^|[\s;{])color-scheme\s*:\s*([^;}]+)/)?.[1]?.trim();
+	const scheme = safeScheme(clean.match(/(?:^|[\s;{])color-scheme\s*:\s*([^;}]+)/)?.[1]);
 	return { vars, scheme };
 }
 
@@ -229,15 +233,57 @@ export const familyCategory: Record<string, string> = Object.fromEntries(
 	Object.entries(familyDocs).map(([name, doc]) => [name, doc.after.replace(/^after /, '')])
 );
 
+/* ------------------------------------------------------------------ *
+ * What may be written into a stylesheet
+ *
+ * Theme values reach the page as CSS TEXT: the app writes them into a
+ * <style> element (routes/+layout.svelte), and they can come from files the
+ * user did not write — an imported theme, a family loaded from disk. A value
+ * holding `</style><img onerror=…>` would leave the stylesheet and run as
+ * script; one holding `}` or `;` would add rules of its own; one holding
+ * `url(` would make the browser fetch an address. So a name is a CSS ident,
+ * a value is a plain CSS value, a scheme is one of the keywords, and anything
+ * else is dropped. Applied where the text is written AND where files are
+ * read, so neither depends on the other.
+ * ------------------------------------------------------------------ */
+
+const SAFE_NAME = /^[a-zA-Z][\w-]{0,79}$/;
+/* Markup, blocks, declarations, escapes, comments, at-rules, and anything
+   that loads or evaluates something. */
+const UNSAFE_VALUE = /[<>{};\\`]|\/\*|\*\/|@|url\s*\(|image-set|image\s*\(|src\s*\(|expression|javascript:|attr\s*\(/i;
+const SCHEMES = new Set(['normal', 'light', 'dark', 'light dark', 'dark light', 'only light', 'only dark']);
+
+/** A custom property name (without `--`) safe to write. */
+export const isSafeName = (name: unknown): name is string => typeof name === 'string' && SAFE_NAME.test(name);
+
+/** A value safe to write after `--name:`: no way out of the declaration. */
+export function isSafeValue(value: unknown): value is string {
+	if (typeof value !== 'string' || value.length > 400 || UNSAFE_VALUE.test(value)) return false;
+	/* An unbalanced quote would swallow what follows it. */
+	return (value.split('"').length - 1) % 2 === 0 && (value.split("'").length - 1) % 2 === 0;
+}
+
+/** A `color-scheme` keyword, or undefined. */
+export function safeScheme(scheme: unknown): string | undefined {
+	if (typeof scheme !== 'string') return undefined;
+	const s = scheme.trim().replace(/\s+/g, ' ').toLowerCase();
+	return SCHEMES.has(s) ? s : undefined;
+}
+
+const safeTokens = (tokens: ThemeToken[]) => tokens.filter((t) => isSafeName(t.name) && isSafeValue(t.value));
+
 /** Convert tokens into an inline `style` string for a preview element. */
 export function tokensToInlineStyle(tokens: ThemeToken[]): string {
-	return tokens.map((t) => `--${t.name}:${t.value}`).join(';');
+	return safeTokens(tokens)
+		.map((t) => `--${t.name}:${t.value}`)
+		.join(';');
 }
 
 /** Serialise tokens into a drop-in `:root { … }` stylesheet. */
 export function serializeTheme(tokens: ThemeToken[], scheme?: string): string {
-	const lines = tokens.map((t) => `\t--${t.name}: ${t.value};`);
-	if (scheme) lines.unshift(`\tcolor-scheme: ${scheme};`);
+	const lines = safeTokens(tokens).map((t) => `\t--${t.name}: ${t.value};`);
+	const keyword = safeScheme(scheme);
+	if (keyword) lines.unshift(`\tcolor-scheme: ${keyword};`);
 	return `:root {\n${lines.join('\n')}\n}\n`;
 }
 

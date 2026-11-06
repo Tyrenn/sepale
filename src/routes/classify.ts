@@ -20,6 +20,7 @@ import {
 	type ClassInfo
 } from '$lib/generated/components.js';
 import type { FamilyDoc, FamilyParam } from '$lib/generated/registry.js';
+import { isSafeName, isSafeValue } from '$lib/theme.js';
 
 const external = new Set(EXTERNAL);
 export const isExternal = (cls: string) =>
@@ -94,13 +95,68 @@ export function classifyStylesheet(css: string): Classification {
 	return { classes, axes, flags };
 }
 
+const TYPES = new Set(['color', 'length', 'number', 'text', 'edge-width', 'shadows']);
+const KINDS = new Set(['surface', 'accent', 'ink']);
+const text = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : undefined);
+const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
+
+/**
+ * One `uu-params` entry, rebuilt field by field from what the file says.
+ *
+ * The file may come from anyone, and its values end up written as CSS text
+ * into the page (see "What may be written" in $lib/theme.ts). So nothing is
+ * copied wholesale: a name must be a CSS ident, a value a plain CSS value, a
+ * type and a kind one of the known words, numbers finite, and the prose is
+ * cut to length (it is only ever shown as text). An entry that fails is left
+ * out, with the rest of the family still loaded.
+ */
+function readParam(raw: unknown): FamilyParam | null {
+	if (!raw || typeof raw !== 'object') return null;
+	const p = raw as Record<string, unknown>;
+	if (!isSafeName(p.name) || !isSafeValue(p.value)) return null;
+	if (typeof p.type !== 'string' || !TYPES.has(p.type)) return null;
+	const out: FamilyParam = {
+		name: p.name,
+		label: text(p.label, 80) ?? p.name,
+		group: text(p.group, 40) ?? 'Other',
+		type: p.type,
+		value: p.value
+	};
+	const description = text(p.description, 400);
+	if (description) out.description = description;
+	for (const key of ['min', 'max', 'step'] as const) {
+		const n = num(p[key]);
+		if (n !== undefined) out[key] = n;
+	}
+	if (typeof p.unit === 'string' && /^[a-z%]{1,6}$/.test(p.unit)) out.unit = p.unit;
+	if (Array.isArray(p.units)) {
+		const units = p.units.filter((u): u is string => typeof u === 'string' && /^[a-z%]{1,6}$/.test(u));
+		if (units.length) out.units = units.slice(0, 10);
+	}
+	if (typeof p.kind === 'string' && KINDS.has(p.kind)) out.kind = p.kind;
+	if (isSafeName(p.on)) out.on = p.on;
+	return out;
+}
+
 /** The `uu-params` declaration a family emits (src/scss/_params.scss). */
 export function paramsIn(css: string): FamilyParam[] | null {
-	const m = css.match(/uu-params (\[[\s\S]*?\]) \*\//);
-	if (!m) return null;
+	const at = css.indexOf('uu-params [');
+	if (at < 0) return null;
+	const end = css.indexOf('] */', at);
+	if (end < 0) return null;
 	try {
-		const list = JSON.parse(m[1]!);
-		return Array.isArray(list) ? list : null;
+		const list: unknown = JSON.parse(css.slice(at + 'uu-params '.length, end + 1));
+		if (!Array.isArray(list)) return null;
+		const seen = new Set<string>();
+		const params: FamilyParam[] = [];
+		for (const raw of list.slice(0, 200)) {
+			const p = readParam(raw);
+			if (p && !seen.has(p.name)) {
+				seen.add(p.name);
+				params.push(p);
+			}
+		}
+		return params;
 	} catch {
 		return null;
 	}
@@ -113,8 +169,17 @@ export function paramsIn(css: string): FamilyParam[] | null {
  * the header survives into the compiled CSS, where this finds it.
  */
 export function docIn(css: string): (FamilyDoc & { name: string }) | null {
-	for (const block of css.matchAll(/\/\*!?\s*=+([\s\S]*?)=+\s*\*\//g)) {
-		const lines = block[1]!.split('\n').map((l) => l.replace(/^\s*/, '').trimEnd());
+	/* Found by position, not by one regex over the file: a lazy `[\s\S]*?`
+	   between runs of `=` backtracks without end on a crafted file. */
+	const blocks: string[] = [];
+	for (let at = css.indexOf('STYLE FAMILY'); at >= 0 && blocks.length < 5; at = css.indexOf('STYLE FAMILY', at + 1)) {
+		const open = css.lastIndexOf('/*', at);
+		const close = css.indexOf('*/', at);
+		if (open < 0 || close < 0 || css.lastIndexOf('*/', at) > open) continue;
+		blocks.push(css.slice(open + 2, close).replace(/^!?\s*=+/, '').replace(/=+\s*$/, ''));
+	}
+	for (const body of blocks) {
+		const lines = body.split('\n').map((l) => l.replace(/^\s*/, '').trimEnd());
 		const at = lines.findIndex((l) => l.startsWith('STYLE FAMILY'));
 		if (at < 0) continue;
 		const head = lines[at]!;
@@ -131,7 +196,7 @@ export function docIn(css: string): (FamilyDoc & { name: string }) | null {
 			.map((p) => p.replace(/\s*\n\s*/g, ' ').trim())
 			.filter(Boolean)
 			.join('\n\n');
-		const section = block[1]!.match(/Changes made[^\n]*\n([\s\S]*?)(?:\n\s*Build:|$)/);
+		const section = body.match(/Changes made[^\n]*\n([\s\S]*?)(?:\n\s*Build:|$)/);
 		const changes = section
 			? section[1]!
 					.split(/(?:^|\n)\s*-\s+/)

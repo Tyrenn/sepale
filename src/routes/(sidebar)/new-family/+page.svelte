@@ -10,6 +10,7 @@
 		local,
 		addFamily,
 		removeFamily,
+		MAX_BYTES,
 		restoreFamilies,
 		type LocalFamily
 	} from '../../local-families.svelte.js';
@@ -27,6 +28,9 @@
 	let prompt = $derived(
 		`Read ${kitUrl} and follow it to write a new Sepale family with me. Start with its first step.`
 	);
+
+	/* Step 1 has two ways in: an assistant, or by hand. */
+	let how = $state<'ai' | 'hand'>('ai');
 
 	let copied = $state('');
 	async function copy(what: string, text: string) {
@@ -50,8 +54,16 @@
 			error = `${file.name} is not a stylesheet: a family is one .css file.`;
 			return;
 		}
-		const family = await addFamily(await file.text(), file.name);
-		showLoaded(family.name);
+		if (file.size > MAX_BYTES) {
+			error = `${file.name} is larger than a family can be (${MAX_BYTES / 1e6} MB).`;
+			return;
+		}
+		try {
+			const family = await addFamily(await file.text(), file.name);
+			showLoaded(family.name);
+		} catch (e) {
+			error = e instanceof Error ? e.message : String(e);
+		}
 	}
 
 	function onPick(e: Event & { currentTarget: HTMLInputElement }) {
@@ -126,7 +138,10 @@
 	const time = (t: number) => new Date(t).toLocaleTimeString();
 </script>
 
-<main class="content nf">
+<!-- The scroll container takes the whole width, so its scrollbar stays at
+     the window edge; the column inside is centred, like a component page. -->
+<main class="content">
+<div class="nf">
 	<header>
 		<h1 class="nf-title">Create a family</h1>
 		<p class="nf-lede">
@@ -139,12 +154,45 @@
 	</header>
 
 	<section class="nf-section">
-		<h2 class="nf-h2"><span class="nf-step">1</span>Write it, with an AI</h2>
+		<h2 class="nf-h2"><span class="nf-step">1</span>Write it</h2>
+		<div class="nf-tabs" role="tablist">
+			<button type="button" role="tab" class="nf-tab" aria-selected={how === 'ai'} onclick={() => (how = 'ai')}>
+				With AI
+			</button>
+			<button type="button" role="tab" class="nf-tab" aria-selected={how === 'hand'} onclick={() => (how = 'hand')}>
+				Without AI
+			</button>
+		</div>
+		{#if how === 'hand'}
+		<p class="nf-note">
+			Everything the components expose to a family, on one page: for each component its classes
+			(root, parts, axes, flags), the states its DOM goes through, the custom properties it writes,
+			how it moves (what Svelte animates, what waits for your CSS), and the markup it renders. With
+			the rules in short, and a built family to start from.
+		</p>
+		<div class="nf-box">
+			<div class="nf-row">
+				<a class="ui-btn ui-btn-sm ui-btn-primary" href={resolve('/new-family/reference')}>Open the reference</a>
+				<a class="ui-btn ui-btn-sm" href={resolve('/family-kit/full.md')} download="sepale-family-reference.md">
+					Download it as Markdown
+				</a>
+			</div>
+			<p class="nf-note nf-flush">
+				Fastest start: download a built family's stylesheet, rename it in its header, and rewrite
+				its values:
+				{#each ['daisy', 'dahlia', 'sunflower', 'cosmos', 'peony'] as f, i (f)}{i ? ', ' : ''}<a
+						class="nf-link"
+						href={asset(`/families/${f}.css`)}
+						download="{f}.css">{f}</a
+					>{/each}.
+			</p>
+		</div>
+		{:else}
 		<p class="nf-note">
 			The <strong>family kit</strong> is written for an assistant: the steps, the contract the
-			file must meet (header, parameters, intrinsic sizing, slots, states), and one page per
-			component with its classes, its states and the DOM it renders. Give an assistant the link;
-			one that cannot fetch pages takes the whole kit as a file.
+			file must meet (header, parameters, intrinsic sizing, slots, states, motion), and one page
+			per component with its classes, its states and the DOM it renders. Give an assistant the
+			link; one that cannot fetch pages takes the whole kit as a file.
 		</p>
 		<div class="nf-box">
 			<div class="nf-row">
@@ -174,6 +222,7 @@
 				>{/each}) are a complete answer to the contract, and the kit links their sources component
 			by component.
 		</p>
+		{/if}
 	</section>
 
 	<section class="nf-section">
@@ -297,11 +346,14 @@
 			{/each}
 		</section>
 	{/if}
+</div>
 </main>
 
 <style>
 	.nf {
-		max-width: 56rem;
+		width: 100%;
+		max-width: 60rem;
+		margin-inline: auto;
 	}
 	.nf-title {
 		margin: 0 0 0.75rem;
@@ -356,6 +408,37 @@
 	}
 	.nf-link {
 		color: var(--ui-color-primary);
+	}
+	.nf-tabs {
+		display: flex;
+		gap: 0.15rem;
+		margin: 0.25rem 0 0.75rem;
+		border-bottom: 1px solid color-mix(in oklab, var(--app-fg) 10%, transparent);
+	}
+	.nf-tab {
+		appearance: none;
+		border: 1px solid transparent;
+		border-bottom: none;
+		background: none;
+		font: inherit;
+		font-size: 0.875rem;
+		font-weight: 600;
+		padding: 0.45rem 1rem;
+		border-radius: 0.55rem 0.55rem 0 0;
+		color: color-mix(in oklab, var(--app-fg) 50%, transparent);
+		cursor: pointer;
+		margin-bottom: -1px;
+	}
+	.nf-tab:hover {
+		color: var(--app-fg);
+	}
+	.nf-tab[aria-selected='true'] {
+		color: var(--app-fg);
+		background: var(--app-bg);
+		border-color: color-mix(in oklab, var(--app-fg) 10%, transparent);
+	}
+	.nf-flush {
+		margin: 0;
 	}
 	.nf-box {
 		display: grid;

@@ -6,7 +6,7 @@
 	import './app.css';
 	import './site.css';
 	import { asset } from '$app/paths';
-	import { tokensToInlineStyle } from '$lib/theme.js';
+	import { tokensToInlineStyle, safeScheme } from '$lib/theme.js';
 	import Header from './Header.svelte';
 	import { playground, stylesheetFor } from './playground.svelte.js';
 	import { restoreFamilies } from './local-families.svelte.js';
@@ -22,7 +22,9 @@
 	// chrome reads none of it — it is daisy renamed to --ui-* (app-ui.css) —
 	// and only the islands (.uu-island) take the theme's colour scheme.
 	let rootStyle = $derived(
-		`:root{--pv-scheme:${playground.scheme};${tokensToInlineStyle(playground.tokens)}}`
+		/* Written as CSS text into a style element: every piece goes through the checks
+		   in $lib/theme.ts, since a theme or a family may come from a file. */
+		`:root{--pv-scheme:${safeScheme(playground.scheme) ?? 'light'};${tokensToInlineStyle(playground.tokens)}}`
 	);
 </script>
 

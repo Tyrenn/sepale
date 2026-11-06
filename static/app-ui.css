@@ -4664,15 +4664,21 @@ span.editable-display {
   width: var(--ui-number-input-width);
   min-width: 0;
   margin: 0;
-  padding: 0 0.25em;
+  padding: 0 calc(0.75em * var(--ui-scale));
   border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
-  text-align: center;
+  text-align: end;
   font-variant-numeric: tabular-nums;
   -moz-appearance: textfield;
   appearance: textfield;
+}
+
+
+.ui-number-input:has(> .ui-number-input-dec) .ui-number-input-field {
+  padding: 0 0.25em;
+  text-align: center;
 }
 
 .ui-number-input-field:focus {
@@ -11135,8 +11141,12 @@ label:has(:checked),
   --ui-number-input-radius: var(--ui-radius-field);
   --ui-number-input-btn-bg: transparent;
   --ui-number-input-btn-hover: color-mix(in oklab, var(--ui-color-on-surface) 8%, #0000);
-  --ui-number-input-width: 4em;
+  --ui-number-input-width: 8em;
   --ui-number-input-focus: 0 0 0 2px color-mix(in oklab, var(--ui-color-primary) 45%, #0000);
+}
+
+.ui-number-input:has(> .ui-number-input-dec) {
+  --ui-number-input-width: 4em;
 }
 
 .ui-number-input-xs {

@@ -105,6 +105,38 @@ body {
 	width: 1.1em;
 	height: 1.1em;
 }
+/* A picker on the rail: the kit's Dropdown (fixed variant), its trigger
+   drawn like the rail's links, its list placed beside the rail by the layout. */
+.side-rail-drop {
+	display: grid;
+}
+button.side-rail-link {
+	width: 100%;
+	padding: 0;
+	border: none;
+	background: none;
+	font: inherit;
+	cursor: pointer;
+}
+button.side-rail-link[aria-expanded='true'] {
+	background-color: color-mix(in oklab, var(--ui-color-primary) 12%, #0000);
+	color: var(--ui-color-primary);
+}
+.side-rail-list {
+	min-width: 12rem;
+}
+.side-rail-hint {
+	margin-inline-start: auto;
+	padding-inline-start: 1rem;
+	font-size: 0.85em;
+	opacity: 0.55;
+}
+.side-rail-rule {
+	width: 60%;
+	margin: 0.15em auto;
+	border: none;
+	border-top: 1px solid color-mix(in oklab, currentColor 15%, #0000);
+}
 @media (prefers-reduced-motion: reduce) {
 	.ui-sidebar.side > .side-rail,
 	.ui-sidebar.side.ui-sidebar-collapsed > .side-rail {
@@ -577,7 +609,8 @@ dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
 
 /* ── Description page ───────────────────────────────────────────────────────── */
 
-.fam { max-width: 62rem; margin-inline: auto; gap: 0; }
+/* The column of the page, inside the full-width scroll container (.content). */
+.fam { width: 100%; max-width: 60rem; margin-inline: auto; }
 
 .fam-head { display: flex; align-items: baseline; gap: 0.75rem; }
 .fam-title { margin: 0; font-size: 2rem; letter-spacing: -0.02em; }

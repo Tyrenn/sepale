@@ -74,9 +74,12 @@ an invention, and the build of a real family rejects it.
 
 ### The file
 
-One stylesheet, plain CSS, UTF-8. No `@import` of another stylesheet of the kit:
-a family reads nothing from another family. A web font may be loaded with an
-`@import` at the very top or left to the page.
+One stylesheet, plain CSS, UTF-8, self-contained: no `@import`, and no `url()`
+to another site. The app previews a family with everything remote blocked (its
+security policy), so a remote font or image shows as missing there. Name a web
+font in a parameter's value (`"Inter", system-ui, sans-serif`) and let the page
+that uses the family load it; an icon or a texture goes inline, as a `data:`
+URL.
 
 It opens with a header comment, which the app reads for the family's name and
 prose. Keep its shape:
@@ -191,6 +194,22 @@ own font size, so a component grows with its text and needs no breakpoint.
 - Read the **custom properties the component writes**, listed on each page:
   the tab indicator's position (`--tabs-x` …), a range's fill (`--range-pct`),
   a one-off fill set by the `background` prop (`--<namespace>-bg`).
+
+### Motion
+
+- **What moves on a change of state is the family's**: CSS transitions and
+  keyframes on its classes and states. A menu folding, a knob sliding, the tab
+  indicator following `--tabs-x`: the component sets a state or a custom
+  property, the family decides how it travels.
+- **Some components animate themselves**, in JavaScript, with Svelte's
+  transitions: a dialog scaling in, a dropdown flying in, a toast sliding out.
+  Each page's *Motion* section names them; they play whatever the family, so
+  draw the element at rest and let them move it.
+- **Some wait for the family**: an element removed on `animationend` (a
+  button's ripple wave) must carry a CSS animation, and a drawer closes its
+  `<dialog>` on `transitionend`. Each page's *Motion* section names those too.
+- Wrap what is decorative in `@media (prefers-reduced-motion: no-preference)`,
+  or cut it under `reduce`.
 
 ### Browser support
 

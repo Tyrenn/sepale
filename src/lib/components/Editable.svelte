@@ -146,7 +146,7 @@
 	});
 
 	function focusEditor() {
-		/* A field before anything else: a NumberInput starts with its stepper. */
+		/* A field before anything else: a NumberInput with controls starts with a button. */
 		const first =
 			form?.querySelector<HTMLElement>('input:not([type=hidden], [type=checkbox], [type=radio]), textarea, select') ??
 			form?.querySelector<HTMLElement>('input, button, [tabindex]');

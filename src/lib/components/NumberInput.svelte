@@ -13,12 +13,17 @@
 
 <script lang="ts">
 	/**
-	 * A number with − and + beside it.
+	 * A number field, aligned to the end like a figure in a column.
 	 *
 	 * The field is a real `<input type="number">`: typing, the arrow keys,
 	 * `min`, `max`, `step` and form submission behave as the browser has them.
-	 * The buttons call its own `stepDown()` / `stepUp()`, so they honour the
-	 * same bounds. `value` is bindable — it is the field's own value.
+	 * With `controls`, a − and a + frame it; they call its own `stepDown()` /
+	 * `stepUp()`, so they honour the same bounds. Without, it is the field
+	 * alone. The buttons are structure, not paint, so they are a prop and not
+	 * a variant: a family draws them when they are there.
+	 *
+	 * `value` is bindable and always a number: what the field holds, parsed,
+	 * or `null` when it is empty or holds no finite number. Never a string.
 	 */
 	import type { Snippet } from 'svelte';
 	import type { HTMLInputAttributes } from 'svelte/elements';
@@ -30,8 +35,10 @@
 		validator?: boolean;
 		/** Shown under the field when it is invalid. */
 		hint?: Snippet;
-		/** Bindable. `null` when the field is empty. */
+		/** Bindable. Always a number, or `null` when the field is empty. */
 		value?: number | null;
+		/** Draw a − and a + around the field. Off: the field alone. */
+		controls?: boolean;
 		min?: number;
 		max?: number;
 		/** `any`: every value is valid, and the buttons move by 1. */
@@ -50,6 +57,7 @@
 		validator = false,
 		hint,
 		value = $bindable(null),
+		controls = false,
 		min,
 		max,
 		step = 1,
@@ -66,8 +74,16 @@
 
 	let field: HTMLInputElement | undefined = $state();
 
+	/** The field's value as a number: `valueAsNumber`, never the string, and
+	    `null` for an empty field or anything that is not a finite number. */
+	function parse(): number | null {
+		if (!field || field.value === '') return null;
+		const n = field.valueAsNumber;
+		return Number.isFinite(n) ? n : null;
+	}
+
 	function read() {
-		value = field && field.value !== '' ? field.valueAsNumber : null;
+		value = parse();
 		onValue?.(value);
 	}
 
@@ -86,6 +102,7 @@
 </script>
 
 <div class={classes}>
+	{#if controls}
 	<button
 		type="button"
 		class="number-input-dec"
@@ -94,6 +111,7 @@
 		disabled={disabled || (min !== undefined && value !== null && value <= min)}
 		onclick={() => stepBy(false)}>−</button
 	>
+	{/if}
 	<input
 		{...applied.rest}
 		bind:this={field}
@@ -106,6 +124,7 @@
 		{disabled}
 		oninput={read}
 	/>
+	{#if controls}
 	<button
 		type="button"
 		class="number-input-inc"
@@ -114,5 +133,6 @@
 		disabled={disabled || (max !== undefined && value !== null && value >= max)}
 		onclick={() => stepBy(true)}>+</button
 	>
+	{/if}
 </div>
 {#if hint}<p class="validator-hint">{@render hint()}</p>{/if}

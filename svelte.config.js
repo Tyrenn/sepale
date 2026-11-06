@@ -13,7 +13,29 @@ const config = {
 		// Served from a sub-path on GitHub Pages: the workflow sets BASE_PATH.
 		paths: { base: process.argv.includes('dev') ? '' : (process.env.BASE_PATH ?? '') },
 		// The doc examples link to made-up anchors (`#demo`), on purpose.
-		prerender: { handleMissingId: 'warn' }
+		prerender: { handleMissingId: 'warn' },
+		// Content Security Policy, written by SvelteKit as a <meta> on every
+		// prerendered page (GitHub Pages sets no headers): its own scripts are
+		// allowed by hash, any other script — inline, injected, an `onerror=`
+		// attribute — is refused. The site loads nothing from elsewhere, so
+		// neither may a family loaded from disk: no remote font, image or
+		// stylesheet, nothing it could report to. Styles stay inline-able
+		// (Svelte transitions, the theme <style>) and `blob:` (a loaded family
+		// is served to the page as a blob URL).
+		csp: {
+			mode: 'hash',
+			directives: {
+				'default-src': ['self'],
+				'script-src': ['self'],
+				'style-src': ['self', 'unsafe-inline', 'blob:'],
+				'img-src': ['self', 'data:', 'blob:'],
+				'font-src': ['self', 'data:'],
+				'connect-src': ['self'],
+				'object-src': ['none'],
+				'base-uri': ['self'],
+				'form-action': ['self']
+			}
+		}
 	}
 };
 
