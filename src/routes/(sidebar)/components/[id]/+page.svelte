@@ -5,7 +5,11 @@
 	// variant does not offer it either.
 	import { page } from '$app/state';
 	import { playground, COMPONENTS } from '../../../playground.svelte.js';
-	import { pages, classRows, propRows, hasWrapper } from '../doc.js';
+	import { pages, classRows, propRows, hasWrapper, contractOf } from '../doc.js';
+	import type { Specimen } from '../dom.js';
+	import DomTree from '../DomTree.svelte';
+
+	let { data }: { data: { specimens: Specimen[] } } = $props();
 
 	let id = $derived(page.params.id ?? 'button');
 	let entry = $derived(pages[id]);
@@ -14,11 +18,22 @@
 	);
 
 	let rows = $derived(entry ? classRows(id, playground.family) : []);
-	let props = $derived(entry ? propRows(id, playground.family) : []);
+	let apiProps = $derived(entry ? propRows(id, playground.family) : []);
 	let wrapped = $derived(hasWrapper(id, playground.family));
-	let many = $derived(new Set(props.map((p) => p.component)).size > 1);
+	let many = $derived(new Set(apiProps.map((p) => p.component)).size > 1);
 
-	let tab = $state<'css' | 'svelte'>('css');
+	let tab = $state<'css' | 'svelte' | 'dom'>('css');
+
+	/* The DOM tab: one example at a time, the first by default. */
+	let specimens = $derived(data.specimens ?? []);
+	let picked = $state(0);
+	$effect(() => {
+		void id;
+		picked = 0;
+	});
+	let specimen = $derived(specimens[Math.min(picked, specimens.length - 1)]);
+	let contract = $derived(contractOf(id));
+	let hooks = $derived(contract.hooks.filter((h) => h.hooks.length));
 </script>
 
 <main class="content">
@@ -44,9 +59,68 @@
 						aria-selected={tab === 'svelte'}
 						onclick={() => (tab = 'svelte')}>Svelte</button
 					>
+					<button
+						type="button"
+						role="tab"
+						class="api-tab"
+						aria-selected={tab === 'dom'}
+						onclick={() => (tab = 'dom')}>DOM</button
+					>
 				</div>
 
-				{#if tab === 'css'}
+				{#if tab === 'dom'}
+					{#if specimen}
+						{#if specimens.length > 1}
+							<div class="dom-pick">
+								<label>
+									<span>Example</span>
+									<select class="ui-select ui-select-xs" bind:value={picked}>
+										{#each specimens as s, i (i)}<option value={i}>{s.title}</option>{/each}
+									</select>
+								</label>
+							</div>
+						{/if}
+						<div class="dom-tree"><DomTree nodes={specimen.nodes} /></div>
+						<p class="api-note dom-legend">
+							What the examples below render, before any script runs: Svelte's own
+							markers removed, siblings shaped alike folded (<span class="dom-chip">×n</span>).
+							The structure is the components', the same in every family. Hover a class:
+							<span class="dom-key" data-kind="root">root</span>
+							<span class="dom-key" data-kind="part">part</span>
+							<span class="dom-key" data-kind="axis">axis</span>
+							<span class="dom-key" data-kind="flag">flag</span>
+							<span class="dom-key" data-kind="unclassified">not the component's</span>
+						</p>
+					{:else}
+						<p class="api-note api-none">
+							No rendered example: this page's examples draw nothing on the server.
+						</p>
+					{/if}
+					{#if contract.states.length}
+						<table class="api-table dom-states">
+							<thead>
+								<tr><th>Class</th><th>States the families draw on it</th></tr>
+							</thead>
+							<tbody>
+								{#each contract.states as row (row.cls)}
+									<tr>
+										<td><code>.{row.cls}</code></td>
+										<td>{#each row.states as s (s)}<code class="dom-state">{s}</code>{/each}</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					{/if}
+					{#if hooks.length}
+						<p class="api-note">
+							Custom properties the component writes on its elements, for the family to read:
+							{#each hooks as h (h.component)}
+								<br /><code>&lt;{h.component}&gt;</code>
+								{#each h.hooks as v (v)}{' '}<code>{v}</code>{/each}
+							{/each}
+						</p>
+					{/if}
+				{:else if tab === 'css'}
 					{#if rows.length}
 					<table class="api-table">
 						<thead>
@@ -73,7 +147,7 @@
 						</p>
 					{/if}
 				{:else if wrapped}
-					{#if props.length}
+					{#if apiProps.length}
 					<table class="api-table">
 						<thead>
 							<tr>
@@ -82,7 +156,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each props as p (p.component + '.' + p.name)}
+							{#each apiProps as p (p.component + '.' + p.name)}
 								<tr>
 									{#if many}<td><code>&lt;{p.component}&gt;</code></td>{/if}
 									<td><code>{p.name}</code></td>
@@ -219,5 +293,57 @@
 	.api-none {
 		border-top: none;
 		padding: 1.25rem 1rem;
+	}
+
+	/* ── DOM tab ─────────────────────────────────────────────────────── */
+	.dom-pick {
+		padding: 0.6rem 1rem 0;
+	}
+	.dom-pick label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: color-mix(in oklab, var(--app-fg) 55%, transparent);
+	}
+	.dom-tree {
+		margin: 0.6rem 1rem 0.9rem;
+		padding: 0.8rem 1rem;
+		max-height: 32rem;
+		overflow: auto;
+		border-radius: 0.6rem;
+		font-family: ui-monospace, SFMono-Regular, monospace;
+		font-size: 0.78rem;
+		background: color-mix(in oklab, var(--app-bg-2) 70%, var(--app-bg-3));
+	}
+	.dom-legend {
+		line-height: 1.9;
+	}
+	.dom-chip,
+	.dom-key {
+		padding: 0.05em 0.4em;
+		border-radius: 0.3rem;
+		font-family: ui-monospace, SFMono-Regular, monospace;
+		font-size: 0.9em;
+		background: color-mix(in oklab, var(--app-fg) 10%, transparent);
+	}
+	.dom-key[data-kind='root'] {
+		background: color-mix(in oklab, var(--ui-color-primary) 22%, transparent);
+	}
+	.dom-key[data-kind='part'] {
+		background: color-mix(in oklab, var(--ui-color-info) 20%, transparent);
+	}
+	.dom-key[data-kind='axis'] {
+		background: color-mix(in oklab, var(--ui-color-success) 20%, transparent);
+	}
+	.dom-key[data-kind='flag'] {
+		background: color-mix(in oklab, var(--ui-color-warning) 24%, transparent);
+	}
+	.dom-states {
+		border-top: 1px solid color-mix(in oklab, var(--app-fg) 8%, transparent);
+	}
+	.dom-state {
+		margin-right: 0.3rem;
 	}
 </style>

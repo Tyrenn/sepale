@@ -4,12 +4,19 @@
 	// source, its themes, and the full list of variables it exposes. All of it
 	// read from the family file at build time — this page cannot drift from
 	// the CSS. Picking a family is the sidebar's job, not this page's.
-	import { playground, families, categoryFor } from '../../playground.svelte.js';
-	import { familyDocs, paramsByFamily, themesByFamily } from '$lib/generated/registry.js';
+	import {
+		playground,
+		allFamilies,
+		categoryFor,
+		docFor,
+		paramsFor,
+		themesFor,
+		isLocal
+	} from '../../playground.svelte.js';
 
-	let doc = $derived(familyDocs[playground.family]!);
-	let params = $derived(paramsByFamily[playground.family] ?? []);
-	let themes = $derived(themesByFamily[playground.family] ?? []);
+	let doc = $derived(docFor(playground.family));
+	let params = $derived(paramsFor(playground.family));
+	let themes = $derived(isLocal(playground.family) ? [] : themesFor(playground.family));
 
 	// Grouped in the order the configurator shows them.
 	const ORDER = ['Colors', 'Typography', 'Shape', 'Size', 'Effects', 'Elevation'];
@@ -122,12 +129,12 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each families as f (f)}
+					{#each allFamilies() as f (f)}
 						<tr data-active={playground.family === f}>
 							<td class="fam-var">{f}</td>
 							<td>{categoryFor(f)}</td>
-							<td>{(themesByFamily[f] ?? []).length}</td>
-							<td>{(paramsByFamily[f] ?? []).length}</td>
+							<td>{isLocal(f) ? 'local' : themesFor(f).length}</td>
+							<td>{paramsFor(f).length}</td>
 						</tr>
 					{/each}
 				</tbody>

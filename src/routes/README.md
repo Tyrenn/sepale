@@ -81,7 +81,15 @@ in each compiled stylesheet.
 2. **`src/lib/generated/components.ts`** — the same intersection, as data:
    every class each family ships, classified (`root` / `axis` / `flag` /
    `part` / `unclassified`), plus the axis values and flags each component has
-   left in that family. The component pages render this.
+   left in that family. The component pages render this. Also, family-blind:
+   `schema` (each component's AXES / FLAGS / PARTS and the custom properties it
+   writes inline), and `statesByClass` (the attribute selectors and state
+   pseudo-classes any family draws on a class, read by `scripts/states.mjs`).
+   `schema` is what lets the app classify a stylesheet it never built
+   (`routes/classify.ts`).
+3. **`static/bundle/_generic.json`**: the generic sources, laid out as in
+   `src/lib/`, for the bundle of a family loaded from disk, which has no
+   narrowed copy.
 
 Both come out of one pass, deliberately: a page cannot describe a class the
 generated component does not offer, because the same code decides both.
@@ -132,7 +140,9 @@ box), which takes back the family's ground, ink, font and colour scheme.
 | `/theme` | `(sidebar)/theme/+page.svelte` | The theme editor: parameters on the left, `ThemePreview` on the right |
 | `/description` | `(sidebar)/description/+page.svelte` | What the active family is, and every variable it exposes — all of it read from `registry.ts` |
 | `/components` | `(sidebar)/components/+page.svelte` | The summary: every component page, by group, with the first sentence of its description |
-| `/components/<id>` | `(sidebar)/components/[id]/+page.svelte` | One component: description, the CSS and Svelte tables, then the examples |
+| `/components/<id>` | `(sidebar)/components/[id]/+page.svelte` | One component: description, the CSS, Svelte and DOM tabs, then the examples |
+| `/new-family` | `(sidebar)/new-family/+page.svelte` | Create a family: the link to the family kit, loading a family from disk, its report |
+| `/family-kit/*.md` | `family-kit/` (`kit.server.ts`, `guide.md`) | The family kit, Markdown for an AI: the hand-written guide, then one generated page per component; `reference/` serves the built families' SCSS |
 
 It is one site. `routes/+layout.svelte` holds the header, swaps the family
 stylesheet and applies the theme, for every page. `(sidebar)` groups the pages
@@ -182,6 +192,24 @@ classification. Writing prose is optional, everywhere.
 family ships none of them, it says so in place of the preview rather than
 rendering an unstyled button labelled "soft". Nothing to declare: the list comes
 from what the example itself writes.
+
+### The DOM tab and the family kit
+
+Both read the same **specimens**: each page's examples, rendered on the server
+with the `SPECIMEN` context (`Section` then draws its preview alone, in a
+`<div data-specimen>`) and parsed back into trees by `components/dom.ts`
+(`specimens.server.ts`). Nothing is written by hand for them; an example added is
+a specimen added. The tab gets them through `[id]/+page.server.ts`, prerendered
+into the page's `__data.json`.
+
+### Families loaded from disk
+
+`local-families.svelte.ts` keeps them (IndexedDB, this browser only), read by
+`classify.ts` the way the build reads a built family. Anything that asks about
+the active family asks through `playground.svelte.ts` (`paramsFor`,
+`classesFor`, `axesFor`, `flagsFor`, `docFor`, `stylesheetFor`…), never the
+generated maps directly, so a loaded family is a family like the others. The
+home page is the exception: it shows the built families only.
 
 ## Adding things
 

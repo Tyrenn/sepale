@@ -111,6 +111,7 @@
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 	import type { DataHandlerState, DiscardChoice, EntitySuggestion, EntityValue, Filter, HandledFilter, Sort } from './data-handler.svelte.js';
 	import Button from './Button.svelte';
+	import Checkbox from './Checkbox.svelte';
 	import Chip from './Chip.svelte';
 	import Dialog from './Dialog.svelte';
 	import DatePicker from './DatePicker.svelte';
@@ -205,6 +206,7 @@
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
 	let t = $derived({ ...LABELS, ...labels });
+	const uid = $props.id();
 
 	/* ── Confirmations ── lent to the handler while it has none of its own. */
 
@@ -294,6 +296,8 @@
 
 	function add(f: HandledFilter) {
 		handler.showFilter(f.id);
+		/* A boolean chip is its own checkbox: on the page it holds yes or no, off it, either. */
+		if (f.type === 'boolean') return set(f, true);
 		openFilter = f.id;
 	}
 
@@ -687,7 +691,10 @@
 						if (e.key === 'Escape' || (e.key === 'Enter' && (f.type === 'text' || f.type === 'number'))) openFilter = undefined;
 					}}
 				>
-					{#if openFilter === f.id}
+					{#if f.type === 'boolean'}
+						<label for={`${uid}-${f.id}`}><strong>{f.title}</strong></label>
+						<Checkbox id={`${uid}-${f.id}`} size="sm" checked={valueOf(f) === true} onchange={(e) => set(f, e.currentTarget.checked)} />
+					{:else if openFilter === f.id}
 						<strong>{f.title}</strong>
 						{@render editor(f, false)}
 					{:else}

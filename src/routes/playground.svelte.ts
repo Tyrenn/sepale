@@ -1,13 +1,87 @@
-import { families, themesByFamily, tokensForFamily, familyCategory } from '$lib/index.js';
-import { parseTheme, type ThemeToken } from '$lib/theme.js';
-import type { ThemeData } from '$lib/generated/registry.js';
+import { families, themesByFamily, familyCategory } from '$lib/index.js';
+import { parseTheme, tokensFrom, type ThemeToken } from '$lib/theme.js';
+import {
+	paramsByFamily,
+	familyDocs,
+	type ThemeData,
+	type FamilyDoc,
+	type FamilyParam
+} from '$lib/generated/registry.js';
+import {
+	classesByFamily,
+	axesByFamily,
+	flagsByFamily,
+	type ClassInfo
+} from '$lib/generated/components.js';
+import { asset } from '$app/paths';
 import { pageIds } from './(sidebar)/components/page-ids.js';
+import { local, type LocalFamily } from './local-families.svelte.js';
 
+/** The families compiled here, the ones the build knows. */
 export { families };
+
+/* ── Built and local families, read the same way ───────────────────────
+   A family loaded from disk (local-families.svelte.ts) is read by the app
+   rather than by the build, so nothing generated knows it. Everything that
+   asks about "the active family" asks through these and gets either answer. */
+
+const localOf = (family: string): LocalFamily | undefined => local.list.find((f) => f.name === family);
+
+/** Whether a family was loaded from disk rather than built here. */
+export const isLocal = (family: string) => localOf(family) !== undefined;
+
+/** Every family the sidebar offers: the built ones, then the loaded ones. */
+export function allFamilies(): string[] {
+	return [...families, ...local.list.map((f) => f.name)];
+}
+
+export function paramsFor(family: string): FamilyParam[] {
+	return localOf(family)?.params ?? paramsByFamily[family] ?? [];
+}
+
+export function docFor(family: string): FamilyDoc {
+	return localOf(family)?.doc ?? familyDocs[family] ?? { title: family, after: '', blurb: '', changes: [] };
+}
+
+/** Every class the family ships, classified. */
+export function classesFor(family: string): Record<string, ClassInfo> {
+	return localOf(family)?.classification.classes ?? classesByFamily[family] ?? {};
+}
+
+/** component → axis → the values this family ships. */
+export function axesFor(family: string): Record<string, Record<string, string[]>> {
+	return localOf(family)?.classification.axes ?? axesByFamily[family] ?? {};
+}
+
+/** component → the flags this family can paint. */
+export function flagsFor(family: string): Record<string, string[]> {
+	return localOf(family)?.classification.flags ?? flagsByFamily[family] ?? {};
+}
+
+/** Where the page loads the family's stylesheet from. */
+export function stylesheetFor(family: string): string {
+	return localOf(family)?.url ?? asset(`/families/${family}.css`);
+}
+
+/** The stylesheet itself, for an export or a bundle. */
+export async function stylesheetText(family: string): Promise<string> {
+	const loaded = localOf(family);
+	if (loaded) return loaded.css;
+	const res = await fetch(asset(`/families/${family}.css`));
+	if (!res.ok) throw new Error(`/families/${family}.css: ${res.status}`);
+	return res.text();
+}
 
 /** Design language label for a family (Flat, Material, …). */
 export function categoryFor(family: string): string {
+	const loaded = localOf(family);
+	if (loaded) return loaded.doc.after.replace(/^after /, '') || 'local';
 	return familyCategory[family] ?? '';
+}
+
+/** The editable tokens of a family, seeded from a theme's variables. */
+export function tokensFor(family: string, vars: Record<string, string> = {}): ThemeToken[] {
+	return tokensFrom(paramsFor(family), vars);
 }
 
 /**
@@ -57,6 +131,8 @@ export const COMPONENTS: { group: string; items: { id: string; label: string }[]
 
 /** Themes available for a family (falls back to the first family's). */
 export function themesFor(family: string): ThemeData[] {
+	/* A loaded family brings no theme files: its parameters' defaults are one. */
+	if (isLocal(family)) return [{ name: 'default', label: 'Default', scheme: 'light', vars: {} }];
 	return themesByFamily[family] ?? themesByFamily[families[0]!] ?? [];
 }
 
@@ -74,14 +150,14 @@ export const playground = $state<{
 	family: initialFamily,
 	theme: initialTheme?.name ?? '',
 	scheme: initialTheme?.scheme ?? 'light',
-	tokens: tokensForFamily(initialFamily, initialTheme?.vars ?? {})
+	tokens: tokensFor(initialFamily, initialTheme?.vars ?? {})
 });
 
 function load(theme: ThemeData | undefined) {
 	if (!theme) return;
 	playground.theme = theme.name;
 	playground.scheme = theme.scheme;
-	playground.tokens = tokensForFamily(playground.family, theme.vars);
+	playground.tokens = tokensFor(playground.family, theme.vars);
 }
 
 /** A family or a theme has been chosen, by hand or by the draw. */
@@ -127,7 +203,7 @@ export function importTheme(css: string, name = 'imported') {
 	const { vars, scheme } = parseTheme(css);
 	playground.theme = name;
 	playground.scheme = scheme ?? playground.scheme;
-	playground.tokens = tokensForFamily(playground.family, vars);
+	playground.tokens = tokensFor(playground.family, vars);
 }
 
 /** Reset edits back to the active theme's original values. */
@@ -135,4 +211,21 @@ export function resetTheme() {
 	/* An imported theme is not in the registry: reset goes back to the file. */
 	if (lastImport?.name === playground.theme) importTheme(lastImport.css, lastImport.name);
 	else selectTheme(playground.theme);
+}
+
+/**
+ * A family loaded from disk has just been (re)loaded. Already active, it keeps
+ * the values in the editor — an author reloading after each save keeps their
+ * theme — and takes the parameters the new file declares; otherwise it
+ * becomes the active family.
+ */
+export function showLoaded(family: string) {
+	if (playground.family !== family) return selectFamily(family);
+	const values = Object.fromEntries(playground.tokens.map((t) => [t.name, t.value]));
+	playground.tokens = tokensFor(family, values);
+}
+
+/** A family is gone: leave it if it was the one on show. */
+export function leaveFamily(family: string) {
+	if (playground.family === family) selectFamily(families.includes('peony') ? 'peony' : families[0]!);
 }

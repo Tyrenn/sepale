@@ -42,11 +42,11 @@ import { parse } from 'svelte/compiler';
  * two apart, so the list is written down. Never classified, never renamed:
  * the other stylesheet keeps its names.
  */
-const EXTERNAL = new Set(['prose', 'filter']);
+export const EXTERNAL = new Set(['prose', 'filter']);
 /* A vendored library's own classes, reached into from under a class of ours:
    `calendar.scss` styles `.calendar .air-datepicker-cell` (ADR 0009,
    integration). */
-const EXTERNAL_PREFIXES = ['air-datepicker'];
+export const EXTERNAL_PREFIXES = ['air-datepicker'];
 export const isExternal = (cls) => EXTERNAL.has(cls) || EXTERNAL_PREFIXES.some((p) => cls.startsWith(p));
 
 const CLASS = /^\.([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/;

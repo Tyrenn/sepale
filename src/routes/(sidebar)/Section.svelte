@@ -3,9 +3,13 @@
 	// over a bordered box with tabs. The Preview tab renders live lib
 	// components (passed as children); the Svelte / HTML tabs show source.
 	// HTML is optional — some demos only make sense via the Svelte component.
-	import type { Snippet } from 'svelte';
-	import { classesByFamily, knownClasses } from './components/doc.js';
-	import { playground } from '../playground.svelte.js';
+	import { getContext, type Snippet } from 'svelte';
+	import { knownClasses } from './components/doc.js';
+	import { SPECIMEN } from './components/dom.js';
+	import { playground, classesFor, allFamilies } from '../playground.svelte.js';
+
+	/* Rendered for the DOM tab and the family kit: the preview alone. */
+	const specimen = getContext<boolean>(SPECIMEN) === true;
 
 	let {
 		title,
@@ -76,7 +80,7 @@
 	 */
 	let missing = $derived.by(() => {
 		if (!htmlSrc) return [];
-		const shipped = classesByFamily[playground.family] ?? {};
+		const shipped = classesFor(playground.family);
 		const used = new Set<string>();
 		for (const m of htmlSrc.matchAll(/class="([^"]+)"/g)) {
 			for (const cls of m[1]!.split(/\s+/)) {
@@ -90,8 +94,8 @@
 	   reader learns the variant exists and where to find it. */
 	let elsewhere = $derived(
 		missing.length
-			? Object.keys(classesByFamily)
-					.filter((f) => f !== playground.family && missing.every((c) => c in classesByFamily[f]!))
+			? allFamilies()
+					.filter((f) => f !== playground.family && missing.every((c) => c in classesFor(f)))
 					.sort()
 			: []
 	);
@@ -105,6 +109,9 @@
 	}
 </script>
 
+{#if specimen}
+	<div data-specimen={title}>{@render children()}</div>
+{:else}
 <section class="section">
 	<header class="section-head">
 		<h2 class="section-title"><span class="section-hash">#</span>{title}</h2>
@@ -161,6 +168,7 @@
 		{/if}
 	</div>
 </section>
+{/if}
 
 <style>
 	.section {

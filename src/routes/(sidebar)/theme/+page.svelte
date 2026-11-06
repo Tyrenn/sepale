@@ -2,8 +2,13 @@
 	// The theme page: parameters on the left, live preview on the right.
 	import ThemeEditor from '../ThemeEditor.svelte';
 	import ThemePreview from '../ThemePreview.svelte';
-	import { playground, resetTheme, importTheme } from '../../playground.svelte.js';
-	import { asset } from '$app/paths';
+	import {
+		playground,
+		resetTheme,
+		importTheme,
+		isLocal,
+		stylesheetText
+	} from '../../playground.svelte.js';
 	import { serializeTheme } from '$lib/theme.js';
 	import { buildBundle } from '../bundle.js';
 
@@ -73,8 +78,7 @@
 		exportText = 'Loading…';
 		dialog?.showModal();
 		try {
-			const res = await fetch(asset(`/families/${playground.family}.css`));
-			exportText = await res.text();
+			exportText = await stylesheetText(playground.family);
 		} catch {
 			exportText = '/* Run `pnpm run build:css` to generate the family. */';
 		}
@@ -119,7 +123,12 @@
 		</p>
 		<label class="bundle-option">
 			<input type="checkbox" bind:checked={bundleSvelte} />
-			The Svelte components, written for {playground.family} alone
+			{#if isLocal(playground.family)}
+				The Svelte components, generic: {playground.family} was loaded from disk, so no copy
+				narrowed to it exists
+			{:else}
+				The Svelte components, written for {playground.family} alone
+			{/if}
 		</label>
 		<label class="bundle-option">
 			<input type="checkbox" bind:checked={bundleReset} />

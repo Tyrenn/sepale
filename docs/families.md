@@ -1,5 +1,11 @@
 # Writing a family
 
+This page is for a family built in this repo, in SCSS. A family written
+elsewhere, by hand or with an AI, is one CSS file under the same contract: the
+**family kit** (`/family-kit/index.md` on the site, sources in
+`src/routes/family-kit/`) states it, and the app's "Create a family" page loads
+the result.
+
 A **family** is one opinionated look, and it is **self-contained** (ADR 0010):
 its directory holds the whole of every component it styles — structure and
 look — and reads nothing from another family. There is no shared base. Two

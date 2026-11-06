@@ -8,10 +8,15 @@
 	import { asset } from '$app/paths';
 	import { tokensToInlineStyle } from '$lib/theme.js';
 	import Header from './Header.svelte';
-	import { playground } from './playground.svelte.js';
+	import { playground, stylesheetFor } from './playground.svelte.js';
+	import { restoreFamilies } from './local-families.svelte.js';
+	import { onMount } from 'svelte';
 	import type { Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
+
+	/* Families loaded on the "Create a family" page, on an earlier visit. */
+	onMount(() => void restoreFamilies());
 
 	// The active theme is applied to :root, where the family reads it. The
 	// chrome reads none of it — it is daisy renamed to --ui-* (app-ui.css) —
@@ -27,7 +32,7 @@
 	<link rel="stylesheet" href={asset('/reset.css')} />
 	<!-- Active style family (compiled by `pnpm run build:css`). The theme
 	     <style> below comes after so its :root values always win. -->
-	<link rel="stylesheet" href={asset(`/families/${playground.family}.css`)} />
+	<link rel="stylesheet" href={stylesheetFor(playground.family)} />
 	{@html `<style>${rootStyle}</style>`}
 </svelte:head>
 

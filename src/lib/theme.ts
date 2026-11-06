@@ -252,7 +252,12 @@ export function cloneTheme(tokens: ThemeToken[] = defaultTheme): ThemeToken[] {
  * from the family's own default otherwise.
  */
 export function tokensForFamily(family: string, vars: Record<string, string> = {}): ThemeToken[] {
-	return (paramsByFamily[family] ?? []).map((p) => {
+	return tokensFrom(paramsByFamily[family] ?? [], vars);
+}
+
+/** The same, from a parameter list in hand — a family the build never saw. */
+export function tokensFrom(params: FamilyParam[], vars: Record<string, string> = {}): ThemeToken[] {
+	return params.map((p) => {
 		const token = fromParam(p);
 		return { ...token, value: vars[p.name] ?? token.value };
 	});

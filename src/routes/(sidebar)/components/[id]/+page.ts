@@ -1,4 +1,5 @@
 import { ids } from '../doc.js';
+import type { Specimen } from '../dom.js';
 
 /**
  * Every component page is known at build time, so the route can prerender.
@@ -9,6 +10,6 @@ export function entries() {
 	return ids.map((id) => ({ id }));
 }
 
-export function load({ params }: { params: { id: string } }) {
-	return { id: params.id };
+export function load({ params, data }: { params: { id: string }; data: { specimens: Specimen[] } }) {
+	return { id: params.id, specimens: data.specimens };
 }

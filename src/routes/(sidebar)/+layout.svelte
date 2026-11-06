@@ -4,7 +4,7 @@
 	import { afterNavigate } from '$app/navigation';
 	import {
 		playground,
-		families,
+		allFamilies,
 		COMPONENTS,
 		themesFor,
 		categoryFor,
@@ -108,7 +108,7 @@
 					value={playground.family}
 					onchange={(e) => selectFamily(e.currentTarget.value)}
 				>
-					{#each families as f (f)}<option value={f}>{f} ({categoryFor(f)})</option>{/each}
+					{#each allFamilies() as f (f)}<option value={f}>{f} ({categoryFor(f)})</option>{/each}
 				</select>
 			</label>
 			<label class="side-select">
@@ -133,6 +133,11 @@
 					</a>
 				</li>
 				<li><a href={resolve('/theme')} class:ui-menu-active={page.url.pathname === resolve('/theme')}>Theme</a></li>
+				<li>
+					<a href={resolve('/new-family')} class:ui-menu-active={page.url.pathname === resolve('/new-family')}>
+						Create a family
+					</a>
+				</li>
 
 				<li class="ui-menu-title side-group-title">Components</li>
 				<li>

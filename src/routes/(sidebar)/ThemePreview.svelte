@@ -47,8 +47,8 @@
 		Toast,
 		MobileFrame
 	} from '$lib/index.js';
-	import { playground } from '../playground.svelte.js';
-	import { classesByFamily } from '$lib/generated/components.js';
+	import { playground, classesFor } from '../playground.svelte.js';
+	
 
 	const COLORS = [
 		'primary',
@@ -64,7 +64,7 @@
 	/* Only the colours the active family ships: sunflower has four, daisy
 	   eight. A colour it lacks would render as an unstyled default and read
 	   as a bug. */
-	let colors = $derived(COLORS.filter((c) => classesByFamily[playground.family]?.[`btn-${c}`]));
+	let colors = $derived(COLORS.filter((c) => classesFor(playground.family)[`btn-${c}`]));
 
 	/** The colour if the family ships it, else none (the plain variant). */
 	const has = <C extends (typeof COLORS)[number]>(c: C): C | undefined =>

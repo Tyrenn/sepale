@@ -19,7 +19,10 @@
  */
 
 import type { Component } from 'svelte';
-import { classesByFamily, axesByFamily, flagsByFamily } from '$lib/generated/components.js';
+import { classesByFamily, schema, statesByClass } from '$lib/generated/components.js';
+import { camel } from '../../classify.js';
+/* The active family may be one loaded from disk: ask through the playground. */
+import { classesFor, axesFor, flagsFor } from '../../playground.svelte.js';
 
 export { classesByFamily };
 
@@ -76,7 +79,7 @@ const RANK = { root: 0, axis: 1, flag: 2, part: 3, unclassified: 4 } as const;
 export function classRows(id: string, family: string): ClassRow[] {
 	const doc = pages[id]?.doc;
 	if (!doc) return [];
-	const shipped = classesByFamily[family] ?? {};
+	const shipped = classesFor(family);
 	const mine = (cls: string) =>
 		doc.namespaces.some((ns) => cls === ns || cls.startsWith(ns + '-'));
 
@@ -118,15 +121,15 @@ export interface PropRow extends PropDoc {
 
 /**
  * Which of a component's boolean props are FLAGS — that is, props that write a
- * class. Read as the union over every family, because a family that does not
- * ship one is exactly the case we are trying to catch.
+ * class. Read from what the component declares, not from any family, because
+ * a family that does not ship one is exactly the case we are trying to catch.
  */
 const flagNames = (() => {
 	const cache = new Map<string, Set<string>>();
 	return (component: string) => {
 		let set = cache.get(component);
 		if (!set) {
-			set = new Set(Object.values(flagsByFamily).flatMap((m) => m[component] ?? []));
+			set = new Set((schema[component]?.flags ?? []).map(camel));
 			cache.set(component, set);
 		}
 		return set;
@@ -147,8 +150,8 @@ export function propRows(id: string, family: string): PropRow[] {
 	   prose: `Loading` is all axes and no prose, and it still has props. */
 	for (const component of componentsOf(id, family)) {
 		const props = doc.props?.[component] ?? [];
-		const axes = axesByFamily[family]?.[component] ?? {};
-		const flags = flagsByFamily[family]?.[component] ?? [];
+		const axes = axesFor(family)[component] ?? {};
+		const flags = flagsFor(family)[component] ?? [];
 
 		/* An axis first: it is the prop whose type changes with the family. */
 		for (const [axis, values] of Object.entries(axes)) {
@@ -187,7 +190,7 @@ export const knownClasses = new Set(
 export function componentsOf(id: string, family: string): string[] {
 	const doc = pages[id]?.doc;
 	if (!doc) return [];
-	const shipped = classesByFamily[family] ?? {};
+	const shipped = classesFor(family);
 	const names = new Set<string>();
 	for (const [cls, info] of Object.entries(shipped)) {
 		if (!info.component) continue;
@@ -206,4 +209,27 @@ export function componentsOf(id: string, family: string): string[] {
  */
 export function hasWrapper(id: string, family: string): boolean {
 	return componentsOf(id, family).length > 0;
+}
+
+/**
+ * What a family must honour on this page beyond its classes, read from what
+ * is generated (gen-components.mjs): the states the families draw on each
+ * class (`:checked`, `[aria-selected=true]`), and the custom properties each
+ * wrapper writes on its elements. Family-independent: it is the contract, not
+ * one family's take on it. Shown in the DOM tab, printed in the family kit.
+ */
+export function contractOf(id: string): {
+	states: { cls: string; states: string[] }[];
+	hooks: { component: string; hooks: string[] }[];
+} {
+	const doc = pages[id]?.doc;
+	if (!doc) return { states: [], hooks: [] };
+	const mine = (cls: string) => doc.namespaces.some((ns) => cls === ns || cls.startsWith(ns + '-'));
+	const states = Object.entries(statesByClass)
+		.filter(([cls]) => mine(cls))
+		.map(([cls, list]) => ({ cls, states: list }));
+	const hooks = Object.entries(schema)
+		.filter(([, s]) => doc.namespaces.includes(s.prefix))
+		.map(([component, s]) => ({ component, hooks: s.hooks }));
+	return { states, hooks };
 }
