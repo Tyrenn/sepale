@@ -12,7 +12,7 @@
    
    	<div class="number-input">
    	  <button type="button" class="number-input-dec" aria-label="Decrease">−</button>
-   	  <input type="number" class="number-input-field" value="2">
+   	  <input type="text" inputmode="decimal" class="number-input-field" value="2">
    	  <button type="button" class="number-input-inc" aria-label="Increase">+</button>
    	</div>
    

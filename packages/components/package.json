@@ -37,11 +37,11 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Tyrenn/u.u.git",
+		"url": "git+https://github.com/Tyrenn/sepale.git",
 		"directory": "packages/components"
 	},
 	"bugs": {
-		"url": "https://github.com/Tyrenn/u.u/issues"
+		"url": "https://github.com/Tyrenn/sepale/issues"
 	},
 	"license": "MIT"
 }

@@ -4,18 +4,20 @@
 	export const DOC: ComponentDoc = {
 		namespaces: ['number-input'],
 		description:
-			'A number field, its figure aligned to the end like a number in a column. The field is a real number input, and its value is always a number. With controls, a − and a + step it within its own min, max and step.',
+			'A number field, its figure aligned to the end like a number in a column. It takes . and , alike as the decimal separator, whatever the browser\'s language, and its value is always a number. With controls, a − and a + step it within its own min, max and step.',
 		classes: {
 			'number-input': 'The frame, field-shaped.',
 			'number-input-dec': 'The − button, drawn with controls.',
-			'number-input-field': 'The input, native spinners hidden. Its figure sits at the end, or centred between the buttons.',
+			'number-input-field': 'The input: a text field with a numeric keyboard, filtered to what a number can be. Its figure sits at the end, or centred between the buttons.',
 			'number-input-inc': 'The + button, drawn with controls.'
 		},
 		props: {
 			NumberInput: [
 				{ name: 'value', type: 'number | null', description: 'Bindable. Always a number, parsed from the field, never its text; null when it is empty or holds no finite number.' },
 				{ name: 'controls', type: 'boolean', default: 'false', description: 'Draw a − and a + around the field. Off, the field stands alone.' },
-				{ name: 'min / max / step', type: 'number', description: 'As on the native input; the arrow keys and the buttons honour them.' },
+				{ name: 'min / max / step', type: 'number', description: 'As on a native number input: they set the field\'s validity, and ↑ / ↓ and the buttons step within them.' },
+				{ name: 'name', type: 'string', description: 'Submitted with the form through a hidden input, written with a . whatever separator was typed.' },
+				{ name: 'messages', type: '{ nan?, min?, max?, step? }', description: 'What the browser says when the field is invalid, in your language.' },
 				{ name: 'disabled', type: 'boolean', default: 'false', description: 'No typing, no stepping.' },
 				{ name: 'onValue', type: '(value: number | null) => void', description: 'After every change, typed or stepped, with the parsed number.' },
 				{ name: 'validator', type: 'boolean', default: 'false', description: 'Colour the field by its own validity (required, min, max, step) and reveal hint once the browser marks it invalid.' },
@@ -36,10 +38,11 @@
 
 <Section
 	title="Basic"
-	subtitle="The field alone, its figure at the end. What it hands back is a number."
+	subtitle="The field alone, its figure at the end. Type 12.5 or 12,5: what it hands back is the number 12.5."
 	svelte={`<NumberInput bind:value={price} step={0.01} name="price" />`}
 	html={`<div class="number-input">
-  <input type="number" class="number-input-field" name="price" value="12.5" step="0.01">
+  <input type="text" inputmode="decimal" role="spinbutton" class="number-input-field" value="12.5">
+  <input type="hidden" name="price" value="12.5">
 </div>`}
 >
 	<NumberInput bind:value={price} step={0.01} name="price" />
@@ -52,7 +55,8 @@
 	svelte={`<NumberInput controls bind:value={qty} min={0} max={10} name="qty" />`}
 	html={`<div class="number-input">
   <button type="button" class="number-input-dec" aria-label="Decrease">−</button>
-  <input type="number" class="number-input-field" name="qty" value="2" min="0" max="10">
+  <input type="text" inputmode="decimal" role="spinbutton" class="number-input-field" value="2">
+  <input type="hidden" name="qty" value="2">
   <button type="button" class="number-input-inc" aria-label="Increase">+</button>
 </div>`}
 >
