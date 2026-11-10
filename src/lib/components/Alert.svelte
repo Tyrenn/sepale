@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .alert is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .alert is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'alert';
 
 	export const AXES = {
@@ -28,7 +28,7 @@
 	import { slide } from 'svelte/transition';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'title'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'title'> {
 		/** A bold first line. */
 		title?: string;
 		/** Replaces the colour's own icon. */
@@ -62,7 +62,7 @@
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
-	/* Read back from the classes, not the prop: a family's copy has no `axes`. */
+	/* Read back from the classes, the one place the axes are resolved. */
 	let kind = $derived((['info', 'success', 'warning', 'error'] as const).find((k) => classes.includes(`${PREFIX}-${k}`)));
 	let urgent = $derived(kind === 'error' || kind === 'warning');
 

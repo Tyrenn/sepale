@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .avatar is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .avatar is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'avatar';
 
 	export const AXES = {
@@ -29,7 +29,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
 		/** The picture. Without it, the children are drawn instead. */
 		src?: string;
 		/** The picture's alternative text. */

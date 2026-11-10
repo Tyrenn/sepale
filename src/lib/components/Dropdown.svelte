@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .dropdown is made of, classified. Each family's copy writes these
-	    out as plain props (scripts/family-component.mjs).
+	/** What .dropdown is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    `.dropdown-open` and `.dropdown-fixed` are PARTS: the wrapper writes
 	    them from its own state, nobody opts into them. */
@@ -43,7 +43,7 @@
 	import { fly } from 'svelte/transition';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** Whether the box is shown. Bindable. */
 		open?: boolean;
 		/** The element that opens it. Spread `props` on it. */

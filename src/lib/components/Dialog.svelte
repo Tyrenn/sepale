@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .dialog is made of, classified. Each family's copy writes these out
-	    as plain props (scripts/family-component.mjs).
+	/** What .dialog is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    The dialog draws its own box, title, body, actions and close button:
 	    they are PARTS. */
@@ -35,7 +35,7 @@
 	// methods, the second is a heading. Component events are `onXxx`; the
 	// native lowercase ones still pass through.
 	interface Props
-		extends AxisProps<typeof AXES, typeof FLAGS>,
+		extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>,
 			Omit<HTMLDialogAttributes, 'open' | 'title'> {
 		/** Whether it is shown. Bindable: closing from inside sets it back. */
 		open?: boolean;

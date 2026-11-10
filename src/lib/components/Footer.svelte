@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .footer is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .footer is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'footer';
 
 	export const AXES = {
@@ -29,7 +29,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLElement>, 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLElement>, 'color'> {
 		sections?: FooterSection[];
 		/** The last row: copyright, legal links, social icons. */
 		bottom?: Snippet;

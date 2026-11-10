@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .file-input is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .file-input is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'file-input';
 
 	export const AXES = {
@@ -25,7 +25,7 @@
 
 	// `size` is ours — the HTML attribute of the same name is a character count
 	// our CSS overrides anyway.
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLInputAttributes, 'size' | 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLInputAttributes, 'size' | 'color'> {
 		/**
 		 * Colour the field by its own validity and reveal `hint` once the
 		 * browser marks it invalid. The CSS drives this off `:user-invalid`,

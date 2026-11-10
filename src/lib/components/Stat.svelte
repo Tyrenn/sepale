@@ -25,7 +25,7 @@
 	/* `title` is an HTML attribute too, and a tooltip is not a label — so the
 	   DOM one is dropped rather than shadowed silently. */
 	interface Props
-		extends AxisProps<typeof AXES, typeof FLAGS>,
+		extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>,
 			Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
 		/** The small label above the value. */
 		title?: string | Snippet;

@@ -2,8 +2,8 @@
  * gen-registry.mjs — derive the family/theme registry from the SCSS sources.
  *
  * Single source of truth = the files under src/scss:
- *   - families:   src/scss/families/<name>.scss   (excluding _partials)
- *   - themes:     src/scss/themes/<family>/<name>.scss
+ *   - families:   src/scss/families/<name>/index.scss
+ *   - themes:     src/scss/families/<family>/themes/<name>.scss
  *   - parameters: declared in the family's SCSS, read back out of its
  *                 compiled CSS (see src/scss/_params.scss)
  *
@@ -11,8 +11,8 @@
  * rather than restating them in TypeScript is what keeps that true: rename a
  * variable in the SCSS and the configurator follows it.
  *
- * To add a family:   drop src/scss/families/<name>.scss + a themes/<name>/ folder.
- * To add a theme:    drop src/scss/themes/<family>/<name>.scss.
+ * To add a family:   a src/scss/families/<name>/ directory, its themes in themes/.
+ * To add a theme:    drop src/scss/families/<family>/themes/<name>.scss.
  * Then run `pnpm run build:css` (this script runs last, after sass).
  *
  * Output: src/lib/generated/registry.ts (git-ignored, regenerated on build).
@@ -21,10 +21,10 @@
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isPrivate } from './private.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const familiesDir = join(root, 'src/scss/families');
-const themesDir = join(root, 'src/scss/themes');
 const builtDir = join(root, 'static/families');
 const outFile = join(root, 'src/lib/generated/registry.ts');
 
@@ -108,16 +108,19 @@ function parseDoc(family) {
 	return { title: cap(family), after, blurb, changes };
 }
 
-/* A family is a directory with an index.scss (ADR 0008). */
+/* A family is a directory with an index.scss (ADR 0008). A private one
+   (private.mjs) only when this build compiled it: `build:css --public` did
+   not, and the registry must not name it either. */
 const families = readdirSync(familiesDir)
 	.filter((name) => existsSync(join(familiesDir, name, 'index.scss')))
+	.filter((name) => !isPrivate(familiesDir, name) || existsSync(join(builtDir, `${name}.css`)))
 	.sort();
 
 const themesByFamily = {};
 const paramsByFamily = {};
 const familyDocs = {};
 for (const family of families) {
-	const dir = join(themesDir, family);
+	const dir = join(familiesDir, family, 'themes');
 	themesByFamily[family] = scssNames(dir).map((name) => {
 		const { scheme, vars } = parseTheme(join(dir, `${name}.scss`));
 		return { name, label: cap(name), scheme, vars };

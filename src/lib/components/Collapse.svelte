@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .collapse is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .collapse is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'collapse';
 
 	export const AXES = {
@@ -34,7 +34,7 @@
 	import { getAccordion } from './accordion-context.js';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
 		/** The trigger's text. */
 		title?: string;
 		/** The trigger's content, as markup. Wins over `title`. */

@@ -22,7 +22,13 @@ families/dahlia/
   input.scss
   join.scss
   …                     one file per component this family styles
+  themes/
+    light.scss          a theme: values for this family's parameters
+    …
 ```
+
+The family and its themes are one directory: copy it, move it or keep it in
+its own repository, and nothing else in the repo has to follow.
 
 The only shared SCSS is tooling that emits nothing until called:
 `_mixins.scss` (colour loops, size scales, `railed-fill`), `_config.scss` (the
@@ -156,7 +162,7 @@ any structure — including another component's, which matters to `join` and
    why), `$params`, `:root`, then every `structure` and every `look`.
 3. Rewrite each component file: its `look` always, its `structure` when the
    look needs a different mechanism.
-4. `themes/<name>/*.scss` — at least one theme, setting exactly the parameters
+4. `families/<name>/themes/*.scss` — at least one theme, setting exactly the parameters
    this family declares (ADR 0005).
 5. `pnpm run build:css` — a family is discovered by having an `index.scss`.
 6. **Look at it**: `node scripts/shoot.mjs <name>`. Every family shipped

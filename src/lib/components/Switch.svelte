@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .switch is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .switch is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'switch';
 
 	export const AXES = {
@@ -29,7 +29,7 @@
 
 	type Option = string | { value: string; label?: string; disabled?: boolean };
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'onchange'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'onchange'> {
 		options: Option[];
 		/** The checked option's value. Bindable. */
 		value?: string;

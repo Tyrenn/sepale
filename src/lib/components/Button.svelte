@@ -1,8 +1,8 @@
 <script module lang="ts">
 	/**
-	 * What .btn is made of, classified. The copy generated for each family
-	 * has none of this: it writes out, as plain props and a plain class list,
-	 * only the values that family ships (scripts/family-component.mjs).
+	 * What .btn is made of, classified. The props follow the families the
+	 * project registers: a family's `.css.d.ts` narrows them to what it ships
+	 * (variants.ts, ADR 0015).
 	 *
 	 * AXES are mutually exclusive and named after what they impact. FLAGS are
 	 * independent booleans. PARTS are class names the component renders itself
@@ -30,8 +30,8 @@
 		active: 'Draw the button as if it were the current choice.'
 	} as const;
 	/* `ripple` is a part for now, not a flag: its prop carries behaviour (the
-	   waves), so it is written by hand below and every family's copy keeps it,
-	   whether or not the family ships .btn-ripple. It leaves Button for an
+	   waves), so it is written by hand below, and offered whether or not the
+	   family ships .btn-ripple. It leaves Button for an
 	   attachment later. */
 	export const PARTS = ['ripple', 'ripple-wave', 'disabled'] as const;
 </script>
@@ -45,7 +45,7 @@
 	// count our CSS overrides anyway. Any axis whose name collides with an
 	// attribute of the element we render must be Omitted like this, or renamed.
 	interface Props
-		extends AxisProps<typeof AXES, typeof FLAGS>,
+		extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>,
 			Omit<HTMLButtonAttributes & HTMLAnchorAttributes, 'size' | 'color' | 'onpointerdown'> {
 		/** Expanding wave from the pointer on press. */
 		ripple?: boolean;
@@ -60,7 +60,7 @@
 
 	// The axes are deliberately NOT destructured: they travel in `axes` and are
 	// resolved by name against the AXES block. That is what keeps this half of
-	// the file identical in every family's copy — drop an axis up there and
+	// the file free of any axis by name — drop an axis up there and
 	// nothing down here has to know.
 	let {
 		ripple = false,

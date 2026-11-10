@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .select is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .select is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'select';
 
 	export const AXES = {
@@ -30,7 +30,7 @@
 	// `size` is ours — the HTML attribute of the same name is a character count
 	// our CSS overrides anyway.
 	interface Props
-		extends AxisProps<typeof AXES, typeof FLAGS>,
+		extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>,
 			Omit<HTMLSelectAttributes, 'size' | 'color' | 'value' | 'multiple'> {
 		/**
 		 * Colour the field by its own validity and reveal `hint` once the

@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .rating is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .rating is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'rating';
 
 	export const AXES = {
@@ -25,7 +25,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'onchange'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'onchange'> {
 		/** The score, 0 for none. Bindable. */
 		value?: number;
 		/** How many icons. */
@@ -61,7 +61,7 @@
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
-	/* Read back from the classes: a family's copy has no `axes`. */
+	/* Read back from the classes, the one place the axes are resolved. */
 	let locked = $derived(classes.includes(`${PREFIX}-readonly`));
 </script>
 

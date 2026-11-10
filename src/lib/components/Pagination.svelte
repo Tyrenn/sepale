@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .pagination is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .pagination is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    The pagination draws its own pages: `.pagination-item`,
 	    `.pagination-gap` and `.pagination-text` are PARTS. The current page is marked by
@@ -35,7 +35,7 @@
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
 	// `color` is ours — the HTML attribute of the same name is long obsolete.
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLElement>, 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLElement>, 'color'> {
 		/** How many pages there are. */
 		count: number;
 		/** The current page, from 1. Bindable. */

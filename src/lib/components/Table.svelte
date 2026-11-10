@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .table is made of, classified. Each family's copy writes these out
-	    as plain props (scripts/family-component.mjs).
+	/** What .table is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    The table draws its own head, rows and cells: every class below the
 	    root that is not a flag is a PART. */
@@ -80,7 +80,7 @@
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 	import Editable from './Editable.svelte';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLTableAttributes {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLTableAttributes {
 		/** The columns, in order. */
 		columns: TableColumn<Row>[];
 		/** The rows: your data, as is. */

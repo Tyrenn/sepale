@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .carousel is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .carousel is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    The carousel draws its own parts: the track, one item per entry of
 	    `items` (and the duplicates of an infinite carousel), the cells its
@@ -49,7 +49,7 @@
 	type Upcoming = { items: { item: Item; index: number }[]; goto: (index: number) => void };
 
 	interface Props
-		extends AxisProps<typeof AXES, typeof FLAGS>,
+		extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>,
 			Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** The items' data. */
 		items: Item[];

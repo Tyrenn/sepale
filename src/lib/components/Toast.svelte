@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .toast is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .toast is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'toast';
 
 	export const AXES = {
@@ -47,7 +47,7 @@
 	import Button from './Button.svelte';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLAttributes<HTMLElement> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLElement> {
 		/** The region's accessible name. */
 		label?: string;
 		/** Each close button's accessible name. */

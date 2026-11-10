@@ -1,5 +1,9 @@
 # Two packages: the style and the components
 
+_The per-family entry points below (`@sepale/components/daisy`) are superseded by
+[0015](./0015-the-stylesheet-carries-its-types.md): the root entry, typed by the
+family stylesheet the project imports. The two packages stand._
+
 Partly supersedes [0012](./0012-a-package-alongside-the-bundle.md): what its
 single `sepale` package held is split in two. The entry points, the casts and
 the semver rule stand; only the names and the delivery change.

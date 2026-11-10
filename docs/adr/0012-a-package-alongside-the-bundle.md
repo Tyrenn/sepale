@@ -1,6 +1,6 @@
 # A package alongside the bundle
 
-_Partly superseded by [0014](./0014-two-packages.md): the package is now two, `@sepale/style` and `@sepale/components`. What follows on entry points and semver stands, under the new names._
+_Partly superseded by [0014](./0014-two-packages.md): the package is now two, `@sepale/style` and `@sepale/components`. And by [0015](./0015-the-stylesheet-carries-its-types.md): the per-family entry points and the bundle's rewritten copies are gone; a family's stylesheet carries its types instead. What follows on semver stands._
 
 Partly supersedes [0001](./0001-distribution-by-bundle-not-npm.md): the bundle
 stays, and the kit is also published to npm as `sepale`. Some users want a

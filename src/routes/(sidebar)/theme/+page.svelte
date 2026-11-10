@@ -6,7 +6,6 @@
 		playground,
 		resetTheme,
 		importTheme,
-		isLocal,
 		stylesheetText
 	} from '../../playground.svelte.js';
 	import { serializeTheme } from '$lib/theme.js';
@@ -123,12 +122,7 @@
 		</p>
 		<label class="bundle-option">
 			<input type="checkbox" bind:checked={bundleSvelte} />
-			{#if isLocal(playground.family)}
-				The Svelte components, generic: {playground.family} was loaded from disk, so no copy
-				narrowed to it exists
-			{:else}
-				The Svelte components, written for {playground.family} alone
-			{/if}
+			The Svelte components, and {playground.family}’s types that narrow them
 		</label>
 		<label class="bundle-option">
 			<input type="checkbox" bind:checked={bundleReset} />

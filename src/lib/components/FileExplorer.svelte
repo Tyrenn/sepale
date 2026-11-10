@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .file-explorer is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .file-explorer is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'file-explorer';
 
 	export const AXES = {
@@ -76,7 +76,7 @@
 	type Folder = FileNode | null;
 	type SortKey = 'name' | 'modified' | 'size';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLAttributes<HTMLDivElement> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLDivElement> {
 		/** A static tree, from its top folder. */
 		root?: FileNode;
 		/** A folder's content, on demand. `null` is the top. Wins over `root`'s children. */

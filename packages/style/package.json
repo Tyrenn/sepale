@@ -4,7 +4,10 @@
 	"description": "Sepale's opinionated CSS families and their themes, as plain compiled stylesheets. No dependency, no build step.",
 	"type": "module",
 	"exports": {
-		"./*.css": "./dist/*.css"
+		"./*.css": {
+			"types": "./dist/*.css.d.ts",
+			"default": "./dist/*.css"
+		}
 	},
 	"files": [
 		"dist"

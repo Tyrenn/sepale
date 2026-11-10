@@ -1,10 +1,9 @@
 <script module lang="ts">
-	/** What .grid is made of, classified. Each family's copy writes these out
-	    as plain props (scripts/family-component.mjs).
+	/** What .grid is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    `masonry` is a PART, not a flag: its prop changes what is drawn (the
-	    lanes), so it is written by hand below and every family's copy keeps
-	    it. */
+	    lanes), so it is written by hand below. */
 	export const PREFIX = 'grid';
 
 	export const AXES = {
@@ -33,7 +32,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLAttributes<HTMLDivElement> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLDivElement> {
 		/** The items: your data, as is. */
 		items?: Item[];
 		/** How one item is drawn. */

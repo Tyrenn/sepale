@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .fieldset is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .fieldset is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'fieldset';
 
 	export const AXES = {} as const;
@@ -14,7 +14,7 @@
 	import type { HTMLFieldsetAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLFieldsetAttributes {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLFieldsetAttributes {
 		/** The group's heading. */
 		legend?: string | Snippet;
 		/** A note under the group. */

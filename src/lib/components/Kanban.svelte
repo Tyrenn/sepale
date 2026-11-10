@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .kanban is made of, classified. Each family's copy writes these out
-	    as plain props (scripts/family-component.mjs). */
+	/** What .kanban is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'kanban';
 
 	export const AXES = {
@@ -61,7 +61,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLAttributes<HTMLDivElement> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLDivElement> {
 		/** The items: your data, as is, each column keeping their order. */
 		items?: Item[];
 		/** The columns, in order. */

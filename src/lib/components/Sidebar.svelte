@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .sidebar is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .sidebar is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    `.sidebar-layout` is the row it may sit in: written by hand around the
 	    page, never by the component, so it is a PART too. */
@@ -29,7 +29,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLElement>, 'children'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLElement>, 'children'> {
 		/** Folded to a rail. Bindable. */
 		collapsed?: boolean;
 		/** The top of the column: a brand, a picker. The toggle follows it. */

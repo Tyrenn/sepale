@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .join is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .join is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    Each child must carry `join-item` for the seams to land; that class is
 	    a part of this component, not a component of its own. */
@@ -20,7 +20,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLAttributes<HTMLDivElement> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLDivElement> {
 		class?: string;
 		children?: Snippet;
 	}

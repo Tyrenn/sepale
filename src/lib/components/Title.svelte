@@ -28,7 +28,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLHeadingElement>, 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLHeadingElement>, 'color'> {
 		/** Which heading tag to render. Purely semantic; the look never moves. */
 		level?: 1 | 2 | 3 | 4 | 5 | 6;
 		class?: string;

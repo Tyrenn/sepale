@@ -17,7 +17,7 @@ Sépale is a low-key UI component library, available as plain CSS classes or as 
 
 - 🧱 **Classes before components** : a component is a DOM structure and a set of classes. The Svelte wrapper is the quick way in, not the only one
 - 🎨 **Five families**, each with its own themes and its own parameters : pick a visual style, adjust it to your colours
-- 🛡️ **Types that match the CSS** : `@sepale/components/<family>` narrows every prop to what that family ships, so a variant it lacks is a compile error
+- 🛡️ **Types that match the CSS** : import a family's stylesheet and every prop narrows to what it ships, so a variant it lacks is a compile error
 - 📐 **Sized by font-size** : components are `em`-based and carry no breakpoints. Change the font size and the whole component follows
 - 🪶 **Plain compiled CSS** : no Tailwind, no `@apply`, no config, no build step. A family is one stylesheet, the reset is optional and separate
 - 📊 **Data views included** : a data handler drives filters, sort, search, pages and pending edits. Tables, grids, lists and kanbans only draw its rows
@@ -34,7 +34,7 @@ Two packages, to take only what you need :
 | Package | Content |
 |---|---|
 | [`@sepale/style`](https://www.npmjs.com/package/@sepale/style) | The families and their themes, as compiled stylesheets. No dependency, no JavaScript |
-| [`@sepale/components`](https://www.npmjs.com/package/@sepale/components) | The Svelte 5 components, with one typed entry point per family. Loads no CSS : `@sepale/style` is an optional peer |
+| [`@sepale/components`](https://www.npmjs.com/package/@sepale/components) | The Svelte 5 components, typed by the family stylesheet you import. Loads no CSS : `@sepale/style` is an optional peer |
 
 ## Quick Start
 
@@ -42,8 +42,8 @@ Two packages, to take only what you need :
 
 ```svelte
 <script>
-	import { Button, Input } from '@sepale/components/daisy';  // props narrowed to daisy
-	import '@sepale/style/daisy.css';                          // explicit, never automatic
+	import { Button, Input } from '@sepale/components';
+	import '@sepale/style/daisy.css';                  // explicit, never automatic: and it types the props
 	import '@sepale/style/daisy/themes/light.css';
 </script>
 
@@ -51,7 +51,7 @@ Two packages, to take only what you need :
 <Button color="primary">Save</Button>
 ```
 
-Switching `@sepale/components/daisy` for `@sepale/components/cosmos` changes what the compiler accepts, never the runtime. The root `@sepale/components` is the generic entry : every variant of every family, with no guarantee that one renders.
+Importing `daisy.css` narrows every prop to what daisy ships. Switching to `cosmos.css` changes what the compiler accepts, never the runtime : `svelte-check` lists what to fix. With no family imported, the props are generic. To keep code that compiles under several families, see [`@sepale/components`](./packages/components/README.md#types-that-follow-the-family).
 
 ### With CSS only
 
@@ -107,11 +107,10 @@ Each one is documented on [the site](https://tyrenn.github.io/sepale/components)
 | Path | Content |
 |---|---|
 | [`src/lib/components`](src/lib/components) | The Svelte components, written by hand |
-| [`src/scss/families`](src/scss/families) | The families, each one the whole of every component |
-| [`src/scss/themes`](src/scss/themes) | The themes, which only set their family's parameters |
+| [`src/scss/families`](src/scss/families) | The families, each one directory : the whole of every component, and its themes |
 | [`packages`](packages) | The two npm packages, `@sepale/style` and `@sepale/components` |
 | [`src/routes`](src/routes) | The [presentation site](https://tyrenn.github.io/sepale/), its theme generator and its component pages |
-| [`scripts`](scripts) | The build : CSS, registry, per-family components, screenshots |
+| [`scripts`](scripts) | The build : CSS, registry, each family's types, the packages, screenshots |
 
 ```sh
 pnpm run dev                  # compile the families, run the site locally

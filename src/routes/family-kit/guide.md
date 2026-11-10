@@ -64,6 +64,16 @@ Give the user the whole file, every time: the app loads a file, not a patch.
 They load it on the app's page (loading a file under the same name replaces the
 family) and walk the component pages in a light and a dark theme.
 
+Hand over the stylesheet only. Do NOT write a `.d.ts`, a type declaration or a
+list of variants for it. The family works without one: the classes draw
+everything. Its types — `name.css.d.ts`, which narrows the Svelte components'
+props to what the family draws — are optional and DERIVED from the stylesheet:
+the app's "Create a family" page offers them once the family is loaded
+("Download types", or the bundle), and `npx sepale-types name.css` writes them
+without the app. A declaration written by hand can promise a variant the
+stylesheet does not draw; the derived one cannot. If the user asks for types,
+point them to those, and tell them to regenerate after every change.
+
 Each round, the user names what is wrong: a component, a state, a theme. Answer
 with the smallest change that fixes it, in that component's rules only, and
 say which rules you changed. When the report shows a class no component

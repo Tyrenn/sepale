@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .calendar is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .calendar is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    `.calendar` is the only class we own. The calendar inside is drawn by
 	    air-datepicker (vendored, src/lib/vendor/air-datepicker), whose class
@@ -47,7 +47,7 @@
 
 	// `color` is ours — the HTML attribute of the same name is long obsolete.
 	interface Props
-		extends AxisProps<typeof AXES, typeof FLAGS>,
+		extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>,
 			Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
 		/** The picked date, or dates with `range` / `multiple`. Bindable. */
 		value?: Value;

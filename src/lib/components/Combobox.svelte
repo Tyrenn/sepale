@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .combobox is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .combobox is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    `.combobox-multiple` is a PART: the wrapper writes it from `multiple`. */
 	export const PREFIX = 'combobox';
@@ -45,7 +45,7 @@
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLInputAttributes, 'size' | 'value'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLInputAttributes, 'size' | 'value'> {
 		/** The options, or where to fetch them. */
 		options: ComboboxSource;
 		/** Reshape what a function or an address answered into the list. */

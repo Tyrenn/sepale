@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .steps is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .steps is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'steps';
 
 	export const AXES = {
@@ -58,7 +58,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLElement>, 'color'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLElement>, 'color'> {
 		steps: Step[];
 		/** The id of the current leaf (a sub-step, or a step without any). */
 		current?: Step['id'];
@@ -93,7 +93,7 @@
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
-	/* Read back from the classes: a family's copy has no `axes`. */
+	/* Read back from the classes, the one place the axes are resolved. */
 	let condensed = $derived(classes.includes(`${PREFIX}-compact`));
 
 	const leavesOf = (s: Step) => (s.steps?.length ? s.steps : [s]);

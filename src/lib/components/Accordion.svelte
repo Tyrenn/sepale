@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .accordion is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .accordion is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'accordion';
 
 	export const AXES = {} as const;
@@ -21,7 +21,7 @@
 	import { setAccordion } from './accordion-context.js';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLAttributes<HTMLDivElement> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLDivElement> {
 		/** At most one collapse open at a time. */
 		exclusive?: boolean;
 		class?: string;

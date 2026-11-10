@@ -1,7 +1,6 @@
 <script module lang="ts">
 	/* No PREFIX, no AXES: the data handler draws nothing, so it has no
-	   namespace and nothing for a family to style. Its copy in a family's
-	   bundle is this file as is. The class is exported for use without the
+	   namespace and nothing for a family to style. The class is exported for use without the
 	   component: `new DataHandlerState({ … })`. */
 	export {
 		DataHandlerState,

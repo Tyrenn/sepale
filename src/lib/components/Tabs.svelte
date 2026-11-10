@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .tabs is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .tabs is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    One namespace, `tabs`: the strip AND the tabs in it (ADR 0009). The
 	    component draws every tab, so `.tabs-item` and its states are PARTS.
@@ -39,7 +39,7 @@
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
 	interface Props
-		extends AxisProps<typeof AXES, typeof FLAGS>,
+		extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>,
 			HTMLAttributes<HTMLDivElement> {
 		/**
 		 * The tabs, in order. A tab's `label` takes a snippet as readily as a

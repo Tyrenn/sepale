@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .chips-input is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .chips-input is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'chips-input';
 
 	export const AXES = {
@@ -38,7 +38,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'onchange'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'onchange'> {
 		/** The values. Bindable. */
 		values?: string[];
 		/** For a form: one hidden `name[]` input per value. */

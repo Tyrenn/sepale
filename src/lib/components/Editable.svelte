@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .editable is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .editable is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    The editable draws the value at rest and the frame around its editor:
 	    `.editable-display`, `.editable-empty` and `.editable-form` are PARTS.
@@ -64,7 +64,7 @@
 	import Checkbox from './Checkbox.svelte';
 	import ChipsInput from './ChipsInput.svelte';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'onchange'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'onchange'> {
 		/** What is shown, and what an edit starts from. */
 		value: V;
 		/** After an edit that changed the value. */

@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .list is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .list is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    The list draws its own rows: `.list-row` is a PART, not something a
 	    caller opts into. What goes INSIDE a row is the caller's, three ways —
@@ -25,7 +25,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLAttributes<HTMLUListElement> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLUListElement> {
 		/**
 		 * The rows. An entry is your data — rendered by `row`, or as text when
 		 * there is no `row` — or a snippet standing in for that one row.

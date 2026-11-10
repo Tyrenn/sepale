@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .progress is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .progress is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'progress';
 
 	export const AXES = {
@@ -26,7 +26,7 @@
 		label?: string;
 	}
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLElement>, 'color'>,
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLElement>, 'color'>,
 			Pick<HTMLProgressAttributes, 'value' | 'max'> {
 		/** Cut the bar into parts, each as wide as its `value` among the others.
 		    The bar then stands for a split rather than a progress: `value` and

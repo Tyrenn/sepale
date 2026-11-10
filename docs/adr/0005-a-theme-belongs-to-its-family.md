@@ -1,6 +1,7 @@
 # A theme belongs to its family
 
-Themes are stored per family (`themes/<family>/<name>.scss`) and may set only
+Themes are stored per family (`families/<family>/themes/<name>.scss`, inside the
+family's own directory since 2026-11-10) and may set only
 the parameters that family exposes. There is no cross-family theme and no
 shared colour palette.
 

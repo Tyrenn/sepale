@@ -62,7 +62,7 @@
 
 	let packageCode = $derived(
 		highlight(`<script>
-	import { Card, Kanban } from '@sepale/components/${playground.family}';
+	import { Card, Kanban } from '@sepale/components';
 	import '@sepale/style/${playground.family}.css';
 	import '@sepale/style/${playground.family}/themes/${playground.theme}.css';
 <\/script>
@@ -90,7 +90,7 @@
 
 	const FEATURES = [
 		{ title: 'Sized by font-size', text: 'Components are em-based and carry no breakpoints. Change the font size and the whole component follows.' },
-		{ title: 'Types that match the CSS', text: '@sepale/components/<family> narrows every prop to what that family ships, so a variant it lacks is a compile error.' },
+		{ title: 'Types that match the CSS', text: 'Import a family’s stylesheet and every prop narrows to what it ships, so a variant it lacks is a compile error.' },
 		{ title: 'Classes before components', text: 'A component is a DOM structure and a set of classes. The Svelte wrapper is the quick way in, not the only one.' },
 		{ title: 'Plain compiled CSS', text: 'No Tailwind, no @apply, no config. A family is one stylesheet, and the reset is optional and separate.' },
 		{ title: 'Data views included', text: 'A data handler drives filters, sort, search, pages and pending edits. Tables, grids, lists and kanbans only draw its rows.' },
@@ -284,18 +284,18 @@
 				<h3 class="s-h3 s-way-title">The packages follow the kit</h3>
 				<p class="s-way-text">
 					<code class="s-inline">@sepale/style</code> is the stylesheets alone, with no dependency. <code class="s-inline">@sepale/components</code>
-					adds the Svelte layer, one typed entry point per family: switching family is a type change, and the compiler lists what to fix.
+					adds the Svelte layer, typed by the stylesheet you import: switching family is changing that import, and the compiler lists what to fix.
 					Parameters, classes and props follow semver.
 				</p>
 				<div class="s-code">
-					<pre>{@html highlight(`import { Button } from '@sepale/components/${playground.family}';\nimport '@sepale/style/${playground.family}.css';`)}</pre>
+					<pre>{@html highlight(`import { Button } from '@sepale/components';\nimport '@sepale/style/${playground.family}.css';`)}</pre>
 				</div>
 			</div>
 			<div class="s-way">
 				<h3 class="s-h3 s-way-title">The files are yours</h3>
 				<p class="s-way-text">
 					Download a zip from the theme generator: the family’s stylesheet, your theme and, if you want them, the Svelte components
-					written for that family alone. A snapshot never updates, so change what you like. Without Svelte, write the classes yourself.
+					with that family’s types. A snapshot never updates, so change what you like. Without Svelte, write the classes yourself.
 				</p>
 				<div class="s-code">
 					<pre>{@html snapshotCode}</pre>

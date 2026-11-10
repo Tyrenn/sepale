@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .floating-label is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .floating-label is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    A container that WRAPS a field, unlike `.label`, which is inline and
 	    lives inside one. Two roles, two components (ADR 0009). The <span> must
@@ -19,7 +19,7 @@
 	import type { HTMLLabelAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLLabelAttributes {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLLabelAttributes {
 		/** The text that floats into the field's frame once it has content. */
 		label?: string;
 		class?: string;

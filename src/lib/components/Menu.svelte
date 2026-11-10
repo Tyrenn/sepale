@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .menu is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs).
+	/** What .menu is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    The menu draws its own rows, so every class below the root is a PART:
 	    nobody opts into `.menu-item` or `.menu-active`, they follow from the
@@ -44,7 +44,7 @@
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
 	interface Props
-		extends AxisProps<typeof AXES, typeof FLAGS>,
+		extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>,
 			HTMLAttributes<HTMLUListElement> {
 		/**
 		 * The rows, nested as deep as needed. A node's `label` and `title` take

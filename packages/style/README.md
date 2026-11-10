@@ -24,5 +24,6 @@ A theme is a set of values for its family's parameters, and belongs to that
 family. To tune your own, use the theme generator on the site and lay the
 `theme.css` it exports after the family's stylesheet.
 
-Using Svelte? [`@sepale/components`](https://www.npmjs.com/package/@sepale/components)
-has the components, typed to what each family ships.
+Every family stylesheet carries its types (`daisy.css.d.ts`): using Svelte,
+[`@sepale/components`](https://www.npmjs.com/package/@sepale/components) reads
+them, and importing `daisy.css` narrows its props to what daisy ships.

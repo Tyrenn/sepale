@@ -28,8 +28,7 @@
 
 	const layout = [
 		{ path: 'src/lib/components', text: 'The Svelte components, written by hand' },
-		{ path: 'src/scss/families', text: 'The families, each one the whole of every component' },
-		{ path: 'src/scss/themes', text: 'The themes, which only set their family’s parameters' },
+		{ path: 'src/scss/families', text: 'The families, each one directory: the whole of every component, and its themes' },
 		{ path: 'packages', text: 'The two npm packages, @sepale/style and @sepale/components' },
 		{ path: 'src/routes', text: 'This site, its theme generator and its component pages' },
 		{ path: 'docs', text: 'How a family is written, and the decisions behind Sépale' }

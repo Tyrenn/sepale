@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .navbar is made of, classified. Each family's copy writes these out as
-	    plain props (scripts/family-component.mjs). */
+	/** What .navbar is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015). */
 	export const PREFIX = 'navbar';
 
 	export const AXES = {
@@ -18,7 +18,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, HTMLAttributes<HTMLElement> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLElement> {
 		/** The three zones. start and end absorb the slack, so whatever is in
 		    center stays centred while either side grows. */
 		start?: Snippet;

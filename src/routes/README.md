@@ -12,8 +12,9 @@ that needs to know what a family actually ships reads its compiled stylesheet.
 ## The chain
 
 ```
-src/scss/families/<fam>/*.scss ─┬─ scripts/build-css.mjs (sass)
-src/scss/themes/<fam>/*.scss ───┘        │
+src/scss/families/<fam>/*.scss ──────────┐
+src/scss/families/<fam>/themes/*.scss ───┴─ scripts/build-css.mjs (sass)
+                                         │
                                          ▼
                               static/families/<fam>.css
                               (+ the uu-params comment a family emits)
@@ -24,9 +25,9 @@ src/scss/themes/<fam>/*.scss ───┘        │
    scripts/gen-registry.mjs                          scripts/gen-components.mjs
               │                                        │            │
               ▼                                        ▼            ▼
-   src/lib/generated/registry.ts          src/generated/     src/lib/generated/
-   families, themes, parameters,          components/<fam>/  components.ts
-   family prose                           narrowed copies    class classification
+   src/lib/generated/registry.ts          static/families/   src/lib/generated/
+   families, themes, parameters,          <fam>.css.d.ts     components.ts
+   family prose                           family's types     class classification
               │                                                     │
               ▼                                                     ▼
     (sidebar)/theme (theme editor)                     (sidebar)/components/[id]
@@ -47,37 +48,28 @@ tells the app which variables it exposes.
 ### `scripts/gen-registry.mjs` → `src/lib/generated/registry.ts`
 
 Reads `src/scss/families/` (the list of families and their header prose),
-`src/scss/themes/<family>/` (the themes and their variable values), and the
+`src/scss/families/<family>/themes/` (the themes and their variable values), and the
 `uu-params` comment out of each compiled stylesheet.
 
 Read by `routes/playground.svelte.ts` (the family and theme pickers),
 `(sidebar)/theme/+page.svelte` (the theme editor), `(sidebar)/description/+page.svelte`
 and `+page.svelte` (the home page's figures).
 
-### `scripts/gen-components.mjs` → two outputs
+### `scripts/gen-components.mjs` → three outputs
 
 Reads every `src/lib/components/*.svelte` — specifically its `<script module>`
 block: `PREFIX`, `AXES`, `FLAGS`, `PARTS` — and intersects it with the classes
-in each compiled stylesheet.
+in each compiled stylesheet. It FAILS on a class under a component's namespace
+that is no axis, flag or part of it.
 
-1. **`src/generated/components/<family>/<Name>.svelte`** — every component
-   written out for that family as plain code (`scripts/family-component.mjs`):
-   its props are unions of exactly the values the family ships, its classes a
-   plain array, and it imports nothing local. No `AXES`, no `applyAxes`, no
-   `AxisProps` — an axis or a flag the family does not ship is simply absent,
-   and `background` only exists where the stylesheet reads `--<prefix>-bg`.
-   Each copy goes through the Svelte compiler before it is written; types are
-   checked by `pnpm run check`. Nothing in the app imports these: they are what
-   the bundle hands over. The script also writes them as one JSON per family
-   into `static/bundle/`, which `(sidebar)/bundle.ts` fetches when someone downloads
-   a zip, assembled in the browser with JSZip (ADR 0001).
-
-   The rewrite leans on hooks every source writes the same way — the
-   `variants.js` import, `extends AxisProps<typeof AXES, typeof FLAGS>`,
-   `...axes`, `let applied = $derived(applyAxes(…))`, `applied.classes`,
-   `{...applied.rest}` — and fails the build on a component that departs from
-   them. An axis value writes its class by two rules (`none` → `no<axis>`, a
-   number → `<axis><n>`); see `src/lib/variants.ts`.
+1. **`static/families/<family>.css.d.ts`**: the types the family's
+   stylesheet carries (ADR 0015). They register the family in the
+   global `Sepale.Families` interface; `AxisProps` (`src/lib/variants.ts`)
+   reads it, so a project that imports the stylesheet gets props narrowed to
+   what the family ships. The text comes from `src/lib/family-types.ts`, the
+   function the app also runs, in the browser, for a family loaded from disk.
+   Nothing in the app imports these: the site shows every family at once and
+   registers none. `package.mjs` ships them in `@sepale/style`.
 2. **`src/lib/generated/components.ts`** — the same intersection, as data:
    every class each family ships, classified (`root` / `axis` / `flag` /
    `part` / `unclassified`), plus the axis values and flags each component has
@@ -88,23 +80,24 @@ in each compiled stylesheet.
    pseudo-classes any family draws on a class, read by `scripts/states.mjs`).
    `schema` is what lets the app classify a stylesheet it never built
    (`routes/classify.ts`).
-3. **`static/bundle/_generic.json`**: the generic sources, laid out as in
-   `src/lib/`, for the bundle of a family loaded from disk, which has no
-   narrowed copy.
+3. **`static/bundle/_generic.json`**: the components as they are, laid out as
+   in `src/lib/` with `variants.ts`, `family-types.ts`, `sepale-types.js` (the
+   command that writes a family's types without the site) and the vendored code,
+   which `(sidebar)/bundle.ts` fetches when someone downloads a zip, assembled
+   in the browser with JSZip (ADR 0001). The zip adds the family's `.css.d.ts`,
+   derived in the browser from the family's classes: the same text for a built
+   family and a loaded one.
 
-Both come out of one pass, deliberately: a page cannot describe a class the
-generated component does not offer, because the same code decides both.
+The types and the pages come out of one pass, deliberately: a page cannot
+describe a class the types do not offer, because the same code decides both.
 
-**A component with no namespace** — `DataHandler`, which draws nothing, so it
-has no `AXES` to narrow — is copied into every family's folder as it is, with
-the plain modules of `src/lib/components/` it imports (`data-handler.svelte.ts`).
-It still goes through the Svelte compiler first.
+An axis value writes its class by two rules (`none` → `no<axis>`, a number →
+`<axis><n>`); see `src/lib/variants.ts`.
 
 **Vendored code** goes with its component. `Calendar` imports air-datepicker
 from `src/lib/vendor/air-datepicker/` (copied from its repository, see the
-README there). When a source imports `../vendor/…`, its family copies get the
-`vendor/` folder next to them and the import rewritten to `./vendor/…`, so a
-copy still carries everything it needs. The library's own class names
+README there), and the bundle carries `vendor/` beside the components, so the
+`../vendor/…` import still holds. The library's own class names
 (`air-datepicker*`) are external, like `.prose`: `calendar.scss` styles them
 from under `.calendar`, it does not own them.
 
@@ -234,8 +227,9 @@ Nothing in the app writes outside the browser: no server, no token, no API.
 
 | To add | Do |
 | --- | --- |
-| a family | `src/scss/families/<name>/` + `src/scss/themes/<name>/`, then `pnpm run build:css` |
-| a theme | `src/scss/themes/<family>/<name>.scss` |
+| a family | `src/scss/families/<name>/`, its themes in `themes/` inside it, then `pnpm run build:css` |
+| a private family | the same, from its own repository cloned there, with a `.private` file in its directory and its path in `.git/info/exclude`: built for the local app, left out of `build` and `package` (`scripts/private.mjs`, ADR 0015) |
+| a theme | `src/scss/families/<family>/themes/<name>.scss` |
 | a parameter | declare it in the family's `$params` map; the editor follows |
 | a component | a file in every family that styles it (`structure` + `look`, ADR 0010) + (if a wrapper earns its keep) `src/lib/components/<Name>.svelte` with its `<script module>` block |
 | a component page | `src/routes/(sidebar)/components/docs/<name>.svelte` with a `DOC`. The sidebar finds it on its own; add its id to `GROUPS` in `playground.svelte.ts` only to place it in a group rather than under "Other" |

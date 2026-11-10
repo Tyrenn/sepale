@@ -1,6 +1,6 @@
 <script module lang="ts">
-	/** What .data-control is made of, classified. Each family's copy writes
-	    these out as plain props (scripts/family-component.mjs).
+	/** What .data-control is made of, classified. The props follow the
+	    families the project registers (variants.ts, ADR 0015).
 
 	    The control draws its own rows: every class below the root that is
 	    not an axis is a PART. The buttons, fields, chips and pagination in
@@ -126,7 +126,7 @@
 	type Handler = DataHandlerState<F, Model, Id>;
 	type ExportOptions = Parameters<Handler['export']>[0];
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS>, Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** The handler whose rows and requests these controls drive. */
 		handler: Handler;
 		/** The view: a Table, a Grid, a List — given the handler. */

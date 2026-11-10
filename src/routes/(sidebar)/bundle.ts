@@ -1,6 +1,8 @@
 import { asset } from '$app/paths';
 import { serializeTheme, type ThemeToken } from '$lib/theme.js';
-import { isLocal, stylesheetText } from '../playground.svelte.js';
+import { classesFor, stylesheetText } from '../playground.svelte.js';
+import { familyShape, familyTypes } from '$lib/family-types.js';
+import { schema } from '$lib/generated/components.js';
 import pkg from '../../../package.json' with { type: 'json' };
 
 const { version } = pkg;
@@ -12,7 +14,7 @@ export type BundleOptions = {
 	scheme: string;
 	/** The parameters as they stand in the editor, edits included. */
 	tokens: ThemeToken[];
-	/** Add the components, written for this family alone. */
+	/** Add the components, and the family's types that narrow them. */
 	svelte: boolean;
 	/** Add the optional reset. */
 	reset: boolean;
@@ -24,15 +26,12 @@ async function text(path: string) {
 	return res.text();
 }
 
-function readme({ family, svelte, reset }: BundleOptions, generic: boolean) {
+function readme({ family, svelte, reset }: BundleOptions) {
 	const sheets = [reset && 'reset.css', `${family}.css`, 'theme.css'].filter(Boolean);
-	const components = generic
-		? `- \`lib/\`: the Svelte components, generic: every axis of every family. ${family}
-  was loaded from disk, not built with Sepale, so no copy narrowed to what it
-  ships exists. A prop it does not style still compiles and renders unstyled.\n`
-		: `- \`components/\`: the Svelte components, written for ${family} alone.\n`;
-	const use = generic
-		? `Copy \`lib/\` anywhere in your project and import from \`lib/components/\`. The
+	const components = `- \`lib/\`: the Svelte components. Their props follow the families your project
+  registers, and \`${family}.css.d.ts\` registers ${family}: see below.
+- \`${family}.css.d.ts\`: what ${family} draws, as types.\n`;
+	const use = `Copy \`lib/\` anywhere in your project and import from \`lib/components/\`. The
 components need Svelte 5 and a bundler that resolves TypeScript (\`variants.ts\`
 is imported as \`variants.js\`, as Vite and SvelteKit do). The date picker's
 library is in \`lib/vendor/\`, with its licence.
@@ -44,18 +43,36 @@ library is in \`lib/vendor/\`, with its licence.
 
 <Button color="primary">Save</Button>
 \`\`\`
-`
-		: `Copy \`components/\` anywhere in your project and import from it. The components
-need Svelte 5 and nothing else: they only import each other, and the date
-picker's library is in \`components/vendor/\`, with its licence.
 
-\`\`\`svelte
-<script>
-	import Button from './components/Button.svelte';
-</script>
+### Types that follow the family
 
-<Button color="primary">Save</Button>
+Keep \`${family}.css.d.ts\` beside \`${family}.css\`, and import the stylesheet from
+any file of your project, a layout typically:
+
+\`\`\`ts
+import './${family}.css';
 \`\`\`
+
+TypeScript reads the declaration next to it, and every component's props narrow
+to what ${family} draws: a variant it lacks is a compile error. Switching family
+is changing that line. If the stylesheet is loaded otherwise (a \`<link>\`), register
+it for its types only: \`import type {} from './${family}.css'\`, or
+\`/// <reference path="./${family}.css.d.ts" />\` in a \`.d.ts\` of yours.
+
+Under \`"moduleResolution": "nodenext"\`, TypeScript does not look for that file
+beside a stylesheet: register it with the \`/// <reference path>\` line above.
+
+To keep code that compiles under several families, register them all and add:
+
+\`\`\`ts
+declare global {
+	namespace Sepale {
+		interface Config { portable: true }
+	}
+}
+\`\`\`
+
+Props then accept only what every registered family draws.
 `;
 	return `# Sepale, ${family}
 
@@ -93,27 +110,27 @@ ${
  */
 export async function buildBundle(options: BundleOptions): Promise<{ name: string; blob: Blob }> {
 	const { family, theme, scheme, tokens, svelte, reset } = options;
-	/* A family loaded from disk has no copy narrowed for it: it gets the
-	   generic sources, laid out as in src/lib/ (gen-components.mjs). */
-	const generic = isLocal(family);
 	const [{ default: JSZip }, stylesheet, resetCss, components] = await Promise.all([
 		import('jszip'),
 		stylesheetText(family),
 		reset ? text('/reset.css') : undefined,
-		svelte ? text(generic ? '/bundle/_generic.json' : `/bundle/${family}.json`) : undefined
+		/* The generic sources, laid out as in src/lib/ (gen-components.mjs). */
+		svelte ? text('/bundle/_generic.json') : undefined
 	]);
 
 	const name = `sepale-${family}-${theme.replace(/[^\w-]+/g, '-')}`;
 	const zip = new JSZip();
 	const root = zip.folder(name)!;
-	root.file('README.md', readme(options, generic));
+	root.file('README.md', readme(options));
 	root.file(`${family}.css`, stylesheet);
 	root.file('theme.css', `/* Sepale ${version}, ${family}, theme "${theme}". */\n${serializeTheme(tokens, scheme)}`);
 	if (resetCss !== undefined) root.file('reset.css', resetCss);
 	if (components !== undefined) {
-		for (const [path, content] of Object.entries<string>(JSON.parse(components))) {
-			root.file(generic ? `lib/${path}` : `components/${path}`, content);
-		}
+		for (const [path, content] of Object.entries<string>(JSON.parse(components))) root.file(`lib/${path}`, content);
+		/* The family's types (ADR 0015), derived here by the function the build
+		   uses — the same text for a family built with Sepale and for one
+		   loaded from disk, which no build ever saw. */
+		root.file(`${family}.css.d.ts`, familyTypes(family, familyShape(classesFor(family), schema, stylesheet)));
 	}
 
 	return { name: `${name}.zip`, blob: await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }) };

@@ -5,7 +5,8 @@
 	// stays in this browser.
 	import { onDestroy, onMount } from 'svelte';
 	import { asset, resolve } from '$app/paths';
-	import { classesByFamily } from '$lib/generated/components.js';
+	import { classesByFamily, schema } from '$lib/generated/components.js';
+	import { familyShape, familyTypes } from '$lib/family-types.js';
 	import {
 		local,
 		addFamily,
@@ -41,6 +42,20 @@
 		} catch {
 			/* No clipboard (insecure origin): the text is on the page anyway. */
 		}
+	}
+
+	/* ── Types ───────────────────────────────────────────────────────── */
+
+	/* The family's `.css.d.ts`, derived from its classes by the function the
+	   build uses (ADR 0015): the same text the bundle carries. */
+	function downloadTypes(f: LocalFamily) {
+		const text = familyTypes(f.name, familyShape(f.classification.classes, schema, f.css));
+		const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `${f.name}.css.d.ts`;
+		a.click();
+		setTimeout(() => URL.revokeObjectURL(url), 1000);
 	}
 
 	/* ── Loading ─────────────────────────────────────────────────────── */
@@ -230,8 +245,7 @@
 		<p class="nf-note">
 			The family joins the picker in the sidebar: walk the component pages and the theme editor
 			with it, in a light and a dark theme. It stays in this browser, and nothing is sent anywhere.
-			Loading a file under the same name replaces it. A bundle of a loaded family carries the
-			generic components, not narrowed to what it ships.
+			Loading a file under the same name replaces it.
 		</p>
 		<label
 			class="nf-drop"
@@ -277,6 +291,12 @@
 							<button type="button" class="ui-btn ui-btn-xs" onclick={() => showLoaded(family.name)}>Show</button>
 						{/if}
 						<a class="ui-btn ui-btn-xs" href={resolve('/theme')} onclick={() => showLoaded(family.name)}>Theme editor</a>
+						<button
+							type="button"
+							class="ui-btn ui-btn-xs"
+							title="{family.name}.css.d.ts: what it draws, as types (step 4)"
+							onclick={() => downloadTypes(family)}>Download types</button
+						>
 						<button type="button" class="ui-btn ui-btn-xs ui-btn-ghost" onclick={() => remove(family)}>Remove</button>
 					</header>
 
@@ -346,6 +366,43 @@
 			{/each}
 		</section>
 	{/if}
+
+	<section class="nf-section">
+		<h2 class="nf-h2"><span class="nf-step">4</span>Get its types <small class="nf-optional">optional</small></h2>
+		<p class="nf-note">
+			A family <strong>works with its stylesheet alone</strong>: the classes draw everything, and the
+			Svelte components run with any family. Its types are a convenience. Beside
+			<code>name.css</code>, a <code>name.css.d.ts</code> narrows the components' props to what the
+			family draws, so a variant it lacks is a compile error. Without it, the props accept every
+			variant of every family, and nothing tells you which ones this family leaves unstyled.
+		</p>
+		<p class="nf-note">
+			<strong>Never write that file by hand</strong>, and do not ask an assistant to: it is derived
+			from the stylesheet, so it cannot promise a variant the stylesheet does not draw. Get it one of
+			three ways:
+		</p>
+		<ol class="nf-ways">
+			<li>
+				<strong>Download types</strong>, on the family in step 3, once it is loaded here: the
+				<code>.css.d.ts</code> alone.
+			</li>
+			<li>
+				<strong>The bundle</strong>: theme editor → <em>Download bundle</em>, with the Svelte
+				components. The stylesheet, your theme, the components and the types, together.
+			</li>
+			<li>
+				<strong>Without this site</strong>: <code>npx sepale-types name.css</code> (from
+				<code>@sepale/components</code>), or <code>node lib/sepale-types.js name.css</code> in a
+				bundle. Add <code>--components &lt;dir&gt;</code> when you changed the components' variants,
+				so the ones you added are typed.
+			</li>
+		</ol>
+		<p class="nf-note">
+			Then keep it beside the stylesheet and import the stylesheet from any file of your project, a
+			layout typically: <code>import './name.css'</code>. Every component's props follow. Regenerate
+			it whenever the stylesheet changes.
+		</p>
+	</section>
 </div>
 </main>
 
@@ -366,6 +423,23 @@
 		font-size: 1rem;
 		line-height: 1.6;
 		color: color-mix(in oklab, var(--app-fg) 80%, transparent);
+	}
+	.nf-optional {
+		margin-inline-start: 0.4rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: color-mix(in oklab, var(--app-fg) 55%, transparent);
+	}
+	.nf-ways {
+		list-style: decimal;
+		margin: 0.5rem 0 0.75rem;
+		padding-inline-start: 1.25rem;
+		display: grid;
+		gap: 0.4rem;
+		font-size: 0.875rem;
+		line-height: 1.55;
 	}
 	.nf-section {
 		margin-top: 2.25rem;
