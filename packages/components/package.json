@@ -1,6 +1,6 @@
 {
 	"name": "@sepale/components",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Sepale's Svelte components, typed by the family stylesheet you import. Optional class prefix as a Vite plugin.",
 	"type": "module",
 	"svelte": "./dist/index.js",
@@ -28,7 +28,7 @@
 	],
 	"sideEffects": false,
 	"peerDependencies": {
-		"@sepale/style": "^0.1.0",
+		"@sepale/style": "^0.1.1",
 		"svelte": "^5.0.0"
 	},
 	"peerDependenciesMeta": {

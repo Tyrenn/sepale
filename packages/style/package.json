@@ -1,6 +1,6 @@
 {
 	"name": "@sepale/style",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Sepale's opinionated CSS families and their themes, as plain compiled stylesheets. No dependency, no build step.",
 	"type": "module",
 	"exports": {
