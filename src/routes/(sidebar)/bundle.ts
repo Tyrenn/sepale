@@ -3,7 +3,7 @@ import { serializeTheme, type ThemeToken } from '$lib/theme.js';
 import { classesFor, stylesheetText } from '../playground.svelte.js';
 import { familyShape, familyTypes } from '$lib/family-types.js';
 import { schema } from '$lib/generated/components.js';
-import pkg from '../../../package.json' with { type: 'json' };
+import pkg from '../../../packages/style/package.json' with { type: 'json' };
 
 const { version } = pkg;
 

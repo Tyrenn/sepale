@@ -1,7 +1,7 @@
 {
 	"name": "@sepale/components",
-	"version": "0.0.1",
-	"description": "Sepale's Svelte components, with one typed entry point per CSS family.",
+	"version": "0.1.0",
+	"description": "Sepale's Svelte components, typed by the family stylesheet you import.",
 	"type": "module",
 	"svelte": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -20,13 +20,16 @@
 	],
 	"sideEffects": false,
 	"peerDependencies": {
-		"@sepale/style": "^0.0.1",
+		"@sepale/style": "^0.1.0",
 		"svelte": "^5.0.0"
 	},
 	"peerDependenciesMeta": {
 		"@sepale/style": {
 			"optional": true
 		}
+	},
+	"devDependencies": {
+		"@sepale/style": "workspace:^"
 	},
 	"scripts": {
 		"prepublishOnly": "pnpm --dir ../.. run package"

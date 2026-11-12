@@ -16,8 +16,9 @@
  * It REFUSES to run while a private family's stylesheet is in static/
  * (private.mjs): `package` builds with `build:css:public`, which leaves them out.
  *
- * The packages are versioned together, from the root package.json: the types of
- * `@sepale/components/<family>` are read from the CSS of the same build.
+ * The packages are versioned together by changesets (a `fixed` group, ADR 0016):
+ * their own manifests hold the version, and this script only checks they agree,
+ * peer range included.
  */
 
 import { readdirSync, readFileSync, writeFileSync, cpSync, rmSync, existsSync } from 'node:fs';
@@ -64,14 +65,15 @@ for (const file of readdirSync(families).filter((f) => f.endsWith('.css'))) {
 cpSync(join(root, 'static/reset.css'), join(dist, 'reset.css'));
 writeFileSync(join(dist, 'reset.css.d.ts'), EMPTY_TYPES);
 
-const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-for (const pkg of [style, components]) {
-	const file = join(pkg, 'package.json');
-	const manifest = JSON.parse(readFileSync(file, 'utf8'));
-	manifest.version = version;
-	if (manifest.peerDependencies?.['@sepale/style']) manifest.peerDependencies['@sepale/style'] = `^${version}`;
-	writeFileSync(file, JSON.stringify(manifest, null, '\t') + '\n');
-	cpSync(join(root, 'LICENSE'), join(pkg, 'LICENSE'));
+const manifest = (pkg) => JSON.parse(readFileSync(join(pkg, 'package.json'), 'utf8'));
+const { version } = manifest(style);
+const peer = manifest(components).peerDependencies?.['@sepale/style'];
+if (manifest(components).version !== version || peer !== `^${version}`) {
+	throw new Error(
+		`package: @sepale/style is at ${version}, @sepale/components at ${manifest(components).version} with peer ${peer} — ` +
+			'they are released together: bump them with `pnpm changeset version`'
+	);
 }
+for (const pkg of [style, components]) cpSync(join(root, 'LICENSE'), join(pkg, 'LICENSE'));
 
 console.log(`package: ${n} families + their themes -> packages/style/dist, both packages at ${version}`);
