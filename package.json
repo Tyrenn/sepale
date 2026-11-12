@@ -16,6 +16,7 @@
 		"check": "pnpm run build:css && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"package": "pnpm run build:css:public && svelte-package -i src/lib -o packages/components/dist && node scripts/package.mjs",
+		"check:prefix": "node scripts/check-prefix.mjs",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
 		"release": "changeset publish"

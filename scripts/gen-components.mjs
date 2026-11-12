@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 /* Run as TypeScript by Node (type stripping): the same file the app imports. */
 import { familyShape, familyTypes } from '../src/lib/family-types.ts';
 /* Shared with the prefix rename (ADR 0007): what a class is, and which ones are not ours. */
-import { classesIn, isExternal, EXTERNAL, EXTERNAL_PREFIXES } from './prefix.mjs';
+import { classesIn, isExternal, EXTERNAL, EXTERNAL_PREFIXES } from '../src/lib/prefix.js';
 /* The states a stylesheet draws on each class — part of the DOM contract. */
 import { statesIn } from './states.mjs';
 
@@ -387,7 +387,7 @@ export const schema: Record<string, ComponentSchema> = ${json(schema)};
 
 /** class → the states drawn on it (\`:checked\`, \`[aria-selected=true]\`), in any
  *  family. Part of the DOM contract: see scripts/states.mjs. */
-/** Class names we write but do not own (scripts/prefix.mjs): never classified. */
+/** Class names we write but do not own (src/lib/prefix.js): never classified. */
 export const EXTERNAL: string[] = ${JSON.stringify([...EXTERNAL])};
 export const EXTERNAL_PREFIXES: string[] = ${JSON.stringify(EXTERNAL_PREFIXES)};
 

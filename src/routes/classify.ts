@@ -33,7 +33,7 @@ export const axisSuffix = (axis: string, value: string) =>
 /** `image-full` → `imageFull`. */
 export const camel = (name: string) => name.replace(/-([a-z0-9])/g, (_, c: string) => c.toUpperCase());
 
-/** Every class name in a stylesheet (scripts/prefix.mjs, `classesIn`). */
+/** Every class name in a stylesheet (src/lib/prefix.js, `classesIn`). */
 export function classesIn(css: string): Set<string> {
 	const clean = css
 		.replace(/\/\*[\s\S]*?\*\//g, '')

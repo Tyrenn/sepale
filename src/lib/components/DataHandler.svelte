@@ -15,12 +15,15 @@
 		type EntitySuggestion,
 		type Filter,
 		type FilterValues,
+		type DeleteQuery,
 		type GetParams,
+		type GetQuery,
 		type GetResult,
 		type HandledFilter,
 		type Identifier,
 		type Navigation,
-		type Sort
+		type Sort,
+		type UpdateQuery
 	} from './data-handler.svelte.js';
 </script>
 

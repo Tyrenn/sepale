@@ -4,6 +4,10 @@ status: accepted
 
 # A class prefix is a bundle-time rename, deferred
 
+_Continued by [0017](./0017-the-prefix-is-a-vite-plugin.md): for a project that installs the
+packages, the rename is applied by a Vite plugin of `@sepale/components`. The module is now
+`src/lib/prefix.js`, not `scripts/prefix.mjs`._
+
 Class names are unprefixed (`btn`, `btn-primary`) and identical across
 families. A configurable prefix is wanted eventually; when it lands it will be
 a **rename applied while the bundle is assembled** — a substitution over the
@@ -25,7 +29,7 @@ compiled build per prefix.
 
 A consumer met the collision (its own `.title` and `.chip` picked up the
 kit's), so the rename exists now — still as a delivery step, never in the
-source: `scripts/prefix.mjs` exports `prefixCss` and `prefixComponent`, and
+source: `prefix.js` exports `prefixCss` and `prefixComponent`, and
 whoever copies a family calls them on what it copies. No prefix asked, nothing
 is called and the delivery is the unprefixed kit, as before. Sepale itself —
 the app, the docs, the package — stays unprefixed.

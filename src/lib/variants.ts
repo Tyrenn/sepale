@@ -148,6 +148,15 @@ export type AxisProps<A extends Record<string, Axis>, F extends Flags = {}, P ex
 			}
 		: {});
 
+/**
+ * The class prefix of the delivery (ADR 0017), written here by the Vite plugin
+ * (`@sepale/components/vite`) and empty otherwise. The components' PREFIX is
+ * renamed with it (`checkbox` -> `sp-checkbox`) so every class they build
+ * follows; this is only for what must NOT follow: a custom property keeps the
+ * name its stylesheet reads, `--checkbox-bg`, whatever the classes are called.
+ */
+export const CLASS_PREFIX: string = '';
+
 /** The class one axis value writes. See the rules above. */
 export function axisClass(prefix: string, axis: string, value: string): string {
 	if (value === 'none') return `${prefix}-no${axis}`;
@@ -189,7 +198,8 @@ export function applyAxes(
 	delete rest.background;
 	if (typeof bg === 'string' && bg) {
 		const own = typeof rest.style === 'string' ? rest.style : '';
-		rest.style = `--${prefix}-bg: ${bg};` + (own ? ` ${own}` : '');
+		const slot = CLASS_PREFIX && prefix.startsWith(`${CLASS_PREFIX}-`) ? prefix.slice(CLASS_PREFIX.length + 1) : prefix;
+		rest.style = `--${slot}-bg: ${bg};` + (own ? ` ${own}` : '');
 	}
 	for (const [name, values] of Object.entries(axes)) {
 		const value = rest[name];

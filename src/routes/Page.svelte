@@ -22,6 +22,7 @@
 		<div class="s-page s-footer-row">
 			<span>MIT licensed. In French, <em>sépale</em> is a sepal, the small leaf that holds a flower. The families are named after flowers.</span>
 			<span class="s-footer-links">
+				<a class="s-link" href={resolve('/prefix')}>Class prefix</a>
 				<a class="s-link" href={resolve('/about')}>About</a>
 				<a class="s-link" href={GITHUB}>GitHub</a>
 				<a class="s-link" href={NPM}>npm</a>

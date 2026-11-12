@@ -1,12 +1,16 @@
+// @ts-nocheck — a Node module that walks Svelte's syntax tree (typed `any` here);
+// its behaviour is checked against the components' own build (ADR 0007, 0017).
 /**
- * prefix.mjs — the class prefix of ADR 0007: a rename applied to a delivery,
+ * prefix — the class prefix of ADR 0007: a rename applied to a delivery,
  * never to the source.
  *
  * Sepale builds and documents unprefixed classes (`btn`, `btn-primary`). A
  * consumer whose own classes would meet them (`.title`, `.chip`, `.label`…)
  * takes its copy renamed — `sp-btn`, `sp-btn-primary` — by calling the two
- * functions below on what it copies: the family stylesheet, and the family's
- * generated components. No prefix, nothing is called: the default delivery is
+ * functions below on what it copies: the family stylesheet, and the
+ * components. The Vite plugin (`@sepale/components/vite`, ADR 0017) calls them
+ * on the fly; this module is also exported as `@sepale/components/prefix` for
+ * any other build tool. No prefix, nothing is called: the default delivery is
  * the unprefixed kit.
  *
  * Only class names move. Custom properties (`--btn-fg`), keyframes, element
@@ -50,11 +54,12 @@ export const EXTERNAL_PREFIXES = ['air-datepicker'];
 export const isExternal = (cls) => EXTERNAL.has(cls) || EXTERNAL_PREFIXES.some((p) => cls.startsWith(p));
 
 const CLASS = /^\.([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/;
-const WORD = /[\w-]/;
 
 /** Every class name in a stylesheet. Comments go first — a doc comment
  *  mentioning `.badge-{position}` is not a class — and so do quoted strings and
- *  url(), or the `w3.org` inside an inline SVG would read as a class `.org`. */
+ *  url(), or the `w3.org` inside an inline SVG would read as a class `.org`.
+ *  @param {string} css
+ *  @returns {Set<string>} */
 export function classesIn(css) {
 	const clean = css
 		.replace(/\/\*[\s\S]*?\*\//g, '')
@@ -69,7 +74,11 @@ export function classesIn(css) {
 /**
  * The stylesheet, every class of ours renamed `.x` → `.<prefix>-x`. Comments,
  * strings and url() are copied untouched — a `w3.org` inside an inline SVG is
- * not a class.
+ * not a class. A class glued to another (`.toast.toast-top`) or to an element
+ * (`a.btn`) is renamed like any other: the components rename it the same way.
+ * @param {string} css
+ * @param {string} prefix without the dash: `sp` gives `.sp-btn`
+ * @returns {string}
  */
 export function prefixCss(css, prefix) {
 	let out = '';
@@ -82,7 +91,7 @@ export function prefixCss(css, prefix) {
 			continue;
 		}
 		const cls = rest.match(CLASS);
-		if (cls && !WORD.test(out[out.length - 1] ?? ' ') && !isExternal(cls[1])) {
+		if (cls && !isExternal(cls[1])) {
 			out += `.${prefix}-${cls[1]}`;
 			i += cls[0].length;
 			continue;
@@ -99,6 +108,10 @@ export function prefixCss(css, prefix) {
  *
  * Returns the source and the list of what was renamed, for the caller to
  * report: a rename is a decision, and it should be readable.
+ * @param {string} src the component's `.svelte` source
+ * @param {string} prefix without the dash: `sp` gives `sp-btn`
+ * @param {Set<string>} classes the classes the family ships
+ * @returns {{ code: string, renamed: string[] }}
  */
 export function prefixComponent(src, prefix, classes) {
 	const ours = (word) => classes.has(word) && !isExternal(word);
@@ -137,7 +150,7 @@ export function prefixComponent(src, prefix, classes) {
 
 	/* A class in a selector string: `.file-explorer-grid`, `.switch-item:has(…)`. */
 	function renameSelector(text, offset) {
-		for (const m of text.matchAll(/(?<![\w-])\.([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)) {
+		for (const m of text.matchAll(/(?<!\d)\.([a-z][a-z0-9]*(?:-[a-z0-9]+)*)/g)) {
 			if (ours(m[1])) edit(offset + m.index + 1, offset + m.index + m[0].length, rename(m[1]), m[1]);
 		}
 	}
@@ -206,6 +219,8 @@ export function prefixComponent(src, prefix, classes) {
 				/* $derived(x), $derived.by(() => x): the rune's value is x. */
 				if (callee.type === 'Identifier' && callee.name === '$derived') return value(node.arguments[0]);
 				if (callee.type === 'MemberExpression' && callee.object.name === '$derived') return value(node.arguments[0]);
+				/* cx(PREFIX, applied.classes, …): the helper every component joins its classes with — its arguments ARE classes. */
+				if (callee.type === 'Identifier' && callee.name === 'cx') return node.arguments.forEach(value);
 				if (callee.type === 'Identifier') return taint(callee.name);
 				/* [...].filter(Boolean).join(' '), a.concat(b) */
 				if (callee.type === 'MemberExpression') {
@@ -272,12 +287,23 @@ export function prefixComponent(src, prefix, classes) {
 
 	/* Whatever the class attributes read, back to its declaration. */
 	const declarations = new Map();
+	/* What applyAxes(PREFIX, …) is given: the word its classes begin with (`<prefix>-<value>`). It need not be a
+	   class itself — `.text` alone is not one, only `.text-s1` — so it is renamed as the head of one. */
+	const axesPrefixes = [];
 	const declare = (name, node) => declarations.set(name, [...(declarations.get(name) ?? []), node]);
 	walk(scripts, (node) => {
 		if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && node.init) declare(node.id.name, node.init);
 		if (node.type === 'FunctionDeclaration' && node.id) declare(node.id.name, node);
+		if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && node.callee.name === 'applyAxes') axesPrefixes.push(node.arguments[0]);
 	});
 	while (queue.length) for (const node of declarations.get(queue.shift()) ?? []) value(node);
+	const headWords = (text, offset) => renameWords(text, offset, { after: true });
+	for (const arg of axesPrefixes) {
+		if (arg?.type === 'Literal') literal(arg, headWords);
+		else if (arg?.type === 'Identifier') {
+			for (const decl of declarations.get(arg.name) ?? []) if (decl.type === 'Literal') literal(decl, headWords);
+		}
+	}
 
 	/* Classes tested or toggled, and classes in selectors, anywhere. */
 	const TESTS = new Set(['includes', 'contains', 'add', 'remove', 'toggle', 'replace']);

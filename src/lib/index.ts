@@ -105,12 +105,15 @@ export {
 	type EntitySuggestion,
 	type Filter,
 	type FilterValues,
+	type DeleteQuery,
 	type GetParams,
+	type GetQuery,
 	type GetResult,
 	type HandledFilter,
 	type Identifier,
 	type Navigation,
-	type Sort
+	type Sort,
+	type UpdateQuery
 } from './components/DataHandler.svelte';
 export { default as DataControl, LABELS as DATA_CONTROL_LABELS, type DataControlLabels } from './components/DataControl.svelte';
 export {
@@ -146,3 +149,6 @@ export {
 	type ThemeToken,
 	type TokenType
 } from './theme.js';
+
+// The colour a <input type="color"> insists on, from any CSS colour (a var(), an oklch…): what a ColorPicker onChange needs.
+export { colorToHex } from './components/color.js';

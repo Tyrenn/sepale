@@ -16,6 +16,25 @@ npm install @sepale/components @sepale/style
 <Button color="primary">Save</Button>
 ```
 
+## A class prefix
+
+The classes are plain (`btn`, `chip`, `title`). When your own classes would
+meet them, a Vite plugin renames the kit's while your project builds:
+
+```ts
+// vite.config.ts
+import { sepale } from '@sepale/components/vite';
+
+plugins: [sepale({ prefix: 'sp', family: '@sepale/style/peony.css' }), sveltekit()]
+```
+
+`sp` writes `sp-btn`, `sp-btn-primary`: the stylesheet and the components are
+renamed from the same list, custom properties and themes are left as they are.
+Your own markup, and the classes you hand to a component, take the prefixed
+names. Without `prefix` the plugin does nothing. Any other build tool calls
+`prefixCss` and `prefixComponent` from `@sepale/components/prefix`. The site's
+[class prefix page](https://tyrenn.github.io/sepale/prefix) has the details.
+
 ## Types that follow the family
 
 Each family's stylesheet carries its types: `daisy.css` comes with
