@@ -19,7 +19,7 @@
 		"check:prefix": "node scripts/check-prefix.mjs",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
-		"release": "changeset publish"
+		"release": "pnpm run package && changeset publish"
 	},
 	"devDependencies": {
 		"@changesets/cli": "^3.0.3",

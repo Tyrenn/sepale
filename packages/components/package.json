@@ -39,9 +39,6 @@
 	"devDependencies": {
 		"@sepale/style": "workspace:^"
 	},
-	"scripts": {
-		"prepublishOnly": "pnpm --dir ../.. run package"
-	},
 	"publishConfig": {
 		"access": "public"
 	},

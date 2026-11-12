@@ -15,9 +15,6 @@
 	"sideEffects": [
 		"**/*.css"
 	],
-	"scripts": {
-		"prepublishOnly": "pnpm --dir ../.. run package"
-	},
 	"publishConfig": {
 		"access": "public"
 	},

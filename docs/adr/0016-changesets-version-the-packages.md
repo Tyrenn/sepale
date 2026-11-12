@@ -41,8 +41,11 @@ packages.
 2. To release: `pnpm version-packages` bumps both manifests, the peer range and
    writes each `CHANGELOG.md`. Commit.
 3. `pnpm release` (`changeset publish`) publishes what npm does not have yet,
-   `@sepale/style` first since the components depend on it, and tags the commit.
-   Each package's `prepublishOnly` runs `pnpm run package` first.
+   both at once, and tags the commit. The order does not matter: the components
+   only peer-depend on `@sepale/style`.
+   `release` runs `pnpm run package` once, first. Not a `prepublishOnly` per
+   package: `changeset publish` publishes them in parallel, and two builds
+   writing the same `dist/` at once fail.
 
 Semver as in [0012](./0012-a-package-alongside-the-bundle.md): removing or
 renaming a class, a variant or a prop is a major, adding is a minor. Under `0.x`,
