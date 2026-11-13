@@ -21,7 +21,7 @@
 	 *
 	 * `state` is where it starts, read once. From then on the drawer is driven
 	 * by its methods — `bind:this={d}`, then `d.open()`, `d.peek()`, `d.hide()`,
-	 * `d.toggle()` — and reports every change through `onState`. It moves by
+	 * `d.toggle()` — and reports every change through `onstate`. It moves by
 	 * itself only to fall back to its rest state (`peek` if it started peeking,
 	 * else `hidden`): on Escape, or a click on the backdrop. A click on a
 	 * peeking drawer opens it.
@@ -42,7 +42,7 @@
 		/** Where Escape and the backdrop send it. Defaults to `peek` if it starts peeking, else `hidden`. */
 		rest?: 'hidden' | 'peek';
 		/** After every change of state. */
-		onState?: (state: DrawerState) => void;
+		onstate?: (state: DrawerState) => void;
 		/** Draw a grip on the inner edge that toggles open and the rest state. */
 		handle?: boolean;
 		handleLabel?: string;
@@ -56,13 +56,19 @@
 		as = 'div',
 		state: initial = 'hidden',
 		rest: restProp,
-		onState,
+		onstate,
 		handle = false,
 		handleLabel = 'Toggle panel',
 		class: klass = '',
 		children,
+		// Native events we listen to as well: handed on, never swallowed.
+		oncancel,
+		onkeydown,
+		onclick,
 		...axes
 	}: Props = $props();
+
+	type On<E extends Event> = E & { currentTarget: EventTarget & HTMLElement };
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
@@ -97,7 +103,7 @@
 		if (next === current) return;
 		current = next;
 		sync(next);
-		onState?.(next);
+		onstate?.(next);
 	}
 
 	export function open() {
@@ -122,19 +128,24 @@
 	});
 
 	/* A dialog's Escape: the browser would close it outright. */
-	function cancel(e: Event) {
-		e.preventDefault();
-		go(restState);
+	function cancel(e: On<Event>) {
+		if (as === 'dialog') {
+			e.preventDefault();
+			go(restState);
+		}
+		oncancel?.(e);
 	}
 
-	function keydown(e: KeyboardEvent) {
+	function keydown(e: On<KeyboardEvent>) {
 		if (e.key === 'Escape' && current === 'open' && as !== 'dialog') {
 			e.stopPropagation();
 			go(restState);
 		}
+		onkeydown?.(e);
 	}
 
-	function click(e: MouseEvent) {
+	function click(e: On<MouseEvent>) {
+		onclick?.(e);
 		if (e.defaultPrevented || !element) return;
 		/* A modal dialog's backdrop: the click lands on the element, outside its box. */
 		if (as === 'dialog' && current === 'open' && e.target === element) {
@@ -153,7 +164,7 @@
 	class={classes}
 	data-state={current}
 	inert={current === 'hidden' && as !== 'dialog' ? true : undefined}
-	oncancel={as === 'dialog' ? cancel : undefined}
+	oncancel={cancel}
 	onkeydown={keydown}
 	onclick={click}
 	role={as === 'div' ? 'region' : undefined}

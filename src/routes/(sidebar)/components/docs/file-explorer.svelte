@@ -35,9 +35,9 @@
 				{ name: 'icons', type: 'Record<string, FileIcon> | false', description: 'Icons by extension ({ glyph, color, bare? }), merged over FILE_ICONS, the default table. false: every file is a page.' },
 				{ name: 'preview', type: '(node) => string | undefined | false', description: "A picture for a file. Defaults to node.thumbnail, else node.url for an image's extension." },
 				{ name: 'icon / empty', type: 'Snippet', description: 'A node icon, drawn by you (wins over icons and preview); an empty folder.' },
-				{ name: 'onOpen / onSelect / onNavigate', type: 'callbacks', description: 'A file opened; the selection changed; another folder shown.' },
-				{ name: 'onDrag', type: '(items, event) => boolean | void', description: 'A drag starts; false refuses it.' },
-				{ name: 'onDrop', type: '(items | File[], target, event) => void', description: 'Something dropped on a folder (null: the top).' },
+				{ name: 'onopen / onselection / onnavigate', type: 'callbacks', description: 'A file opened; the selection changed; another folder shown.' },
+				{ name: 'ondragitems', type: '(items, event) => boolean | void', description: 'A drag starts; false refuses it.' },
+				{ name: 'ondropitems', type: '(items | File[], target, event) => void', description: 'Something dropped on a folder (null: the top).' },
 				{ name: 'labels / formatSize / formatDate', type: '', description: 'The texts and formats it writes.' },
 				{ name: 'refresh(folder?) / navigate(chain) / getSelection()', type: 'methods', description: 'Through bind:this.' }
 			]
@@ -103,10 +103,10 @@
 	title="Drive"
 	subtitle="Double-click a folder, drag files onto a folder (or from your desktop), right-click for the menu, select to see the details."
 	svelte={`<FileExplorer bind:this={explorer} load={load}
-  onOpen={(f) => …} onDrop={(items, target) => { move(items, target); explorer.refresh(); }}>
+  onopen={(f) => …} ondropitems={(items, target) => { move(items, target); explorer.refresh(); }}>
   {#snippet toolbar()}<Button size="sm">New folder</Button>{/snippet}
   {#snippet details(items)}…{/snippet}
-  {#snippet menu({ items, close })}<Menu items={…} onSelect={close} />{/snippet}
+  {#snippet menu({ items, close })}<Menu items={…} onpick={close} />{/snippet}
 </FileExplorer>`}
 	html={`<div class="file-explorer">
   <div class="file-explorer-toolbar">…</div>
@@ -123,9 +123,9 @@
 		<FileExplorer
 			bind:this={explorer}
 			load={load}
-			onOpen={(f) => (log = `open ${f.name}`)}
-			onNavigate={(f) => (log = `in ${f?.name ?? 'Files'}`)}
-			onDrop={(items, target) => move(items, target)}
+			onopen={(f) => (log = `open ${f.name}`)}
+			onnavigate={(f) => (log = `in ${f?.name ?? 'Files'}`)}
+			ondropitems={(items, target) => move(items, target)}
 		>
 			{#snippet toolbar()}
 				<Button size="sm" onclick={() => (log = 'new folder…')}>New folder</Button>
@@ -142,7 +142,7 @@
 			{#snippet menu({ items, close })}
 				<Menu
 					items={[{ label: `Open ${items.length > 1 ? `${items.length} items` : items[0]!.name}` }, { label: 'Rename' }, { label: 'Delete' }]}
-					onSelect={(n) => {
+					onpick={(n) => {
 						log = `${n.label}`;
 						close();
 					}}

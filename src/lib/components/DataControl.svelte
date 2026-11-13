@@ -155,7 +155,7 @@
 		/** Draw export: `true`, or the options the export runs with. */
 		exportable?: boolean | ExportOptions;
 		/** Draw an add button calling this. */
-		onAdd?: () => void;
+		onadd?: () => void;
 		/** Confirm deletions and discarded changes in a dialog. Default true. */
 		confirm?: boolean;
 		/** How an entity is drawn, in its filter's chip and suggestions. Default: its text. */
@@ -189,7 +189,7 @@
 		editing = true,
 		removable = true,
 		exportable = false,
-		onAdd,
+		onadd,
 		confirm = true,
 		entity,
 		start,
@@ -325,7 +325,7 @@
 	const hasActions = $derived(
 		!!leftActions ||
 		!!rightActions ||
-		!!onAdd ||
+		!!onadd ||
 		!!exportable ||
 		(editing && handler.canUpdate) ||
 		(removable && handler.canDelete)
@@ -352,7 +352,7 @@
 	<Menu
 		size={compact ? 'sm' : undefined}
 		items={sortNodes}
-		onSelect={(node) => {
+		onpick={(node) => {
 			close();
 			handler.changeSort(handler.sorts[sortNodes.indexOf(node as (typeof sortNodes)[number]) - 1]);
 		}}
@@ -364,7 +364,7 @@
 		<div class={`${PREFIX}-pagination`}>
 			<span class={`${PREFIX}-range`}>{t.range(from, to, handler.total)}</span>
 			{#if (handler.pages ?? 1) > 1}
-				<Pagination count={handler.pages ?? 1} page={handler.page} onPage={(p) => handler.changePage(p)} />
+				<Pagination count={handler.pages ?? 1} page={handler.page} onpage={(p) => handler.changePage(p)} />
 			{/if}
 			{#if fields}
 				<div class={`${PREFIX}-page-options`}>
@@ -375,7 +375,7 @@
 							placeholder={t.sort}
 							options={handler.sorts.map((x) => ({ value: sortKey(x), name: x.name }))}
 							value={handler.sort ? sortKey(handler.sort) : undefined}
-							onValue={(v) => handler.changeSort(handler.sorts.find((x) => sortKey(x) === v))}
+							onvalue={(v) => handler.changeSort(handler.sorts.find((x) => sortKey(x) === v))}
 						/>
 					{/if}
 					{#if limits && limits.length}
@@ -383,7 +383,7 @@
 							aria-label={t.perPage(handler.limit)}
 							options={limits.map((n) => ({ value: String(n), name: t.perPage(n) }))}
 							value={String(handler.limit)}
-							onValue={(v) => handler.changeLimit(Number(v))}
+							onvalue={(v) => handler.changeLimit(Number(v))}
 						/>
 					{/if}
 				</div>
@@ -422,7 +422,7 @@
 			<DatePicker
 				size={fieldSize}
 				value={(valueOf(f) as Date | undefined) ?? null}
-				onChange={(d) => set(f, d instanceof Date ? d : undefined)}
+				onvalue={(d) => set(f, d instanceof Date ? d : undefined)}
 			/>
 		{:else if f.type === 'boolean'}
 			<Select
@@ -432,7 +432,7 @@
 				placeholder={t.any}
 				aria-label={f.title}
 				value={valueOf(f) === undefined || valueOf(f) === null ? undefined : valueOf(f) ? 'yes' : 'no'}
-				onValue={(v) => set(f, v ? v === 'yes' : undefined)}
+				onvalue={(v) => set(f, v ? v === 'yes' : undefined)}
 			/>
 		{:else if f.type === 'select' && inline && f.switch && !f.multiple}
 			<Switch
@@ -440,7 +440,7 @@
 				label={f.title}
 				options={[{ value: '', label: t.any }, ...f.options.map((o) => ({ value: String(o.value), label: o.name }))]}
 				value={(valueOf(f) as string[] | undefined)?.[0] ?? ''}
-				onChange={(v) => set(f, v ? [v] : undefined)}
+				onvalue={(v) => set(f, v ? [v] : undefined)}
 			/>
 		{:else if f.type === 'select'}
 			<Select
@@ -451,7 +451,7 @@
 				placeholder={t.any}
 				aria-label={f.title}
 				value={f.multiple ? ((valueOf(f) as string[]) ?? []) : ((valueOf(f) as string[] | undefined)?.[0])}
-				onValue={(v) => {
+				onvalue={(v) => {
 					const list = Array.isArray(v) ? v : v ? [v] : [];
 					set(f, list.length ? list : undefined);
 				}}
@@ -466,7 +466,7 @@
 				show={(s: EntitySuggestion) => (f.show ? f.show(s) : String(s.name ?? s.id))}
 				wait={f.wait}
 				eager
-				onSelect={(s: EntitySuggestion | undefined) => set(f, s ? ({ id: String(s.id), name: s.name } satisfies EntityValue) : undefined)}
+				onvalue={(s: EntitySuggestion | undefined) => set(f, s ? ({ id: String(s.id), name: s.name } satisfies EntityValue) : undefined)}
 			>
 				{#snippet option(s: EntitySuggestion)}
 					{#if entity}{@render entity(f, s)}{:else}{f.show ? f.show(s) : String(s.name ?? s.id)}{/if}
@@ -495,7 +495,7 @@
 					aria-label={t.perPage(handler.limit)}
 					options={limits.map((n) => ({ value: String(n), name: t.perPage(n) }))}
 					value={String(handler.limit)}
-					onValue={(v) => handler.changeLimit(Number(v))}
+					onvalue={(v) => handler.changeLimit(Number(v))}
 				/>
 			{/if}
 
@@ -528,8 +528,8 @@
 				</Button>
 			{/if}
 
-			{#if onAdd}
-				<Button variant="soft" shape="square" title={t.add} aria-label={t.add} onclick={() => onAdd()}>
+			{#if onadd}
+				<Button variant="soft" shape="square" title={t.add} aria-label={t.add} onclick={() => onadd()}>
 					{@render icon('M12 5v14M5 12h14')}
 				</Button>
 			{/if}
@@ -556,7 +556,7 @@
 						<Menu
 							size={compact ? 'sm' : undefined}
 							items={filterNodes}
-							onSelect={(node) => {
+							onpick={(node) => {
 								const f = handler.availableFilters[filterNodes.indexOf(node as (typeof filterNodes)[number])];
 								close();
 								if (f) add(f);
@@ -736,7 +736,7 @@
 			bind:open={dialogOpen}
 			size="sm"
 			title={asking?.kind === 'delete' ? t.confirmDeleteTitle(asking.count) : asking ? t.confirmDiscardTitle(asking.count) : ''}
-			onClose={answered}
+			onvalue={answered}
 		>
 			{asking?.kind === 'delete' ? t.confirmDeleteText : t.confirmDiscardText}
 			{#snippet actions()}

@@ -38,7 +38,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'onchange'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLDivElement> {
 		/** The values. Bindable. */
 		values?: string[];
 		/** For a form: one hidden `name[]` input per value. */
@@ -59,7 +59,7 @@
 		/** How one chip reads. Defaults to the value. */
 		chip?: Snippet<[string]>;
 		/** After every addition or removal. */
-		onChange?: (values: string[]) => void;
+		onvalue?: (values: string[]) => void;
 		/** A remove button's accessible name. */
 		removeLabel?: (value: string) => string;
 		/** The list's accessible name. */
@@ -72,7 +72,7 @@
 	// The axes are deliberately NOT destructured: they travel in `axes` and are
 	// resolved by name, so an axis a family drops changes nothing down here.
 	let {
-		values = $bindable([]),
+		values = $bindable(),
 		name,
 		unique = true,
 		placeholder,
@@ -82,7 +82,7 @@
 		validator = false,
 		field,
 		chip,
-		onChange,
+		onvalue,
 		removeLabel = (v: string) => `Remove ${v}`,
 		listLabel,
 		chipClass = '',
@@ -94,19 +94,21 @@
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
 	let draft = $state('');
+	/** The chips held: none while no list is given. */
+	let list = $derived(values ?? []);
 
 	function add(value: string) {
 		const v = `${value ?? ''}`.trim();
-		if (!v || disabled || (unique && values.includes(v))) return;
-		values = [...values, v];
-		onChange?.(values);
+		if (!v || disabled || (unique && list.includes(v))) return;
+		values = [...list, v];
+		onvalue?.(values);
 	}
-	const has = (value: string) => values.includes(`${value ?? ''}`.trim());
-	let missing = $derived(required && values.length === 0);
+	const has = (value: string) => list.includes(`${value ?? ''}`.trim());
+	let missing = $derived(required && list.length === 0);
 
 	function remove(i: number) {
-		values = values.filter((_, n) => n !== i);
-		onChange?.(values);
+		values = list.filter((_, n) => n !== i);
+		onvalue?.(values);
 	}
 
 	function draftKeydown(e: KeyboardEvent) {
@@ -114,9 +116,9 @@
 			e.preventDefault();
 			add(draft);
 			draft = '';
-		} else if (e.key === 'Backspace' && draft === '' && values.length && !disabled) {
+		} else if (e.key === 'Backspace' && draft === '' && list.length && !disabled) {
 			/* Backspace in the empty default field: the last chip goes. */
-			remove(values.length - 1);
+			remove(list.length - 1);
 		}
 	}
 </script>
@@ -137,7 +139,7 @@
 		/>
 	{/if}
 	<ul class="chips-input-list" aria-label={listLabel}>
-		{#each values as v, i (v + i)}
+		{#each list as v, i (v + i)}
 			<li class={cx('chip', chipClass)}>
 				{#if chip}{@render chip(v)}{:else}{v}{/if}
 				<button
@@ -153,6 +155,6 @@
 		{/each}
 	</ul>
 	{#if name}
-		{#each values as v, i (v + i)}<input type="hidden" name="{name}[]" value={v} />{/each}
+		{#each list as v, i (v + i)}<input type="hidden" name="{name}[]" value={v} />{/each}
 	{/if}
 </div>

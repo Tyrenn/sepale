@@ -44,7 +44,7 @@
 		/** How a value is written in the field. Defaults to the browser's locale for the type. */
 		format?: (date: Date) => string;
 		/** After every completed pick, and after a clear (`null`). */
-		onChange?: (value: Value) => void;
+		onvalue?: (value: Value) => void;
 		/** Colour the field by its validity, as Input's `validator`. */
 		validator?: boolean;
 		/** An error from outside, as on Input: shown, and the field is invalid. */
@@ -57,7 +57,7 @@
 	}
 
 	let {
-		value = $bindable(null),
+		value = $bindable(),
 		type = 'date',
 		range = false,
 		id,
@@ -68,7 +68,7 @@
 		min,
 		max,
 		format,
-		onChange,
+		onvalue,
 		validator = false,
 		error = null,
 		calendar = {},
@@ -83,7 +83,7 @@
 	let ranged = $derived(range && type === 'date');
 	let timed = $derived(type !== 'date');
 
-	const list = (v: Value): Date[] => (v == null ? [] : Array.isArray(v) ? v : [v]);
+	const list = (v: Value | undefined): Date[] => (v == null ? [] : Array.isArray(v) ? v : [v]);
 	const pad = (n: number) => String(n).padStart(2, '0');
 	const day = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 	const clock = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -118,14 +118,14 @@
 		const done = ranged ? list(next).length === 2 : next != null;
 		if (done) {
 			if (!timed) open = false;
-			onChange?.(next);
+			onvalue?.(next);
 		}
 	}
 
 	function clear() {
 		value = null;
 		refused = null;
-		onChange?.(null);
+		onvalue?.(null);
 	}
 </script>
 
@@ -163,7 +163,7 @@
 			{min}
 			{max}
 			{value}
-			onChange={picked}
+			onvalue={picked}
 		/>
 	</Dropdown>
 	<!-- What the field holds, as the browser reads it: the form's value and

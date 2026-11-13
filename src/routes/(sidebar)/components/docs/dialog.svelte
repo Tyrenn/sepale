@@ -21,7 +21,7 @@
 				{ name: 'animated', type: 'boolean', default: 'true', description: 'Animate opening and closing. The CSS never does; reduced motion is honoured.' },
 				{ name: 'title', type: 'string | Snippet', description: 'The heading, which also names the dialog for assistive tech.' },
 				{ name: 'actions', type: 'Snippet', description: 'Buttons, inside the <form method="dialog">: each one closes with its value.' },
-				{ name: 'onClose', type: '(value: string) => void', description: 'After it closed, with the value of the button that closed it — empty otherwise.' },
+				{ name: 'onvalue', type: '(value: string) => void', description: 'After it closed, with the value of the button that closed it — empty otherwise.' },
 				{ name: 'closeLabel', type: 'string', default: "'Close'", description: 'The accessible name of the close button.' },
 				{ name: 'element', type: 'HTMLDialogElement', description: 'The <dialog> itself. Bindable.' }
 			]
@@ -42,10 +42,10 @@
 
 <Section
 	title="A confirmation"
-	subtitle="The actions sit in a form with method=dialog: the button that closes the dialog hands its value to onClose. Escape and a click on the shade close it with an empty value."
+	subtitle="The actions sit in a form with method=dialog: the button that closes the dialog hands its value to onvalue. Escape and a click on the shade close it with an empty value."
 	svelte={`<Button onclick={() => (open = true)}>Delete…</Button>
 
-<Dialog bind:open title="Delete 3 rows?" onClose={(value) => (answer = value)}>
+<Dialog bind:open title="Delete 3 rows?" onvalue={(value) => (answer = value)}>
 	This cannot be undone.
 	{#snippet actions()}
 		<Button value="cancel">Cancel</Button>
@@ -67,7 +67,7 @@
 >
 	<Button onclick={() => (confirmOpen = true)}>Delete…</Button>
 	{#if answer !== ''}<span style="opacity:.6;">closed with “{answer}”</span>{/if}
-	<Dialog bind:open={confirmOpen} title="Delete 3 rows?" onClose={(v) => (answer = v || '(nothing)')}>
+	<Dialog bind:open={confirmOpen} title="Delete 3 rows?" onvalue={(v) => (answer = v || '(nothing)')}>
 		This cannot be undone.
 		{#snippet actions()}
 			<Button value="cancel">Cancel</Button>

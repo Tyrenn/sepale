@@ -6,7 +6,7 @@
 	 *
 	 * A visually hidden `<input type="file">` holds the files: it carries
 	 * `name`, `accept`, `multiple` and `required`, so a form submits and
-	 * validates them, and a drop fills it as a pick does. `onFiles` gets the
+	 * validates them, and a drop fills it as a pick does. `onfiles` gets the
 	 * files that match `accept` (and `maxSize`), then those that do not.
 	 */
 	import type { Snippet } from 'svelte';
@@ -32,7 +32,7 @@
 		/** Files are dragged above the zone. Bindable, for a look drawn outside it. */
 		over?: boolean;
 		/** After a drop or a pick: the files kept, then the ones refused. */
-		onFiles?: (accepted: File[], rejected: File[]) => void;
+		onfiles?: (accepted: File[], rejected: File[]) => void;
 		/** The content, given whether files are dragged above it and how to open the dialog. */
 		children?: Snippet<[{ over: boolean; open: () => void }]>;
 		class?: string;
@@ -47,10 +47,16 @@
 		id,
 		clickable = false,
 		maxSize = Infinity,
-		over = $bindable(false),
-		onFiles,
+		over = $bindable(),
+		onfiles,
 		children,
 		class: klass = '',
+		// Native events we listen to as well: handed on, never swallowed.
+		ondragenter,
+		ondragover,
+		ondragleave,
+		ondrop,
+		onclick,
 		...rest
 	}: Props = $props();
 
@@ -85,7 +91,7 @@
 		const files = multiple ? [...list] : [...list].slice(0, 1);
 		const accepted = files.filter(matches);
 		const rejected = files.filter((f) => !matches(f));
-		onFiles?.(accepted, rejected);
+		onfiles?.(accepted, rejected);
 	}
 
 	const carriesFiles = (e: DragEvent) => !!e.dataTransfer?.types.includes('Files');
@@ -130,13 +136,13 @@
 	class={klass}
 	style="position: relative;"
 	data-over={over || undefined}
-	ondragenter={handleDragEnter}
-	ondragover={handleDragOver}
-	ondragleave={handleDragLeave}
-	ondrop={handleDrop}
-	onclick={clickable ? (e) => { if (e.target !== input) open(); } : undefined}
+	ondragenter={(e) => { handleDragEnter(e); ondragenter?.(e); }}
+	ondragover={(e) => { handleDragOver(e); ondragover?.(e); }}
+	ondragleave={(e) => { handleDragLeave(e); ondragleave?.(e); }}
+	ondrop={(e) => { handleDrop(e); ondrop?.(e); }}
+	onclick={(e) => { if (clickable && e.target !== input) open(); onclick?.(e); }}
 >
-	{@render children?.({ over, open })}
+	{@render children?.({ over: !!over, open })}
 	<input
 		bind:this={input}
 		type="file"

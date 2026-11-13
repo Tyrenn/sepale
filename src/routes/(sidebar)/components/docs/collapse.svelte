@@ -16,7 +16,7 @@
 				{ name: 'title', type: 'string', description: "The trigger's text." },
 				{ name: 'trigger', type: 'Snippet', description: "The trigger's content, as markup." },
 				{ name: 'open', type: 'boolean', default: 'false', description: 'Whether it starts open. Not bound.' },
-				{ name: 'onToggle', type: '(open: boolean) => void', description: 'After every change.' },
+				{ name: 'onopen', type: '(open: boolean) => void', description: 'After every change.' },
 				{ name: 'show() / hide() / toggle()', type: 'methods', description: 'Drive it from outside, through bind:this.' }
 			]
 		}
@@ -62,7 +62,7 @@
 
 <Section
 	title="Driven from outside"
-	svelte={`<Collapse bind:this={remote} title="Remote" arrow onToggle={(o) => (log = o ? 'open' : 'closed')}>…</Collapse>
+	svelte={`<Collapse bind:this={remote} title="Remote" arrow onopen={(o) => (log = o ? 'open' : 'closed')}>…</Collapse>
 <Button onclick={() => remote.toggle()}>Toggle</Button>`}
 	html={`<!-- the wrapper's methods set aria-expanded -->`}
 >
@@ -71,8 +71,8 @@
 			<Button size="sm" onclick={() => remote?.show()}>Show</Button>
 			<Button size="sm" onclick={() => remote?.hide()}>Hide</Button>
 			<Button size="sm" onclick={() => remote?.toggle()}>Toggle</Button>
-			<span>onToggle: {log}</span>
+			<span>onopen: {log}</span>
 		</div>
-		<Collapse bind:this={remote} title="Remote" arrow onToggle={(o) => (log = o ? 'open' : 'closed')}>Opened by a button elsewhere.</Collapse>
+		<Collapse bind:this={remote} title="Remote" arrow onopen={(o) => (log = o ? 'open' : 'closed')}>Opened by a button elsewhere.</Collapse>
 	</div>
 </Section>

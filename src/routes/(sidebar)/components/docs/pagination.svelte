@@ -29,7 +29,7 @@
 				{ name: 'edges', type: 'boolean', default: 'false', description: 'Keep the first and last pages, with a gap. Without (the default): only the window — `‹ 6 ›` with siblings 0, `‹ 5 6 7 ›` with 1.' },
 				{ name: 'controls', type: 'boolean', default: 'true (false for dots, bars)', description: 'Draw previous / next.' },
 				{ name: 'variant', type: "'dots' | 'bars' | 'count'", description: 'How the pages are drawn: dots, segments, or only “3 / 8” between previous and next.' },
-				{ name: 'onPage', type: '(page) => void', description: 'Called with the new page after every change.' },
+				{ name: 'onpage', type: '(page) => void', description: 'Called with the new page after every change.' },
 				{
 					name: 'pageLabel / previousLabel / nextLabel',
 					type: '(page) => string / string',

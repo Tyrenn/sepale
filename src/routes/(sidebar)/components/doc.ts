@@ -65,8 +65,11 @@ export const ids = Object.keys(pages).sort();
 
 /** One row of the CSS table. */
 export interface ClassRow {
-	name: string;
+	/** One class, or every value of one axis on one element: they read as one row. */
+	names: string[];
 	effect: string;
+	/** In an axis row, the values that have prose of their own. */
+	notes: { name: string; effect: string }[];
 	/** `axis color`, `flag`, `part`, `root`, or `—` when nobody classifies it. */
 	type: string;
 	/** Ordering only: the root first, then axes, flags, parts, strays. */
@@ -83,18 +86,51 @@ export function classRows(id: string, family: string): ClassRow[] {
 	const mine = (cls: string) =>
 		doc.namespaces.some((ns) => cls === ns || cls.startsWith(ns + '-'));
 
-	return Object.entries(shipped)
-		.filter(([cls]) => mine(cls))
-		.map(([name, info]) => {
+	/* The values of one axis on one element are one row: `.btn-xs … .btn-xl`
+	   says "the size axis" once, not five times. Keyed by the class minus its
+	   value, so `.tabs-sm` and `.tabs-item-sm` would stay apart. */
+	const axes = new Map<string, ClassRow>();
+	for (const [name, info] of Object.entries(shipped)) {
+		if (!mine(name) || info.kind !== 'axis') continue;
+		const value = info.value ?? '';
+		const key = `${value ? name.slice(0, -(value.length + 1)) : name}|${info.axis}`;
+		let row = axes.get(key);
+		if (!row) {
+			row = { names: [], effect: `Sets ${info.axis}, one class per value.`, notes: [], type: `axis ${info.axis}`, rank: RANK.axis };
+			axes.set(key, row);
+		}
+		row.names.push(name);
+		const written = doc.classes?.[name];
+		if (written) row.notes.push({ name, effect: written });
+	}
+	/* The values in the order the family declares them (xs before xl), not the
+	   alphabetical one the stylesheet hands over. */
+	const declared = axesFor(family);
+	const rank = (cls: string) => {
+		const info = shipped[cls]!;
+		const values: readonly string[] = (info.component && info.axis && declared[info.component]?.[info.axis]) || [];
+		const i = values.indexOf(info.value ?? '');
+		return i < 0 ? Number.MAX_SAFE_INTEGER : i;
+	};
+	for (const row of axes.values()) row.names.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+
+	/* An axis of a single value is no group: its prose, if any, is the effect. */
+	for (const row of axes.values()) {
+		if (row.names.length === 1) {
+			row.effect = row.notes[0]?.effect ?? row.effect;
+			row.notes = [];
+		}
+	}
+
+	const singles = Object.entries(shipped)
+		.filter(([cls, info]) => mine(cls) && info.kind !== 'axis')
+		.map(([name, info]): ClassRow => {
 			const written = doc.classes?.[name];
 			let effect = written ?? '';
 			let type: string = info.kind;
 			if (info.kind === 'root') {
 				effect ||= doc.description;
 				type = 'root';
-			} else if (info.kind === 'axis') {
-				effect ||= `Sets ${info.axis} to “${info.value}”.`;
-				type = `axis ${info.axis}`;
 			} else if (info.kind === 'flag') {
 				effect ||= `Written by the ${info.prop} prop.`;
 				type = 'flag';
@@ -108,9 +144,13 @@ export function classRows(id: string, family: string): ClassRow[] {
 				   build warns about the classes that are a real gap. */
 				type = '';
 			}
-			return { name, effect, type, rank: RANK[info.kind] };
-		})
-		.sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name));
+			return { names: [name], effect, notes: [], type, rank: RANK[info.kind] };
+		});
+
+	/* Rows sort by kind, then by their first class. */
+	return [...axes.values(), ...singles].sort(
+		(a, b) => a.rank - b.rank || a.names[0]!.localeCompare(b.names[0]!)
+	);
 }
 
 /** One row of the Svelte table. */

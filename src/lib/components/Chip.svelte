@@ -23,7 +23,7 @@
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLSpanElement>, 'color'> {
 		/** Draw a remove button after the content, calling this. */
-		onRemove?: () => void;
+		onremove?: () => void;
 		/** The remove button's accessible name. */
 		removeLabel?: string;
 		/** Keep the remove button out of reach (it is hidden). */
@@ -35,7 +35,7 @@
 	// The axes are deliberately NOT destructured: they travel in `axes` and are
 	// resolved by name, so an axis a family drops changes nothing down here.
 	let {
-		onRemove,
+		onremove,
 		removeLabel = 'Remove',
 		disabled = false,
 		class: klass = '',
@@ -48,12 +48,12 @@
 </script>
 
 <span {...applied.rest} class={classes}
-	>{@render children?.()}{#if onRemove}<button
+	>{@render children?.()}{#if onremove}<button
 			type="button"
 			class="chip-remove"
 			aria-label={removeLabel}
 			{disabled}
-			onclick={onRemove}
+			onclick={onremove}
 		>
 			<svg viewBox="0 0 24 24" width="0.9em" height="0.9em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18" /></svg>
 		</button>{/if}</span

@@ -52,7 +52,7 @@
 		error = null,
 		element = $bindable(),
 		disabled = false,
-		value = $bindable(''),
+		value = $bindable(),
 		class: klass = '',
 		...axes
 	}: Props = $props();

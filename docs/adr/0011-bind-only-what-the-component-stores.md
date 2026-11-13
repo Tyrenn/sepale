@@ -8,7 +8,7 @@ action of the component's own.
 A value that is a **projection of the DOM** — read off a scroll position, a
 size, a measurement — is not bindable. Its owner exposes commands to change it
 (`goto`, `prev`, `next`, through `bind:this`) and a callback to learn it
-(`onIndex`). The carousel's `index` is the first case: the scroll position is
+(`onindex`). The carousel's `index` is the first case: the scroll position is
 the truth, the index is read from it.
 
 ## Why
@@ -40,7 +40,7 @@ Swiper (`slideTo` + `slideChange`).
 ## Consequences
 
 - `index` on the carousel is the **initial** item only. Moving there later is a
-  `goto` call; knowing where it rests is `onIndex`.
+  `goto` call; knowing where it rests is `onindex`.
 - A pagination outside the carousel holds a reference to it (`bind:this`)
   instead of sharing a bound variable.
 - The rule is per prop, not per component: a component may bind one value and

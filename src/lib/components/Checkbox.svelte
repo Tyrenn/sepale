@@ -35,7 +35,7 @@
 	let {
 		validator = false,
 		hint,
-		checked = $bindable(false),
+		checked = $bindable(),
 		class: klass = '',
 		...axes
 	}: Props = $props();

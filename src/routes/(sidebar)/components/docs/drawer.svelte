@@ -15,7 +15,7 @@
 				{ name: 'as', type: "'div' | 'aside' | 'nav' | 'dialog'", default: "'div'", description: 'The element. dialog makes open modal; peek stays non-modal.' },
 				{ name: 'state', type: "'hidden' | 'peek' | 'open'", default: "'hidden'", description: 'Where it starts. Read once.' },
 				{ name: 'rest', type: "'hidden' | 'peek'", description: 'Where Escape and the backdrop send it. Defaults to peek if it starts peeking.' },
-				{ name: 'onState', type: '(state) => void', description: 'After every change of state.' },
+				{ name: 'onstate', type: '(state) => void', description: 'After every change of state.' },
 				{ name: 'handle', type: 'boolean', default: 'false', description: 'Draw the grip.' },
 				{ name: 'open() / peek() / hide() / toggle() / getState()', type: 'methods', description: 'Drive it, through bind:this.' }
 			]
@@ -38,7 +38,7 @@
 <Section
 	title="Peeking menu"
 	subtitle="A nav that peeks: click it, or its grip, to open; Escape sends it back."
-	svelte={`<Drawer bind:this={nav} as="nav" state="peek" handle onState={(s) => (navState = s)}
+	svelte={`<Drawer bind:this={nav} as="nav" state="peek" handle onstate={(s) => (navState = s)}
   style="--drawer-size: 14em; --drawer-peek: 3.5em">
   <Menu items={…} />
 </Drawer>`}
@@ -48,7 +48,7 @@
 </nav>`}
 >
 	<div style={stage}>
-		<Drawer bind:this={nav} as="nav" state="peek" handle onState={(s) => (navState = s)} style="--drawer-size: 14em; --drawer-peek: 3.5em">
+		<Drawer bind:this={nav} as="nav" state="peek" handle onstate={(s) => (navState = s)} style="--drawer-size: 14em; --drawer-peek: 3.5em">
 			<Menu items={[{ label: 'Home' }, { label: 'Projects' }, { label: 'Settings' }]} />
 		</Drawer>
 		<div style="margin-left:5em; padding:1em; display:flex; gap:.5em; flex-wrap:wrap; align-items:center">

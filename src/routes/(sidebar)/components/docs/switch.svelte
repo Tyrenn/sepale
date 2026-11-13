@@ -16,7 +16,7 @@
 				{ name: 'value', type: 'string', description: "The checked option's value. Bindable." },
 				{ name: 'name', type: 'string', description: "The radios' name, for a form." },
 				{ name: 'label', type: 'string', description: "The group's accessible name." },
-				{ name: 'onChange', type: '(value: string) => void', description: 'After the user picked another option.' }
+				{ name: 'onvalue', type: '(value: string) => void', description: 'After the user picked another option.' }
 			]
 		}
 	};

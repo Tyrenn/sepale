@@ -20,7 +20,7 @@
 	 *
 	 * `info`, `success`, `warning` and `error` come with an icon of their own;
 	 * the `icon` snippet replaces it. A dismissible alert hides itself when its
-	 * close button is pressed, then calls `onDismiss` — the parent need not
+	 * close button is pressed, then calls `ondismiss` — the parent need not
 	 * track it.
 	 */
 	import type { Snippet } from 'svelte';
@@ -38,7 +38,7 @@
 		/** Draw a close button that hides the alert. */
 		dismissible?: boolean;
 		/** After the alert hid itself. */
-		onDismiss?: () => void;
+		ondismiss?: () => void;
 		/** The close button's accessible name. */
 		dismissLabel?: string;
 		class?: string;
@@ -52,7 +52,7 @@
 		icon,
 		actions,
 		dismissible = false,
-		onDismiss,
+		ondismiss,
 		dismissLabel = 'Dismiss',
 		class: klass = '',
 		children,
@@ -70,7 +70,7 @@
 
 	function dismiss() {
 		gone = true;
-		onDismiss?.();
+		ondismiss?.();
 	}
 </script>
 

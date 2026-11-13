@@ -25,7 +25,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'onchange'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
 		/** The score, 0 for none. Bindable. */
 		value?: number;
 		/** How many icons. */
@@ -40,21 +40,21 @@
 		/** One item's accessible name. */
 		itemLabel?: (n: number) => string;
 		/** After the user picked a score. */
-		onChange?: (value: number) => void;
+		onvalue?: (value: number) => void;
 		class?: string;
 	}
 
 	// The axes are deliberately NOT destructured: they travel in `axes` and are
 	// resolved by name, so an axis a family drops changes nothing down here.
 	let {
-		value = $bindable(0),
+		value = $bindable(),
 		max = 5,
 		name = `rating-${Math.random().toString(36).slice(2, 9)}`,
 		mask,
 		disabled = false,
 		label = 'Rating',
 		itemLabel = (n: number) => `${n} / ${max}`,
-		onChange,
+		onvalue,
 		class: klass = '',
 		...axes
 	}: Props = $props();
@@ -83,7 +83,7 @@
 			disabled={disabled || locked}
 			onchange={() => {
 				value = i + 1;
-				onChange?.(value);
+				onvalue?.(value);
 			}}
 		/>
 	{/each}

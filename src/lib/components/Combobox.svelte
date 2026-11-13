@@ -61,9 +61,9 @@
 		/** The pick(s) — the text, when not strict. Followed when changed from outside. */
 		value?: any;
 		/** A pick changed: the option, `undefined` when dropped, or the list with `multiple`. */
-		onSelect?: (value: any) => void;
+		onvalue?: (value: any) => void;
 		/** The text changed, typed or completed. */
-		onInput?: (text: string) => void;
+		onquery?: (text: string) => void;
 		/** Milliseconds without typing before the source is asked. Default 100. */
 		wait?: number;
 		/** Open the list as soon as the field takes the focus. */
@@ -71,7 +71,7 @@
 		/** Draw the list over scrolling ancestors, at fixed coordinates. */
 		float?: boolean;
 		/** A last row, "create what is being typed", once something is typed. */
-		add?: { show?: (text: string) => string; max?: number; onAdd: (text: string) => void };
+		add?: { show?: (text: string) => string; max?: number; onadd: (text: string) => void };
 		/** The field's text for several picks. Defaults to the labels joined, or "n selected". */
 		summary?: (picks: any[]) => string;
 		/** How one option is drawn in the list. Defaults to its label. */
@@ -104,8 +104,8 @@
 		strict: strictProp = true,
 		multiple = false,
 		value: initial,
-		onSelect,
-		onInput,
+		onvalue,
+		onquery,
 		wait = 100,
 		eager = false,
 		float = false,
@@ -122,6 +122,7 @@
 		name,
 		disabled = false,
 		class: klass = '',
+		oninput,
 		onfocus,
 		onblur,
 		onkeydown,
@@ -176,7 +177,7 @@
 
 	/* A `value` changed from outside (a form reset, another field) replaces
 	   the pick(s). A value echoing the current pick changes nothing, so a
-	   parent writing back what `onSelect` gave it does not disturb a search. */
+	   parent writing back what `onvalue` gave it does not disturb a search. */
 	const same = (a: any, b: any) => (a == null || b == null ? a == b : keyOf(a) === keyOf(b));
 	$effect(() => {
 		const next = initial;
@@ -262,7 +263,7 @@
 	function choose(o: any) {
 		if (multiple) {
 			picked = isPicked(o) ? (picked as any[]).filter((p) => keyOf(p) !== keyOf(o)) : [...picked, o];
-			onSelect?.(picked);
+			onvalue?.(picked);
 			return; // the list stays open while ticking
 		}
 		query = undefined;
@@ -271,9 +272,9 @@
 			lastPicked = o;
 		} else {
 			text = label(o);
-			onInput?.(text);
+			onquery?.(text);
 		}
-		onSelect?.(o);
+		onvalue?.(o);
 		close();
 	}
 
@@ -291,7 +292,7 @@
 		const t = typed;
 		close();
 		query = undefined;
-		add?.onAdd(t);
+		add?.onadd(t);
 	}
 
 	/** Empty the field and drop the pick(s). */
@@ -300,8 +301,8 @@
 		text = '';
 		lastPicked = undefined;
 		if (multiple) {
-			if ((picked as any[]).length) onSelect?.((picked = []));
-		} else if (strict && picked != null) onSelect?.((picked = undefined));
+			if ((picked as any[]).length) onvalue?.((picked = []));
+		} else if (strict && picked != null) onvalue?.((picked = undefined));
 	}
 
 	export function focus() {
@@ -333,16 +334,17 @@
 
 	/* ── Events ───────────────────────────────────────────────────────── */
 
-	function handleInput(e: Event & { currentTarget: HTMLInputElement }) {
+	function handleInput(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+		oninput?.(e);
 		const t = e.currentTarget.value;
 		if (strict) {
 			// Typing, pasting or an autofill: the text is a search again, and no
 			// longer stands for the pick.
 			query = t;
-			if (!multiple && picked != null) onSelect?.((picked = undefined));
+			if (!multiple && picked != null) onvalue?.((picked = undefined));
 		} else {
 			text = t;
-			onInput?.(t);
+			onquery?.(t);
 		}
 		clearTimeout(timer);
 		timer = setTimeout(search, wait);
@@ -373,7 +375,7 @@
 		// a deliberate reset and stays empty.
 		if (strict && picked == null) {
 			const searching = query !== undefined && query.trim() !== '';
-			if (searching && lastPicked != null) onSelect?.((picked = lastPicked));
+			if (searching && lastPicked != null) onvalue?.((picked = lastPicked));
 			else if (!searching) lastPicked = undefined;
 		}
 		query = undefined;

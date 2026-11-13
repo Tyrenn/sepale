@@ -24,7 +24,7 @@
 				{ name: 'side', type: "'end'", description: 'On the end side.' },
 				{ name: 'noToggle', type: 'boolean', default: 'false', description: 'No toggle: fold it some other way.' },
 				{ name: 'toggleLabel', type: '{ open, collapsed }', description: "The toggle's accessible names." },
-				{ name: 'onToggle', type: '(collapsed) => void', description: 'After every fold.' },
+				{ name: 'oncollapsed', type: '(collapsed) => void', description: 'After every fold.' },
 				{ name: 'toggle(value?)', type: 'method', description: 'Through bind:this.' }
 			]
 		}

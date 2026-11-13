@@ -47,9 +47,9 @@
 					description: "`value` of the selected tab, for tabs keyed by their own id (`{ value: 3, label: 'Null' }`) rather than by position. When set, it decides the selection over `active`."
 				},
 				{
-					name: "onSelect",
-					type: "(index: number, value: string | number | undefined) => void",
-					description: "Called with the new index, and the tab's `value`, when a tab is chosen."
+					name: "onvalue",
+					type: "(value: string | number | undefined, index: number) => void",
+					description: "Called with the tab's `value`, and its index, when a tab is chosen."
 				}
 			]
 		}

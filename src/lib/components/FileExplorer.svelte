@@ -58,11 +58,11 @@
 	 * Folders load lazily through `load(folder)` — `null` is the top — or
 	 * come from a static `root`. Selection: click, Ctrl/⌘ to add, Shift for a
 	 * range; the keyboard walks the content (arrows, Enter, Backspace to go
-	 * up). Double-click or Enter opens a folder, or calls `onOpen` on a file.
+	 * up). Double-click or Enter opens a folder, or calls `onopen` on a file.
 	 * Right-click shows the `menu` snippet.
 	 *
-	 * Drag and drop moves nothing by itself: `onDrag` may refuse a drag,
-	 * `onDrop(items, target)` says what was dropped where — nodes from inside,
+	 * Drag and drop moves nothing by itself: `ondragitems` may refuse a drag,
+	 * `ondropitems(items, target)` says what was dropped where — nodes from inside,
 	 * or `File`s from the system — and the app does the work, then calls
 	 * `refresh()`.
 	 */
@@ -108,15 +108,15 @@
 		/** Drawn in an empty folder. */
 		empty?: Snippet<[Folder]>;
 		/** A file was opened (double-click, Enter). */
-		onOpen?: (file: FileNode) => void;
+		onopen?: (file: FileNode) => void;
 		/** The selection changed. */
-		onSelect?: (items: FileNode[]) => void;
+		onselection?: (items: FileNode[]) => void;
 		/** Another folder is shown. */
-		onNavigate?: (folder: Folder) => void;
+		onnavigate?: (folder: Folder) => void;
 		/** A drag starts. Return `false` to refuse it. */
-		onDrag?: (items: FileNode[], event: DragEvent) => boolean | void;
+		ondragitems?: (items: FileNode[], event: DragEvent) => boolean | void;
 		/** Something was dropped on a folder (`null`: the top). */
-		onDrop?: (items: FileDrop, target: Folder, event: DragEvent) => void;
+		ondropitems?: (items: FileDrop, target: Folder, event: DragEvent) => void;
 		/** The texts it writes. */
 		labels?: Partial<typeof LABELS>;
 		formatSize?: (bytes: number) => string;
@@ -151,11 +151,11 @@
 		icons = {},
 		preview = defaultPreview,
 		empty,
-		onOpen,
-		onSelect,
-		onNavigate,
-		onDrag,
-		onDrop,
+		onopen,
+		onselection,
+		onnavigate,
+		ondragitems,
+		ondropitems,
 		labels = {},
 		formatSize = defaultSize,
 		formatDate = (d: Date) => d.toLocaleDateString(),
@@ -233,7 +233,7 @@
 		for (const f of path) expanded.add(f.id);
 		clearSelection();
 		focusAt = -1;
-		onNavigate?.(current);
+		onnavigate?.(current);
 	}
 
 	function up() {
@@ -279,7 +279,7 @@
 	let selection = $derived(items.filter((n) => selected.has(n.id)));
 
 	function changed() {
-		onSelect?.(items.filter((n) => selected.has(n.id)));
+		onselection?.(items.filter((n) => selected.has(n.id)));
 	}
 
 	function clearSelection() {
@@ -314,7 +314,7 @@
 
 	function open(node: FileNode) {
 		if (node.kind === 'folder') navigate([...path, node]);
-		else onOpen?.(node);
+		else onopen?.(node);
 	}
 
 	/* ── Keyboard ─────────────────────────────────────────────────────── */
@@ -400,7 +400,7 @@
 	function dragstart(e: DragEvent, i: number) {
 		if (!selected.has(items[i]!.id)) selectAt(i, { ctrlKey: false, metaKey: false, shiftKey: false });
 		const moving = items.filter((n) => selected.has(n.id));
-		if (onDrag?.(moving, e) === false) return e.preventDefault();
+		if (ondragitems?.(moving, e) === false) return e.preventDefault();
 		dragging = moving;
 		e.dataTransfer?.setData('text/plain', moving.map((n) => n.name).join('\n'));
 		if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
@@ -412,7 +412,7 @@
 	}
 
 	function accepts(target: Folder, e: DragEvent): boolean {
-		if (!onDrop) return false;
+		if (!ondropitems) return false;
 		if (dragging) return !dragging.some((n) => n.id === target?.id) && !(target === current && dragging.every((n) => items.includes(n)));
 		return !!e.dataTransfer?.types.includes('Files');
 	}
@@ -435,7 +435,7 @@
 		const what: FileDrop = dragging ?? [...(e.dataTransfer?.files ?? [])];
 		dragging = null;
 		dropKey = null;
-		onDrop?.(what, target, e);
+		ondropitems?.(what, target, e);
 	}
 
 	/** The handlers that make an element a drop target for `target`. */

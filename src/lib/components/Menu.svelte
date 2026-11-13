@@ -57,11 +57,11 @@
 		 */
 		row?: Snippet<[MenuNode]>;
 		/** Called when a row without an href is chosen. */
-		onSelect?: (node: MenuNode) => void;
+		onpick?: (node: MenuNode) => void;
 		class?: string;
 	}
 
-	let { items = [], row, onSelect, class: klass = '', ...axes }: Props = $props();
+	let { items = [], row, onpick, class: klass = '', ...axes }: Props = $props();
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
@@ -134,7 +134,7 @@
 					type="button"
 					class={rowClass(node, false)}
 					disabled={node.disabled}
-					onclick={() => onSelect?.(node)}
+					onclick={() => onpick?.(node)}
 				>{@render inside(node)}</button>
 			</li>
 		{/if}

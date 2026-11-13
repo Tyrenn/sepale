@@ -41,7 +41,7 @@
 		/** The toggle's accessible name, open and folded. */
 		toggleLabel?: { open: string; collapsed: string };
 		/** After every fold or unfold. */
-		onToggle?: (collapsed: boolean) => void;
+		oncollapsed?: (collapsed: boolean) => void;
 		class?: string;
 		/** The body: usually a Menu. */
 		children?: Snippet<[{ collapsed: boolean }]>;
@@ -50,12 +50,12 @@
 	// The axes are deliberately NOT destructured: they travel in `axes` and are
 	// resolved by name, so an axis a family drops changes nothing down here.
 	let {
-		collapsed = $bindable(false),
+		collapsed = $bindable(),
 		head,
 		foot,
 		noToggle = false,
 		toggleLabel = { open: 'Collapse the sidebar', collapsed: 'Expand the sidebar' },
-		onToggle,
+		oncollapsed,
 		class: klass = '',
 		children,
 		...axes
@@ -70,13 +70,13 @@
 	export function toggle(value = !collapsed) {
 		if (value === collapsed) return;
 		collapsed = value;
-		onToggle?.(value);
+		oncollapsed?.(value);
 	}
 </script>
 
 <aside {...applied.rest} class={classes}>
 	<div class="{PREFIX}-head">
-		{@render head?.({ collapsed })}
+		{@render head?.({ collapsed: !!collapsed })}
 		{#if !noToggle}
 			<button
 				type="button"
@@ -92,9 +92,9 @@
 		{/if}
 	</div>
 	<div class="{PREFIX}-body" id="{uid}-body" inert={collapsed}>
-		{@render children?.({ collapsed })}
+		{@render children?.({ collapsed: !!collapsed })}
 	</div>
 	{#if foot}
-		<div class="{PREFIX}-foot" inert={collapsed}>{@render foot({ collapsed })}</div>
+		<div class="{PREFIX}-foot" inert={collapsed}>{@render foot({ collapsed: !!collapsed })}</div>
 	{/if}
 </aside>

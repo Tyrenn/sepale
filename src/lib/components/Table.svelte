@@ -52,7 +52,7 @@
 		value?: (row: Row) => unknown;
 		/**
 		 * Make the cell editable in place with the editor for this shape of value
-		 * (an `Editable`). The edit is handed to `onEdit`. Ignored when a `cell`
+		 * (an `Editable`). The edit is handed to `onedit`. Ignored when a `cell`
 		 * snippet draws the cell — put an `Editable` in it yourself.
 		 */
 		edit?: EditableKind;
@@ -73,7 +73,7 @@
 	 * table's business.
 	 *
 	 * Selection, sorting and loading are states every table has, so they are
-	 * here as plain props — `selected`, `sort` / `onSort`, `loading` — and the
+	 * here as plain props — `selected`, `sort` / `onsort`, `loading` — and the
 	 * table only draws them.
 	 */
 	import type { HTMLTableAttributes } from 'svelte/elements';
@@ -103,9 +103,9 @@
 		/** The current sort, drawn on its header. */
 		sort?: TableSort;
 		/** A sortable header was clicked: ascending, then descending, then none. */
-		onSort?: (sort: TableSort | undefined) => void;
+		onsort?: (sort: TableSort | undefined) => void;
 		/** An editable cell (a column with `edit`) was changed: the row, the column's key, the new value. */
-		onEdit?: (row: Row, key: string, value: unknown) => void;
+		onedit?: (row: Row, key: string, value: unknown) => void;
 		/** The scroll box's maximum height, for a long table with a pinned head. */
 		maxHeight?: string;
 		class?: string;
@@ -121,8 +121,8 @@
 		selected,
 		dirty,
 		sort,
-		onSort,
-		onEdit,
+		onsort,
+		onedit,
 		maxHeight,
 		class: klass = '',
 		...axes
@@ -169,9 +169,9 @@
 		sort?.key === c.key ? (sort.direction === 'asc' ? 'ascending' : 'descending') : undefined;
 
 	function next(c: TableColumn<Row>) {
-		if (sort?.key !== c.key) return onSort?.({ key: c.key, direction: 'asc' });
-		if (sort.direction === 'asc') return onSort?.({ key: c.key, direction: 'desc' });
-		onSort?.(undefined);
+		if (sort?.key !== c.key) return onsort?.({ key: c.key, direction: 'asc' });
+		if (sort.direction === 'asc') return onsort?.({ key: c.key, direction: 'desc' });
+		onsort?.(undefined);
 	}
 
 	const raw = (r: Row, c: TableColumn<Row>) =>
@@ -225,7 +225,7 @@
 								{#if cell}{@render cell(r, c, ri)}{:else if c.edit}<Editable
 										value={raw(r, c)}
 										kind={c.edit}
-										onChange={(v) => onEdit?.(r, c.key, v)}
+										onvalue={(v) => onedit?.(r, c.key, v)}
 									/>{:else}{text(r, c)}{/if}
 							</td>
 						{/each}

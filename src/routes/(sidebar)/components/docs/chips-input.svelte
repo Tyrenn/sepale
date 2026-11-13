@@ -19,7 +19,7 @@
 				{ name: 'field', type: 'Snippet<[{ add, has }]>', description: 'The field; it calls add(value). Defaults to a plain input.' },
 				{ name: 'chip', type: 'Snippet<[string]>', description: 'How a chip reads.' },
 				{ name: 'chipClass', type: 'string', description: 'Classes on each chip: chip-primary, chip-soft…' },
-				{ name: 'onChange', type: '(values) => void', description: 'After every addition or removal.' },
+				{ name: 'onvalue', type: '(values) => void', description: 'After every addition or removal.' },
 				{ name: 'placeholder / disabled / removeLabel', type: '', description: 'As named.' }
 			]
 		}
@@ -58,7 +58,7 @@
 	svelte={`<ChipsInput bind:values={cities}>
   {#snippet field({ add })}
     <Combobox bind:this={picker} options={CITIES} placeholder="City"
-      onSelect={(c) => { if (c) { add(c); picker.clear(); } }} />
+      onvalue={(c) => { if (c) { add(c); picker.clear(); } }} />
   {/snippet}
 </ChipsInput>`}
 	html={`<div class="input chips-input">… <div class="combobox">…</div></div>`}
@@ -70,7 +70,7 @@
 					bind:this={picker}
 					options={CITIES}
 					placeholder="City"
-					onSelect={(c) => {
+					onvalue={(c) => {
 						if (c) {
 							add(c);
 							picker?.clear();
@@ -87,7 +87,7 @@
 	subtitle="The list on the side, after the field."
 	svelte={`<ChipsInput side="end">
   {#snippet field({ add })}
-    <Select options={['Red', 'Green', 'Blue']} placeholder="Colour" onValue={(v) => v && add(v)} />
+    <Select options={['Red', 'Green', 'Blue']} placeholder="Colour" onvalue={(v) => v && add(v)} />
   {/snippet}
 </ChipsInput>`}
 	html={`<div class="input chips-input">… <select class="select">…</select></div>`}
@@ -95,7 +95,7 @@
 	<div style="width:100%; max-width:28em">
 		<ChipsInput side="end" values={['Red']} chipClass="chip-outline">
 			{#snippet field({ add })}
-				<Select options={['Red', 'Green', 'Blue']} placeholder="Colour" onValue={(v) => v && add(v)} />
+				<Select options={['Red', 'Green', 'Blue']} placeholder="Colour" onvalue={(v) => v && add(v)} />
 			{/snippet}
 		</ChipsInput>
 	</div>

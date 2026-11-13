@@ -4,7 +4,7 @@
 	export const DOC: ComponentDoc = {
 		namespaces: ['steps'],
 		description:
-			'Where the user is in a journey: one column per step, one bar per sub-step. Four states — current, visited, complete (declared by the app), unknown — and errors or warnings once a step is reached. It moves nothing: clicks go to onStep.',
+			'Where the user is in a journey: one column per step, one bar per sub-step. Four states — current, visited, complete (declared by the app), unknown — and errors or warnings once a step is reached. It moves nothing: clicks go to onstep.',
 		classes: {
 			steps: 'The journey. Horizontal unless vertical.',
 			'steps-heading': 'The line above the bars in compact mode.',
@@ -24,7 +24,7 @@
 				{ name: 'explored', type: 'id', description: 'The first leaf never reached; leaves before it are visited. Defaults to the one after current.' },
 				{ name: 'clickable', type: 'boolean', default: 'true', description: 'Reached steps answer clicks.' },
 				{ name: 'disabled', type: 'boolean', default: 'false', description: 'No clicks at all.' },
-				{ name: 'onStep', type: '(step) => void', description: "A reached leaf was clicked (a step's marker gives its first leaf)." },
+				{ name: 'onstep', type: '(step) => void', description: "A reached leaf was clicked (a step's marker gives its first leaf)." },
 				{ name: 'heading', type: 'Snippet<[{ step, parent, index, total }]>', description: 'The compact heading. Defaults to "label · sub-label   n/total".' },
 				{ name: 'label', type: 'string', default: "'Progress'", description: "The nav's accessible name." }
 			]
@@ -55,7 +55,7 @@
 <Section
 	title="With sub-steps"
 	subtitle="Click a reached step. Basics is complete, Price is current, a warning sits on Amount."
-	svelte={`<Steps steps={journey} {current} {explored} onStep={(s) => (current = s.id)} />`}
+	svelte={`<Steps steps={journey} {current} {explored} onstep={(s) => (current = s.id)} />`}
 	html={`<nav class="steps" aria-label="Progress">
   <ol class="steps-list">
     <li class="steps-item" data-state="complete">
@@ -69,7 +69,7 @@
   </ol>
 </nav>`}
 >
-	<div style="width:100%"><Steps steps={journey} {current} {explored} onStep={go} /></div>
+	<div style="width:100%"><Steps steps={journey} {current} {explored} onstep={go} /></div>
 </Section>
 
 <Section
@@ -80,7 +80,7 @@
   …
 </nav>`}
 >
-	<div style="width:100%; max-width:22em"><Steps steps={journey} {current} {explored} compact onStep={go} /></div>
+	<div style="width:100%; max-width:22em"><Steps steps={journey} {current} {explored} compact onstep={go} /></div>
 </Section>
 
 <Section
@@ -88,7 +88,7 @@
 	svelte={`<Steps steps={journey} {current} direction="vertical" color="success" />`}
 	html={`<nav class="steps steps-vertical steps-success">…</nav>`}
 >
-	<div style="width:16em"><Steps steps={journey} {current} {explored} direction="vertical" color="success" onStep={go} /></div>
+	<div style="width:16em"><Steps steps={journey} {current} {explored} direction="vertical" color="success" onstep={go} /></div>
 </Section>
 
 <Section

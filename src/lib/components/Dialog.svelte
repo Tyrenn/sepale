@@ -24,7 +24,7 @@
 	 *
 	 * The actions sit in a `<form method="dialog">`: a button closes the
 	 * dialog and its `value` becomes the dialog's return value, handed to
-	 * `onClose`. The opening and closing are animated here, not in the CSS.
+	 * `onvalue`. The opening and closing are animated here, not in the CSS.
 	 */
 	import type { Snippet } from 'svelte';
 	import type { HTMLDialogAttributes } from 'svelte/elements';
@@ -32,8 +32,8 @@
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
 	// `open` and `title` are ours: the first is driven through the element's
-	// methods, the second is a heading. Component events are `onXxx`; the
-	// native lowercase ones still pass through.
+	// methods, the second is a heading. `onvalue` hands over the return value;
+	// every native event, `onclose` included, still reaches the caller.
 	interface Props
 		extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>,
 			Omit<HTMLDialogAttributes, 'open' | 'title'> {
@@ -52,7 +52,7 @@
 		/** Buttons, inside the `<form method="dialog">`: each one closes with its `value`. */
 		actions?: Snippet;
 		/** After it closed, with the value of the button that closed it ('' otherwise). */
-		onClose?: (value: string) => void;
+		onvalue?: (value: string) => void;
 		/** The accessible name of the close button. */
 		closeLabel?: string;
 		/** The `<dialog>` itself. Bindable. */
@@ -62,20 +62,27 @@
 	}
 
 	let {
-		open = $bindable(false),
+		open = $bindable(),
 		modal = true,
 		closable = true,
 		dismissible = true,
 		animated = true,
 		title,
 		actions,
-		onClose,
+		onvalue,
 		closeLabel = 'Close',
 		element = $bindable(),
 		class: klass = '',
 		children,
+		// Native events we listen to as well: handed on, never swallowed.
+		oncancel,
+		onclose,
+		onpointerdown,
+		onclick,
 		...axes
 	}: Props = $props();
+
+	type On<E extends Event> = E & { currentTarget: EventTarget & HTMLDialogElement };
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
@@ -117,19 +124,22 @@
 	}
 
 	/* The element closed — by us, or by the browser on its own. */
-	function closed() {
+	function closed(e: On<Event>) {
+		// Before the return value is cleared, so the caller can still read it.
+		onclose?.(e);
 		const value = element?.returnValue ?? pending;
 		pending = '';
 		shown = false;
 		open = false;
 		if (element) element.returnValue = '';
-		onClose?.(value);
+		onvalue?.(value);
 	}
 
 	/* Escape: the browser would close at once, skipping the transition. */
-	function cancel(e: Event) {
+	function cancel(e: On<Event>) {
 		e.preventDefault();
 		if (dismissible) request();
+		oncancel?.(e);
 	}
 
 	/* A form with method="dialog" closes the element as it submits; the
@@ -144,12 +154,14 @@
 	   also STARTED there counts: a text selection dragged out of the box
 	   must not close it. */
 	let downOnOverlay = false;
-	function pointerdown(e: PointerEvent) {
+	function pointerdown(e: On<PointerEvent>) {
 		downOnOverlay = e.target === element;
+		onpointerdown?.(e);
 	}
-	function click(e: MouseEvent) {
+	function click(e: On<MouseEvent>) {
 		if (dismissible && downOnOverlay && e.target === element) request();
 		downOnOverlay = false;
+		onclick?.(e);
 	}
 </script>
 

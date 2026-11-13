@@ -34,7 +34,7 @@
 	let {
 		validator = false,
 		hint,
-		value = $bindable(0),
+		value = $bindable(),
 		min = 0,
 		max = 100,
 		class: klass = '',
@@ -46,7 +46,7 @@
 
 	/* How far the value is along the track, for a family that paints the
 	   filled part itself (`data-fill`) rather than with the thumb's shadow. */
-	let pct = $derived(max > min ? Math.min(100, Math.max(0, ((Number(value) - min) / (max - min)) * 100)) : 0);
+	let pct = $derived(max > min ? Math.min(100, Math.max(0, ((Number(value ?? min) - min) / (max - min)) * 100)) : 0);
 </script>
 
 <input type="range" {...applied.rest} {min} {max} class={classes} data-fill style:--range-pct="{pct}%" bind:value />

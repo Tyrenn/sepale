@@ -92,7 +92,7 @@
 					description: "The text of a multiple field holding several choices."
 				},
 				{
-					name: "onValue",
+					name: "onvalue",
 					type: "(value) => void",
 					description: "Called with the new value after every change."
 				},

@@ -29,7 +29,7 @@
 	import { oklchToCss, toOklch, type Oklch } from './color.js';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'onchange'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLDivElement> {
 		/** Any CSS colour. Bindable; written back as `oklch(…)`. */
 		value?: string;
 		/** Colours one click away, drawn as swatches. */
@@ -39,18 +39,18 @@
 		/** The channels' accessible names. */
 		labels?: { l?: string; c?: string; h?: string; value?: string };
 		/** After every change. */
-		onChange?: (value: string) => void;
+		onvalue?: (value: string) => void;
 		class?: string;
 	}
 
 	// The axes are deliberately NOT destructured: they travel in `axes` and are
 	// resolved by name, so an axis a family drops changes nothing down here.
 	let {
-		value = $bindable('oklch(62% 0.19 260)'),
+		value = $bindable(),
 		presets = [],
 		noInput = false,
 		labels = {},
-		onChange,
+		onvalue,
 		class: klass = '',
 		...axes
 	}: Props = $props();
@@ -59,16 +59,18 @@
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
 	let lch = $state<Oklch>({ l: 0.62, c: 0.19, h: 260 });
+	/** The colour shown: the starting one while none is given. */
+	let color = $derived(value ?? 'oklch(62% 0.19 260)');
 	/* The value this component last wrote: a different one came from outside. */
 	let written = '';
 	$effect.pre(() => {
-		if (value !== written && typeof document !== 'undefined') lch = toOklch(value);
+		if (value != null && value !== written && typeof document !== 'undefined') lch = toOklch(value);
 	});
 
 	function emit(v: string) {
 		written = v;
 		value = v;
-		onChange?.(v);
+		onvalue?.(v);
 	}
 	function set(part: Partial<Oklch>) {
 		lch = { ...lch, ...part };
@@ -88,7 +90,7 @@
 	]);
 </script>
 
-<div {...applied.rest} class={classes} style:--color-picker-value={value}>
+<div {...applied.rest} class={classes} style:--color-picker-value={color}>
 	<div class="{PREFIX}-head">
 		<span class="{PREFIX}-preview"></span>
 		{#if !noInput}
@@ -96,7 +98,7 @@
 				class="input input-sm {PREFIX}-value"
 				aria-label={labels.value ?? 'Value'}
 				spellcheck="false"
-				{value}
+				value={color}
 				onchange={(e) => pick(e.currentTarget.value)}
 			/>
 		{/if}

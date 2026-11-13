@@ -15,7 +15,7 @@
 				{ name: 'disabled', type: 'boolean', default: 'false', description: 'Neither drops nor the dialog.' },
 				{ name: 'clickable', type: 'boolean', default: 'false', description: 'A click anywhere on the zone opens the dialog.' },
 				{ name: 'over', type: 'boolean', description: 'Bindable: files are dragged above the zone, for a look drawn outside it.' },
-				{ name: 'onFiles', type: '(accepted, rejected) => void', description: 'After a drop or a pick.' },
+				{ name: 'onfiles', type: '(accepted, rejected) => void', description: 'After a drop or a pick.' },
 				{ name: 'children', type: 'Snippet<[{ over, open }]>', description: 'The content: whether files are dragged above it, and how to open the dialog.' },
 				{ name: 'open()', type: 'method', description: 'Open the file dialog from outside.' }
 			]
@@ -32,7 +32,7 @@
 
 <Section
 	title="Any content"
-	svelte={`<FileDropzone accept="image/*" multiple onFiles={(files) => …}>
+	svelte={`<FileDropzone accept="image/*" multiple onfiles={(files) => …}>
   {#snippet children({ over, open })}
     <div class="card" class:over>
       Drop pictures here, or <Button onclick={open}>browse</Button>
@@ -41,7 +41,7 @@
 </FileDropzone>`}
 	html={`<!-- the content, and a hidden <input type="file"> -->`}
 >
-	<FileDropzone accept="image/*" multiple onFiles={(files) => (names = files.map((f) => f.name))}>
+	<FileDropzone accept="image/*" multiple onfiles={(files) => (names = files.map((f) => f.name))}>
 		{#snippet children({ over, open })}
 			<div class="card card-border" style:padding="2em" style:outline={over ? '2px dashed currentColor' : 'none'}>
 				Drop pictures here, or <Button size="sm" type="button" onclick={open}>browse</Button>

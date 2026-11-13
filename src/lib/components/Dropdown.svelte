@@ -53,16 +53,16 @@
 		/** Animate the box. Ignored when the visitor asks for reduced motion. */
 		animated?: boolean;
 		/** Called after every change of `open`. */
-		onToggle?: (open: boolean) => void;
+		onopen?: (open: boolean) => void;
 		class?: string;
 	}
 
 	let {
-		open = $bindable(false),
+		open = $bindable(),
 		trigger,
 		children,
 		animated = true,
-		onToggle,
+		onopen,
 		side,
 		align,
 		class: klass = '',
@@ -83,7 +83,7 @@
 	function set(value: boolean) {
 		if (value === open) return;
 		open = value;
-		onToggle?.(value);
+		onopen?.(value);
 	}
 	const toggle = () => set(!open);
 	const close = () => set(false);
@@ -160,10 +160,10 @@
 
 <div {...applied.rest} bind:this={root} class={classes}>
 	{@render trigger({
-		open,
+		open: !!open,
 		toggle,
 		props: {
-			'aria-expanded': open,
+			'aria-expanded': !!open,
 			'aria-controls': `${uid}-content`,
 			'aria-haspopup': 'true',
 			onclick: toggle

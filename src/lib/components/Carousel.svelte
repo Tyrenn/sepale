@@ -27,7 +27,7 @@
 	 *
 	 * The index is a projection of the scroll position, never bound
 	 * (ADR 0011): `index` is the initial item, `goto` / `prev` / `next`
-	 * (through `bind:this`) move, `onIndex` tells. The script holds no
+	 * (through `bind:this`) move, `onindex` tells. The script holds no
 	 * `$effect`: the observers, the drag, the wheel and the autoplay are
 	 * attachments, and only exist while their prop asks for them.
 	 *
@@ -64,7 +64,7 @@
 		 * next 3 drawn by `children`, a number for that many, or a snippet.
 		 */
 		upcoming?: true | number | null | Snippet<[Upcoming]>;
-		/** The item to start on, from 0. Not bound: move with `goto`, listen with `onIndex`. */
+		/** The item to start on, from 0. Not bound: move with `goto`, listen with `onindex`. */
 		index?: number;
 		/** At the last item, next goes back to the first, and the other way round. */
 		loop?: boolean;
@@ -84,7 +84,7 @@
 		/** Move with the arrow keys, Home and End once the track has the focus. Default `true`. */
 		keyboard?: boolean;
 		/** Called with the new index whenever the current item changes. */
-		onIndex?: (index: number) => void;
+		onindex?: (index: number) => void;
 		/** Accessible names. */
 		previousLabel?: string;
 		nextLabel?: string;
@@ -108,7 +108,7 @@
 		drag = true,
 		scroll = true,
 		keyboard = true,
-		onIndex,
+		onindex,
 		previousLabel = 'Previous item',
 		nextLabel = 'Next item',
 		itemLabel = (i: number, n: number) => `${i + 1} / ${n}`,
@@ -174,7 +174,7 @@
 		const i = mod(best - clones, count);
 		if (i !== current) {
 			current = i;
-			onIndex?.(i);
+			onindex?.(i);
 		}
 	}
 
@@ -540,7 +540,7 @@
 					variant="dots"
 					{count}
 					page={current + 1}
-					onPage={(p) => goto(p - 1)}
+					onpage={(p) => goto(p - 1)}
 					pageLabel={(p) => itemLabel(p - 1, count)}
 					aria-label="Items"
 				/>

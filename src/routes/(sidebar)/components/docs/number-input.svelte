@@ -19,7 +19,7 @@
 				{ name: 'name', type: 'string', description: 'Submitted with the form through a hidden input, written with a . whatever separator was typed.' },
 				{ name: 'messages', type: '{ nan?, min?, max?, step? }', description: 'What the browser says when the field is invalid, in your language.' },
 				{ name: 'disabled', type: 'boolean', default: 'false', description: 'No typing, no stepping.' },
-				{ name: 'onValue', type: '(value: number | null) => void', description: 'After every change, typed or stepped, with the parsed number.' },
+				{ name: 'onvalue', type: '(value: number | null) => void', description: 'After every change, typed or stepped, with the parsed number.' },
 				{ name: 'validator', type: 'boolean', default: 'false', description: 'Colour the field by its own validity (required, min, max, step) and reveal hint once the browser marks it invalid.' },
 				{ name: 'hint', type: 'Snippet', description: 'Shown under the field when it is invalid.' },
 				{ name: 'decreaseLabel / increaseLabel', type: 'string', description: "The buttons' accessible names, with controls." }

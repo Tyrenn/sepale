@@ -19,7 +19,7 @@
 				{ name: 'icon', type: 'Snippet', description: "Replaces the colour's own icon (info, success, warning and error have one)." },
 				{ name: 'actions', type: 'Snippet', description: 'Buttons on the trailing side.' },
 				{ name: 'dismissible', type: 'boolean', default: 'false', description: 'Draw a close button that hides the alert.' },
-				{ name: 'onDismiss', type: '() => void', description: 'After the alert hid itself.' },
+				{ name: 'ondismiss', type: '() => void', description: 'After the alert hid itself.' },
 				{ name: 'dismissLabel', type: 'string', default: "'Dismiss'", description: "The close button's accessible name." }
 			]
 		}
@@ -80,8 +80,8 @@
 
 <Section
 	title="Actions and dismiss"
-	subtitle="A dismissible alert hides itself, then calls onDismiss. This one comes back after a second."
-	svelte={`<Alert color="info" dismissible onDismiss={() => …}>
+	subtitle="A dismissible alert hides itself, then calls ondismiss. This one comes back after a second."
+	svelte={`<Alert color="info" dismissible ondismiss={() => …}>
   Cookies keep the session alive.
   {#snippet actions()}<Button size="sm">Settings</Button>{/snippet}
 </Alert>`}
@@ -94,7 +94,7 @@
 >
 	<div style="display:grid; gap:.75em; width:100%">
 		{#key dismissed}
-			<Alert color="info" dismissible onDismiss={() => setTimeout(() => dismissed++, 1000)}>
+			<Alert color="info" dismissible ondismiss={() => setTimeout(() => dismissed++, 1000)}>
 				Cookies keep the session alive.
 				{#snippet actions()}<Button size="sm">Settings</Button>{/snippet}
 			</Alert>

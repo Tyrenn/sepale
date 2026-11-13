@@ -16,7 +16,7 @@
 				{ name: 'trigger', type: 'Snippet<[{ open, toggle, props }]>', description: 'The element that opens it. Spread `props` on your button: it carries the click and the ARIA state.' },
 				{ name: 'children', type: 'Snippet<[{ close }]>', description: 'The box’s content. It closes on Escape and on a press outside — a click inside is the content’s to decide, with `close`.' },
 				{ name: 'animated', type: 'boolean', default: 'true', description: 'Animate the box. The CSS never does; reduced motion is honoured.' },
-				{ name: 'onToggle', type: '(open: boolean) => void', description: 'After every change of `open`.' }
+				{ name: 'onopen', type: '(open: boolean) => void', description: 'After every change of `open`.' }
 			]
 		}
 	};
@@ -38,7 +38,7 @@
 	{/snippet}
 	{#snippet children({ close })}
 		<Menu items={[{ label: 'Newest' }, { label: 'Oldest' }, { label: 'Name' }]}
-			onSelect={(item) => { chosen = item.label; close(); }} />
+			onpick={(item) => { chosen = item.label; close(); }} />
 	{/snippet}
 </Dropdown>`}
 	html={`<details class="dropdown">
@@ -58,7 +58,7 @@
 		{#snippet children({ close })}
 			<Menu
 				items={[{ label: 'Newest' }, { label: 'Oldest' }, { label: 'Name' }]}
-				onSelect={(item) => {
+				onpick={(item) => {
 					chosen = String(item.label);
 					close();
 				}}

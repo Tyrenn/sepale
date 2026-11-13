@@ -21,7 +21,7 @@
 				{ name: 'title', type: 'string', description: 'A bold first line.' },
 				{ name: 'color', type: 'string', description: 'The alert colour.' },
 				{ name: 'duration', type: 'number', default: '5000', description: 'Milliseconds on screen; 0 keeps it until dismissed. Hover or focus pauses the countdown.' },
-				{ name: 'action', type: '{ label, onClick }', description: 'One button inside the toast; clicking it dismisses the toast too.' }
+				{ name: 'action', type: '{ label, onclick }', description: 'One button inside the toast; clicking it dismisses the toast too.' }
 			],
 			'dismiss()': [{ name: 'id', type: 'number', description: 'The id `add()` returned.' }],
 			'clear()': [{ name: '—', type: '', description: 'Removes every alert.' }]
@@ -46,7 +46,7 @@
 <!-- then, from the script -->
 toast.add('Saved');
 toast.add({ message: 'Upload failed', color: 'error', duration: 0 });
-toast.add({ message: 'Row deleted', action: { label: 'Undo', onClick: undo } });`}
+toast.add({ message: 'Row deleted', action: { label: 'Undo', onclick: undo } });`}
 	html={`<section class="toast" aria-live="polite">
   <div class="alert alert-success" role="status">…</div>
   <div class="alert" role="status">…</div>
@@ -57,7 +57,7 @@ toast.add({ message: 'Row deleted', action: { label: 'Undo', onClick: undo } });
 			<Button onclick={() => inline?.add(`Saved (${++n})`)}>Plain</Button>
 			<Button color="success" onclick={() => inline?.add({ message: 'Your changes are live.', title: 'Published', color: 'success' })}>Success</Button>
 			<Button color="error" onclick={() => inline?.add({ message: 'Stays until dismissed.', color: 'error', duration: 0 })}>Persistent error</Button>
-			<Button onclick={() => inline?.add({ message: 'Row deleted.', color: 'info', action: { label: 'Undo', onClick: () => inline?.add('Restored') } })}>With action</Button>
+			<Button onclick={() => inline?.add({ message: 'Row deleted.', color: 'info', action: { label: 'Undo', onclick: () => inline?.add('Restored') } })}>With action</Button>
 		</div>
 		<Toast bind:this={inline} max={4} />
 	</div>

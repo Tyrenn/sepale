@@ -26,7 +26,7 @@
 		readonly value: V;
 		/** Change the value being edited. */
 		set: (value: V) => void;
-		/** Keep the edit: `onChange` is called if the value changed. */
+		/** Keep the edit: `onvalue` is called if the value changed. */
 		commit: () => void;
 		/** Drop the edit. */
 		cancel: () => void;
@@ -42,7 +42,7 @@
 	 * handed an `EditableControl`; or, for a plain value, the one `kind` names
 	 * (`text`, `number`, `boolean` and their lists). Enter keeps the edit
 	 * (Ctrl + Enter in a multi-line field), Escape drops it, and leaving the
-	 * editor keeps it. `onChange` is only called when the value changed.
+	 * editor keeps it. `onvalue` is only called when the value changed.
 	 *
 	 * Each of those is a default, not a rule. `editing` is bindable: read it,
 	 * or set it to open and close the editor from anywhere — a pencil button,
@@ -53,7 +53,7 @@
 	 * keeps the edit; only Escape and `cancel()` drop it.
 	 *
 	 * The component keeps no value of its own: `value` is what is shown, and
-	 * it is the owner's to update in `onChange` — a DataHandler row, a form.
+	 * it is the owner's to update in `onvalue` — a DataHandler row, a form.
 	 */
 	import { tick, untrack, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -64,11 +64,11 @@
 	import Checkbox from './Checkbox.svelte';
 	import ChipsInput from './ChipsInput.svelte';
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'onchange'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLDivElement> {
 		/** What is shown, and what an edit starts from. */
 		value: V;
 		/** After an edit that changed the value. */
-		onChange?: (value: V) => void;
+		onvalue?: (value: V) => void;
 		/** The editor drawn when there is no `edit` snippet. Default `text`. */
 		kind?: EditableKind;
 		/** How the value is drawn at rest. Default: as text. */
@@ -95,13 +95,13 @@
 
 	let {
 		value,
-		onChange,
+		onvalue,
 		kind = 'text',
 		display,
 		edit,
 		placeholder = '—',
 		disabled = false,
-		editing = $bindable(false),
+		editing = $bindable(),
 		openOn = ['click', 'enter', 'f2'],
 		commitOnBlur = true,
 		editLabel = 'Edit',
@@ -129,7 +129,7 @@
 	   left for something else. */
 	let was = false;
 	$effect(() => {
-		const now = editing;
+		const now = !!editing;
 		untrack(() => {
 			if (now === was) return;
 			was = now;
@@ -137,7 +137,7 @@
 				draft = copy(value);
 				tick().then(focusEditor);
 			} else {
-				if (!same(draft, value)) onChange?.(draft);
+				if (!same(draft, value)) onvalue?.(draft);
 				tick().then(() => {
 					if (document.activeElement === document.body) button?.focus();
 				});
@@ -243,14 +243,14 @@
 			{#if edit}
 				{@render edit(control)}
 			{:else if kind === 'number'}
-				<NumberInput value={draft as number | null} onValue={(v) => (draft = v as V)} />
+				<NumberInput value={draft as number | null} onvalue={(v) => (draft = v as V)} />
 			{:else if kind === 'boolean'}
 				<Toggle checked={!!draft} onchange={(e) => (draft = e.currentTarget.checked as V)} />
 			{:else if kind === 'text[]' || kind === 'number[]'}
 				<ChipsInput
 					values={list().map(String)}
 					unique={false}
-					onChange={(vs) => (draft = (kind === 'number[]' ? vs.map(Number).filter((n) => !Number.isNaN(n)) : vs) as V)}
+					onvalue={(vs) => (draft = (kind === 'number[]' ? vs.map(Number).filter((n) => !Number.isNaN(n)) : vs) as V)}
 				/>
 			{:else if kind === 'boolean[]'}
 				<span class={`${PREFIX}-list`}>

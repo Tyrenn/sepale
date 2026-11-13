@@ -49,8 +49,8 @@
 	/**
 	 * Items in columns, one column per state they can be in. Like a table or a
 	 * grid it knows nothing of where its items come from, and it moves nothing:
-	 * dragging a card, or Shift + an arrow key on it, calls `onMove`, and the
-	 * items only change when the caller changes them. Without `onMove` the board
+	 * dragging a card, or Shift + an arrow key on it, calls `onmove`, and the
+	 * items only change when the caller changes them. Without `onmove` the board
 	 * is read-only.
 	 *
 	 * The drag is the browser's own, which brings the drag image, Escape to
@@ -83,7 +83,7 @@
 		/** Keys of the items to draw as changed and not yet saved. */
 		dirty?: Iterable<string>;
 		/** An item was dropped somewhere new. Given, it makes the items movable. */
-		onMove?: (move: KanbanMove<Item>) => void;
+		onmove?: (move: KanbanMove<Item>) => void;
 		class?: string;
 	}
 
@@ -98,7 +98,7 @@
 		empty,
 		selected,
 		dirty,
-		onMove,
+		onmove,
 		class: klass = '',
 		...axes
 	}: Props = $props();
@@ -186,7 +186,7 @@
 		const stays =
 			from === column &&
 			lanes.find((lane) => lane.column.id === column)?.entries.findIndex((other) => other.key === entry.key) === index;
-		if (!stays) onMove?.({ item: entry.item, from, to: column, index });
+		if (!stays) onmove?.({ item: entry.item, from, to: column, index });
 		dragend();
 	}
 
@@ -204,7 +204,7 @@
 		laneIndex: number,
 		index: number
 	) {
-		if (!onMove || !e.shiftKey || e.target !== e.currentTarget) return;
+		if (!onmove || !e.shiftKey || e.target !== e.currentTarget) return;
 		const lane = lanes[laneIndex]!;
 		const rtl = getComputedStyle(e.currentTarget).direction === 'rtl';
 		let to = laneIndex;
@@ -218,7 +218,7 @@
 		const target = lanes[to];
 		if (!target || place < 0) return;
 		if (to === laneIndex && place >= lane.entries.length) return;
-		onMove({
+		onmove({
 			item: entry.item,
 			from: lane.column.id,
 			to: target.column.id,
@@ -262,9 +262,9 @@
 							draggedKey === entry.key && `${PREFIX}-item-dragged`
 						)}
 						data-kanban-key={entry.key}
-						draggable={onMove ? 'true' : undefined}
-						tabindex={onMove ? 0 : undefined}
-						aria-keyshortcuts={onMove ? 'Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight' : undefined}
+						draggable={onmove ? 'true' : undefined}
+						tabindex={onmove ? 0 : undefined}
+						aria-keyshortcuts={onmove ? 'Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight' : undefined}
 						ondragstart={(e) => dragstart(e, entry, lane.column.id)}
 						ondragend={dragend}
 						onkeydown={(e) => keydown(e, entry, laneIndex, i)}

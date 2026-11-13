@@ -26,7 +26,7 @@
 	 *
 	 * `open` is where it starts. To drive it from outside, use the methods —
 	 * `bind:this={c}` then `c.show()`, `c.hide()`, `c.toggle()` — and listen
-	 * with `onToggle`. Inside an exclusive Accordion, opening one closes the
+	 * with `onopen`. Inside an exclusive Accordion, opening one closes the
 	 * others.
 	 */
 	import { untrack, type Snippet } from 'svelte';
@@ -42,7 +42,7 @@
 		/** Whether it starts open. Not bound: use the methods to drive it. */
 		open?: boolean;
 		/** After every change, with the new state. */
-		onToggle?: (open: boolean) => void;
+		onopen?: (open: boolean) => void;
 		class?: string;
 		children?: Snippet;
 	}
@@ -53,7 +53,7 @@
 		title,
 		trigger,
 		open: initial = false,
-		onToggle,
+		onopen,
 		class: klass = '',
 		children,
 		...axes
@@ -77,7 +77,7 @@
 		if (next === isOpen) return;
 		isOpen = next;
 		if (next) group?.opened(closeFromGroup);
-		onToggle?.(next);
+		onopen?.(next);
 	}
 
 	export function show() {

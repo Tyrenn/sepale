@@ -81,7 +81,7 @@
 		/** Anything else air-datepicker accepts. Applied last. */
 		options?: AirDatepickerOptions<HTMLElement>;
 		/** Called with the new value after every pick. */
-		onChange?: (value: Value) => void;
+		onvalue?: (value: Value) => void;
 		/** The air-datepicker instance, for what no prop covers. Bindable. */
 		picker?: AirDatepicker<HTMLElement>;
 		class?: string;
@@ -90,7 +90,7 @@
 	// The axes are deliberately NOT destructured: they travel in `axes` and are
 	// resolved by name, so an axis a family drops changes nothing down here.
 	let {
-		value = $bindable(null),
+		value = $bindable(),
 		range = false,
 		multiple = false,
 		inline = true,
@@ -107,7 +107,7 @@
 		buttons,
 		dateFormat,
 		options,
-		onChange,
+		onvalue,
 		picker = $bindable(),
 		class: klass = '',
 		...axes
@@ -119,7 +119,7 @@
 	let host: HTMLDivElement | undefined = $state();
 	let field: HTMLInputElement | undefined = $state();
 
-	const asList = (v: Value): Date[] => (v == null ? [] : Array.isArray(v) ? v : [v]);
+	const asList = (v: Value | undefined): Date[] => (v == null ? [] : Array.isArray(v) ? v : [v]);
 	const same = (a: Date[], b: Date[]) =>
 		a.length === b.length && a.every((d, i) => d.getTime() === b[i]!.getTime());
 
@@ -146,7 +146,7 @@
 		const next: Value = range || multiple ? asList(date as Value) : ((date as Date | undefined) ?? null);
 		if (same(asList(next), asList(value))) return;
 		value = next;
-		onChange?.(next);
+		onvalue?.(next);
 	}
 
 	// One instance per element: built when the element is there, rebuilt only

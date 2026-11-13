@@ -150,5 +150,5 @@ export {
 	type TokenType
 } from './theme.js';
 
-// The colour a <input type="color"> insists on, from any CSS colour (a var(), an oklch…): what a ColorPicker onChange needs.
+// The colour a <input type="color"> insists on, from any CSS colour (a var(), an oklch…): what a ColorPicker onvalue needs.
 export { colorToHex } from './components/color.js';

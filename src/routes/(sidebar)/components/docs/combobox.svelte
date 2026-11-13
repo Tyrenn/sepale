@@ -19,11 +19,11 @@
 				{ name: 'strict', type: 'boolean', default: 'true', description: 'The value is a picked option; false makes it the text (autocompletion).' },
 				{ name: 'multiple', type: 'boolean', default: 'false', description: 'Pick several; implies strict. The field shows a summary.' },
 				{ name: 'value', type: 'any', description: 'The pick(s) it starts with — the text when not strict. Read once.' },
-				{ name: 'onSelect', type: '(value) => void', description: 'A pick changed: the option, undefined when dropped, or the list.' },
-				{ name: 'onInput', type: '(text) => void', description: 'The text changed (free mode).' },
+				{ name: 'onvalue', type: '(value) => void', description: 'A pick changed: the option, undefined when dropped, or the list.' },
+				{ name: 'onquery', type: '(text) => void', description: 'The text changed (free mode).' },
 				{ name: 'name', type: 'string', description: 'Strict: on the hidden select. Free: on the input.' },
 				{ name: 'wait / eager / float', type: 'number / boolean / boolean', description: 'Debounce in ms (100); open on focus; draw the list at fixed coordinates over scrolling ancestors.' },
-				{ name: 'add', type: '{ show?, max?, onAdd }', description: 'A last "create what is typed" row.' },
+				{ name: 'add', type: '{ show?, max?, onadd }', description: 'A last "create what is typed" row.' },
 				{ name: 'summary', type: '(picks) => string', description: 'The field text for several picks. Labels joined, or "n selected".' },
 				{ name: 'option', type: 'Snippet<[any]>', description: 'How one option is drawn.' },
 				{ name: 'start / end', type: 'Snippet', description: 'Inside the frame, before and after the text.' },
@@ -64,7 +64,7 @@
 	title="Strict"
 	subtitle="Only a picked option is a value: type, then leave the field without picking — the last pick comes back."
 	svelte={`<Combobox options={COUNTRIES} show={(c) => c.name} key={(c) => c.code}
-  name="country" placeholder="Country" eager onSelect={(c) => (country = c)} />`}
+  name="country" placeholder="Country" eager onvalue={(c) => (country = c)} />`}
 	html={`<div class="combobox">
   <label class="input">
     <input role="combobox" aria-expanded="true" aria-controls="l1" aria-autocomplete="list">
@@ -76,7 +76,7 @@
 </div>`}
 >
 	<div style="display:flex; flex-direction:column; gap:.5rem; min-height:14rem;">
-		<Combobox options={COUNTRIES} show={(c) => c.name} key={(c) => c.code} name="country" placeholder="Country" eager onSelect={(c) => (country = c)} />
+		<Combobox options={COUNTRIES} show={(c) => c.name} key={(c) => c.code} name="country" placeholder="Country" eager onvalue={(c) => (country = c)} />
 		<small>value: {country ? JSON.stringify(country) : '—'}</small>
 	</div>
 </Section>
@@ -85,13 +85,13 @@
 	title="Free: autocompletion"
 	subtitle="The value is the text; the list only completes it. The last row creates what is typed."
 	svelte={`<Combobox strict={false} options={FRUITS} name="fruit" placeholder="Fruit"
-  onInput={(t) => (typed = t)} add={{ max: 3, onAdd: (v) => (created = v) }} />`}
+  onquery={(t) => (typed = t)} add={{ max: 3, onadd: (v) => (created = v) }} />`}
 	html={`<div class="combobox">
   <label class="input"><input role="combobox" name="fruit" …></label>
 </div>`}
 >
 	<div style="display:flex; flex-direction:column; gap:.5rem; min-height:14rem;">
-		<Combobox strict={false} options={FRUITS} name="fruit" placeholder="Fruit" onInput={(t) => (typed = t)} add={{ max: 3, onAdd: (v) => (created = v) }} />
+		<Combobox strict={false} options={FRUITS} name="fruit" placeholder="Fruit" onquery={(t) => (typed = t)} add={{ max: 3, onadd: (v) => (created = v) }} />
 		<small>text: {typed || '—'} · created: {created ?? '—'}</small>
 	</div>
 </Section>
@@ -110,7 +110,7 @@
 	title="Multiple"
 	subtitle="The list stays open while ticking; the field summarises the picks."
 	svelte={`<Combobox multiple options={COUNTRIES} show={(c) => c.name} key={(c) => c.code}
-  name="countries" placeholder="Countries" onSelect={(list) => (picks = list)} />`}
+  name="countries" placeholder="Countries" onvalue={(list) => (picks = list)} />`}
 	html={`<div class="combobox combobox-multiple">
   <label class="input">…
     <ul class="list list-suggestions" role="listbox" aria-multiselectable="true">
@@ -121,7 +121,7 @@
 </div>`}
 >
 	<div style="display:flex; flex-direction:column; gap:.5rem; min-height:14rem;">
-		<Combobox multiple options={COUNTRIES} show={(c) => c.name} key={(c) => c.code} name="countries" placeholder="Countries" eager onSelect={(list) => (picks = list)} />
+		<Combobox multiple options={COUNTRIES} show={(c) => c.name} key={(c) => c.code} name="countries" placeholder="Countries" eager onvalue={(list) => (picks = list)} />
 		<small>{picks.map((p) => p.code).join(', ') || '—'}</small>
 	</div>
 </Section>

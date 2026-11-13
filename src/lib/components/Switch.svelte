@@ -29,7 +29,7 @@
 
 	type Option = string | { value: string; label?: string; disabled?: boolean };
 
-	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'onchange'> {
+	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
 		options: Option[];
 		/** The checked option's value. Bindable. */
 		value?: string;
@@ -38,7 +38,7 @@
 		/** The group's accessible name. */
 		label?: string;
 		/** After the user picked another option. */
-		onChange?: (value: string) => void;
+		onvalue?: (value: string) => void;
 		/** Slide the checked look from one option to the next. */
 		animated?: boolean;
 		class?: string;
@@ -51,7 +51,7 @@
 		value = $bindable(),
 		name = `switch-${Math.random().toString(36).slice(2, 9)}`,
 		label,
-		onChange,
+		onvalue,
 		animated = true,
 		class: klass = '',
 		...axes
@@ -96,7 +96,7 @@
 				disabled={o.disabled}
 				onchange={() => {
 					value = o.value;
-					onChange?.(o.value);
+					onvalue?.(o.value);
 				}}
 			/>
 			{o.label}

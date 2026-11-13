@@ -59,7 +59,7 @@
 		validator = false,
 		hint,
 		error = null,
-		invalid = $bindable(false),
+		invalid = $bindable(),
 		element = $bindable(),
 		files = $bindable<FileList | null>(null),
 		class: klass = '',

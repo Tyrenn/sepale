@@ -22,7 +22,7 @@
 		/** Milliseconds on screen. `0` keeps it until dismissed. Default 5000. */
 		duration?: number;
 		/** One button inside the alert. Clicking it also dismisses the alert. */
-		action?: { label: string; onClick: () => void };
+		action?: { label: string; onclick: () => void };
 	}
 
 	interface Item extends ToastOptions {
@@ -139,14 +139,14 @@
 				<Button
 					size="sm"
 					onclick={() => {
-						t.action?.onClick();
+						t.action?.onclick();
 						dismiss(t.id);
 					}}>{t.action?.label}</Button
 				>
 			{/snippet}
 			<!-- `as never`: any colour name goes; a family that lacks one simply
 			     draws the default alert, as a class it never ships does. -->
-			<Alert color={t.color as never} title={t.title} dismissible {dismissLabel} onDismiss={() => dismiss(t.id)} actions={t.action ? action : undefined}>
+			<Alert color={t.color as never} title={t.title} dismissible {dismissLabel} ondismiss={() => dismiss(t.id)} actions={t.action ? action : undefined}>
 				{t.message}
 			</Alert>
 		</div>

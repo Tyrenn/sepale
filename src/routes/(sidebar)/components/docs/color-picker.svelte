@@ -22,7 +22,7 @@
 				{ name: 'noInput', type: 'boolean', default: 'false', description: 'Hide the raw value field.' },
 				{ name: 'flat', type: 'boolean', default: 'false', description: 'No box of its own.' },
 				{ name: 'labels', type: '{ l, c, h, value }', description: 'Accessible names.' },
-				{ name: 'onChange', type: '(value) => void', description: 'After every change.' }
+				{ name: 'onvalue', type: '(value) => void', description: 'After every change.' }
 			]
 		}
 	};

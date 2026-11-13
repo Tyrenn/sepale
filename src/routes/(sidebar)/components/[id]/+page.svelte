@@ -127,10 +127,17 @@
 							<tr><th>Class</th><th>Effect</th><th>Type</th></tr>
 						</thead>
 						<tbody>
-							{#each rows as row (row.name)}
+							{#each rows as row (row.names[0])}
 								<tr>
-									<td><code>.{row.name}</code></td>
-									<td>{row.effect}</td>
+									<td><div class="api-classes">{#each row.names as name (name)}<code>.{name}</code>{/each}</div></td>
+									<td>
+										{row.effect}
+										{#if row.notes.length}
+											<ul class="api-notes">
+												{#each row.notes as note (note.name)}<li><code>.{note.name}</code> {note.effect}</li>{/each}
+											</ul>
+										{/if}
+									</td>
 									<td class="api-kind">{row.type}</td>
 								</tr>
 							{/each}
@@ -276,6 +283,17 @@
 	.api-type {
 		white-space: normal;
 		word-break: break-word;
+	}
+	/* An axis row lists its values side by side, wrapping as needed. */
+	.api-classes {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.3rem;
+		max-width: 22rem;
+	}
+	.api-notes {
+		margin: 0.35rem 0 0;
+		padding-left: 1rem;
 	}
 	.api-kind {
 		white-space: nowrap;

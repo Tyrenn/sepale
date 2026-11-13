@@ -67,7 +67,7 @@
 	import '@sepale/style/${playground.family}/themes/${playground.theme}.css';
 <\/script>
 
-<Kanban {items} {columns} columnOf={(t) => t.status} key={(t) => t.id} {onMove}>
+<Kanban {items} {columns} columnOf={(t) => t.status} key={(t) => t.id} {onmove}>
 	{#snippet item(task)}
 		<Card size="sm">{task.title}</Card>
 	{/snippet}
@@ -228,7 +228,7 @@
 			</select>
 		</label>
 		<div class="s-board uu-island">
-			<Kanban size="sm" items={tasks} columns={COLUMNS} columnOf={(t) => t.status} key={(t) => t.id} onMove={move}>
+			<Kanban size="sm" items={tasks} columns={COLUMNS} columnOf={(t) => t.status} key={(t) => t.id} onmove={move}>
 				{#snippet item(task)}
 					<Card size="sm">{task.title}</Card>
 				{/snippet}

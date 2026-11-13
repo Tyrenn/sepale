@@ -18,7 +18,7 @@
 				{ name: 'disabled', type: 'boolean', default: 'false', description: 'No picking, dimmed by the browser.' },
 				{ name: 'label', type: 'string', default: "'Rating'", description: "The group's accessible name." },
 				{ name: 'itemLabel', type: '(n) => string', description: "One item's accessible name." },
-				{ name: 'onChange', type: '(value: number) => void', description: 'After the user picked a score.' }
+				{ name: 'onvalue', type: '(value: number) => void', description: 'After the user picked a score.' }
 			]
 		}
 	};

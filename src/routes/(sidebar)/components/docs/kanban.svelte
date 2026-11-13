@@ -6,7 +6,7 @@
 	export const DOC: ComponentDoc = {
 		namespaces: ['kanban'],
 		description:
-			'Items in columns, one column per state they can be in. Like a table or a grid it knows nothing of where its items come from, and it moves nothing: dragging a card, or Shift + an arrow key on it, calls onMove, and the items change when you change them. Without onMove the board is read-only.',
+			'Items in columns, one column per state they can be in. Like a table or a grid it knows nothing of where its items come from, and it moves nothing: dragging a card, or Shift + an arrow key on it, calls onmove, and the items change when you change them. Without onmove the board is read-only.',
 		classes: {
 			'kanban-column': 'One column.',
 			'kanban-column-over': 'A column an item is being dragged over.',
@@ -29,7 +29,7 @@
 				{ name: 'columnOf', type: '(item) => string', description: 'The id of the column an item belongs to.' },
 				{ name: 'item', type: 'Snippet<[item, index]>', description: 'How one item is drawn, given its place in its column.' },
 				{ name: 'key', type: '(item, index) => string', default: 'the index', description: 'An item’s identity, for selected, dirty, keyed rendering and giving the focus back after a move.' },
-				{ name: 'onMove', type: '({ item, from, to, index }) => void', description: 'An item was dropped somewhere new. `index` is its place in `to`, counted without the item itself. Given, it makes the items movable.' },
+				{ name: 'onmove', type: '({ item, from, to, index }) => void', description: 'An item was dropped somewhere new. `index` is its place in `to`, counted without the item itself. Given, it makes the items movable.' },
 				{ name: 'head', type: 'Snippet<[column, items]>', description: 'Replaces a column’s title and count.' },
 				{ name: 'foot', type: 'Snippet<[column]>', description: 'Drawn under a column’s items: an add button, usually.' },
 				{ name: 'empty', type: 'Snippet<[column]>', description: 'Drawn in a column with no items.' },
@@ -92,7 +92,7 @@
 	columns={[{ id: 'todo', title: 'To do' }, { id: 'doing', title: 'In progress' }, …]}
 	columnOf={(t) => t.status}
 	key={(t) => t.id}
-	onMove={({ item, to, index }) => {
+	onmove={({ item, to, index }) => {
 		const rest = tasks.filter((t) => t.id !== item.id);
 		const before = rest.filter((t) => t.status === to)[index];
 		rest.splice(before ? rest.indexOf(before) : rest.length, 0, { ...item, status: to });
@@ -117,7 +117,7 @@
 </div>`}
 >
 	<div style="width:100%;">
-		<Kanban items={tasks} columns={COLUMNS} columnOf={(t) => t.status} key={(t) => t.id} onMove={move} item={card}>
+		<Kanban items={tasks} columns={COLUMNS} columnOf={(t) => t.status} key={(t) => t.id} onmove={move} item={card}>
 			{#snippet empty()}Nothing here.{/snippet}
 		</Kanban>
 	</div>
@@ -125,7 +125,7 @@
 
 <Section
 	title="Read-only"
-	subtitle="Without onMove nothing can be dragged or focused: the board only shows where things stand. A height on the board makes each column scroll on its own."
+	subtitle="Without onmove nothing can be dragged or focused: the board only shows where things stand. A height on the board makes each column scroll on its own."
 	svelte={`<Kanban style="max-height:16rem" {items} {columns} columnOf={(t) => t.status} key={(t) => t.id} selected={['3']} dirty={['1']}>…</Kanban>`}
 >
 	<div style="width:100%;">
@@ -186,7 +186,7 @@
 			selected={handler.selection}
 			dirty={handler.changed}
 			loading={handler.loading}
-			onMove={({ item, from, to }) => { if (from !== to) item.update({ role: to }); }}
+			onmove={({ item, from, to }) => { if (from !== to) item.update({ role: to }); }}
 		>
 			{#snippet item(row)}<Card size="sm">{row.value.name}</Card>{/snippet}
 		</Kanban>
@@ -206,7 +206,7 @@
 							selected={handler.selection}
 							dirty={handler.changed}
 							loading={handler.loading}
-							onMove={({ item, from, to }) => {
+							onmove={({ item, from, to }) => {
 								if (from !== to) item.update({ role: to as Person['role'] });
 							}}
 						>

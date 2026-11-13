@@ -56,8 +56,8 @@
 		/** `value` of the selected tab, for tabs keyed by their own id rather than by
 		    position. Bindable. When set, it decides the selection over `active`. */
 		value?: V;
-		/** Called with the new index, and the tab's `value`, when a tab is chosen. */
-		onSelect?: (index: number, value: V | undefined) => void;
+		/** Called with the tab's `value`, and its index, when a tab is chosen. */
+		onvalue?: (value: V | undefined, index: number) => void;
 		/** Slide the selection from one tab to the next. Not with `lift`, whose
 		    tab opens into its panel. */
 		animated?: boolean;
@@ -67,9 +67,9 @@
 	let {
 		tabs = [],
 		tab,
-		active = $bindable(0),
+		active = $bindable(),
 		value = $bindable(),
-		onSelect,
+		onvalue,
 		animated = true,
 		class: klass = '',
 		...axes
@@ -79,7 +79,7 @@
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
 	/* The selected index: from `value` when the strip is keyed by value, else `active`. */
-	let current = $derived(value !== undefined ? tabs.findIndex((t) => t.value === value) : active);
+	let current = $derived(value !== undefined ? tabs.findIndex((t) => t.value === value) : (active ?? 0));
 
 	let root: HTMLDivElement | undefined = $state();
 	let box = $state({ x: 0, y: 0, w: 0, h: 0 });
@@ -105,7 +105,7 @@
 	function select(i: number) {
 		active = i;
 		if (tabs[i]?.value !== undefined) value = tabs[i].value;
-		onSelect?.(i, tabs[i]?.value);
+		onvalue?.(tabs[i]?.value, i);
 	}
 </script>
 

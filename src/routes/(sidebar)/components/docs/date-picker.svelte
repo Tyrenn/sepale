@@ -17,7 +17,7 @@
 				{ name: 'placeholder / disabled / size', type: '', description: "As on Input." },
 				{ name: 'min / max', type: 'Date', description: 'Bounds, for the calendar and the native input.' },
 				{ name: 'format', type: '(date) => string', description: "How a date is written in the field. The browser's locale by default." },
-				{ name: 'onChange', type: '(value) => void', description: 'After every completed pick.' },
+				{ name: 'onvalue', type: '(value) => void', description: 'After every completed pick.' },
 				{ name: 'calendar', type: 'Calendar props', description: 'Anything else for the calendar: locale, firstDay, view…' }
 			]
 		}

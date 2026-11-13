@@ -11,7 +11,7 @@
 	export const DOC: ComponentDoc = {
 		namespaces: ['carousel'],
 		description:
-			'A row of items that scrolls and snaps natively, with optional arrows over it, upcoming items and a pagination under it. Items may differ in size: the carousel measures them. The Svelte component draws one item per entry of `items`; the index is never bound — `goto` / `prev` / `next` move, `onIndex` tells (ADR 0011).',
+			'A row of items that scrolls and snaps natively, with optional arrows over it, upcoming items and a pagination under it. Items may differ in size: the carousel measures them. The Svelte component draws one item per entry of `items`; the index is never bound — `goto` / `prev` / `next` move, `onindex` tells (ADR 0011).',
 		classes: {
 			'carousel-track': 'The scrolling, snapping row. Focusable, so the arrow keys move through it.',
 			'carousel-item': 'One item. As wide as the track, unless `--carousel-item-width` says otherwise (`auto`: the item sizes itself).',
@@ -49,8 +49,8 @@
 					description:
 						'The items after the current one, small, under the track: `true` for 3, a number for that many, or your snippet given `{ items: { item, index }[], goto }`. Wraps with `loop` / `infinite`.'
 				},
-				{ name: 'index', type: 'number', default: '0', description: 'The item to start on, from 0. Not bound: move with `goto`, listen with `onIndex`.' },
-				{ name: 'onIndex', type: '(index) => void', description: 'Called whenever the current item changes.' },
+				{ name: 'index', type: 'number', default: '0', description: 'The item to start on, from 0. Not bound: move with `goto`, listen with `onindex`.' },
+				{ name: 'onindex', type: '(index) => void', description: 'Called whenever the current item changes.' },
 				{ name: 'loop', type: 'boolean', default: 'false', description: 'At the last item, next goes back to the first (scrolling back across them), and the other way round.' },
 				{ name: 'infinite', type: 'boolean', default: 'false', description: 'No end: items are duplicated on both sides so the row runs on with no jump. Wins over `loop`.' },
 				{
@@ -115,7 +115,7 @@
 <Section
 	title="Arrows and dots"
 	subtitle="`arrow` and `pagination` set to true: the defaults. Swipe, drag, turn the wheel, or focus the track and use the arrow keys."
-	svelte={`<Carousel items={SLIDES} arrow pagination onIndex={(i) => (index = i)}>
+	svelte={`<Carousel items={SLIDES} arrow pagination onindex={(i) => (index = i)}>
 	{#snippet children(s, i)}<div …>{i + 1}. {s.title}</div>{/snippet}
 </Carousel>`}
 	html={`<div class="carousel" role="region" aria-roledescription="carousel">
@@ -132,10 +132,10 @@
 </div>`}
 >
 	<div style="width:28rem; display:flex; flex-direction:column; gap:.5rem;">
-		<Carousel items={SLIDES} arrow pagination onIndex={(i) => (index = i)}>
+		<Carousel items={SLIDES} arrow pagination onindex={(i) => (index = i)}>
 			{#snippet children(s, i)}{@render slide(s, i)}{/snippet}
 		</Carousel>
-		<small>onIndex: {index}</small>
+		<small>onindex: {index}</small>
 	</div>
 </Section>
 
@@ -187,7 +187,7 @@
 		<button class="btn btn-sm" onclick={go}>{direction}</button>
 	{/snippet}
 	{#snippet pagination({ count, index, goto })}
-		<Pagination {count} edges page={index + 1} onPage={(p) => goto(p - 1)} size="sm" />
+		<Pagination {count} edges page={index + 1} onpage={(p) => goto(p - 1)} size="sm" />
 	{/snippet}
 </Carousel>`}
 >
@@ -198,7 +198,7 @@
 				<button type="button" class="btn btn-sm" onclick={go}>{direction}</button>
 			{/snippet}
 			{#snippet pagination({ count, index, goto })}
-				<Pagination {count} edges page={index + 1} onPage={(p) => goto(p - 1)} size="sm" />
+				<Pagination {count} edges page={index + 1} onpage={(p) => goto(p - 1)} size="sm" />
 			{/snippet}
 		</Carousel>
 	</div>
@@ -206,15 +206,15 @@
 
 <Section
 	title="Driven from outside"
-	subtitle="No binding: a reference through `bind:this`, `goto` to move, `onIndex` to follow."
-	svelte={`<Carousel bind:this={remote} items={SLIDES} onIndex={(i) => (remoteIndex = i)}>…</Carousel>
-<Pagination count={SLIDES.length} edges page={remoteIndex + 1} onPage={(p) => remote?.goto(p - 1)} />`}
+	subtitle="No binding: a reference through `bind:this`, `goto` to move, `onindex` to follow."
+	svelte={`<Carousel bind:this={remote} items={SLIDES} onindex={(i) => (remoteIndex = i)}>…</Carousel>
+<Pagination count={SLIDES.length} edges page={remoteIndex + 1} onpage={(p) => remote?.goto(p - 1)} />`}
 >
 	<div style="width:28rem; display:flex; flex-direction:column; gap:.5rem; align-items:center;">
-		<Carousel bind:this={remote} items={SLIDES} onIndex={(i) => (remoteIndex = i)} style="width:100%">
+		<Carousel bind:this={remote} items={SLIDES} onindex={(i) => (remoteIndex = i)} style="width:100%">
 			{#snippet children(s, i)}{@render slide(s, i)}{/snippet}
 		</Carousel>
-		<Pagination count={SLIDES.length} edges page={remoteIndex + 1} onPage={(p) => remote?.goto(p - 1)} size="sm" />
+		<Pagination count={SLIDES.length} edges page={remoteIndex + 1} onpage={(p) => remote?.goto(p - 1)} size="sm" />
 	</div>
 </Section>
 

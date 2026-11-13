@@ -45,7 +45,7 @@
 	/**
 	 * Where the user is in a journey: one column per step, one bar per sub-step.
 	 *
-	 * The component moves nothing: a click calls `onStep` with the step, and
+	 * The component moves nothing: a click calls `onstep` with the step, and
 	 * the app decides whether to change `current`. A step is clickable once it
 	 * has been reached (current, visited or complete) — a step's own marker
 	 * leads to its first sub-step. `clickable={false}` or `disabled` turns that
@@ -68,7 +68,7 @@
 		clickable?: boolean;
 		disabled?: boolean;
 		/** A reached step was clicked: a leaf, or the first leaf of a step. */
-		onStep?: (step: Step) => void;
+		onstep?: (step: Step) => void;
 		/** The line above the bars in compact mode. Defaults to "label · sub-label   n/total". */
 		heading?: Snippet<[{ step: Step | undefined; parent: Step | undefined; index: number; total: number }]>;
 		/** The nav's accessible name. */
@@ -84,7 +84,7 @@
 		explored,
 		clickable = true,
 		disabled = false,
-		onStep,
+		onstep,
 		heading,
 		label = 'Progress',
 		class: klass = '',
@@ -163,7 +163,7 @@
 							class="steps-marker"
 							aria-label={step.label ?? `${n + 1}`}
 							disabled={!reachable(state)}
-							onclick={() => onStep?.(own[0]!)}
+							onclick={() => onstep?.(own[0]!)}
 						>
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
 						</button>
@@ -179,7 +179,7 @@
 							aria-label={leaf.label ?? `${n + 1}${own.length > 1 ? `.${i + 1}` : ''}`}
 							aria-current={ls === 'current' ? 'step' : undefined}
 							disabled={!reachable(ls)}
-							onclick={() => onStep?.(leaf)}
+							onclick={() => onstep?.(leaf)}
 						>
 							<span></span>
 						</button>

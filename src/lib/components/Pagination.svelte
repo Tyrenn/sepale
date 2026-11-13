@@ -49,7 +49,7 @@
 		/** Draw previous / next. Default: yes, except in the dots and bars variants. */
 		controls?: boolean;
 		/** Called with the new page after every change. */
-		onPage?: (page: number) => void;
+		onpage?: (page: number) => void;
 		/** The accessible name of a page. Default `Page N`. */
 		pageLabel?: (page: number) => string;
 		/** The text of the count variant. Default `3 / 8`. */
@@ -64,11 +64,11 @@
 	// also changes what is drawn. It is handed back to applyAxes below.
 	let {
 		count,
-		page = $bindable(1),
+		page = $bindable(),
 		siblings = 1,
 		edges = false,
 		controls,
-		onPage,
+		onpage,
 		pageLabel = (p: number) => `Page ${p}`,
 		countLabel = (p: number, n: number) => `${p} / ${n}`,
 		previousLabel = 'Previous page',
@@ -85,6 +85,9 @@
 	let marks = $derived(variant === 'dots' || variant === 'bars');
 	let showControls = $derived(controls ?? !marks);
 
+	/** The page shown: the first while none is given. */
+	let current = $derived(page ?? 1);
+
 	/** The pages to draw, with `null` for a gap. */
 	let pages = $derived.by((): (number | null)[] => {
 		const all = Array.from({ length: Math.max(0, count) }, (_, i) => i + 1);
@@ -93,7 +96,7 @@
 		// No edges: a window of 2 * siblings + 1 pages, slid back inside the row at its ends.
 		if (!edges) {
 			const w = Math.min(count, 2 * siblings + 1);
-			const start = Math.min(Math.max(1, page - siblings), count - w + 1);
+			const start = Math.min(Math.max(1, current - siblings), count - w + 1);
 			return all.slice(start - 1, start - 1 + w);
 		}
 		// first + last + current + siblings + two gaps: below that, folding saves nothing
@@ -101,9 +104,9 @@
 		// Always 2 * siblings + 5 slots, so the row keeps its width: near an
 		// end, the pages the missing gap would have taken are shown instead.
 		const edge = 2 * siblings + 3;
-		if (page <= siblings + 3) return [...all.slice(0, edge), null, count];
-		if (page >= count - siblings - 2) return [1, null, ...all.slice(count - edge)];
-		return [1, null, ...all.slice(page - siblings - 1, page + siblings), null, count];
+		if (current <= siblings + 3) return [...all.slice(0, edge), null, count];
+		if (current >= count - siblings - 2) return [1, null, ...all.slice(count - edge)];
+		return [1, null, ...all.slice(current - siblings - 1, current + siblings), null, count];
 	});
 
 	/** Which way the last move went, for a family that animates the numbers.
@@ -112,10 +115,10 @@
 
 	function go(p: number) {
 		const next = Math.min(Math.max(1, p), count);
-		if (next === page) return;
-		direction = next > page ? 'next' : 'previous';
+		if (next === current) return;
+		direction = next > current ? 'next' : 'previous';
 		page = next;
-		onPage?.(next);
+		onpage?.(next);
 	}
 </script>
 
@@ -125,15 +128,15 @@
 			type="button"
 			class={`${PREFIX}-item`}
 			aria-label={previousLabel}
-			disabled={page <= 1}
-			onclick={() => go(page - 1)}
+			disabled={current <= 1}
+			onclick={() => go(current - 1)}
 		>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
 		</button>
 	{/if}
 
 	{#if variant === 'count'}
-		<span class={`${PREFIX}-text`} aria-live="polite">{countLabel(page, count)}</span>
+		<span class={`${PREFIX}-text`} aria-live="polite">{countLabel(current, count)}</span>
 	{/if}
 
 	<!-- Unkeyed: the slots stay put and only their numbers change, so the
@@ -146,7 +149,7 @@
 				type="button"
 				class={`${PREFIX}-item`}
 				aria-label={pageLabel(p)}
-				aria-current={p === page ? 'page' : undefined}
+				aria-current={p === current ? 'page' : undefined}
 				onclick={() => go(p)}
 			>
 				<!-- Keyed: a new number is a new span, so its entrance can play. -->
@@ -160,8 +163,8 @@
 			type="button"
 			class={`${PREFIX}-item`}
 			aria-label={nextLabel}
-			disabled={page >= count}
-			onclick={() => go(page + 1)}
+			disabled={current >= count}
+			onclick={() => go(current + 1)}
 		>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
 		</button>

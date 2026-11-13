@@ -56,7 +56,7 @@
 		step?: number | 'any';
 		disabled?: boolean;
 		/** After every change, typed or stepped. */
-		onValue?: (value: number | null) => void;
+		onvalue?: (value: number | null) => void;
 		decreaseLabel?: string;
 		increaseLabel?: string;
 		/** Submitted with the form, as a number written with a `.`. */
@@ -71,13 +71,13 @@
 	let {
 		validator = false,
 		hint,
-		value = $bindable(null),
+		value = $bindable(),
 		controls = false,
 		min,
 		max,
 		step = 1,
 		disabled = false,
-		onValue,
+		onvalue,
 		decreaseLabel = 'Decrease',
 		increaseLabel = 'Increase',
 		name,
@@ -123,7 +123,7 @@
 	function commit(next: string) {
 		text = next;
 		value = parse(next);
-		onValue?.(value);
+		onvalue?.(value);
 	}
 
 	/* Keep out what no number can become; clean a paste of its spaces. */
@@ -206,7 +206,7 @@
 		class="number-input-dec"
 		tabindex="-1"
 		aria-label={decreaseLabel}
-		disabled={disabled || (min !== undefined && value !== null && value <= min)}
+		disabled={disabled || (min !== undefined && value != null && value <= min)}
 		onclick={() => stepBy(false)}>−</button
 	>
 	{/if}
@@ -247,7 +247,7 @@
 		class="number-input-inc"
 		tabindex="-1"
 		aria-label={increaseLabel}
-		disabled={disabled || (max !== undefined && value !== null && value >= max)}
+		disabled={disabled || (max !== undefined && value != null && value >= max)}
 		onclick={() => stepBy(true)}>+</button
 	>
 	{/if}

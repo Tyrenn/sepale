@@ -28,8 +28,8 @@
 				{ name: 'selected', type: 'Iterable<string>', description: 'Keys of the rows drawn as selected.' },
 				{ name: 'dirty', type: 'Iterable<string>', description: 'Keys of the rows drawn as changed and not saved.' },
 				{ name: 'sort', type: '{ key, direction }', description: 'The current sort, drawn on its header.' },
-				{ name: 'onSort', type: '(sort | undefined) => void', description: 'A sortable header was clicked: ascending, then descending, then none.' },
-				{ name: 'onEdit', type: '(row, key, value) => void', description: 'An editable cell was changed. The table keeps no data: update the row — with a DataHandler, `handler.update(id, { [key]: value })`.' },
+				{ name: 'onsort', type: '(sort | undefined) => void', description: 'A sortable header was clicked: ascending, then descending, then none.' },
+				{ name: 'onedit', type: '(row, key, value) => void', description: 'An editable cell was changed. The table keeps no data: update the row — with a DataHandler, `handler.update(id, { [key]: value })`.' },
 				{ name: 'maxHeight', type: 'string', description: 'The scroll box’s maximum height — for a pinned head.' }
 			]
 		}
@@ -123,7 +123,7 @@
 		{ key: 'radius', label: 'Radius (km)', width: '10em', align: 'end', sortable: true },
 		…
 	]}
-	{sort} onSort={(s) => (sort = s)} selected={picked} zebra hover>
+	{sort} onsort={(s) => (sort = s)} selected={picked} zebra hover>
 	{#snippet cell(p, column)}
 		{#if column.key === 'pick'}
 			<Checkbox checked={picked.includes(p.name)} onchange={() => toggle(p.name)} />
@@ -139,7 +139,7 @@
 			key={(p) => p.name}
 			columns={wide}
 			{sort}
-			onSort={(s) => (sort = s)}
+			onsort={(s) => (sort = s)}
 			selected={picked}
 			zebra
 			hover
@@ -178,17 +178,17 @@
 
 <Section
 	title="Editable in place"
-	subtitle="A column with `edit` draws an Editable in its cells; the new value comes back through onEdit."
+	subtitle="A column with `edit` draws an Editable in its cells; the new value comes back through onedit."
 	svelte={`<Table {rows} key={(p) => p.name} columns={[
 	{ key: 'name', label: 'Planet', edit: 'text' },
 	{ key: 'moons', label: 'Moons', align: 'end', edit: 'number' },
 	{ key: 'tags', label: 'Tags', edit: 'text[]' }
-]} onEdit={(row, key, value) => (row[key] = value)} />`}
+]} onedit={(row, key, value) => (row[key] = value)} />`}
 >
 	<Table
 		rows={editRows}
 		columns={editable}
-		onEdit={(row, key, value) => ((row as Record<string, unknown>)[key] = value)}
+		onedit={(row, key, value) => ((row as Record<string, unknown>)[key] = value)}
 		style="min-width:26rem;"
 	/>
 </Section>
