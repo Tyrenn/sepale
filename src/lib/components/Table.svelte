@@ -78,6 +78,7 @@
 	 */
 	import type { HTMLTableAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { keyer, type KeyOf } from '../keys.js';
 	import Editable from './Editable.svelte';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLTableAttributes {
@@ -85,8 +86,9 @@
 		columns: TableColumn<Row>[];
 		/** The rows: your data, as is. */
 		rows?: Row[];
-		/** A row's identity, for `selected`, `dirty` and keyed rendering. Defaults to its index. */
-		key?: (row: Row, index: number) => string;
+		/** A row's identity, for `selected`, `dirty`, keyed rendering and a crossfade:
+		    a field's name (`"id"`) or a function. Defaults to its index. */
+		key?: KeyOf<Row>;
 		/** How one cell is drawn. Without it, the cell is the column's value as text. */
 		cell?: Snippet<[Row, TableColumn<Row>, number]>;
 		/**
@@ -114,7 +116,7 @@
 	let {
 		columns,
 		rows = [],
-		key = (_row: Row, i: number) => String(i),
+		key: keyProp,
 		cell,
 		row,
 		empty,
@@ -127,6 +129,9 @@
 		class: klass = '',
 		...axes
 	}: Props = $props();
+
+	/* `key` as a function, whatever form it was given in. */
+	let key = $derived(keyer(keyProp));
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));

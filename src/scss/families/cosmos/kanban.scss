@@ -17,8 +17,12 @@
 	      <span class="kanban-column-title">To do</span>
 	      <span class="kanban-column-count">2</span>
 	    </header>
+	    <div class="kanban-column-empty">…</div>   (an empty column)
 	    <ul class="kanban-column-body">
-	      <li class="kanban-item"> <div class="card">…</div> </li>
+	      <li class="kanban-entry">
+	        <div class="kanban-marker"></div>       (while dragging)
+	        <div class="kanban-item"> <div class="card">…</div> </div>
+	      </li>
 	    </ul>
 	    <footer class="kanban-column-foot">…</footer>
 	  </section>
@@ -30,7 +34,10 @@
    on its own.
 
    What an item looks like is the caller's, a card usually. Dragging
-   and the marker are the Svelte wrapper's.
+   and the marker are the Svelte wrapper's. The body holds nothing but
+   entries: an entry is the element that comes, goes and moves (the
+   motion is on it), and it holds its item, and the drop marker when
+   the item in flight would land before it (or after it, the last).
 
    Plumbing contract (the family fills these on `.kanban`):
 	--kanban-gap                  space between columns
@@ -133,6 +140,16 @@
 		padding-block: var(--kanban-p);
 		color: var(--kanban-empty-fg);
 		text-align: center;
+	}
+
+	/* An entry stacks its marker and its item with the gap of the list, so
+	   the marker's negative margins give back exactly the room it takes. */
+	.kanban-entry {
+		display: flex;
+		flex: none;
+		flex-direction: column;
+		gap: var(--kanban-item-gap);
+		min-width: 0;
 	}
 
 	.kanban-item {

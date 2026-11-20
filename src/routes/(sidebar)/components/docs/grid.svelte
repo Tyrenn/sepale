@@ -17,7 +17,7 @@
 			Grid: [
 				{ name: 'items', type: 'Item[]', default: '[]', description: 'Your data, as is.' },
 				{ name: 'item', type: 'Snippet<[item, index]>', description: 'How one item is drawn.' },
-				{ name: 'key', type: '(item, index) => string', default: 'the index', description: 'An item’s identity, for selected, dirty and keyed rendering.' },
+				{ name: 'key', type: 'string | (item, index) => string', default: 'the index', description: 'An item’s identity, for selected, dirty and keyed rendering: a field’s name ("id") or a function.' },
 				{ name: 'masonry', type: 'boolean', default: 'false', description: 'Stack each column on its own, uneven items packed tight. The items are dealt to the columns in turn, so they still read row by row. Svelte only.' },
 				{ name: 'empty', type: 'Snippet', description: 'Drawn in place of the items when there are none.' },
 				{ name: 'selected', type: 'Iterable<string>', description: 'Keys of the items drawn as selected.' },

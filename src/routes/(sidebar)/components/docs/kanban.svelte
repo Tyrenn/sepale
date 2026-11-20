@@ -16,11 +16,12 @@
 			'kanban-column-body': 'The items of a column. Takes the height left, so the whole column can be dropped on.',
 			'kanban-column-foot': 'Your `foot` snippet, under the items.',
 			'kanban-column-empty': 'Drawn in a column with no items.',
+			'kanban-entry': 'Where one item stands in the column: what comes, goes and moves, holding the item and, during a drag, the marker.',
 			'kanban-item': 'One item. The component wraps each of yours in one.',
 			'kanban-item-selected': 'An item whose key is in `selected`.',
 			'kanban-item-dirty': 'An item whose key is in `dirty`: changed, not saved.',
 			'kanban-item-dragged': 'The item being dragged, where it came from.',
-			'kanban-marker': 'Where a dragged item would land. Written by the component during a drag.'
+			'kanban-marker': 'Where a dragged item would land: in the entry it would land before, or after the last one. Written by the component during a drag.'
 		},
 		props: {
 			Kanban: [
@@ -28,13 +29,15 @@
 				{ name: 'columns', type: '{ id, title? }[]', description: 'The columns, in order. An item naming another column is not drawn.' },
 				{ name: 'columnOf', type: '(item) => string', description: 'The id of the column an item belongs to.' },
 				{ name: 'item', type: 'Snippet<[item, index]>', description: 'How one item is drawn, given its place in its column.' },
-				{ name: 'key', type: '(item, index) => string', default: 'the index', description: 'An item’s identity, for selected, dirty, keyed rendering and giving the focus back after a move.' },
+				{ name: 'key', type: 'string | (item, index) => string', default: 'the index', description: 'An item’s identity — a field’s name ("id") or a function — for selected, dirty, a crossfade, keyed rendering and giving the focus back after a move.' },
 				{ name: 'onmove', type: '({ item, from, to, index }) => void', description: 'An item was dropped somewhere new. `index` is its place in `to`, counted without the item itself. Given, it makes the items movable.' },
 				{ name: 'head', type: 'Snippet<[column, items]>', description: 'Replaces a column’s title and count.' },
 				{ name: 'foot', type: 'Snippet<[column]>', description: 'Drawn under a column’s items: an add button, usually.' },
 				{ name: 'empty', type: 'Snippet<[column]>', description: 'Drawn in a column with no items.' },
 				{ name: 'selected', type: 'Iterable<string>', description: 'Keys of the items drawn as selected.' },
-				{ name: 'dirty', type: 'Iterable<string>', description: 'Keys of the items drawn as changed and not saved.' }
+				{ name: 'dirty', type: 'Iterable<string>', description: 'Keys of the items drawn as changed and not saved.' },
+				{ name: 'transition', type: 'Motion', default: 'the family', description: 'Who plays a card’s coming and going. Each card hands it its key: with crossfade(), a card moved to another column flies there. Left out, the family’s CSS (data-motion); false: instant; or a Svelte transition: slide, { fn: fly, params: { y: -4 } }, { in, out }.' },
+				{ name: 'animate', type: 'Move', default: 'the family', description: 'Who plays a card’s move. Left out, the family: a card that stands elsewhere after a change, in its column or another, is marked data-motion="move" from where it stood. false: nobody. A Svelte animation (flip) plays on the entries, as animate:flip would — with a crossfade() transition, the board moves as a plain Svelte one.' },
 			]
 		}
 	};
@@ -110,8 +113,12 @@
 			<span class="kanban-column-count">2</span>
 		</header>
 		<ul class="kanban-column-body">
-			<li class="kanban-item"><div class="card">…</div></li>
-			<li class="kanban-item kanban-item-selected"><div class="card">…</div></li>
+			<li class="kanban-entry">
+				<div class="kanban-item"><div class="card">…</div></div>
+			</li>
+			<li class="kanban-entry">
+				<div class="kanban-item kanban-item-selected"><div class="card">…</div></div>
+			</li>
 		</ul>
 	</section>
 </div>`}

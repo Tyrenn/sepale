@@ -76,4 +76,37 @@
 		background-image: linear-gradient(var(--alert-bg), var(--alert-bg));
 		background-color: var(--color-surface-2);
 	}
+
+	/* ── Motion ──
+	   The component marks each `.toast-item` `data-motion="enter"`,
+	   `"leave"` or `"move"` (with `--motion-dx/dy`, where it came from),
+	   and removes a leaving one once the motion written here has run: an
+	   alert rises in from the stack's open side, slides out sideways, and
+	   the others glide to their new places. */
+	@media (prefers-reduced-motion: no-preference) {
+		.toast-item[data-motion="enter"] {
+			animation: toast-item-in 0.18s cubic-bezier(0.33, 1, 0.68, 1);
+		}
+		.toast-top > .toast-item[data-motion="enter"] {
+			animation-name: toast-item-in-down;
+		}
+		.toast-item[data-motion="leave"] {
+			animation: toast-item-out 0.16s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+		}
+		.toast-item[data-motion="move"] {
+			animation: toast-item-move 0.18s cubic-bezier(0.33, 1, 0.68, 1);
+		}
+	}
+	@keyframes toast-item-in {
+		from { opacity: 0; translate: 0 16px; }
+	}
+	@keyframes toast-item-in-down {
+		from { opacity: 0; translate: 0 -16px; }
+	}
+	@keyframes toast-item-out {
+		to { opacity: 0; translate: 24px 0; }
+	}
+	@keyframes toast-item-move {
+		from { translate: var(--motion-dx, 0) var(--motion-dy, 0); }
+	}
 }

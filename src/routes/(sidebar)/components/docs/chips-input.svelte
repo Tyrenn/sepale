@@ -20,7 +20,9 @@
 				{ name: 'chip', type: 'Snippet<[string]>', description: 'How a chip reads.' },
 				{ name: 'chipClass', type: 'string', description: 'Classes on each chip: chip-primary, chip-soft…' },
 				{ name: 'onvalue', type: '(values) => void', description: 'After every addition or removal.' },
-				{ name: 'placeholder / disabled / removeLabel', type: '', description: 'As named.' }
+				{ name: 'placeholder / disabled / removeLabel', type: '', description: 'As named.' },
+				{ name: 'transition', type: 'Motion', default: 'the family', description: 'Who plays a chip’s coming and going. Left out, the family’s CSS (data-motion); false: instant; or a Svelte transition: slide, { fn: fly, params: { y: -4 } }, { in, out }.' },
+				{ name: 'animate', type: 'Move', default: 'the family', description: 'Who plays the other chips’ move when one comes or goes. Left out, the family’s CSS; false: instant; or a Svelte animation: flip, { fn: flip, params: { duration: 200 } }.' }
 			]
 		}
 	};

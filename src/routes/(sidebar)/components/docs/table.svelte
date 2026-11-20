@@ -21,7 +21,7 @@
 			Table: [
 				{ name: 'columns', type: 'TableColumn[]', description: '{ key, label, width, sticky, hidden, sortable, align, value, edit }, in order. `edit` (a kind of `Editable`: text, number, boolean and their lists) makes the cell editable in place. A width is a minimum: text wraps inside it.' },
 				{ name: 'rows', type: 'Row[]', default: '[]', description: 'Your data, as is.' },
-				{ name: 'key', type: '(row, index) => string', default: 'the index', description: 'A row’s identity, for selected, dirty and keyed rendering.' },
+				{ name: 'key', type: 'string | (row, index) => string', default: 'the index', description: 'A row’s identity, for selected, dirty and keyed rendering: a field’s name ("id") or a function.' },
 				{ name: 'cell', type: 'Snippet<[row, column, index]>', description: 'How one cell is drawn. Without it, the column’s value as text.' },
 				{ name: 'row', type: 'Snippet<[row, index]>', description: 'How a whole row is drawn, <td>s included — the escape hatch. The table still writes the <tr>.' },
 				{ name: 'empty', type: 'Snippet', description: 'Drawn in place of the rows when there are none.' },

@@ -10,7 +10,7 @@
 	} as const;
 
 	export const FLAGS = {} as const;
-	export const PARTS = [] as const;
+	export const PARTS = ['item'] as const;
 
 	/** The colours an alert has an icon for, and any other the family ships. */
 	export type ToastColor = 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error';
@@ -41,11 +41,10 @@
 	 * viewport; without, it sits in the flow where it is placed.
 	 */
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { flip } from 'svelte/animate';
-	import { fly } from 'svelte/transition';
 	import Alert from './Alert.svelte';
 	import Button from './Button.svelte';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { motion, moved, withKey, type Motion, type Move } from '../motion.js';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLElement> {
 		/** The region's accessible name. */
@@ -54,6 +53,13 @@
 		dismissLabel?: string;
 		/** At most this many alerts; the oldest goes first. */
 		max?: number;
+		/** Who plays an alert's coming and going: the family (default), `false`
+		    for nobody, or a Svelte transition — `fly`, `{ fn: fly, params: { x: 40 } }`,
+		    `{ in: fly, out: fade }` (motion.ts). */
+		transition?: Motion;
+		/** Who plays the others' move when one comes or goes: the family
+		    (default), `false`, or a Svelte animation — `flip`, `{ fn: flip, params: { duration: 200 } }`. */
+		animate?: Move;
 		class?: string;
 	}
 
@@ -63,13 +69,14 @@
 		label = 'Notifications',
 		dismissLabel = 'Dismiss',
 		max = Infinity,
+		transition,
+		animate,
 		class: klass = '',
 		...axes
 	}: Props = $props();
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
-	let top = $derived(classes.includes(`${PREFIX}-top`));
 
 	let items: Item[] = $state([]);
 	let next = 1;
@@ -134,7 +141,7 @@
 
 <section {...applied.rest} class={classes} aria-label={label} aria-live="polite">
 	{#each items as t (t.id)}
-		<div use:countdown={t} animate:flip={{ duration: 180 }} in:fly={{ y: top ? -16 : 16, duration: 180 }} out:fly={{ x: 24, duration: 160 }}>
+		<div class={`${PREFIX}-item`} use:countdown={t} animate:moved={animate} in:motion={withKey(transition, t.id)} out:motion={withKey(transition, t.id)}>
 			{#snippet action()}
 				<Button
 					size="sm"

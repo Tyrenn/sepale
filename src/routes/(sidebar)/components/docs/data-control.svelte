@@ -42,7 +42,8 @@
 				{ name: 'rightActions', type: 'Snippet<[handler]>', description: 'Drawn at the end of the bar, after the built-in actions.' },
 				{ name: 'header', type: 'Snippet<[handler]>', description: 'Drawn above the view, and above a top pagination.' },
 				{ name: 'footer', type: 'Snippet<[handler]>', description: 'Drawn below the view, and below a bottom pagination.' },
-				{ name: 'labels', type: 'Partial<DataControlLabels>', description: 'Every text it writes, for another language.' }
+				{ name: 'labels', type: 'Partial<DataControlLabels>', description: 'Every text it writes, for another language.' },
+				{ name: 'transition', type: 'Motion', default: 'the family', description: 'Who plays the extra filters’ opening and closing. Left out, the family’s CSS; false: instant; or a Svelte transition (slide…).' }
 			]
 		}
 	};

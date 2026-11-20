@@ -72,6 +72,7 @@
 	import Breadcrumbs from './Breadcrumbs.svelte';
 	import { FILE_ICONS, IMAGE_EXTENSIONS, PAGE, extensionOf, type FileIcon } from './file-icons.js';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { motion, type Motion } from '../motion.js';
 
 	type Folder = FileNode | null;
 	type SortKey = 'name' | 'modified' | 'size';
@@ -121,6 +122,10 @@
 		labels?: Partial<typeof LABELS>;
 		formatSize?: (bytes: number) => string;
 		formatDate?: (date: Date) => string;
+		/** Who plays a tree branch's opening and closing: the family (default, `data-motion`), `false` for
+		    nobody, or a Svelte transition — `slide`, `{ fn: fly, params: { y: -4 } }`,
+		    `{ in, out }` (motion.ts). */
+		transition?: Motion;
 		class?: string;
 	}
 
@@ -159,6 +164,7 @@
 		labels = {},
 		formatSize = defaultSize,
 		formatDate = (d: Date) => d.toLocaleDateString(),
+		transition,
 		class: klass = '',
 		...axes
 	}: Props = $props();
@@ -474,7 +480,7 @@
 {/snippet}
 
 {#snippet branch(nodes: FileNode[], chain: FileNode[])}
-	<ul role="group">
+	<ul role="group" in:motion={transition} out:motion={transition}>
 		{#each nodes.filter((n) => n.kind === 'folder') as folder (folder.id)}
 			{@const open_ = expanded.has(folder.id)}
 			{@const known = cache.get(folder.id)}

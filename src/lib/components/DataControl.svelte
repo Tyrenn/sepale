@@ -106,9 +106,9 @@
 	 * the handler was given its own `confirmDelete` / `confirmDiscard`.
 	 */
 	import type { Snippet } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { motion, type Motion } from '../motion.js';
 	import type { DataHandlerState, DiscardChoice, EntitySuggestion, EntityValue, Filter, HandledFilter, Sort } from './data-handler.svelte.js';
 	import Button from './Button.svelte';
 	import Checkbox from './Checkbox.svelte';
@@ -172,6 +172,9 @@
 		footer?: Snippet<[Handler]>;
 		/** The texts, for another language. */
 		labels?: Partial<DataControlLabels>;
+		/** Who plays the extra filters' opening and closing: the family
+		    (default), `false` for nobody, or a Svelte transition (motion.ts). */
+		transition?: Motion;
 		class?: string;
 	}
 
@@ -198,6 +201,7 @@
 		header,
 		footer,
 		labels,
+		transition,
 		class: klass = '',
 		...axes
 	}: Props = $props();
@@ -617,7 +621,7 @@
 					</Button>
 				{/if}
 				{#if showMore}
-					<div class={`${PREFIX}-more`} transition:slide={{ duration: 220 }}>
+					<div class={`${PREFIX}-more`} in:motion={transition} out:motion={transition}>
 						{#each moreFilters as f (f.id)}
 							{@render editor(f, true)}
 						{/each}

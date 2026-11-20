@@ -211,13 +211,24 @@ own font size, so a component grows with its text and needs no breakpoint.
   keyframes on its classes and states. A menu folding, a knob sliding, the tab
   indicator following `--tabs-x`: the component sets a state or a custom
   property, the family decides how it travels.
-- **Some components animate themselves**, in JavaScript, with Svelte's
-  transitions: a dialog scaling in, a dropdown flying in, a toast sliding out.
-  Each page's *Motion* section names them; they play whatever the family, so
-  draw the element at rest and let them move it.
-- **Some wait for the family**: an element removed on `animationend` (a
-  button's ripple wave) must carry a CSS animation, and a drawer closes its
-  `<dialog>` on `transitionend`. Each page's *Motion* section names those too.
+- **No component animates by itself** (ADR 0019). When an element comes,
+  goes or changes places, the component marks the moment on it and waits as
+  long as the family's CSS says, read back from the computed style:
+  - `data-motion="enter"`: just inserted, while your animation runs. A new
+    element has no style to transition from: use `@keyframes` (or
+    `@starting-style`).
+  - `data-motion="leave"`: going; it stays in the DOM until your transitions
+    and animations on it have run (a dialog's box, a dropdown, a dismissed
+    alert, a toast).
+  - `data-motion="move"`: changed places in a list (the toast stack);
+    `--motion-dx` / `--motion-dy` hold where it came from.
+  - `--motion-w` / `--motion-h`: its size as it enters or leaves, for a
+    height that folds (`height: auto` does not animate).
+  Draw nothing for a phase and it is instant. Each page's *Motion* section
+  names the elements marked.
+- **Some wait for a change of state**: a drawer closes its `<dialog>` once its
+  hidden state's transition has run; a ripple wave is removed once its
+  animation has.
 - Wrap what is decorative in `@media (prefers-reduced-motion: no-preference)`,
   or cut it under `reduce`.
 

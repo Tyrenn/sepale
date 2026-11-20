@@ -19,7 +19,7 @@
 			"btn-active": "Draw it as the current choice without it being pressed.",
 			"btn-disabled": "For an <a>, which cannot carry the disabled attribute.",
 			"btn-ripple": "Arm the press wave; the wave itself is drawn by the component.",
-			"btn-ripple-wave": "One wave, positioned at the press point and removed when its animation ends.",
+			"btn-ripple-wave": "One wave, positioned at the press point and removed once the family's motion on it has run (at once if it draws none).",
 			"btn-block": "Full width of its container.",
 			"btn-wide": "Wider than its content, without filling the row."
 		},

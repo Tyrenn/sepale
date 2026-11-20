@@ -15,7 +15,7 @@
 				{ name: 'open', type: 'boolean', default: 'false', description: 'Whether the box is shown. Bindable.' },
 				{ name: 'trigger', type: 'Snippet<[{ open, toggle, props }]>', description: 'The element that opens it. Spread `props` on your button: it carries the click and the ARIA state.' },
 				{ name: 'children', type: 'Snippet<[{ close }]>', description: 'The box’s content. It closes on Escape and on a press outside — a click inside is the content’s to decide, with `close`.' },
-				{ name: 'animated', type: 'boolean', default: 'true', description: 'Animate the box. The CSS never does; reduced motion is honoured.' },
+				{ name: 'transition', type: 'Motion', default: 'the family', description: 'Who plays the opening and closing. Left out, the family’s CSS (data-motion). false: instant. A Svelte transition takes over: fly, { fn: fly, params: { y: 8 } }, or { in: fade, out: fly }.' },
 				{ name: 'onopen', type: '(open: boolean) => void', description: 'After every change of `open`.' }
 			]
 		}

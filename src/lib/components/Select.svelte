@@ -26,6 +26,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { motion, type Motion } from '../motion.js';
 
 	// `size` is ours — the HTML attribute of the same name is a character count
 	// our CSS overrides anyway.
@@ -73,6 +74,10 @@
 		onvalue?: (value: any) => void;
 		/** The native `<select>`. Bindable. */
 		element?: HTMLSelectElement;
+		/** Who plays the list's opening and closing: the family (default, `data-motion`), `false` for
+		    nobody, or a Svelte transition — `slide`, `{ fn: fly, params: { y: -4 } }`,
+		    `{ in, out }` (motion.ts). */
+		transition?: Motion;
 		class?: string;
 		value?: any;
 		children?: Snippet;
@@ -96,6 +101,7 @@
 		onvalue,
 		element = $bindable(),
 		value = $bindable(),
+		transition,
 		class: klass = '',
 		disabled = false,
 		children,
@@ -265,7 +271,7 @@
 		</select>
 
 		{#if open}
-			<ul id="{uid}-list" class="list list-suggestions" role="listbox" aria-multiselectable="true">
+			<ul id="{uid}-list" class="list list-suggestions" role="listbox" aria-multiselectable="true" in:motion={transition} out:motion={transition}>
 				{#if nullable}
 					<li
 						id="{uid}-0"

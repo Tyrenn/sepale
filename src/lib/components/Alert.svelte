@@ -25,8 +25,8 @@
 	 */
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { slide } from 'svelte/transition';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { motion, type Motion } from '../motion.js';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'title'> {
 		/** A bold first line. */
@@ -41,6 +41,9 @@
 		ondismiss?: () => void;
 		/** The close button's accessible name. */
 		dismissLabel?: string;
+		/** Who plays its leaving once dismissed: the family (default), `false`
+		    for nobody, or a Svelte transition (motion.ts). */
+		transition?: Motion;
 		class?: string;
 		children?: Snippet;
 	}
@@ -54,6 +57,7 @@
 		dismissible = false,
 		ondismiss,
 		dismissLabel = 'Dismiss',
+		transition,
 		class: klass = '',
 		children,
 		...axes
@@ -75,7 +79,7 @@
 </script>
 
 {#if !gone}
-	<div {...applied.rest} class={classes} role={urgent ? 'alert' : 'status'} out:slide={{ duration: 160 }}>
+	<div {...applied.rest} class={classes} role={urgent ? 'alert' : 'status'} out:motion={transition}>
 		{#if icon}
 			<span class="alert-icon">{@render icon()}</span>
 		{:else if kind}

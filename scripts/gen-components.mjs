@@ -282,15 +282,18 @@ const hooksOf = (src, prefix) => {
 	for (const m of src.matchAll(/style:--([a-z][\w-]*)/g)) found.add(`--${m[1]}`);
 	for (const m of src.matchAll(/["'`;\s{]--([a-z][\w-]*)\s*:/g)) found.add(`--${m[1]}`);
 	for (const m of src.matchAll(/setProperty\(\s*["'`]--([a-z][\w-]*)/g)) found.add(`--${m[1]}`);
+	/* What motion.ts writes on the elements it marks (ADR 0019). */
+	if (/\b(?:in|out):motion\b/.test(src)) ['--motion-w', '--motion-h'].forEach((h) => found.add(h));
+	if (/\banimate:moved\b/.test(src)) ['--motion-dx', '--motion-dy'].forEach((h) => found.add(h));
 	/* `background` writes the fill slot (variants.ts), where a family reads it. */
 	if (allCss.includes(`var(--${prefix}-bg`)) found.add(`--${prefix}-bg`);
 	return [...found].sort();
 };
 /**
- * How a wrapper moves, read from its source: the Svelte transitions it plays
- * in JavaScript (`transition:`, `in:`, `out:`, `animate:`), and the CSS events
- * it waits for (`animationend`, `transitionend`), each as one sentence. A
- * family needs both: the first it cannot restyle, the second it must provide.
+ * How a wrapper moves, read from its source, each as one sentence: the phases
+ * it marks for the family to draw (motion.ts — `in:motion`, `out:motion`,
+ * `animate:moved`, `settle`; ADR 0019), and any Svelte transition it would
+ * still play in JavaScript, which a family could not restyle.
  */
 const motionOf = (src, prefix) => {
 	const out = [];
@@ -303,7 +306,40 @@ const motionOf = (src, prefix) => {
 		if (/class=\{classes\}/.test(tag)) return `\`.${prefix}\``;
 		return `a \`<${tag.match(/^<([\w-]+)/)?.[1] ?? 'element'}>\``;
 	};
+	for (const m of src.matchAll(/\b(in|out):motion\b/g)) {
+		out.push(
+			m[1] === 'in'
+				? `${target(m.index)} is marked \`data-motion="enter"\` when inserted, while the family's animation on it runs (\`--motion-w/h\`: its size). Nothing drawn: it appears at once.`
+				: `${target(m.index)} is marked \`data-motion="leave"\` and stays in the DOM until the family's transitions and animations on it have run (\`--motion-w/h\`: its size). Nothing drawn: it goes at once.`
+		);
+	}
+	for (const m of src.matchAll(/\banimate:moved\b/g)) {
+		out.push(
+			`${target(m.index)} is marked \`data-motion="move"\` when the list reorders, \`--motion-dx/dy\` holding where it came from: the family plays it back from there.`
+		);
+	}
+	/* The app may take a motion back with a prop (motion.ts: Motion, Move). */
+	if (/:motion=\{(?:withKey\()?transition\b/.test(src)) {
+		out.push(
+			"The `transition` prop hands the coming and going to a Svelte transition instead (`fly`, `{ fn, params }`, `{ in, out }`): no phase is marked then. `false`: instant."
+		);
+	}
+	if (/new Reflow\(/.test(src)) {
+		out.push(
+			"An item that stands somewhere else after a change — another place in its list, or another list — is marked `data-motion=\"move\"`, `--motion-dx/dy` holding where it stood: measured by the component (FLIP, motion.ts `Reflow`). An item that changed list neither leaves nor enters, it moves. The `animate` prop turns it off."
+		);
+	}
+	if (/animate:moved=\{animate\}/.test(src)) {
+		out.push("The `animate` prop hands the move to a Svelte animation instead (`flip`): no phase is marked then. `false`: instant.");
+	}
+	for (const m of src.matchAll(/\buse:settled=/g)) {
+		out.push(`${target(m.index)} is removed once the family's motion on it has run — at once if it draws none.`);
+	}
+	if (/\bsettle\(/.test(src)) {
+		out.push(`Finishes a change of state once the family's transition on the element has run, as long as its CSS says — at once if it draws none.`);
+	}
 	for (const m of src.matchAll(/\b(transition|in|out|animate):(\w+)(?:=\{\{([^}]*)\}\})?/g)) {
+		if (m[2] === 'motion' || m[2] === 'moved') continue;
 		const params = (m[3] ?? '').replace(/\s+/g, ' ').trim();
 		const kind = { transition: 'enters and leaves', in: 'enters', out: 'leaves', animate: 'moves between places' }[m[1]];
 		out.push(

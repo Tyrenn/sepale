@@ -26,7 +26,8 @@
    writes `.dropdown-fixed` and places the box itself, in fixed
    coordinates, which no overflow crops.
 
-   Nothing here animates: the Svelte wrapper brings the transition.
+   Motion is the family's: the wrapper marks the box `data-motion`
+   ("enter" / "leave") and waits for what the look draws (see Motion).
 
    Plumbing contract (the family fills these on `.dropdown`):
 	--dropdown-bg / --dropdown-fg
@@ -146,5 +147,27 @@
 		--menu-shadow: none;
 		--menu-p: 0px;
 		width: 100%;
+	}
+
+	/* ── Motion ──
+	   The component marks the box `data-motion="enter"` / `"leave"` and
+	   removes it once the motion written here has run: it drops in 4px
+	   from the trigger's side as it fades, and back out. */
+	@media (prefers-reduced-motion: no-preference) {
+		.dropdown-content[data-motion="enter"] {
+			animation: dropdown-content-in 0.12s cubic-bezier(0.33, 1, 0.68, 1);
+		}
+		.dropdown-content[data-motion="leave"] {
+			animation: dropdown-content-in 0.12s cubic-bezier(0.33, 1, 0.68, 1) reverse forwards;
+		}
+		.dropdown-top > .dropdown-content:is([data-motion="enter"], [data-motion="leave"]) {
+			animation-name: dropdown-content-in-up;
+		}
+	}
+	@keyframes dropdown-content-in {
+		from { opacity: 0; translate: 0 -4px; }
+	}
+	@keyframes dropdown-content-in-up {
+		from { opacity: 0; translate: 0 4px; }
 	}
 }

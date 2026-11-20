@@ -270,4 +270,24 @@
 		--data-control-shadow: 15px 28px 25px -18px oklch(0% 0 0 / 0.2);
 		--data-control-p: calc(1.25em * var(--scale));
 	}
+
+	/* ── Motion ──
+	   The extra filters are marked `data-motion="enter"` / `"leave"` (with
+	   `--motion-h`, their height) and removed once the motion written here
+	   has run: they unfold, and fold back. */
+	@media (prefers-reduced-motion: no-preference) {
+		.data-control-more:is([data-motion="enter"], [data-motion="leave"]) {
+			box-sizing: border-box;
+			overflow: hidden;
+			animation: data-control-more-in 0.22s cubic-bezier(0.33, 1, 0.68, 1);
+		}
+		.data-control-more[data-motion="leave"] {
+			animation-direction: reverse;
+			animation-fill-mode: forwards;
+		}
+	}
+	@keyframes data-control-more-in {
+		from { height: 0; padding-block: 0; margin-block: 0; border-block-width: 0; opacity: 0; }
+		to { height: var(--motion-h); }
+	}
 }

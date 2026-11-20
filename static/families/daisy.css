@@ -80,13 +80,17 @@
 }
 /* ── svg ── */
 /* ============================================================
-   svg.scss — inline SVG sizing.
+   svg.scss — icon sizing inside the components.
 
-   Icons inside components scale with the surrounding font size,
-   which is what makes intrinsic (em-based) sizing work for buttons,
-   chips, tabs and the like.
+   An icon the caller puts in a component (a button, a chip, a
+   field, a tab, a menu…) scales with the surrounding font size,
+   which is what makes intrinsic (em-based) sizing work for them.
+   Only there: the page's own svg is not the family's business,
+   and an svg stating its own height (an illustration) keeps it.
+   :where keeps the rule at zero specificity, so anything wins.
+   The components' own svg are sized in their own files.
    ============================================================ */
-svg {
+:where(.btn, .chip, .badge, .input, .select, .combobox, .tabs-item, .menu, .alert, .dropdown, .collapse, .breadcrumbs, .navbar, .dock, .list, .stat) svg:not([height]) {
   height: 1em;
 }
 
@@ -181,7 +185,7 @@ svg {
    intrinsic (resolved against the element's own font-size, so size
    variants stay proportioned) while the text is left alone.
 
-   What does NOT scale: text, icons (svg { height: 1em } — they sit on
+   What does NOT scale: text, icons (an svg in a component is 1em — they sit on
    the text baseline), the radii (their own parameters), hairlines in px,
    and the text-natured components that draw no frame (text, link,
    breadcrumbs, validator).
@@ -616,8 +620,8 @@ svg {
 	  </div>
 	</dialog>
 
-   Nothing here animates: opening and closing are instant in CSS.
-   The Svelte wrapper brings its own transitions.
+   Motion is the family's: the wrapper marks the box `data-motion`
+   ("enter" / "leave") and waits for what the look draws (see Motion).
 
    Plumbing contract (the family fills these on `.dialog`):
 	--dialog-backdrop      the shade behind a modal dialog
@@ -664,7 +668,8 @@ svg {
    writes `.dropdown-fixed` and places the box itself, in fixed
    coordinates, which no overflow crops.
 
-   Nothing here animates: the Svelte wrapper brings the transition.
+   Motion is the family's: the wrapper marks the box `data-motion`
+   ("enter" / "leave") and waits for what the look draws (see Motion).
 
    Plumbing contract (the family fills these on `.dropdown`):
 	--dropdown-bg / --dropdown-fg
@@ -810,8 +815,12 @@ svg {
 	      <span class="kanban-column-title">To do</span>
 	      <span class="kanban-column-count">2</span>
 	    </header>
+	    <div class="kanban-column-empty">…</div>   (an empty column)
 	    <ul class="kanban-column-body">
-	      <li class="kanban-item"> <div class="card">…</div> </li>
+	      <li class="kanban-entry">
+	        <div class="kanban-marker"></div>       (while dragging)
+	        <div class="kanban-item"> <div class="card">…</div> </div>
+	      </li>
 	    </ul>
 	    <footer class="kanban-column-foot">…</footer>
 	  </section>
@@ -823,7 +832,10 @@ svg {
    on its own.
 
    What an item looks like is the caller's, a card usually. Dragging
-   and the marker are the Svelte wrapper's.
+   and the marker are the Svelte wrapper's. The body holds nothing but
+   entries: an entry is the element that comes, goes and moves (the
+   motion is on it), and it holds its item, and the drop marker when
+   the item in flight would land before it (or after it, the last).
 
    Plumbing contract (the family fills these on `.kanban`):
 	--kanban-gap                  space between columns
@@ -3776,6 +3788,12 @@ svg {
     background-color: var(--dialog-close-hover);
   }
 }
+/* The cross: the size of the text, like any icon. */
+.dialog-close svg {
+  width: 1em;
+  height: 1em;
+}
+
 .dialog-close:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
@@ -4160,6 +4178,16 @@ svg {
   padding-block: var(--kanban-p);
   color: var(--kanban-empty-fg);
   text-align: center;
+}
+
+/* An entry stacks its marker and its item with the gap of the list, so
+   the marker's negative margins give back exactly the room it takes. */
+.kanban-entry {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--kanban-item-gap);
+  min-width: 0;
 }
 
 .kanban-item {
@@ -9308,6 +9336,33 @@ dialog.drawer[open] {
   --data-control-p: calc(1em * var(--scale));
 }
 
+/* ── Motion ──
+   The extra filters are marked `data-motion="enter"` / `"leave"` (with
+   `--motion-h`, their height) and removed once the motion written here
+   has run: they unfold, and fold back. */
+@media (prefers-reduced-motion: no-preference) {
+  .data-control-more:is([data-motion=enter], [data-motion=leave]) {
+    box-sizing: border-box;
+    overflow: hidden;
+    animation: data-control-more-in 0.22s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .data-control-more[data-motion=leave] {
+    animation-direction: reverse;
+    animation-fill-mode: forwards;
+  }
+}
+@keyframes data-control-more-in {
+  from {
+    height: 0;
+    padding-block: 0;
+    margin-block: 0;
+    border-block-width: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--motion-h);
+  }
+}
 .dialog {
   --dialog-backdrop: oklch(0% 0 0 / 0.4);
   --dialog-bg: var(--color-base-100);
@@ -9331,6 +9386,24 @@ dialog.drawer[open] {
   margin-block-start: calc(0.5em * var(--scale));
 }
 
+/* ── Motion ──
+   The component marks the box `data-motion="enter"` / `"leave"` and
+   closes the dialog once the motion written here has run: the box
+   scales in from 95% and fades, and back out. */
+@media (prefers-reduced-motion: no-preference) {
+  .dialog-box[data-motion=enter] {
+    animation: dialog-box-in 0.15s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .dialog-box[data-motion=leave] {
+    animation: dialog-box-in 0.15s cubic-bezier(0.33, 1, 0.68, 1) reverse forwards;
+  }
+}
+@keyframes dialog-box-in {
+  from {
+    opacity: 0;
+    scale: 0.95;
+  }
+}
 .dock {
   right: 0;
   bottom: 0;
@@ -9471,6 +9544,33 @@ dialog.drawer[open] {
   width: 100%;
 }
 
+/* ── Motion ──
+   The component marks the box `data-motion="enter"` / `"leave"` and
+   removes it once the motion written here has run: it drops in 4px
+   from the trigger's side as it fades, and back out. */
+@media (prefers-reduced-motion: no-preference) {
+  .dropdown-content[data-motion=enter] {
+    animation: dropdown-content-in 0.12s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .dropdown-content[data-motion=leave] {
+    animation: dropdown-content-in 0.12s cubic-bezier(0.33, 1, 0.68, 1) reverse forwards;
+  }
+  .dropdown-top > .dropdown-content:is([data-motion=enter], [data-motion=leave]) {
+    animation-name: dropdown-content-in-up;
+  }
+}
+@keyframes dropdown-content-in {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+@keyframes dropdown-content-in-up {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+}
 .fieldset {
   gap: calc(0.375em * var(--scale));
   padding-block: calc(0.25em * var(--scale));
@@ -12219,6 +12319,29 @@ label:has(:checked),
   --fontsize: var(--xl, var(--default-xl));
 }
 
+/* ── Motion ──
+   A dismissed alert is marked `data-motion="leave"` (with
+   `--motion-h`, its height) and removed once the motion written here
+   has run: it folds up. */
+@media (prefers-reduced-motion: no-preference) {
+  .alert[data-motion=leave] {
+    box-sizing: border-box;
+    overflow: hidden;
+    animation: alert-out 0.16s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  }
+}
+@keyframes alert-out {
+  from {
+    height: var(--motion-h);
+  }
+  to {
+    height: 0;
+    padding-block: 0;
+    margin-block: 0;
+    border-block-width: 0;
+    opacity: 0;
+  }
+}
 .toast {
   --toast-gap: calc(0.6em * var(--scale));
   --toast-m: calc(1em * var(--scale));
@@ -12232,6 +12355,49 @@ label:has(:checked),
   background-color: var(--color-base-100);
 }
 
+/* ── Motion ──
+   The component marks each `.toast-item` `data-motion="enter"`,
+   `"leave"` or `"move"` (with `--motion-dx/dy`, where it came from),
+   and removes a leaving one once the motion written here has run: an
+   alert rises in from the stack's open side, slides out sideways, and
+   the others glide to their new places. */
+@media (prefers-reduced-motion: no-preference) {
+  .toast-item[data-motion=enter] {
+    animation: toast-item-in 0.18s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .toast-top > .toast-item[data-motion=enter] {
+    animation-name: toast-item-in-down;
+  }
+  .toast-item[data-motion=leave] {
+    animation: toast-item-out 0.16s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  }
+  .toast-item[data-motion=move] {
+    animation: toast-item-move 0.18s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+}
+@keyframes toast-item-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+@keyframes toast-item-in-down {
+  from {
+    opacity: 0;
+    translate: 0 -16px;
+  }
+}
+@keyframes toast-item-out {
+  to {
+    opacity: 0;
+    translate: 24px 0;
+  }
+}
+@keyframes toast-item-move {
+  from {
+    translate: var(--motion-dx, 0) var(--motion-dy, 0);
+  }
+}
 .tooltip {
   --tooltip-bg: var(--color-base-content);
   --tooltip-fg: var(--color-base-100);

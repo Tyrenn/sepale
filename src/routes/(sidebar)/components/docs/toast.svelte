@@ -14,7 +14,9 @@
 				{ name: 'align', type: "'start' | 'center' | 'end'", description: 'Pins the stack to that end of the edge.' },
 				{ name: 'max', type: 'number', default: 'Infinity', description: 'At most this many alerts; the oldest goes first.' },
 				{ name: 'label', type: 'string', default: "'Notifications'", description: "The region's accessible name." },
-				{ name: 'dismissLabel', type: 'string', default: "'Dismiss'", description: "Each close button's accessible name." }
+				{ name: 'dismissLabel', type: 'string', default: "'Dismiss'", description: "Each close button's accessible name." },
+				{ name: 'transition', type: 'Motion', default: 'the family', description: 'Who plays an alert’s coming and going. Left out, the family’s CSS; false: instant; or a Svelte transition: fly, { fn: fly, params: { x: 40 } }, { in: fly, out: fade }.' },
+				{ name: 'animate', type: 'Move', default: 'the family', description: 'Who plays the other alerts’ move when one comes or goes. Left out, the family’s CSS; false: instant; or a Svelte animation: flip, { fn: flip, params: { duration: 200 } }.' }
 			],
 			'add()': [
 				{ name: 'message', type: 'string', description: 'The text. `add("Saved")` is the short form.' },

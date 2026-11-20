@@ -18,7 +18,7 @@
 				{ name: 'modal', type: 'boolean', default: 'true', description: 'Block the page behind it (showModal). Escape closes it.' },
 				{ name: 'closable', type: 'boolean', default: 'true', description: 'Draw a close button in the corner.' },
 				{ name: 'dismissible', type: 'boolean', default: 'true', description: 'Close on Escape and on a click outside the box.' },
-				{ name: 'animated', type: 'boolean', default: 'true', description: 'Animate opening and closing. The CSS never does; reduced motion is honoured.' },
+				{ name: 'transition', type: 'Motion', default: 'the family', description: 'Who plays the opening and closing. Left out, the family’s CSS (data-motion). false: instant. A Svelte transition takes over: fly, { fn: fly, params: { y: 8 } }, or { in: fade, out: fly }.' },
 				{ name: 'title', type: 'string | Snippet', description: 'The heading, which also names the dialog for assistive tech.' },
 				{ name: 'actions', type: 'Snippet', description: 'Buttons, inside the <form method="dialog">: each one closes with its value.' },
 				{ name: 'onvalue', type: '(value: string) => void', description: 'After it closed, with the value of the button that closed it — empty otherwise.' },

@@ -21,9 +21,13 @@
 	 * `options` are strings, or `{ value, label, disabled }`. `value` is
 	 * bindable — it is the field's own value.
 	 *
+	 * `option` draws what an item shows (an icon, an icon and its text…)
+	 * in place of its label; the label stays its accessible name.
+	 *
 	 * An indicator slides from the old choice to the new one (`animated`,
 	 * off when the visitor asks for reduced motion).
 	 */
+	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
 
@@ -37,6 +41,8 @@
 		name?: string;
 		/** The group's accessible name. */
 		label?: string;
+		/** What an item shows in place of its label, given the option and whether it is checked. */
+		option?: Snippet<[{ value: string; label: string; disabled: boolean; checked: boolean }]>;
 		/** After the user picked another option. */
 		onvalue?: (value: string) => void;
 		/** Slide the checked look from one option to the next. */
@@ -51,6 +57,7 @@
 		value = $bindable(),
 		name = `switch-${Math.random().toString(36).slice(2, 9)}`,
 		label,
+		option,
 		onvalue,
 		animated = true,
 		class: klass = '',
@@ -63,28 +70,55 @@
 	let list = $derived(options.map((o) => (typeof o === 'string' ? { value: o, label: o, disabled: false } : { label: o.value, disabled: false, ...o })));
 
 	let root: HTMLDivElement | undefined = $state();
-	let x = $state(0);
-	let w = $state(0);
+	let indicator: HTMLSpanElement | undefined = $state();
+	/* The item the indicator stands under, from one value to the next. */
+	let shown: HTMLElement | undefined;
 
-	/* The indicator follows the checked item: measured after every change of
-	   value, and again whenever the track resizes (a font, a wrap). */
+	/* The indicator follows the checked item: placed after every change of
+	   value, and again whenever the track resizes (a font, a wrap). How it
+	   travels is the family's: the component only writes where it stands. */
 	$effect(() => {
-		if (!animated || !root) return;
+		if (!animated || !root || !indicator) return;
+		const track = root;
+		const mark = indicator;
 		void value;
-		const measure = () => {
-			const item = root?.querySelector<HTMLElement>(`.${PREFIX}-item:has(:checked)`);
-			x = item?.offsetLeft ?? 0;
-			w = item?.offsetWidth ?? 0;
+		const target = track.querySelector<HTMLElement>(`.${PREFIX}-item:has(:checked)`) ?? undefined;
+
+		/* Read off the layout as it is now, to the subpixel, from the track's
+		   padding box: where the indicator, positioned in the track, is laid. */
+		const place = (item: HTMLElement | undefined) => {
+			const t = track.getBoundingClientRect();
+			const b = item?.getBoundingClientRect();
+			mark.style.setProperty('--switch-x', `${b ? b.left - t.left - track.clientLeft + track.scrollLeft : 0}px`);
+			mark.style.setProperty('--switch-w', `${b ? b.width : 0}px`);
 		};
-		measure();
-		const observer = new ResizeObserver(measure);
-		observer.observe(root);
+
+		/* Placed without the family's transition, which then starts from there. */
+		const snap = (item: HTMLElement | undefined) => {
+			mark.style.transition = 'none';
+			place(item);
+			void mark.offsetWidth;
+			mark.style.transition = '';
+		};
+
+		/* A new value may have moved the items: the indicator first stands
+		   under the item it leaves, as that item is laid out now, and travels
+		   from there. On mount, nothing to travel from: it appears in place. */
+		const from = shown !== target && shown?.isConnected ? shown : undefined;
+		if (from) {
+			snap(from);
+			place(target);
+		} else snap(target);
+		shown = target;
+
+		const observer = new ResizeObserver(() => place(target));
+		observer.observe(track);
 		return () => observer.disconnect();
 	});
 </script>
 
-<div {...applied.rest} bind:this={root} class={classes} role="radiogroup" aria-label={label} style:--switch-x="{x}px" style:--switch-w="{w}px">
-	{#if animated}<span class="{PREFIX}-indicator" aria-hidden="true"></span>{/if}
+<div {...applied.rest} bind:this={root} class={classes} role="radiogroup" aria-label={label}>
+	{#if animated}<span bind:this={indicator} class="{PREFIX}-indicator" aria-hidden="true"></span>{/if}
 	{#each list as o (o.value)}
 		<label class="switch-item">
 			<input
@@ -94,12 +128,13 @@
 				value={o.value}
 				checked={value === o.value}
 				disabled={o.disabled}
+				aria-label={option ? o.label : undefined}
 				onchange={() => {
 					value = o.value;
 					onvalue?.(o.value);
 				}}
 			/>
-			{o.label}
+			{#if option}{@render option({ value: o.value, label: o.label ?? o.value, disabled: o.disabled ?? false, checked: value === o.value })}{:else}{o.label}{/if}
 		</label>
 	{/each}
 </div>

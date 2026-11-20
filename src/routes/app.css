@@ -125,10 +125,62 @@ button.side-rail-link[aria-expanded='true'] {
 .side-rail-list {
 	min-width: 12rem;
 }
-.side-rail-hint {
-	margin-inline-start: auto;
-	padding-inline-start: 1rem;
-	font-size: 0.85em;
+/* A family in a picker: its name, and under it, small and grey, what it is
+   after. */
+.side-rail-list .ui-menu li > .side-family {
+	grid-auto-flow: row;
+	justify-items: start;
+	gap: 0;
+}
+.side-family-hint {
+	font-size: 0.8em;
+	line-height: 1.3;
+	color: color-mix(in oklch, currentColor 55%, #0000);
+}
+
+/* The head's family switcher: it fills the row the fold sits at the end of,
+   as tall as the fold, so the head is one line — not an empty row with a
+   button in its corner. */
+.side-switch {
+	flex: 1;
+	display: grid;
+}
+.side-switch-trigger {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	height: calc(var(--ui-sidebar-rail) - 2 * var(--ui-sidebar-p));
+	min-width: 0;
+	padding: 0 0.6em;
+	border: none;
+	border-radius: 0.5em;
+	background: none;
+	color: inherit;
+	font: inherit;
+	font-weight: 600;
+	text-align: start;
+	cursor: pointer;
+}
+.side-switch-trigger:hover,
+.side-switch-trigger[aria-expanded='true'] {
+	background-color: color-mix(in oklab, currentColor 8%, #0000);
+}
+.side-switch-trigger:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 1px;
+}
+.side-switch-trigger svg {
+	flex: none;
+	width: 1.1em;
+	height: 1.1em;
+}
+.side-switch-name {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.side-switch-chevron {
 	opacity: 0.55;
 }
 .side-rail-rule {
@@ -690,4 +742,120 @@ dialog.export::backdrop { background: oklch(0% 0 0 / 0.4); }
 	border: 1px solid color-mix(in oklab, var(--app-fg) 20%, #0000);
 	vertical-align: -0.1rem;
 	margin-inline-end: 0.35rem;
+}
+
+/* ── Guide ───────────────────────────────────────────────────────────────── */
+
+/* One readable column, centred like the family description. */
+.guide {
+	width: 100%;
+	max-width: 46rem;
+	margin-inline: auto;
+	line-height: 1.6;
+}
+.guide-title {
+	margin: 0;
+	font-size: 2rem;
+	letter-spacing: -0.02em;
+}
+.guide-lede {
+	margin: 0.75rem 0 0;
+	font-size: 1.05rem;
+	color: color-mix(in oklch, var(--app-fg) 80%, #0000);
+}
+.guide-h2 {
+	margin: 2.25rem 0 0.5rem;
+	font-size: 1.15rem;
+	letter-spacing: -0.01em;
+}
+.guide p {
+	margin: 0.6rem 0;
+}
+.guide a:not(.guide-pager-link) {
+	color: var(--ui-color-primary);
+}
+.guide :is(p, li, dd) > code {
+	padding: 0.1em 0.35em;
+	border-radius: 0.3em;
+	background: color-mix(in oklab, var(--app-fg) 7%, #0000);
+	font-family: ui-monospace, monospace;
+	font-size: 0.85em;
+}
+.guide-list {
+	margin: 0.6rem 0;
+	padding-inline-start: 1.2rem;
+}
+.guide-list > li {
+	margin-bottom: 0.35rem;
+}
+.guide-terms {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 0.5rem 1.25rem;
+	margin: 1rem 0;
+}
+.guide-terms > dt {
+	font-weight: 600;
+}
+.guide-terms > dd {
+	margin: 0;
+}
+
+/* Code stays dark in both themes, like the site's. */
+.guide-code {
+	margin: 1rem 0;
+	border-radius: 0.75rem;
+	background: #0f2418;
+	color: #e8f3e8;
+	overflow: hidden;
+}
+.guide-code > figcaption {
+	padding: 0.5rem 1rem 0;
+	font-family: ui-monospace, monospace;
+	font-size: 0.75rem;
+	color: #93ab97;
+}
+.guide-code > pre {
+	margin: 0;
+	padding: 0.9rem 1rem;
+	overflow-x: auto;
+	font-family: ui-monospace, monospace;
+	font-size: 0.8rem;
+	line-height: 1.6;
+	tab-size: 2;
+}
+.guide-code .t-keyword { color: #ff9ec4; }
+.guide-code .t-string { color: #f0dfa0; }
+.guide-code .t-tag { color: #bfe6c4; }
+.guide-code .t-comment { color: #93ab97; font-style: italic; }
+
+/* Previous / next, at the end of every page. */
+.guide-pager {
+	display: flex;
+	gap: 1rem;
+	margin-top: 3rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid color-mix(in oklab, var(--app-fg) 10%, #0000);
+}
+.guide-pager-link {
+	display: flex;
+	flex-direction: column;
+	padding: 0.6rem 0.9rem;
+	border: 1px solid color-mix(in oklab, var(--app-fg) 12%, #0000);
+	border-radius: 0.6rem;
+	color: inherit;
+	font-weight: 600;
+	text-decoration: none;
+}
+.guide-pager-link:hover {
+	border-color: var(--ui-color-primary);
+}
+.guide-pager-link > small {
+	font-weight: 400;
+	font-size: 0.75rem;
+	color: color-mix(in oklch, var(--app-fg) 55%, #0000);
+}
+.guide-pager-next {
+	margin-inline-start: auto;
+	text-align: end;
 }

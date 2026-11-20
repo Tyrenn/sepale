@@ -100,7 +100,8 @@
 					name: "isValid() / show()",
 					type: "methods",
 					description: "Through `bind:this`: check the field now; open the list of a multiple field."
-				}
+				},
+				{ name: 'transition', type: 'Motion', default: 'the family', description: 'Who plays the list’s opening and closing (several choices). Left out, the family’s CSS (data-motion); false: instant; or a Svelte transition: slide, { fn: fly, params: { y: -4 } }, { in, out }.' }
 			]
 		}
 	};

@@ -24,6 +24,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { keyer, type KeyOf } from '../keys.js';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLUListElement> {
 		/**
@@ -36,8 +37,9 @@
 		 * an entry that is itself a snippet skips it.
 		 */
 		row?: Snippet<[Row]>;
-		/** A row's identity, for `selected`, `dirty` and keyed rendering. Defaults to its index. */
-		key?: (row: Row, index: number) => string;
+		/** A row's identity, for `selected`, `dirty`, keyed rendering and a crossfade:
+		    a field's name (`"id"`) or a function. Defaults to its index. */
+		key?: KeyOf<Row>;
 		/** Drawn in place of the rows when there are none. */
 		empty?: Snippet;
 		/** Keys of the rows to draw as selected. */
@@ -50,13 +52,16 @@
 	let {
 		rows = [],
 		row,
-		key = (_row: Row, i: number) => String(i),
+		key: keyProp,
 		empty,
 		selected,
 		dirty,
 		class: klass = '',
 		...axes
 	}: Props = $props();
+
+	/* `key` as a function, whatever form it was given in. */
+	let key = $derived(keyer(keyProp));
 
 	let selectedSet = $derived(new Set(selected ?? []));
 	let dirtySet = $derived(new Set(dirty ?? []));

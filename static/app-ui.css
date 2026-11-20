@@ -14,7 +14,7 @@
 }
 
 
-svg {
+:where(.ui-btn, .ui-chip, .ui-badge, .ui-input, .ui-select, .ui-combobox, .ui-tabs-item, .ui-menu, .ui-alert, .ui-dropdown, .ui-collapse, .ui-breadcrumbs, .ui-navbar, .ui-dock, .ui-list, .ui-stat) svg:not([height]) {
   height: 1em;
 }
 
@@ -3241,6 +3241,12 @@ input[type=color].ui-swatch::-moz-color-swatch {
     background-color: var(--ui-dialog-close-hover);
   }
 }
+
+.ui-dialog-close svg {
+  width: 1em;
+  height: 1em;
+}
+
 .ui-dialog-close:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
@@ -3700,6 +3706,15 @@ input[type=color].ui-swatch::-moz-color-swatch {
   padding-block: var(--ui-kanban-p);
   color: var(--ui-kanban-empty-fg);
   text-align: center;
+}
+
+
+.ui-kanban-entry {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--ui-kanban-item-gap);
+  min-width: 0;
 }
 
 .ui-kanban-item {
@@ -10526,6 +10541,16 @@ label:has(:checked),
   margin-block-start: calc(0.5em * var(--ui-scale));
 }
 
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-dialog-box[data-motion=enter] {
+    animation: dialog-box-in 0.15s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .ui-dialog-box[data-motion=leave] {
+    animation: dialog-box-in 0.15s cubic-bezier(0.33, 1, 0.68, 1) reverse forwards;
+  }
+}
+
 .ui-dropdown {
   --ui-dropdown-bg: var(--ui-color-surface-1);
   --ui-dropdown-fg: var(--ui-color-on-surface);
@@ -10546,6 +10571,20 @@ label:has(:checked),
   --ui-menu-p: 0px;
   width: 100%;
 }
+
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-dropdown-content[data-motion=enter] {
+    animation: dropdown-content-in 0.12s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .ui-dropdown-content[data-motion=leave] {
+    animation: dropdown-content-in 0.12s cubic-bezier(0.33, 1, 0.68, 1) reverse forwards;
+  }
+  .ui-dropdown-top > .ui-dropdown-content:is([data-motion=enter], [data-motion=leave]) {
+    animation-name: dropdown-content-in-up;
+  }
+}
+
 
 .ui-table-scroll {
   --ui-table-frame: var(--ui-color-border);
@@ -10681,6 +10720,19 @@ label:has(:checked),
   --ui-data-control-radius: var(--ui-radius-box);
   --ui-data-control-shadow: var(--ui-shadow-light, none);
   --ui-data-control-p: calc(1em * var(--ui-scale));
+}
+
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-data-control-more:is([data-motion=enter], [data-motion=leave]) {
+    box-sizing: border-box;
+    overflow: hidden;
+    animation: data-control-more-in 0.22s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .ui-data-control-more[data-motion=leave] {
+    animation-direction: reverse;
+    animation-fill-mode: forwards;
+  }
 }
 
 .ui-divider {
@@ -10854,6 +10906,15 @@ label:has(:checked),
   box-shadow: 0 0.2em 0.5em -0.2em color-mix(in oklab, var(--ui-alert-color) 60%, rgba(0, 0, 0, 0));
 }
 
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-alert[data-motion=leave] {
+    box-sizing: border-box;
+    overflow: hidden;
+    animation: alert-out 0.16s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  }
+}
+
 .ui-toast {
   --ui-toast-gap: calc(0.6em * var(--ui-scale));
   --ui-toast-m: calc(1em * var(--ui-scale));
@@ -10866,6 +10927,25 @@ label:has(:checked),
   background-image: linear-gradient(var(--ui-alert-bg), var(--ui-alert-bg));
   background-color: var(--ui-color-surface-1);
 }
+
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-toast-item[data-motion=enter] {
+    animation: toast-item-in 0.18s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  .ui-toast-top > .ui-toast-item[data-motion=enter] {
+    animation-name: toast-item-in-down;
+  }
+  .ui-toast-item[data-motion=leave] {
+    animation: toast-item-out 0.16s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  }
+  .ui-toast-item[data-motion=move] {
+    animation: toast-item-move 0.18s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+}
+
+
+
 
 .ui-tooltip {
   --ui-tooltip-bg: var(--ui-color-on-surface);

@@ -24,12 +24,14 @@
 	 *
 	 * The actions sit in a `<form method="dialog">`: a button closes the
 	 * dialog and its `value` becomes the dialog's return value, handed to
-	 * `onvalue`. The opening and closing are animated here, not in the CSS.
+	 * `onvalue`. The box's opening and closing are the family's: it is marked
+	 * `data-motion="enter"` / `"leave"`, and the dialog closes once the
+	 * family's motion on it has run (motion.ts).
 	 */
 	import type { Snippet } from 'svelte';
 	import type { HTMLDialogAttributes } from 'svelte/elements';
-	import { scale } from 'svelte/transition';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { motion, type Motion } from '../motion.js';
 
 	// `open` and `title` are ours: the first is driven through the element's
 	// methods, the second is a heading. `onvalue` hands over the return value;
@@ -45,8 +47,10 @@
 		closable?: boolean;
 		/** Close on Escape and on a click outside the box. Default true. */
 		dismissible?: boolean;
-		/** Animate opening and closing. Ignored when the visitor asks for reduced motion. */
-		animated?: boolean;
+		/** Who plays its coming and going: the family (default), `false` for
+		    nobody, or a Svelte transition — `fly`, `{ fn: fly, params: { y: 8 } }`,
+		    `{ in: fade, out: fly }` (motion.ts). */
+		transition?: Motion;
 		/** The heading, as text or as a snippet. */
 		title?: string | Snippet;
 		/** Buttons, inside the `<form method="dialog">`: each one closes with its `value`. */
@@ -66,7 +70,7 @@
 		modal = true,
 		closable = true,
 		dismissible = true,
-		animated = true,
+		transition,
 		title,
 		actions,
 		onvalue,
@@ -94,10 +98,6 @@
 	/** The value the dialog will close with, once the box has gone. */
 	let pending = '';
 
-	const reduced = () =>
-		typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-	let duration = $derived(animated ? 150 : 0);
-
 	/* `open` drives the element. Opening is immediate; closing waits for the
 	   box's outro (outroend → finish), unless there is nothing to wait for. */
 	$effect(() => {
@@ -107,7 +107,7 @@
 			else element.show();
 			shown = true;
 		} else if (!open && element.open && shown) {
-			if (!animated || reduced()) finish();
+			if (transition === false) finish();
 			else shown = false;
 		}
 	});
@@ -178,7 +178,8 @@
 	{#if shown}
 		<div
 			class={`${PREFIX}-box`}
-			transition:scale={{ start: 0.95, duration: reduced() ? 0 : duration }}
+			in:motion={transition}
+			out:motion={transition}
 			onoutroend={finish}
 		>
 			{#if closable}

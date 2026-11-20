@@ -37,6 +37,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { motion, moved, withKey, type Motion, type Move } from '../motion.js';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLDivElement> {
 		/** The values. Bindable. */
@@ -66,6 +67,13 @@
 		listLabel?: string;
 		/** Classes on each chip: `chip-primary`, `chip-soft`… */
 		chipClass?: string;
+		/** Who plays a chip's coming and going: the family (default, `data-motion`), `false` for
+		    nobody, or a Svelte transition — `slide`, `{ fn: fly, params: { y: -4 } }`,
+		    `{ in, out }` (motion.ts). */
+		transition?: Motion;
+		/** Who plays the other chips' move when one comes or goes: the family (default), `false`, or a Svelte
+		    animation — `flip`, `{ fn: flip, params: { duration: 200 } }`. */
+		animate?: Move;
 		class?: string;
 	}
 
@@ -86,6 +94,8 @@
 		removeLabel = (v: string) => `Remove ${v}`,
 		listLabel,
 		chipClass = '',
+		transition,
+		animate,
 		class: klass = '',
 		...axes
 	}: Props = $props();
@@ -96,6 +106,17 @@
 	let draft = $state('');
 	/** The chips held: none while no list is given. */
 	let list = $derived(values ?? []);
+	/* A chip is keyed by its value (and which occurrence it is, when `unique`
+	   is off), not by its index: removing one leaves the others' keys as they
+	   were, so only that one leaves and the others move. */
+	let keyed = $derived.by(() => {
+		const seen = new Map<string, number>();
+		return list.map((v, i) => {
+			const n = seen.get(v) ?? 0;
+			seen.set(v, n + 1);
+			return { v, i, key: `${n}:${v}` };
+		});
+	});
 
 	function add(value: string) {
 		const v = `${value ?? ''}`.trim();
@@ -139,8 +160,8 @@
 		/>
 	{/if}
 	<ul class="chips-input-list" aria-label={listLabel}>
-		{#each list as v, i (v + i)}
-			<li class={cx('chip', chipClass)}>
+		{#each keyed as { v, i, key } (key)}
+			<li class={cx('chip', chipClass)} in:motion={withKey(transition, key)} out:motion={withKey(transition, key)} animate:moved={animate}>
 				{#if chip}{@render chip(v)}{:else}{v}{/if}
 				<button
 					type="button"

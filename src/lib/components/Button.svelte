@@ -40,6 +40,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { settled } from '../motion.js';
 
 	// `size` is ours — the HTML attribute of the same name is a character
 	// count our CSS overrides anyway. Any axis whose name collides with an
@@ -87,7 +88,7 @@
 	);
 
 	// Live ripple waves; each renders a .btn-ripple-wave positioned at the
-	// press point and removed when its animation ends.
+	// press point and removed once the family's motion on it has run.
 	let waves = $state<{ id: number; x: number; y: number; size: number }[]>([]);
 	let waveId = 0;
 
@@ -110,7 +111,7 @@
 		<span
 			class={`${PREFIX}-ripple-wave`}
 			style="--ripple-x:{wave.x}px;--ripple-y:{wave.y}px;--ripple-size:{wave.size}px"
-			onanimationend={() => (waves = waves.filter((w) => w.id !== wave.id))}
+			use:settled={() => (waves = waves.filter((w) => w.id !== wave.id))}
 		></span>
 	{/each}
 {/snippet}

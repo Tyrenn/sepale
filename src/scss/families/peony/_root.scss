@@ -19,14 +19,18 @@
 
 /* ── svg ── */
 /* ============================================================
-   svg.scss — inline SVG sizing.
+   svg.scss — icon sizing inside the components.
 
-   Icons inside components scale with the surrounding font size,
-   which is what makes intrinsic (em-based) sizing work for buttons,
-   chips, tabs and the like.
+   An icon the caller puts in a component (a button, a chip, a
+   field, a tab, a menu…) scales with the surrounding font size,
+   which is what makes intrinsic (em-based) sizing work for them.
+   Only there: the page's own svg is not the family's business,
+   and an svg stating its own height (an illustration) keeps it.
+   :where keeps the rule at zero specificity, so anything wins.
+   The components' own svg are sized in their own files.
    ============================================================ */
 
-svg {
+:where(.btn, .chip, .badge, .input, .select, .combobox, .tabs-item, .menu, .alert, .dropdown, .collapse, .breadcrumbs, .navbar, .dock, .list, .stat) svg:not([height]) {
 	height: 1em;
 }
 
@@ -128,7 +132,7 @@ svg {
    intrinsic (resolved against the element's own font-size, so size
    variants stay proportioned) while the text is left alone.
 
-   What does NOT scale: text, icons (svg { height: 1em } — they sit on
+   What does NOT scale: text, icons (an svg in a component is 1em — they sit on
    the text baseline), the radii (their own parameters), hairlines in px,
    and the text-natured components that draw no frame (text, link,
    breadcrumbs, validator).

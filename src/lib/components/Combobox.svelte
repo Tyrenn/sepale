@@ -44,6 +44,7 @@
 	import { untrack, type Snippet } from 'svelte';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { motion, type Motion } from '../motion.js';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLInputAttributes, 'size' | 'value'> {
 		/** The options, or where to fetch them. */
@@ -52,8 +53,8 @@
 		then?: (answer: any) => any[];
 		/** The text an option stands for: in the list, and in the field once picked. */
 		show?: (option: any) => string;
-		/** What identifies an option, and what the hidden select submits. Defaults to `id`, `value`, then the label. */
-		key?: (option: any) => string | number;
+		/** What identifies an option, and what the hidden select submits: a field's name (`"code"`) or a function. Defaults to `id`, `value`, then the label. */
+		key?: string | ((option: any) => string | number);
 		/** The value is a picked option (default), or the text (`false`). */
 		strict?: boolean;
 		/** Pick several. Implies strict. */
@@ -91,6 +92,10 @@
 		hint?: Snippet;
 		/** The validity message of a strict field left with text but no pick. */
 		unpickedLabel?: string;
+		/** Who plays the list's opening and closing: the family (default, `data-motion`), `false` for
+		    nobody, or a Svelte transition — `slide`, `{ fn: fly, params: { y: -4 } }`,
+		    `{ in, out }` (motion.ts). */
+		transition?: Motion;
 		class?: string;
 	}
 
@@ -121,6 +126,7 @@
 		unpickedLabel = 'Pick an option from the list',
 		name,
 		disabled = false,
+		transition,
 		class: klass = '',
 		oninput,
 		onfocus,
@@ -144,8 +150,8 @@
 		return `${o.label ?? o.name ?? o.value ?? o.id ?? ''}`;
 	}
 	function keyOf(o: any): string | number {
-		if (key) return key(o);
-		if (o !== null && typeof o === 'object') return o.id ?? o.value ?? label(o);
+		if (typeof key === 'function') return key(o);
+		if (o !== null && typeof o === 'object') return (key ? o[key] : undefined) ?? o.id ?? o.value ?? label(o);
 		return o;
 	}
 
@@ -444,6 +450,8 @@
 				role="listbox"
 				aria-multiselectable={multiple || undefined}
 				style={float ? floatStyle : undefined}
+				in:motion={transition}
+				out:motion={transition}
 			>
 				{#if loading}
 					<li class="list-row"><span class="loading loading-dots loading-sm"></span></li>

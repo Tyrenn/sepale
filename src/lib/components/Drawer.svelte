@@ -30,9 +30,10 @@
 	 * inside, page inert) while `peek` stays non-modal; `aside`, `nav` and the
 	 * default `div` never block the page — a collapsible menu is a `nav`.
 	 */
-	import { onMount, untrack, type Snippet } from 'svelte';
+	import { onMount, tick, untrack, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { settle } from '../motion.js';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLElement> {
 		/** The element. `dialog` makes the open state modal. */
@@ -80,10 +81,16 @@
 	let element: HTMLElement | undefined = $state();
 	const dialog = () => (as === 'dialog' ? (element as HTMLDialogElement | undefined) : undefined);
 
-	/** Puts a <dialog> in the mode the state needs. Hiding waits for the slide. */
+	/** Cancels the wait of a hiding still in progress. */
+	let hiding = () => {};
+
+	/** Puts a <dialog> in the mode the state needs. Hiding waits for the
+	    family's motion: as long as its CSS says, read once the hidden
+	    state is in the DOM (motion.ts) — at once if it draws none. */
 	function sync(next: DrawerState) {
 		const d = dialog();
 		if (!d) return;
+		hiding();
 		if (next === 'open') {
 			if (d.open) d.close();
 			d.showModal();
@@ -91,11 +98,12 @@
 			if (d.open) d.close();
 			d.show();
 		} else {
-			const done = () => {
-				if (current === 'hidden' && d.open) d.close();
-			};
-			d.addEventListener('transitionend', done, { once: true });
-			setTimeout(done, 500);
+			tick().then(() => {
+				if (current !== 'hidden') return;
+				hiding = settle(d, () => {
+					if (current === 'hidden' && d.open) d.close();
+				});
+			});
 		}
 	}
 

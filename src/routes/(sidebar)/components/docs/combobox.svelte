@@ -15,7 +15,7 @@
 				{ name: 'options', type: 'any[] | (q) => any[] | Promise | string | { uri, options? }', description: 'A list (filtered here), a function of the query, or an address answering JSON.' },
 				{ name: 'then', type: '(answer) => any[]', description: 'Reshape what a function or an address answered.' },
 				{ name: 'show', type: '(option) => string', description: 'The text an option stands for. Defaults to label, name, value or id.' },
-				{ name: 'key', type: '(option) => string | number', description: 'What identifies an option and what the select submits. Defaults to id, value, then the label.' },
+				{ name: 'key', type: 'string | (option) => string | number', description: 'What identifies an option and what the select submits: a field’s name ("code") or a function. Defaults to id, value, then the label.' },
 				{ name: 'strict', type: 'boolean', default: 'true', description: 'The value is a picked option; false makes it the text (autocompletion).' },
 				{ name: 'multiple', type: 'boolean', default: 'false', description: 'Pick several; implies strict. The field shows a summary.' },
 				{ name: 'value', type: 'any', description: 'The pick(s) it starts with — the text when not strict. Read once.' },
@@ -31,7 +31,8 @@
 				{ name: 'validator', type: 'boolean', default: 'false', description: 'Colour the field by its validity and reveal hint once the browser marks it invalid. A strict field left with text but no pick is invalid.' },
 				{ name: 'hint', type: 'Snippet', description: 'Shown under the field when it is invalid.' },
 				{ name: 'unpickedLabel', type: 'string', default: "'Pick an option from the list'", description: 'The validity message of a strict field left with text but no pick.' },
-				{ name: 'clear() / focus()', type: 'methods', description: 'Through bind:this.' }
+				{ name: 'clear() / focus()', type: 'methods', description: 'Through bind:this.' },
+				{ name: 'transition', type: 'Motion', default: 'the family', description: 'Who plays the list’s opening and closing. Left out, the family’s CSS (data-motion); false: instant; or a Svelte transition: slide, { fn: fly, params: { y: -4 } }, { in, out }.' }
 			]
 		}
 	};

@@ -39,7 +39,8 @@
 				{ name: 'ondragitems', type: '(items, event) => boolean | void', description: 'A drag starts; false refuses it.' },
 				{ name: 'ondropitems', type: '(items | File[], target, event) => void', description: 'Something dropped on a folder (null: the top).' },
 				{ name: 'labels / formatSize / formatDate', type: '', description: 'The texts and formats it writes.' },
-				{ name: 'refresh(folder?) / navigate(chain) / getSelection()', type: 'methods', description: 'Through bind:this.' }
+				{ name: 'refresh(folder?) / navigate(chain) / getSelection()', type: 'methods', description: 'Through bind:this.' },
+				{ name: 'transition', type: 'Motion', default: 'the family', description: 'Who plays a tree branch’s opening and closing. Left out, the family’s CSS (data-motion); false: instant; or a Svelte transition: slide, { fn: fly, params: { y: -4 } }, { in, out }.' }
 			]
 		}
 	};

@@ -12,6 +12,7 @@
 		selectFamily,
 		selectTheme
 	} from '../playground.svelte.js';
+	import { GUIDE } from './guide/pages.js';
 	import { onMount, type Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
@@ -42,29 +43,29 @@
 		} catch {}
 	});
 
-	/* The family picker's last option is not a family: it opens the page that
-	   makes one, and the picker stays on the family on show. */
-	const NEW_FAMILY = '__new';
-	function pickFamily(select: HTMLSelectElement) {
-		if (select.value !== NEW_FAMILY) return selectFamily(select.value);
-		select.value = playground.family;
-		void goto(resolve('/new-family'));
-	}
+	/** A family's name as a title: `daisy` → `Daisy`. */
+	const named = (family: string) => family.charAt(0).toUpperCase() + family.slice(1);
 
 	function newFamily() {
 		rail = null;
 		void goto(resolve('/new-family'));
 	}
 
-	/* The folded rail's pickers: which list is open, and where — beside the
-	   rail, level with the icon that opened it. */
-	let rail = $state<{ which: 'family' | 'theme'; x: number; y: number } | null>(null);
-	function toggleRail(which: 'family' | 'theme', trigger: HTMLElement) {
+	/* The pickers: which list is open, and where. The head's family switcher
+	   drops its list under itself; the folded rail's pickers beside the rail,
+	   level with the icon that opened them. */
+	type Picker = 'head' | 'family' | 'theme';
+	let rail = $state<{ which: Picker; x: number; y: number; w?: number } | null>(null);
+	function toggleRail(which: Picker, trigger: HTMLElement) {
 		if (rail?.which === which) {
 			rail = null;
 			return;
 		}
 		const box = trigger.getBoundingClientRect();
+		if (which === 'head') {
+			rail = { which, x: box.left, y: box.bottom + 4, w: box.width };
+			return;
+		}
 		const side = trigger.closest('.side')?.getBoundingClientRect();
 		rail = { which, x: (side?.right ?? box.right) + 6, y: box.top };
 	}
@@ -75,8 +76,10 @@
 	function escape(e: KeyboardEvent) {
 		if (rail && e.key === 'Escape') rail = null;
 	}
+	/* Folding or unfolding closes whatever list was open: its trigger moved. */
 	$effect(() => {
-		if (!collapsed) rail = null;
+		void collapsed;
+		rail = null;
 	});
 
 	/* Groups of the nav fold: open until folded by hand. */
@@ -91,12 +94,60 @@
 	<link rel="stylesheet" href={asset('/app-ui.css')} />
 </svelte:head>
 
+<!-- The families, as the head's switcher and the rail's picker both list
+     them: the name, and under it, small, what the family is after. -->
+{#snippet familyMenu()}
+	<ul class="ui-menu ui-menu-sm" role="menu" aria-label="Family">
+		<li class="ui-menu-title">Family</li>
+		{#each allFamilies() as f (f)}
+			<li role="none">
+				<button
+					type="button"
+					role="menuitemradio"
+					class="side-family"
+					aria-checked={f === playground.family}
+					class:ui-menu-active={f === playground.family}
+					onclick={() => {
+						rail = null;
+						selectFamily(f);
+					}}
+				>
+					<span>{named(f)}</span>
+					{#if categoryFor(f)}<small class="side-family-hint">{categoryFor(f)}</small>{/if}
+				</button>
+			</li>
+		{/each}
+		<li role="none">
+			<button type="button" role="menuitem" onclick={newFamily}>Create a family…</button>
+		</li>
+	</ul>
+{/snippet}
+
 <div class="shell app-ui">
 	<!-- The sidebar lives in the layout: it is the same on the theme page and
 	     on every component page. -->
 	<!-- The kit's own Sidebar, in the chrome's ui- space: it folds to a rail. -->
 	<aside class="ui-sidebar side" class:ui-sidebar-collapsed={collapsed}>
+		<!-- The head: the family switcher, then the fold. Folded, only the fold
+		     stays; the rail below takes the switcher's place. -->
 		<div class="ui-sidebar-head">
+			<div class="ui-dropdown ui-dropdown-fixed side-rail-drop side-switch" class:ui-dropdown-open={rail?.which === 'head'}>
+				<button
+					type="button"
+					class="side-switch-trigger"
+					aria-haspopup="menu"
+					aria-expanded={rail?.which === 'head'}
+					aria-label="Family: {named(playground.family)}"
+					onclick={(e) => toggleRail('head', e.currentTarget)}
+				>
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 7.5l9 4.5 9-4.5L12 3Z" /><path d="m3 12 9 4.5 9-4.5M3 16.5 12 21l9-4.5" /></svg>
+					<span class="side-switch-name">{named(playground.family)}</span>
+					<svg class="side-switch-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
+				</button>
+				<div class="ui-dropdown-content side-rail-list" style:left="{rail?.x ?? 0}px" style:top="{rail?.y ?? 0}px" style:min-width={rail?.w ? `${rail.w}px` : undefined}>
+					{@render familyMenu()}
+				</div>
+			</div>
 			<button
 				type="button"
 				class="ui-sidebar-toggle"
@@ -119,35 +170,14 @@
 					class="side-rail-link"
 					aria-haspopup="menu"
 					aria-expanded={rail?.which === 'family'}
-					aria-label="Family: {playground.family}"
-					title="Family: {playground.family}"
+					aria-label="Family: {named(playground.family)}"
+					title="Family: {named(playground.family)}"
 					onclick={(e) => toggleRail('family', e.currentTarget)}
 				>
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 7.5l9 4.5 9-4.5L12 3Z" /><path d="m3 12 9 4.5 9-4.5M3 16.5 12 21l9-4.5" /></svg>
 				</button>
 				<div class="ui-dropdown-content side-rail-list" style:left="{rail?.x ?? 0}px" style:top="{rail?.y ?? 0}px">
-					<ul class="ui-menu ui-menu-sm" role="menu" aria-label="Family">
-						<li class="ui-menu-title">Family</li>
-						{#each allFamilies() as f (f)}
-							<li role="none">
-								<button
-									type="button"
-									role="menuitemradio"
-									aria-checked={f === playground.family}
-									class:ui-menu-active={f === playground.family}
-									onclick={() => {
-										rail = null;
-										selectFamily(f);
-									}}
-								>
-									{f}<span class="side-rail-hint">{categoryFor(f)}</span>
-								</button>
-							</li>
-						{/each}
-						<li role="none">
-							<button type="button" role="menuitem" onclick={newFamily}>Create a family…</button>
-						</li>
-					</ul>
+					{@render familyMenu()}
 				</div>
 			</div>
 			<div class="ui-dropdown ui-dropdown-fixed side-rail-drop" class:ui-dropdown-open={rail?.which === 'theme'}>
@@ -185,6 +215,15 @@
 			<hr class="side-rail-rule" />
 			<a
 				class="side-rail-link"
+				href={resolve('/guide')}
+				aria-label="Guide"
+				title="Guide"
+				aria-current={page.url.pathname.startsWith(resolve('/guide')) ? 'page' : undefined}
+			>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v15H6.5A2.5 2.5 0 0 0 4 20.5 2.5 2.5 0 0 0 6.5 23H20v-5" /></svg>
+			</a>
+			<a
+				class="side-rail-link"
 				href={resolve('/description')}
 				aria-label="Family description"
 				title="Family description"
@@ -214,17 +253,6 @@
 		<div class="ui-sidebar-body side-body" inert={collapsed}>
 		<div class="side-head">
 			<label class="side-select">
-				<span>Family</span>
-				<select
-					class="ui-select ui-select-sm"
-					value={playground.family}
-					onchange={(e) => pickFamily(e.currentTarget)}
-				>
-					{#each allFamilies() as f (f)}<option value={f}>{f} ({categoryFor(f)})</option>{/each}
-					<option value={NEW_FAMILY}>Create a family…</option>
-				</select>
-			</label>
-			<label class="side-select">
 				<span>Theme</span>
 				<select
 					class="ui-select ui-select-sm"
@@ -239,6 +267,13 @@
 		<!-- The app's own navigation: a daisy .menu, in the chrome's ui- space. -->
 		<nav class="side-nav">
 			<ul class="ui-menu ui-menu-sm">
+				<li class="ui-menu-title side-group-title">Guide</li>
+				{#each GUIDE as g (g.path)}
+					<li>
+						<a href={resolve(g.path)} class:ui-menu-active={page.url.pathname === resolve(g.path)}>{g.title}</a>
+					</li>
+				{/each}
+
 				<li class="ui-menu-title side-group-title">Family</li>
 				<li>
 					<a href={resolve('/description')} class:ui-menu-active={page.url.pathname === resolve('/description')}>

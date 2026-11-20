@@ -82,23 +82,54 @@
 	let current = $derived(value !== undefined ? tabs.findIndex((t) => t.value === value) : (active ?? 0));
 
 	let root: HTMLDivElement | undefined = $state();
-	let box = $state({ x: 0, y: 0, w: 0, h: 0 });
+	let indicator: HTMLSpanElement | undefined = $state();
+	/* The tab the indicator stands under, from one selection to the next. */
+	let shown = -1;
 
-	/* The indicator follows the selected tab: measured after every change,
-	   and again whenever the strip resizes (a font, a wrap, a panel). */
+	/* The indicator follows the selected tab: placed after every change, and
+	   again whenever the strip resizes (a font, a wrap, a panel). How it
+	   travels is the family's: the component only writes where it stands. */
 	$effect(() => {
-		if (!animated || !root) return;
-		void current;
+		if (!animated || !root || !indicator) return;
+		const strip = root;
+		const mark = indicator;
+		const target = current;
 		void tabs.length;
-		const measure = () => {
-			const item = root?.querySelectorAll<HTMLElement>(`:scope > [role="tab"]`)[current];
-			box = item
-				? { x: item.offsetLeft, y: item.offsetTop, w: item.offsetWidth, h: item.offsetHeight }
-				: { x: 0, y: 0, w: 0, h: 0 };
+
+		const item = (i: number) => strip.querySelectorAll<HTMLElement>(`:scope > [role="tab"]`)[i];
+
+		/* Read off the layout as it is now, to the subpixel, from the strip's
+		   padding box: where the indicator, positioned in the strip, is laid. */
+		const place = (tab: HTMLElement | undefined) => {
+			const s = strip.getBoundingClientRect();
+			const b = tab?.getBoundingClientRect();
+			mark.style.setProperty('--tabs-x', `${b ? b.left - s.left - strip.clientLeft + strip.scrollLeft : 0}px`);
+			mark.style.setProperty('--tabs-y', `${b ? b.top - s.top - strip.clientTop + strip.scrollTop : 0}px`);
+			mark.style.setProperty('--tabs-w', `${b ? b.width : 0}px`);
+			mark.style.setProperty('--tabs-h', `${b ? b.height : 0}px`);
 		};
-		measure();
-		const observer = new ResizeObserver(measure);
-		observer.observe(root);
+
+		/* Placed without the family's transition, which then starts from there. */
+		const snap = (tab: HTMLElement | undefined) => {
+			mark.style.transition = 'none';
+			place(tab);
+			void mark.offsetWidth;
+			mark.style.transition = '';
+		};
+
+		/* A new selection may have moved the tabs (a heavier weight widens the
+		   chosen one, and its neighbours shift): the indicator first stands
+		   under the tab it leaves, as that tab is laid out now, and travels
+		   from there. On mount, nothing to travel from: it appears in place. */
+		const from = shown !== target ? item(shown) : undefined;
+		if (from) {
+			snap(from);
+			place(item(target));
+		} else snap(item(target));
+		shown = target;
+
+		const observer = new ResizeObserver(() => place(item(target)));
+		observer.observe(strip);
 		return () => observer.disconnect();
 	});
 
@@ -115,13 +146,8 @@
 	{:else}{item.label}{/if}
 {/snippet}
 
-<div {...applied.rest} bind:this={root} role="tablist" class={classes}
-	style:--tabs-x="{box.x}px"
-	style:--tabs-y="{box.y}px"
-	style:--tabs-w="{box.w}px"
-	style:--tabs-h="{box.h}px"
->
-	{#if animated}<span class="{PREFIX}-item {PREFIX}-item-active {PREFIX}-indicator" aria-hidden="true"></span>{/if}
+<div {...applied.rest} bind:this={root} role="tablist" class={classes}>
+	{#if animated}<span bind:this={indicator} class="{PREFIX}-item {PREFIX}-item-active {PREFIX}-indicator" aria-hidden="true"></span>{/if}
 	{#each tabs as item, i (i)}
 		<button
 			type="button"

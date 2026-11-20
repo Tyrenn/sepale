@@ -20,7 +20,8 @@
 				{ name: 'actions', type: 'Snippet', description: 'Buttons on the trailing side.' },
 				{ name: 'dismissible', type: 'boolean', default: 'false', description: 'Draw a close button that hides the alert.' },
 				{ name: 'ondismiss', type: '() => void', description: 'After the alert hid itself.' },
-				{ name: 'dismissLabel', type: 'string', default: "'Dismiss'", description: "The close button's accessible name." }
+				{ name: 'dismissLabel', type: 'string', default: "'Dismiss'", description: "The close button's accessible name." },
+				{ name: 'transition', type: 'Motion', default: 'the family', description: 'Who plays its leaving once dismissed. Left out, the family’s CSS; false: instant; or a Svelte transition (slide, fade…).' }
 			]
 		}
 	};

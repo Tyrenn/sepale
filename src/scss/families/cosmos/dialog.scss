@@ -29,8 +29,8 @@
 	  </div>
 	</dialog>
 
-   Nothing here animates: opening and closing are instant in CSS.
-   The Svelte wrapper brings its own transitions.
+   Motion is the family's: the wrapper marks the box `data-motion`
+   ("enter" / "leave") and waits for what the look draws (see Motion).
 
    Plumbing contract (the family fills these on `.dialog`):
 	--dialog-backdrop      the shade behind a modal dialog
@@ -159,6 +159,11 @@
 			background-color: var(--dialog-close-hover);
 		}
 	}
+	/* The cross: the size of the text, like any icon. */
+	.dialog-close svg {
+		width: 1em;
+		height: 1em;
+	}
 	.dialog-close:focus-visible {
 		outline: 2px solid currentColor;
 		outline-offset: 2px;
@@ -204,5 +209,21 @@
 		--cw: var(--cosmos-wobble-box, 0.2);
 		--dialog-radius: var(--c2);
 		rotate: calc(var(--cosmos-tilt, 0.4) * -0.5deg);
+	}
+
+	/* ── Motion ──
+	   The component marks the box `data-motion="enter"` / `"leave"` and
+	   closes the dialog once the motion written here has run: the box
+	   scales in from 95% and fades, and back out. */
+	@media (prefers-reduced-motion: no-preference) {
+		.dialog-box[data-motion="enter"] {
+			animation: dialog-box-in 0.15s cubic-bezier(0.33, 1, 0.68, 1);
+		}
+		.dialog-box[data-motion="leave"] {
+			animation: dialog-box-in 0.15s cubic-bezier(0.33, 1, 0.68, 1) reverse forwards;
+		}
+	}
+	@keyframes dialog-box-in {
+		from { opacity: 0; scale: 0.95; }
 	}
 }

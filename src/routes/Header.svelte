@@ -12,6 +12,7 @@
 		</a>
 		<div class="s-links">
 			<a class="s-start" href={resolve('/components')}>Components</a>
+			<a href={resolve('/guide')}>Docs</a>
 			<a href={resolve('/theme')}>Theme{' '}<span class="s-wide">generator</span></a>
 			<a class="s-wide" href={resolve('/prefix')}>Prefix</a>
 			<a href={resolve('/about')}>About</a>

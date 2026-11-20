@@ -136,6 +136,11 @@ export { default as Join } from './components/Join.svelte';
 
 export { type Axis, type AxisProps, type Values } from './variants.js';
 
+// Motion is the family's (ADR 0019): mark an element's phase, wait for its CSS.
+export { motion, moved, withKey, Reflow, settle, settled, motionTime } from './motion.js';
+export type { Motion, MotionOne, Move, TransitionFunction, AnimationFunction } from './motion.js';
+export { keyer, type KeyOf } from './keys.js';
+
 // Registry of style families + their themes, auto-generated from src/scss.
 export { families, themesByFamily, type ThemeData } from './generated/registry.js';
 export {

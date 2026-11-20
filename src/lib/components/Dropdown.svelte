@@ -40,8 +40,8 @@
 	 */
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import { fly } from 'svelte/transition';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { motion, type Motion } from '../motion.js';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 		/** Whether the box is shown. Bindable. */
@@ -50,8 +50,10 @@
 		trigger: Snippet<[DropdownTrigger]>;
 		/** The box's content. `close` closes it. */
 		children?: Snippet<[{ close: () => void }]>;
-		/** Animate the box. Ignored when the visitor asks for reduced motion. */
-		animated?: boolean;
+		/** Who plays its coming and going: the family (default), `false` for
+		    nobody, or a Svelte transition — `fly`, `{ fn: fly, params: { y: 8 } }`,
+		    `{ in: fade, out: fly }` (motion.ts). */
+		transition?: Motion;
 		/** Called after every change of `open`. */
 		onopen?: (open: boolean) => void;
 		class?: string;
@@ -61,7 +63,7 @@
 		open = $bindable(),
 		trigger,
 		children,
-		animated = true,
+		transition,
 		onopen,
 		side,
 		align,
@@ -152,10 +154,6 @@
 			document.removeEventListener('keydown', escape);
 		};
 	});
-
-	const reduced = () =>
-		typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-	let duration = $derived(animated && !reduced() ? 120 : 0);
 </script>
 
 <div {...applied.rest} bind:this={root} class={classes}>
@@ -175,7 +173,8 @@
 			id={`${uid}-content`}
 			class={`${PREFIX}-content`}
 			style={coords}
-			transition:fly={{ y: side === 'top' ? 4 : -4, duration }}
+			in:motion={transition}
+			out:motion={transition}
 		>
 			{@render children?.({ close })}
 		</div>

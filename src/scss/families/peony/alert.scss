@@ -176,4 +176,20 @@
 		background-color: var(--color-surface-1);
 		box-shadow: 0 0.2em 0.5em -0.2em color-mix(in oklab, var(--alert-color) 60%, #0000);
 	}
+
+	/* ── Motion ──
+	   A dismissed alert is marked `data-motion="leave"` (with
+	   `--motion-h`, its height) and removed once the motion written here
+	   has run: it folds up. */
+	@media (prefers-reduced-motion: no-preference) {
+		.alert[data-motion="leave"] {
+			box-sizing: border-box;
+			overflow: hidden;
+			animation: alert-out 0.16s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+		}
+	}
+	@keyframes alert-out {
+		from { height: var(--motion-h); }
+		to { height: 0; padding-block: 0; margin-block: 0; border-block-width: 0; opacity: 0; }
+	}
 }

@@ -31,14 +31,16 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import { keyer, type KeyOf } from '../keys.js';
 
 	interface Props extends AxisProps<typeof AXES, typeof FLAGS, typeof PREFIX>, HTMLAttributes<HTMLDivElement> {
 		/** The items: your data, as is. */
 		items?: Item[];
 		/** How one item is drawn. */
 		item: Snippet<[Item, number]>;
-		/** An item's identity, for `selected`, `dirty` and keyed rendering. Defaults to its index. */
-		key?: (item: Item, index: number) => string;
+		/** An item's identity, for `selected`, `dirty`, keyed rendering and a crossfade:
+		    a field's name (`"id"`) or a function. Defaults to its index. */
+		key?: KeyOf<Item>;
 		/** Drawn in place of the items when there are none. */
 		empty?: Snippet;
 		/** Keys of the items to draw as selected. */
@@ -53,7 +55,7 @@
 	let {
 		items = [],
 		item,
-		key = (_item: Item, i: number) => String(i),
+		key: keyProp,
 		empty,
 		selected,
 		dirty,
@@ -61,6 +63,9 @@
 		class: klass = '',
 		...axes
 	}: Props = $props();
+
+	/* `key` as a function, whatever form it was given in. */
+	let key = $derived(keyer(keyProp));
 
 	let applied = $derived(applyAxes(PREFIX, AXES, FLAGS, axes));
 	let classes = $derived(cx(PREFIX, applied.classes, masonry && `${PREFIX}-masonry`, klass));
