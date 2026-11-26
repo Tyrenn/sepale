@@ -7744,6 +7744,16 @@ fieldset:disabled .ui-input::placeholder {
   inset-inline-end: calc(0.75em * var(--ui-scale));
 }
 
+
+.ui-input:is([type=date], [type=datetime-local], [type=time]) {
+  width: auto;
+}
+
+@supports selector(::-webkit-calendar-picker-indicator) {
+  .ui-input:is([type=date], [type=datetime-local], [type=time]) {
+    padding-inline-end: calc(2.25em * var(--ui-scale));
+  }
+}
 .ui-input:has(> input[type=date]) input[type=date]::-webkit-calendar-picker-indicator {
   inset-inline-end: calc(0.75em * var(--ui-scale));
   width: 1em;

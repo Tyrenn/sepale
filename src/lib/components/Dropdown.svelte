@@ -32,9 +32,10 @@
 
 <script lang="ts">
 	/**
-	 * A trigger and a box that floats next to it. The box is placed in fixed
-	 * coordinates, so no ancestor's `overflow` crops it, and it flips to the
-	 * other side when there is no room. It closes on Escape and on a press
+	 * A trigger and a box that floats next to it. The box is a popover, in the
+	 * browser's top layer, placed in fixed coordinates: no ancestor's
+	 * `overflow`, stacking (`z-index`) or `transform` crops, covers or moves
+	 * it. It flips to the other side when there is no room. It closes on Escape and on a press
 	 * outside — not on a click inside, which is the content's to decide
 	 * (`close` is handed to it).
 	 */
@@ -121,13 +122,15 @@
 		/* Kept inside the viewport, a little off its edges. */
 		left = Math.min(Math.max(4, left), Math.max(4, vw - b.width - 4));
 		top = Math.min(Math.max(4, top), Math.max(4, vh - b.height - 4));
-		coords = `top:${Math.round(top)}px;left:${Math.round(left)}px;`;
+		coords = `top:${Math.round(top)}px;left:${Math.round(left)}px;margin:0;`;
 	}
 
 	/* While open: placed now, and again on every scroll or resize. Closed by
 	   Escape and by a press outside the dropdown. */
 	$effect(() => {
 		if (!open || !content) return;
+		/* Into the top layer first: placed where it will be shown. */
+		if (content.showPopover && !content.matches(':popover-open')) content.showPopover();
 		place();
 		const reposition = () => place();
 		const outside = (e: PointerEvent) => {
@@ -172,6 +175,7 @@
 			bind:this={content}
 			id={`${uid}-content`}
 			class={`${PREFIX}-content`}
+			popover="manual"
 			style={coords}
 			in:motion={transition}
 			out:motion={transition}

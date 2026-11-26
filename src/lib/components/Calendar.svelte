@@ -23,9 +23,10 @@
 	 * A date picker, drawn by air-datepicker (https://air-datepicker.com).
 	 *
 	 * Inline by default: the calendar sits in the page. With `inline={false}`
-	 * it is a field (`.input`) that opens the calendar under it; the calendar
-	 * is then appended to this component's own `.calendar` element rather
-	 * than to <body>, so it stays under the class every family styles.
+	 * it is a read-only field (the family's Input) that opens it in a
+	 * Dropdown: a popover, in the top layer, so no ancestor's `overflow`,
+	 * `z-index` or `transform` crops, covers or moves it. The calendar is
+	 * always air-datepicker's inline one, under `.calendar`.
 	 *
 	 * `value` is a Date (or null) — an array of Dates with `range` or
 	 * `multiple`. Anything air-datepicker can do that has no prop here goes
@@ -41,7 +42,10 @@
 		AirDatepickerViewsSingle,
 		AirDatepickerButtonPresets
 	} from '../vendor/air-datepicker/index.js';
+	import en from '../vendor/air-datepicker/locale/en.js';
 	import { applyAxes, cx, type AxisProps } from '../variants.js';
+	import Input from './Input.svelte';
+	import Dropdown from './Dropdown.svelte';
 
 	type Value = Date | Date[] | null;
 
@@ -76,7 +80,8 @@
 		timepicker?: boolean;
 		/** Buttons under the calendar. */
 		buttons?: AirDatepickerButtonPresets[];
-		/** How a date is written in the field (air-datepicker tokens). */
+		/** How a date is written in the field (air-datepicker tokens). The
+		    locale's by default, its time format added with `timepicker`. */
 		dateFormat?: string;
 		/** Anything else air-datepicker accepts. Applied last. */
 		options?: AirDatepickerOptions<HTMLElement>;
@@ -117,7 +122,8 @@
 	let classes = $derived(cx(PREFIX, applied.classes, klass));
 
 	let host: HTMLDivElement | undefined = $state();
-	let field: HTMLInputElement | undefined = $state();
+	/** Not inline: whether the field's box is open. */
+	let open = $state(false);
 
 	const asList = (v: Value | undefined): Date[] => (v == null ? [] : Array.isArray(v) ? v : [v]);
 	const same = (a: Date[], b: Date[]) =>
@@ -136,9 +142,6 @@
 		timepicker,
 		...(buttons ? { buttons } : {}),
 		...(dateFormat ? { dateFormat } : {}),
-		// A popup closes on a pick when one date is all there is to pick.
-		autoClose: !range && !multiple && !timepicker,
-		position: 'bottom left',
 		...options
 	});
 
@@ -147,18 +150,26 @@
 		if (same(asList(next), asList(value))) return;
 		value = next;
 		onvalue?.(next);
+		/* The field's box closes once there is nothing left to pick. */
+		if (!inline && !multiple && !timepicker && (!range || asList(next).length === 2)) open = false;
 	}
 
-	// One instance per element: built when the element is there, rebuilt only
-	// when switching between inline and field.
+	/* The field's text, written as air-datepicker writes dates: its
+	   formatDate reads nothing but the locale. */
+	let text = $derived.by(() => {
+		const lang = { ...en, ...locale };
+		const pattern = dateFormat ?? (timepicker ? `${lang.dateFormat} ${lang.timeFormat}` : lang.dateFormat);
+		const write = (d: Date) => (AirDatepicker.prototype.formatDate as (this: unknown, d: Date, f: string) => string).call({ locale: lang }, d, pattern);
+		return asList(value).map(write).join(range ? ' – ' : ', ');
+	});
+
+	// One instance per element: built when it is there — not inline, each
+	// time the box opens.
 	$effect(() => {
-		const el = inline ? host : field;
-		if (!el || !host) return;
-		const instance = new AirDatepicker<HTMLElement>(el, {
+		if (!host) return;
+		const instance = new AirDatepicker<HTMLElement>(host, {
 			...untrack(() => settings),
-			inline,
-			// The popup is placed against, and appended to, our own element.
-			container: inline ? undefined : host,
+			inline: true,
 			selectedDates: untrack(() => asList(value)),
 			onSelect: picked
 		});
@@ -186,8 +197,17 @@
 	});
 </script>
 
-<div {...applied.rest} bind:this={host} class={classes}>
-	{#if !inline}
-		<input bind:this={field} class="input" {placeholder} {name} {disabled} readonly />
+{#if inline}
+	<div {...applied.rest} bind:this={host} class={classes}></div>
+{:else}
+	<Dropdown bind:open>
+		{#snippet trigger({ props })}
+			<Input {...props} {placeholder} {disabled} value={text} readonly />
+		{/snippet}
+		<div {...applied.rest} bind:this={host} class={classes}></div>
+	</Dropdown>
+	<!-- The value for a form, as the field shows it -->
+	{#if name}
+		<input type="hidden" {name} value={text} />
 	{/if}
-</div>
+{/if}

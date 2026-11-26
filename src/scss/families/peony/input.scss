@@ -198,6 +198,17 @@
 	.input::-webkit-calendar-picker-indicator {
 		inset-inline-end: calc(0.75em * var(--scale));
 	}
+	/* A date, a time: as wide as what it shows and its picker button, no
+	   wider. Chromium and WebKit draw the button out of the flow (above):
+	   room is left for it. */
+	.input:is([type="date"], [type="datetime-local"], [type="time"]) {
+		width: auto;
+	}
+	@supports selector(::-webkit-calendar-picker-indicator) {
+		.input:is([type="date"], [type="datetime-local"], [type="time"]) {
+			padding-inline-end: calc(2.25em * var(--scale));
+		}
+	}
 	.input:has(> input[type="date"]) input[type="date"]::-webkit-calendar-picker-indicator {
 		inset-inline-end: calc(0.75em * var(--scale));
 		width: 1em;

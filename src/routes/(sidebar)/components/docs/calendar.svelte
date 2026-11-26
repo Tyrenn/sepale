@@ -18,7 +18,7 @@
 				{ name: 'value', type: 'Date | Date[] | null', default: '$bindable(null)', description: 'The picked date — an array with `range` or `multiple`.' },
 				{ name: 'range', type: 'boolean', default: 'false', description: 'Pick a start and an end.' },
 				{ name: 'multiple', type: 'boolean | number', default: 'false', description: 'Pick several dates, at most N when a number.' },
-				{ name: 'inline', type: 'boolean', default: 'true', description: 'In the page, or as an `.input` field that opens it underneath.' },
+				{ name: 'inline', type: 'boolean', default: 'true', description: 'In the page, or as a read-only `.input` field that opens it in a Dropdown (a popover, in the top layer).' },
 				{ name: 'placeholder / name / disabled', type: 'string / string / boolean', description: 'The field’s, when not inline.' },
 				{ name: 'min / max', type: 'Date', description: 'Dates outside cannot be picked.' },
 				{ name: 'locale', type: 'AirDatepickerLocale', default: 'English', description: 'Month and day names. 33 locales ship in `vendor/air-datepicker/locale/`.' },
@@ -77,14 +77,16 @@
 
 <Section
 	title="As a field"
-	subtitle="Not inline: an `.input` that opens the calendar under it — inside the `.calendar` element, not at the end of the page."
+	subtitle="Not inline: a read-only `.input` that opens the calendar in a Dropdown — a popover, over everything, whatever its ancestors crop or stack."
 	svelte={`<Calendar inline={false} placeholder="Pick a date" timepicker bind:value={when} />`}
-	html={`<div class="calendar">
+	html={`<div class="dropdown dropdown-fixed">
 	<input class="input" readonly placeholder="Pick a date" />
-	<div class="air-datepicker -active- -bottom-left-">…</div>
+	<div class="dropdown-content" popover="manual">
+		<div class="calendar"><div class="air-datepicker -inline-">…</div></div>
+	</div>
 </div>`}
 >
-	<div style="display:flex; flex-direction:column; gap:.5rem; align-items:center; min-height:24rem;">
+	<div style="display:flex; flex-direction:column; gap:.5rem; align-items:center;">
 		<Calendar inline={false} placeholder="Pick a date" timepicker bind:value={when} />
 		<small>value: {when ? (when as Date).toLocaleString() : '—'}</small>
 	</div>
